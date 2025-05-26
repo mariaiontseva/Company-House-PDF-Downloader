@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Companies House PDF Downloader</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 700px;
+        }
+        
+        h1 {
+            color: #2d3748;
+            margin-bottom: 10px;
+            text-align: center;
+            font-size: 32px;
+        }
+        
+        .subtitle {
+            color: #718096;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #4a5568;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .status-box {
+            margin-top: 20px;
+            padding: 16px;
+            border-radius: 10px;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .success {
+            background: #c6f6d5;
+            color: #276749;
+            border: 1px solid #9ae6b4;
+        }
+        
+        .error {
+            background: #fed7d7;
+            color: #9b2c2c;
+            border: 1px solid #feb2b2;
+        }
+        
+        .info {
+            background: #bee3f8;
+            color: #2c5282;
+            border: 1px solid #90cdf4;
+        }
+        
+        .warning {
+            background: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fde68a;
+        }
+        
+        .progress-container {
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .progress-bar {
+            background: #e2e8f0;
+            height: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .progress-fill {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .file-count {
+            text-align: center;
+            color: #4a5568;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+        
+        .download-zip-btn {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .download-zip-btn:hover {
+            box-shadow: 0 10px 20px rgba(72, 187, 120, 0.3);
+        }
+        
+        .api-note {
+            font-size: 12px;
+            color: #718096;
+            margin-top: 5px;
+        }
+        
+        .api-note a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .file-list {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 10px;
+            padding: 10px;
+            background: #f7fafc;
+            border-radius: 8px;
+            font-size: 12px;
+            color: #4a5568;
+        }
+        
+        .file-item {
+            padding: 4px 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .file-item.success {
+            color: #38a169;
+        }
+        
+        .file-item.error {
+            color: #e53e3e;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏢 Companies House PDF Downloader</h1>
+        <p class="subtitle">Download all PDF documents filed by UK companies as a ZIP file</p>
+        
+        <form id="searchForm">
+            <div class="form-group">
+                <label for="companyName">Company Name</label>
+                <input 
+                    type="text" 
+                    id="companyName" 
+                    placeholder="e.g. Tesco PLC, Sainsbury's" 
+                    required
+                >
+            </div>
+            
+            <div class="form-group">
+                <label for="apiKey">Companies House API Key</label>
+                <input 
+                    type="password" 
+                    id="apiKey" 
+                    placeholder="Your API key" 
+                    value="22aefa40-ee9e-47c0-b40a-2dd3c03165c6"
+                    required
+                >
+                <p class="api-note">
+                    Need an API key? <a href="https://developer.company-information.service.gov.uk/get-started" target="_blank">Get one free here</a>
+                </p>
+            </div>
+            
+            <button type="submit" class="btn" id="searchBtn">
+                Search & Prepare Downloads
+            </button>
+        </form>
+        
+        <div class="status-box" id="statusBox"></div>
+        
+        <div class="progress-container" id="progressContainer">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill">0%</div>
+            </div>
+            <div class="file-count" id="fileCount"></div>
+            <div class="file-list" id="fileList"></div>
+        </div>
+        
+        <button class="btn download-zip-btn" id="downloadZipBtn">
+            📦 Download All as ZIP
+        </button>
+    </div>
+    
+    <script>
+        let allDocuments = [];
+        let companyData = null;
+        
+        // Use a CORS proxy that works with APIs
+        const CORS_PROXY = 'https://corsproxy.io/?';
+        
+        async function fetchWithProxy(url, apiKey) {
+            const proxyUrl = CORS_PROXY + encodeURIComponent(url);
+            
+            try {
+                const response = await fetch(proxyUrl, {
+                    headers: {
+                        'Authorization': 'Basic ' + btoa(apiKey + ':'),
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                return response;
+            } catch (error) {
+                console.error('Fetch error:', error);
+                throw error;
+            }
+        }
+        
+        async function fetchPdfWithProxy(url, apiKey) {
+            const proxyUrl = CORS_PROXY + encodeURIComponent(url);
+            
+            try {
+                const response = await fetch(proxyUrl, {
+                    headers: {
+                        'Authorization': 'Basic ' + btoa(apiKey + ':'),
+                        'Accept': 'application/pdf'
+                    }
+                });
+                
+                if (response.ok) {
+                    return await response.blob();
+                }
+                return null;
+            } catch (error) {
+                console.error('PDF fetch error:', error);
+                return null;
+            }
+        }
+        
+        function showStatus(type, message) {
+            const statusBox = document.getElementById('statusBox');
+            statusBox.className = `status-box ${type}`;
+            statusBox.textContent = message;
+            statusBox.style.display = 'block';
+        }
+        
+        function updateProgress(current, total) {
+            const percentage = Math.round((current / total) * 100);
+            const progressFill = document.getElementById('progressFill');
+            progressFill.style.width = `${percentage}%`;
+            progressFill.textContent = `${percentage}%`;
+            
+            document.getElementById('fileCount').textContent = 
+                `Processing ${current} of ${total} documents`;
+        }
+        
+        function addFileToList(filename, status) {
+            const fileList = document.getElementById('fileList');
+            const fileItem = document.createElement('div');
+            fileItem.className = `file-item ${status}`;
+            fileItem.textContent = `${status === 'success' ? '✓' : '✗'} ${filename}`;
+            fileList.appendChild(fileItem);
+            fileList.scrollTop = fileList.scrollHeight;
+        }
+        
+        document.getElementById('searchForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const companyName = document.getElementById('companyName').value.trim();
+            const apiKey = document.getElementById('apiKey').value.trim();
+            const searchBtn = document.getElementById('searchBtn');
+            const progressContainer = document.getElementById('progressContainer');
+            const downloadZipBtn = document.getElementById('downloadZipBtn');
+            
+            // Reset UI
+            searchBtn.disabled = true;
+            searchBtn.innerHTML = 'Searching... <span class="spinner"></span>';
+            progressContainer.style.display = 'none';
+            downloadZipBtn.style.display = 'none';
+            document.getElementById('fileList').innerHTML = '';
+            allDocuments = [];
+            
+            try {
+                // Search for company
+                showStatus('info', 'Searching for company...');
+                
+                const searchUrl = `https://api.companieshouse.gov.uk/search/companies?q=${encodeURIComponent(companyName)}&items_per_page=1`;
+                const searchResponse = await fetchWithProxy(searchUrl, apiKey);
+                
+                if (!searchResponse.ok) {
+                    if (searchResponse.status === 401) {
+                        throw new Error('Invalid API key. Please check your credentials.');
+                    }
+                    throw new Error('Failed to search for company');
+                }
+                
+                const searchData = await searchResponse.json();
+                
+                if (!searchData.items || searchData.items.length === 0) {
+                    throw new Error('No company found with that name');
+                }
+                
+                companyData = searchData.items[0];
+                showStatus('success', `Found: ${companyData.title}`);
+                
+                // Get filing history
+                showStatus('info', 'Fetching filing history...');
+                
+                const filingUrl = `https://api.companieshouse.gov.uk/company/${companyData.company_number}/filing-history?items_per_page=100`;
+                const filingResponse = await fetchWithProxy(filingUrl, apiKey);
+                
+                if (!filingResponse.ok) {
+                    throw new Error('Failed to fetch filing history');
+                }
+                
+                const filingData = await filingResponse.json();
+                const documents = filingData.items || [];
+                
+                if (documents.length === 0) {
+                    throw new Error('No documents found for this company');
+                }
+                
+                showStatus('info', `Found ${documents.length} documents. Preparing downloads...`);
+                
+                // Filter documents with PDF links
+                allDocuments = documents.filter(doc => 
+                    doc.links && doc.links.document_metadata
+                ).map(doc => ({
+                    date: doc.date || 'unknown',
+                    category: doc.category || 'document',
+                    description: doc.description || 'Untitled',
+                    metadataUrl: doc.links.document_metadata.startsWith('/')
+                        ? `https://api.companieshouse.gov.uk${doc.links.document_metadata}`
+                        : doc.links.document_metadata,
+                    filename: generateFilename(doc)
+                }));
+                
+                if (allDocuments.length === 0) {
+                    throw new Error('No downloadable PDFs found');
+                }
+                
+                // Show download button
+                showStatus('success', `Ready to download ${allDocuments.length} PDF files!`);
+                downloadZipBtn.style.display = 'block';
+                
+            } catch (error) {
+                showStatus('error', error.message);
+            } finally {
+                searchBtn.disabled = false;
+                searchBtn.innerHTML = 'Search & Prepare Downloads';
+            }
+        });
+        
+        document.getElementById('downloadZipBtn').addEventListener('click', async () => {
+            const apiKey = document.getElementById('apiKey').value.trim();
+            const progressContainer = document.getElementById('progressContainer');
+            const downloadZipBtn = document.getElementById('downloadZipBtn');
+            
+            downloadZipBtn.disabled = true;
+            progressContainer.style.display = 'block';
+            
+            showStatus('info', 'Downloading PDFs... This may take a few minutes.');
+            
+            const zip = new JSZip();
+            const companyFolder = zip.folder(sanitizeFilename(companyData.title));
+            
+            let downloaded = 0;
+            let failed = 0;
+            
+            for (let i = 0; i < allDocuments.length; i++) {
+                const doc = allDocuments[i];
+                updateProgress(i + 1, allDocuments.length);
+                
+                try {
+                    // Get PDF content
+                    const pdfUrl = `${doc.metadataUrl}/content`;
+                    const pdfBlob = await fetchPdfWithProxy(pdfUrl, apiKey);
+                    
+                    if (pdfBlob && pdfBlob.size > 0) {
+                        companyFolder.file(doc.filename, pdfBlob);
+                        downloaded++;
+                        addFileToList(doc.filename, 'success');
+                    } else {
+                        failed++;
+                        addFileToList(doc.filename, 'error');
+                    }
+                    
+                    // Small delay to avoid rate limiting
+                    await new Promise(resolve => setTimeout(resolve, 300));
+                    
+                } catch (error) {
+                    failed++;
+                    addFileToList(doc.filename, 'error');
+                }
+            }
+            
+            if (downloaded > 0) {
+                showStatus('info', 'Creating ZIP file...');
+                
+                // Generate ZIP file
+                const content = await zip.generateAsync({ 
+                    type: 'blob',
+                    compression: 'DEFLATE',
+                    compressionOptions: { level: 6 }
+                });
+                
+                // Download ZIP
+                saveAs(content, `${sanitizeFilename(companyData.title)}_documents.zip`);
+                
+                showStatus('success', 
+                    `✨ Download complete! ${downloaded} files downloaded${failed > 0 ? `, ${failed} failed` : ''}.`
+                );
+            } else {
+                showStatus('error', 'No files could be downloaded. Please try again.');
+            }
+            
+            downloadZipBtn.disabled = false;
+        });
+        
+        function generateFilename(doc) {
+            const date = doc.date || 'unknown';
+            const category = doc.category || 'document';
+            const desc = (doc.description || 'document').substring(0, 50);
+            const safeDesc = sanitizeFilename(desc);
+            return `${date}_${category}_${safeDesc}.pdf`;
+        }
+        
+        function sanitizeFilename(name) {
+            return name.replace(/[^a-z0-9\s\-\_]/gi, '').trim().replace(/\s+/g, '_');
+        }
+    </script>
+</body>
+</html>
