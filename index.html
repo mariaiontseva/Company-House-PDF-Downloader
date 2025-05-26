@@ -231,22 +231,6 @@
             text-decoration: none;
         }
         
-        .debug-info {
-            margin-top: 20px;
-            padding: 15px;
-            background: #f7fafc;
-            border-radius: 8px;
-            font-family: monospace;
-            font-size: 12px;
-            color: #4a5568;
-            max-height: 200px;
-            overflow-y: auto;
-            display: none;
-        }
-        
-        .debug-line {
-            margin: 2px 0;
-        }
     </style>
 </head>
 <body>
@@ -272,7 +256,6 @@
                     type="password" 
                     id="apiKey" 
                     placeholder="Your API key" 
-                    value="22aefa40-ee9e-47c0-b40a-2dd3c03165c6"
                     required
                 >
                 <p class="api-note">
@@ -299,7 +282,6 @@
             📦 Download All as ZIP
         </button>
         
-        <div class="debug-info" id="debugInfo"></div>
     </div>
     
     <script>
@@ -308,14 +290,7 @@
         let companyData = null;
         
         function addDebug(message) {
-            const debugInfo = document.getElementById('debugInfo');
-            debugInfo.style.display = 'block';
-            const line = document.createElement('div');
-            line.className = 'debug-line';
-            line.textContent = `${new Date().toISOString().substr(11, 8)} - ${message}`;
-            debugInfo.appendChild(line);
-            debugInfo.scrollTop = debugInfo.scrollHeight;
-            console.log(message);
+            console.log(`${new Date().toISOString().substr(11, 8)} - ${message}`);
         }
         
         async function fetchWithWorker(url, apiKey) {
@@ -398,7 +373,6 @@
             progressContainer.style.display = 'none';
             downloadZipBtn.style.display = 'none';
             document.getElementById('fileList').innerHTML = '';
-            document.getElementById('debugInfo').innerHTML = '';
             allDocuments = [];
             
             try {
@@ -514,8 +488,8 @@
             let downloaded = 0;
             let failed = 0;
             
-            // Limit to first 10 documents for testing
-            const documentsToDownload = allDocuments.slice(0, 10);
+            // Download all documents
+            const documentsToDownload = allDocuments;
             addDebug(`Attempting to download ${documentsToDownload.length} documents`);
             
             for (let i = 0; i < documentsToDownload.length; i++) {
