@@ -319,12 +319,36 @@
         }
         
         async function fetchWithWorker(url, apiKey) {
-            const proxyUrl = `${WORKER_URL}?url=${encodeURIComponent(url)}&apiKey=${encodeURIComponent(apiKey)}`;
-            addDebug(`Fetching: ${url}`);
+            // Build the proxy URL with parameters
+            const params = new URLSearchParams({
+                url: url,
+                apiKey: apiKey
+            });
+            const proxyUrl = `${WORKER_URL}?${params.toString()}`;
+            
+            addDebug(`Worker URL: ${WORKER_URL}`);
+            addDebug(`Target URL: ${url}`);
+            addDebug(`Full proxy URL: ${proxyUrl}`);
             
             try {
-                const response = await fetch(proxyUrl);
+                const response = await fetch(proxyUrl, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': url.includes('/content') ? 'application/pdf' : 'application/json'
+                    }
+                });
                 addDebug(`Response status: ${response.status}`);
+                
+                // If error, log the response
+                if (!response.ok) {
+                    try {
+                        const errorText = await response.text();
+                        addDebug(`Error response: ${errorText}`);
+                    } catch (e) {
+                        // Ignore if can't read error
+                    }
+                }
+                
                 return response;
             } catch (error) {
                 addDebug(`Fetch error: ${error.message}`);
