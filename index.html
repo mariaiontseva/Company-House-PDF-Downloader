@@ -455,15 +455,24 @@
                         addDebug(`No document link for: ${doc.description}`);
                     }
                     return hasLink;
-                }).map(doc => ({
-                    date: doc.date || 'unknown',
-                    category: doc.category || 'document',
-                    description: doc.description || 'Untitled',
-                    metadataUrl: doc.links.document_metadata.startsWith('/')
-                        ? `https://api.companieshouse.gov.uk${doc.links.document_metadata}`
-                        : doc.links.document_metadata,
-                    filename: generateFilename(doc)
-                }));
+                }).map(doc => {
+                    // Document metadata URLs can be in different formats
+                    let metadataUrl = doc.links.document_metadata;
+                    
+                    // If it's a relative URL, make it absolute
+                    if (metadataUrl.startsWith('/')) {
+                        metadataUrl = `https://api.companieshouse.gov.uk${metadataUrl}`;
+                    }
+                    // If it's already a full URL with different domain, keep it as is
+                    
+                    return {
+                        date: doc.date || 'unknown',
+                        category: doc.category || 'document',
+                        description: doc.description || 'Untitled',
+                        metadataUrl: metadataUrl,
+                        filename: generateFilename(doc)
+                    };
+                });
                 
                 addDebug(`${allDocuments.length} documents have downloadable PDFs`);
                 
@@ -514,8 +523,11 @@
                 updateProgress(i + 1, documentsToDownload.length);
                 
                 try {
-                    // Get PDF content
-                    const pdfUrl = `${doc.metadataUrl}/content`;
+                    // Get PDF content - the content endpoint is at the document URL
+                    // For document-api URLs, we need to use the URL as-is
+                    const pdfUrl = doc.metadataUrl.includes('document-api.') 
+                        ? doc.metadataUrl 
+                        : `${doc.metadataUrl}/content`;
                     addDebug(`Downloading PDF ${i + 1}: ${pdfUrl}`);
                     
                     const pdfResponse = await fetchWithWorker(pdfUrl, apiKey);
