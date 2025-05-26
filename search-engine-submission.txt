@@ -1,0 +1,55 @@
+SEARCH ENGINE SUBMISSION URLS FOR DOCSPACE.UK
+=============================================
+
+IMPORTANT: Replace G-XXXXXXXXXX in index.html with your actual Google Analytics ID
+
+1. GOOGLE
+---------
+Google Search Console: https://search.google.com/search-console
+- Add property: https://docspace.uk
+- Verify ownership (HTML file or DNS)
+- Submit sitemap: https://docspace.uk/sitemap.xml
+- Request indexing for homepage
+
+Google Analytics: https://analytics.google.com
+- Create new property for docspace.uk
+- Get measurement ID (G-XXXXXXXXXX)
+- Already added to site - just replace ID
+
+2. BING
+-------
+Bing Webmaster Tools: https://www.bing.com/webmasters
+- Add site: https://docspace.uk
+- Verify ownership
+- Submit sitemap: https://docspace.uk/sitemap.xml
+
+3. YANDEX
+---------
+Yandex Webmaster: https://webmaster.yandex.com
+- Add site: https://docspace.uk
+- Verify ownership
+- Submit sitemap
+
+4. DUCKDUCKGO
+-------------
+DuckDuckGo doesn't have submission - it uses Bing's index
+
+5. MANUAL SUBMISSION URLS
+-------------------------
+Google: https://www.google.com/ping?sitemap=https://docspace.uk/sitemap.xml
+Bing: https://www.bing.com/ping?sitemap=https://docspace.uk/sitemap.xml
+
+6. UK BUSINESS DIRECTORIES (for backlinks)
+------------------------------------------
+- Yell.com
+- Thomson Local
+- FreeIndex
+- Hotfrog
+- Yelp UK
+- Scoot
+- TouchLocal
+
+7. MONITORING
+-------------
+Set up Google Alerts for "docspace.uk" to monitor mentions
+Use Google Search Console to track impressions and clicks
