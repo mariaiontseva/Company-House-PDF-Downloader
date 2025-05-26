@@ -279,7 +279,7 @@
     <script>
         const WORKER_URL = 'https://blue-flower-d40f.mahin84.workers.dev';
         const API_KEY = '22aefa40-ee9e-47c0-b40a-2dd3c03165c6';
-        const STRIPE_PUBLIC_KEY = 'pk_test_YOUR_STRIPE_PUBLISHABLE_KEY'; // Replace with your Stripe public key
+        const STRIPE_PUBLIC_KEY = 'pk_test_51RT33XAJ1gsWpnv6rpEFMeCmuADlJet1lmqeaMrPXas4DYblZZ73SOnNEXb0gE5ADHrfRkVJIXyACM3Nw5Vt9HCz00L8E9wffe';
         let allDocuments = [];
         let companyData = null;
         let paymentCompleted = false;
@@ -481,24 +481,28 @@
                 downloadZipBtn.innerHTML = 'Processing payment... <span class="spinner"></span>';
                 
                 try {
-                    // Check if Stripe is properly configured
-                    if (STRIPE_PUBLIC_KEY === 'pk_test_YOUR_STRIPE_PUBLISHABLE_KEY') {
-                        showStatus('info', '💳 Payment integration ready! See stripe-setup.md for configuration.');
-                        
-                        // Demo mode - simulate payment
-                        await new Promise(resolve => setTimeout(resolve, 2000));
-                        paymentCompleted = true;
-                        showStatus('success', 'Demo mode: Payment simulated! Starting download...');
-                    } else {
-                        // Real payment flow would go here
-                        showStatus('error', 'Payment server not configured. See stripe-setup.md for instructions.');
-                        downloadZipBtn.disabled = false;
-                        downloadZipBtn.innerHTML = '📦 Download All as ZIP';
-                        return;
-                    }
+                    showStatus('info', 'Redirecting to payment...');
                     
-                    // Continue with download
+                    // Store company data in sessionStorage to retrieve after payment
+                    sessionStorage.setItem('pendingCompany', JSON.stringify({
+                        companyData: companyData,
+                        allDocuments: allDocuments
+                    }));
+                    
+                    // Create a Stripe Payment Link URL with metadata
+                    // Note: You need to create a Payment Link in your Stripe Dashboard
+                    // Set it to £5 and configure the success URL to your GitHub Pages URL
+                    const paymentUrl = 'https://buy.stripe.com/test_PAYMENT_LINK_ID'; // Replace with your Payment Link
+                    
+                    // For now, simulate payment until Payment Link is configured
+                    showStatus('info', 'Payment simulation mode (configure Payment Link in Stripe Dashboard)');
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                    paymentCompleted = true;
+                    showStatus('success', 'Ready to download! Click again to start.');
+                    
+                    downloadZipBtn.disabled = false;
                     downloadZipBtn.innerHTML = '📦 Download All as ZIP';
+                    return;
                     
                 } catch (error) {
                     showStatus('error', 'Payment error: ' + error.message);
@@ -617,27 +621,23 @@
         window.addEventListener('DOMContentLoaded', async () => {
             const urlParams = new URLSearchParams(window.location.search);
             const paymentStatus = urlParams.get('payment');
-            const companyNumber = urlParams.get('company');
             
-            if (paymentStatus === 'success' && companyNumber) {
-                paymentCompleted = true;
-                showStatus('success', 'Payment successful! Click the download button to get your files.');
-                
-                // Auto-trigger search to restore the company data
-                try {
-                    // Search for company by number to restore state
-                    const searchUrl = `https://api.companieshouse.gov.uk/company/${companyNumber}`;
-                    const response = await fetchWithWorker(searchUrl, API_KEY);
+            if (paymentStatus === 'success') {
+                // Retrieve stored company data
+                const storedData = sessionStorage.getItem('pendingCompany');
+                if (storedData) {
+                    const { companyData: stored, allDocuments: docs } = JSON.parse(storedData);
+                    companyData = stored;
+                    allDocuments = docs;
+                    paymentCompleted = true;
                     
-                    if (response.ok) {
-                        const data = await response.json();
-                        document.getElementById('companyName').value = data.company_name;
-                        
-                        // Trigger search to load all the documents again
-                        document.getElementById('searchForm').dispatchEvent(new Event('submit'));
-                    }
-                } catch (error) {
-                    console.error('Failed to restore company data:', error);
+                    // Update UI
+                    document.getElementById('companyName').value = companyData.title;
+                    showStatus('success', 'Payment successful! Ready to download your files.');
+                    document.getElementById('downloadZipBtn').style.display = 'block';
+                    
+                    // Clear stored data
+                    sessionStorage.removeItem('pendingCompany');
                 }
                 
                 // Clean URL

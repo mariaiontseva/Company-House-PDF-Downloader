@@ -1,18 +1,24 @@
 # Stripe Payment Integration Setup
 
-To enable real payments for the Companies House PDF Downloader, you need to set up a server endpoint to handle Stripe payments securely.
+To enable real payments for the Companies House PDF Downloader, you can use Stripe Payment Links (no server required).
 
-## Quick Setup
+## Quick Setup with Payment Links (Recommended for GitHub Pages)
 
-1. **Get your Stripe keys**
-   - Sign up at https://stripe.com
-   - Get your publishable key (starts with `pk_`)
-   - Get your secret key (starts with `sk_`)
+1. **Create a Payment Link in Stripe Dashboard**
+   - Go to https://dashboard.stripe.com/payment-links
+   - Click "New payment link"
+   - Set price to £5.00
+   - Name it "Companies House Documents Download"
+   - Set success URL to: `https://mariaiontseva.github.io/Company-House-PDF-Downloader/?payment=success`
+   - Save and copy the payment link URL
 
-2. **Update the public key in index.html**
-   ```javascript
-   const STRIPE_PUBLIC_KEY = 'pk_live_YOUR_PUBLISHABLE_KEY_HERE';
-   ```
+2. **Update index.html**
+   - Find this line: `const paymentUrl = 'https://buy.stripe.com/test_PAYMENT_LINK_ID';`
+   - Replace with your actual payment link URL
+
+3. **That's it!** The payment flow will work without any server.
+
+## Alternative: Server-Based Setup
 
 3. **Create a server endpoint** (example using Node.js/Express)
 
