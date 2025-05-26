@@ -483,11 +483,16 @@
                 try {
                     showStatus('info', 'Redirecting to payment...');
                     
-                    // Store company data in sessionStorage to retrieve after payment
-                    sessionStorage.setItem('pendingCompany', JSON.stringify({
+                    // Store company data in localStorage to retrieve after payment
+                    const dataToStore = {
                         companyData: companyData,
-                        allDocuments: allDocuments
-                    }));
+                        allDocuments: allDocuments,
+                        timestamp: Date.now()
+                    };
+                    localStorage.setItem('pendingCompany', JSON.stringify(dataToStore));
+                    
+                    console.log('Storing company data before payment:', companyData.title);
+                    console.log('Document count:', allDocuments.length);
                     
                     // Create a Stripe Payment Link URL with metadata
                     const paymentUrl = 'https://buy.stripe.com/test_4gM14m2IhcZL9yw0Fpcwg00';
@@ -616,25 +621,47 @@
             
             if (paymentStatus === 'success') {
                 // Retrieve stored company data
-                const storedData = sessionStorage.getItem('pendingCompany');
+                const storedData = localStorage.getItem('pendingCompany');
+                console.log('Payment success - checking for stored data:', storedData ? 'Found' : 'Not found');
+                
                 if (storedData) {
-                    const { companyData: stored, allDocuments: docs } = JSON.parse(storedData);
-                    companyData = stored;
-                    allDocuments = docs;
-                    paymentCompleted = true;
-                    
-                    // Update UI
-                    document.getElementById('companyName').value = companyData.title;
-                    showStatus('success', 'Payment successful! Starting download...');
-                    document.getElementById('downloadZipBtn').style.display = 'block';
-                    
-                    // Clear stored data
-                    sessionStorage.removeItem('pendingCompany');
-                    
-                    // Automatically trigger download after a short delay
-                    setTimeout(() => {
-                        document.getElementById('downloadZipBtn').click();
-                    }, 1500);
+                    try {
+                        const parsed = JSON.parse(storedData);
+                        const { companyData: stored, allDocuments: docs, timestamp } = parsed;
+                        
+                        // Check if data is recent (within 30 minutes)
+                        if (Date.now() - timestamp < 30 * 60 * 1000) {
+                            companyData = stored;
+                            allDocuments = docs;
+                            paymentCompleted = true;
+                            
+                            console.log('Restored company:', companyData.title);
+                            console.log('Document count:', allDocuments.length);
+                            
+                            // Update UI
+                            document.getElementById('companyName').value = companyData.title;
+                            showStatus('success', 'Payment successful! Starting download...');
+                            document.getElementById('downloadZipBtn').style.display = 'block';
+                            
+                            // Clear stored data
+                            localStorage.removeItem('pendingCompany');
+                            
+                            // Automatically trigger download after a short delay
+                            setTimeout(() => {
+                                console.log('Auto-clicking download button');
+                                document.getElementById('downloadZipBtn').click();
+                            }, 1500);
+                        } else {
+                            console.log('Stored data too old');
+                            localStorage.removeItem('pendingCompany');
+                            showStatus('error', 'Payment session expired. Please search again.');
+                        }
+                    } catch (error) {
+                        console.error('Error parsing stored data:', error);
+                        showStatus('error', 'Error restoring session. Please search again.');
+                    }
+                } else {
+                    showStatus('info', 'Payment successful! Please search for the company again to download.');
                 }
                 
                 // Clean URL
