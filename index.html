@@ -657,13 +657,90 @@
         }
 
         /* Info section */
-        .info-section {
+        .info-section-single {
             width: 100%;
-            max-width: 1200px;
-            margin-top: 80px;
+            max-width: 600px;
+            margin: 60px auto;
+        }
+
+        .info-container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: var(--shadow-xl);
+            transition: all 0.3s ease;
+        }
+
+        .info-container:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 25px 50px -12px rgba(99, 102, 241, 0.25);
+        }
+
+        .info-content {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 24px;
+            grid-template-columns: 1fr 2fr;
+            gap: 32px;
+        }
+
+        .info-column h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary-light);
+            margin-bottom: 16px;
+        }
+
+        .feature-list.compact {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .feature-list.compact .feature-item {
+            padding: 8px 0;
+            color: #e2e8f0;
+            font-size: 15px;
+            display: block;
+        }
+
+        .user-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .user-item {
+            font-size: 14px;
+        }
+
+        .user-item strong {
+            color: #e2e8f0;
+            display: block;
+            margin-bottom: 4px;
+            font-size: 15px;
+        }
+
+        .user-item p {
+            color: #94a3b8;
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 768px) {
+            .info-content {
+                grid-template-columns: 1fr;
+                gap: 24px;
+            }
+            
+            .info-container {
+                padding: 24px;
+            }
+        }
+
+        /* Old info card styles for compatibility */
+        .info-section {
+            display: none;
         }
 
         .info-card {
@@ -836,6 +913,27 @@
         body.light-mode .search-container,
         body.light-mode .company-card,
         body.light-mode .progress-section,
+        body.light-mode .info-container {
+            background: white;
+            border-color: #e2e8f0;
+        }
+
+        body.light-mode .info-column h3 {
+            color: var(--primary);
+        }
+
+        body.light-mode .feature-list.compact .feature-item {
+            color: #475569;
+        }
+
+        body.light-mode .user-item strong {
+            color: #1e293b;
+        }
+
+        body.light-mode .user-item p {
+            color: #64748b;
+        }
+
         body.light-mode .info-card {
             background: white;
             border-color: #e2e8f0;
@@ -1010,35 +1108,35 @@
             <div class="info-card">
                 <div class="info-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                     </svg>
                 </div>
-                <h3 class="info-title">Complete Document Archive</h3>
-                <p class="info-description">Access every document filed at Companies House for your chosen company, including:</p>
+                <h3 class="info-title">Why DocSpace?</h3>
+                <p class="info-description">We make accessing Companies House documents simple and efficient:</p>
                 <ul class="feature-list">
                     <li class="feature-item">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                         </svg>
-                        Annual Returns & Confirmation Statements
+                        One-click download of all company documents
                     </li>
                     <li class="feature-item">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                         </svg>
-                        Financial Accounts & Statements
+                        Save hours of manual searching and downloading
                     </li>
                     <li class="feature-item">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                         </svg>
-                        Incorporation & Articles of Association
+                        Organized ZIP file with all documents sorted by date
                     </li>
                     <li class="feature-item">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                         </svg>
-                        Director & Secretary Changes
+                        Direct access to official Companies House records
                     </li>
                 </ul>
             </div>
@@ -1046,71 +1144,35 @@
             <div class="info-card">
                 <div class="info-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                     </svg>
                 </div>
-                <h3 class="info-title">Lightning Fast Downloads</h3>
-                <p class="info-description">Our advanced infrastructure ensures you get your documents quickly:</p>
+                <h3 class="info-title">Who Uses DocSpace?</h3>
+                <p class="info-description">Trusted by professionals across the UK:</p>
                 <ul class="feature-list">
                     <li class="feature-item">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                         </svg>
-                        Parallel document processing
+                        Accountants performing due diligence
                     </li>
                     <li class="feature-item">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                         </svg>
-                        Real-time progress tracking
+                        Lawyers reviewing company history
                     </li>
                     <li class="feature-item">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                         </svg>
-                        Automatic retry for failed downloads
+                        Investors researching opportunities
                     </li>
                     <li class="feature-item">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                         </svg>
-                        Compressed ZIP for faster delivery
-                    </li>
-                </ul>
-            </div>
-            
-            <div class="info-card">
-                <div class="info-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                    </svg>
-                </div>
-                <h3 class="info-title">Secure & Reliable</h3>
-                <p class="info-description">Your data security is our top priority:</p>
-                <ul class="feature-list">
-                    <li class="feature-item">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                        </svg>
-                        Secure payment via Stripe
-                    </li>
-                    <li class="feature-item">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                        </svg>
-                        No data stored after download
-                    </li>
-                    <li class="feature-item">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                        </svg>
-                        Direct from Companies House API
-                    </li>
-                    <li class="feature-item">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                        </svg>
-                        SSL encrypted connections
+                        Business owners archiving records
                     </li>
                 </ul>
             </div>
