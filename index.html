@@ -490,18 +490,10 @@
                     }));
                     
                     // Create a Stripe Payment Link URL with metadata
-                    // Note: You need to create a Payment Link in your Stripe Dashboard
-                    // Set it to £5 and configure the success URL to your GitHub Pages URL
-                    const paymentUrl = 'https://buy.stripe.com/test_PAYMENT_LINK_ID'; // Replace with your Payment Link
+                    const paymentUrl = 'https://buy.stripe.com/test_4gM14m2IhcZL9yw0Fpcwg00';
                     
-                    // For now, simulate payment until Payment Link is configured
-                    showStatus('info', 'Payment simulation mode (configure Payment Link in Stripe Dashboard)');
-                    await new Promise(resolve => setTimeout(resolve, 2000));
-                    paymentCompleted = true;
-                    showStatus('success', 'Ready to download! Click again to start.');
-                    
-                    downloadZipBtn.disabled = false;
-                    downloadZipBtn.innerHTML = '📦 Download All as ZIP';
+                    // Redirect to Stripe payment
+                    window.location.href = paymentUrl;
                     return;
                     
                 } catch (error) {
