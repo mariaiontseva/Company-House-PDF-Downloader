@@ -275,27 +275,12 @@
 
         /* Form styles */
         .form-group {
-            position: relative;
             margin-bottom: 24px;
-        }
-
-        .form-label {
-            position: absolute;
-            left: 16px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #94a3b8;
-            font-size: 16px;
-            font-weight: 500;
-            pointer-events: none;
-            transition: all 0.3s ease;
-            background: transparent;
-            padding: 0 4px;
         }
 
         .form-input {
             width: 100%;
-            padding: 20px 16px;
+            padding: 16px 20px;
             background: rgba(255, 255, 255, 0.05);
             border: 2px solid rgba(255, 255, 255, 0.1);
             border-radius: var(--radius);
@@ -305,21 +290,16 @@
             font-family: inherit;
         }
 
-        .form-input:focus,
-        .form-input:not(:placeholder-shown) {
+        .form-input:focus {
             outline: none;
             border-color: var(--primary);
             background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
         }
 
-        .form-input:focus ~ .form-label,
-        .form-input:not(:placeholder-shown) ~ .form-label {
-            top: -12px;
-            left: 12px;
-            font-size: 14px;
-            color: var(--primary-light);
-            background: #1a1f36;
-            padding: 0 8px;
+        .form-input::placeholder {
+            color: #64748b;
+            opacity: 1;
         }
 
         .form-helper {
@@ -849,12 +829,7 @@
 
         body.light-mode .form-input:focus {
             background: white;
-        }
-
-        body.light-mode .form-label,
-        body.light-mode .form-input:focus ~ .form-label,
-        body.light-mode .form-input:not(:placeholder-shown) ~ .form-label {
-            background: white;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
         }
 
         body.light-mode .company-name,
@@ -953,12 +928,11 @@
                         id="companyName" 
                         name="companyName" 
                         class="form-input"
-                        placeholder=" "
+                        placeholder="Enter company name or number"
                         required
                         autocomplete="off"
                     >
-                    <label for="companyName" class="form-label">Company Name</label>
-                    <div class="form-helper">Enter the name of any UK registered company</div>
+                    <div class="form-helper">Search any UK registered company</div>
                 </div>
                 
                 <button type="submit" class="btn" id="searchBtn">
