@@ -6,6 +6,7 @@
     <title>Companies House PDF Downloader</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <script src="https://js.stripe.com/v3/"></script>
     <style>
         * {
             margin: 0;
@@ -237,6 +238,9 @@
     <div class="container">
         <h1>🏢 Companies House PDF Downloader</h1>
         <p class="subtitle">Download all PDF documents filed by UK companies as a ZIP file</p>
+        <p style="text-align: center; color: #667eea; font-weight: 600; margin-top: -20px; margin-bottom: 25px;">
+            £5 per company download
+        </p>
         
         <form id="searchForm">
             <div class="form-group">
@@ -275,8 +279,13 @@
     <script>
         const WORKER_URL = 'https://blue-flower-d40f.mahin84.workers.dev';
         const API_KEY = '22aefa40-ee9e-47c0-b40a-2dd3c03165c6';
+        const STRIPE_PUBLIC_KEY = 'pk_test_YOUR_STRIPE_PUBLISHABLE_KEY'; // Replace with your Stripe public key
         let allDocuments = [];
         let companyData = null;
+        let paymentCompleted = false;
+        
+        // Initialize Stripe
+        const stripe = Stripe(STRIPE_PUBLIC_KEY);
         
         function addDebug(message) {
             console.log(`${new Date().toISOString().substr(11, 8)} - ${message}`);
@@ -466,6 +475,40 @@
             const progressContainer = document.getElementById('progressContainer');
             const downloadZipBtn = document.getElementById('downloadZipBtn');
             
+            // Check if payment already completed for this session
+            if (!paymentCompleted) {
+                downloadZipBtn.disabled = true;
+                downloadZipBtn.innerHTML = 'Processing payment... <span class="spinner"></span>';
+                
+                try {
+                    // Check if Stripe is properly configured
+                    if (STRIPE_PUBLIC_KEY === 'pk_test_YOUR_STRIPE_PUBLISHABLE_KEY') {
+                        showStatus('info', '💳 Payment integration ready! See stripe-setup.md for configuration.');
+                        
+                        // Demo mode - simulate payment
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+                        paymentCompleted = true;
+                        showStatus('success', 'Demo mode: Payment simulated! Starting download...');
+                    } else {
+                        // Real payment flow would go here
+                        showStatus('error', 'Payment server not configured. See stripe-setup.md for instructions.');
+                        downloadZipBtn.disabled = false;
+                        downloadZipBtn.innerHTML = '📦 Download All as ZIP';
+                        return;
+                    }
+                    
+                    // Continue with download
+                    downloadZipBtn.innerHTML = '📦 Download All as ZIP';
+                    
+                } catch (error) {
+                    showStatus('error', 'Payment error: ' + error.message);
+                    downloadZipBtn.disabled = false;
+                    downloadZipBtn.innerHTML = '📦 Download All as ZIP';
+                    return;
+                }
+            }
+            
+            // If payment completed, proceed with download
             downloadZipBtn.disabled = true;
             progressContainer.style.display = 'block';
             
@@ -569,6 +612,42 @@
         function sanitizeFilename(name) {
             return name.replace(/[^a-z0-9\s\-\_]/gi, '').trim().replace(/\s+/g, '_');
         }
+        
+        // Check URL parameters on page load for payment status
+        window.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const paymentStatus = urlParams.get('payment');
+            const companyNumber = urlParams.get('company');
+            
+            if (paymentStatus === 'success' && companyNumber) {
+                paymentCompleted = true;
+                showStatus('success', 'Payment successful! Click the download button to get your files.');
+                
+                // Auto-trigger search to restore the company data
+                try {
+                    // Search for company by number to restore state
+                    const searchUrl = `https://api.companieshouse.gov.uk/company/${companyNumber}`;
+                    const response = await fetchWithWorker(searchUrl, API_KEY);
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        document.getElementById('companyName').value = data.company_name;
+                        
+                        // Trigger search to load all the documents again
+                        document.getElementById('searchForm').dispatchEvent(new Event('submit'));
+                    }
+                } catch (error) {
+                    console.error('Failed to restore company data:', error);
+                }
+                
+                // Clean URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+            } else if (paymentStatus === 'cancelled') {
+                showStatus('info', 'Payment cancelled. Search for a company to try again.');
+                // Clean URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        });
     </script>
 </body>
 </html>
