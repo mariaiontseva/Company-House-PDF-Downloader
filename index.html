@@ -281,9 +281,27 @@
     </div>
     
     <script>
-        const WORKER_URL = 'https://blue-flower-d40f.mahin84.workers.dev';
-        const API_KEY = '22aefa40-ee9e-47c0-b40a-2dd3c03165c6';
-        const STRIPE_PUBLIC_KEY = 'pk_test_51RT33XAJ1gsWpnv6rpEFMeCmuADlJet1lmqeaMrPXas4DYblZZ73SOnNEXb0gE5ADHrfRkVJIXyACM3Nw5Vt9HCz00L8E9wffe';
+        // ===== CONFIGURATION =====
+        const CONFIG = {
+            // API Configuration
+            WORKER_URL: 'https://blue-flower-d40f.mahin84.workers.dev',
+            API_KEY: '22aefa40-ee9e-47c0-b40a-2dd3c03165c6',
+            
+            // Stripe Configuration
+            STRIPE_MODE: 'test', // Change to 'live' for real payments
+            STRIPE_PUBLIC_KEY: 'pk_test_51RT33XAJ1gsWpnv6rpEFMeCmuADlJet1lmqeaMrPXas4DYblZZ73SOnNEXb0gE5ADHrfRkVJIXyACM3Nw5Vt9HCz00L8E9wffe',
+            STRIPE_PAYMENT_LINK_TEST: 'https://buy.stripe.com/test_4gM14m2IhcZL9yw0Fpcwg00',
+            STRIPE_PAYMENT_LINK_LIVE: '', // Add your live payment link here
+            
+            // Payment Settings
+            PRICE_GBP: 5.00,
+            SUCCESS_URL: 'https://docspace.uk/?payment=success'
+        };
+        
+        // Use configuration
+        const WORKER_URL = CONFIG.WORKER_URL;
+        const API_KEY = CONFIG.API_KEY;
+        const STRIPE_PUBLIC_KEY = CONFIG.STRIPE_PUBLIC_KEY;
         let allDocuments = [];
         let companyData = null;
         let paymentCompleted = false;
@@ -621,8 +639,17 @@
                     console.log('Storing company data before payment:', companyData.title);
                     console.log('Document count:', allDocuments.length);
                     
-                    // Create a Stripe Payment Link URL with metadata
-                    const paymentUrl = 'https://buy.stripe.com/test_4gM14m2IhcZL9yw0Fpcwg00';
+                    // Use appropriate payment link based on mode
+                    const paymentUrl = CONFIG.STRIPE_MODE === 'live' 
+                        ? CONFIG.STRIPE_PAYMENT_LINK_LIVE 
+                        : CONFIG.STRIPE_PAYMENT_LINK_TEST;
+                    
+                    if (CONFIG.STRIPE_MODE === 'live' && !CONFIG.STRIPE_PAYMENT_LINK_LIVE) {
+                        showStatus('error', 'Live payment link not configured. Please update CONFIG.STRIPE_PAYMENT_LINK_LIVE');
+                        downloadZipBtn.disabled = false;
+                        downloadZipBtn.innerHTML = '📦 Download All as ZIP';
+                        return;
+                    }
                     
                     // Redirect to Stripe payment
                     window.location.href = paymentUrl;
