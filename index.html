@@ -641,9 +641,12 @@
                     console.log('Document count:', allDocuments.length);
                     
                     // Use appropriate payment link based on mode
+                    console.log('STRIPE MODE:', CONFIG.STRIPE_MODE);
+                    console.log('LIVE URL:', CONFIG.STRIPE_PAYMENT_LINK_LIVE);
                     const paymentUrl = CONFIG.STRIPE_MODE === 'live' 
                         ? CONFIG.STRIPE_PAYMENT_LINK_LIVE 
                         : CONFIG.STRIPE_PAYMENT_LINK_TEST;
+                    console.log('SELECTED URL:', paymentUrl);
                     
                     if (CONFIG.STRIPE_MODE === 'live' && !CONFIG.STRIPE_PAYMENT_LINK_LIVE) {
                         showStatus('error', 'Live payment link not configured. Please update CONFIG.STRIPE_PAYMENT_LINK_LIVE');
