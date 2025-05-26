@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Companies House PDF Downloader</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+        }
+        
+        h1 {
+            color: #2d3748;
+            margin-bottom: 10px;
+            text-align: center;
+            font-size: 32px;
+        }
+        
+        .subtitle {
+            color: #718096;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #4a5568;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .status {
+            margin-top: 20px;
+            padding: 16px;
+            border-radius: 10px;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .success {
+            background: #c6f6d5;
+            color: #276749;
+            border: 1px solid #9ae6b4;
+        }
+        
+        .error {
+            background: #fed7d7;
+            color: #9b2c2c;
+            border: 1px solid #feb2b2;
+        }
+        
+        .info {
+            background: #bee3f8;
+            color: #2c5282;
+            border: 1px solid #90cdf4;
+        }
+        
+        .progress {
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .progress-bar {
+            background: #e2e8f0;
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .progress-fill {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .file-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+        
+        .file-item {
+            padding: 12px;
+            margin: 8px 0;
+            background: #f7fafc;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s;
+        }
+        
+        .file-item:hover {
+            background: #edf2f7;
+            transform: translateX(5px);
+        }
+        
+        .download-link {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        .download-link:hover {
+            text-decoration: underline;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .api-note {
+            font-size: 12px;
+            color: #718096;
+            margin-top: 5px;
+        }
+        
+        .api-note a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        
+        .download-all-btn {
+            background: #48bb78;
+            margin-top: 15px;
+        }
+        
+        .download-all-btn:hover {
+            box-shadow: 0 10px 20px rgba(72, 187, 120, 0.3);
+        }
+        
+        .github-link {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #718096;
+        }
+        
+        .github-link a {
+            color: #667eea;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏢 Companies House PDF Downloader</h1>
+        <p class="subtitle">Download all PDF documents filed by UK companies</p>
+        
+        <form id="searchForm">
+            <div class="form-group">
+                <label for="companyName">Company Name</label>
+                <input 
+                    type="text" 
+                    id="companyName" 
+                    placeholder="e.g. Tesco PLC, Sainsbury's" 
+                    required
+                >
+            </div>
+            
+            <div class="form-group">
+                <label for="apiKey">Companies House API Key</label>
+                <input 
+                    type="password" 
+                    id="apiKey" 
+                    placeholder="Your API key" 
+                    value="22aefa40-ee9e-47c0-b40a-2dd3c03165c6"
+                    required
+                >
+                <p class="api-note">
+                    Need an API key? <a href="https://developer.company-information.service.gov.uk/get-started" target="_blank">Get one free here</a>
+                </p>
+            </div>
+            
+            <button type="submit" class="btn" id="searchBtn">
+                Search & Download PDFs
+            </button>
+        </form>
+        
+        <div class="status" id="status"></div>
+        
+        <div class="progress" id="progress">
+            <div id="progressText">Initializing...</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div id="progressStats"></div>
+        </div>
+        
+        <div class="file-list" id="fileList"></div>
+        
+        <div class="github-link">
+            <a href="https://github.com/yourusername/companies-house-downloader" target="_blank">View on GitHub</a>
+        </div>
+    </div>
+    
+    <script>
+        const CORS_PROXY = 'https://api.allorigins.win/raw?url=';
+        
+        document.getElementById('searchForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const companyName = document.getElementById('companyName').value.trim();
+            const apiKey = document.getElementById('apiKey').value.trim();
+            const status = document.getElementById('status');
+            const progress = document.getElementById('progress');
+            const searchBtn = document.getElementById('searchBtn');
+            
+            // Reset UI
+            status.style.display = 'none';
+            progress.style.display = 'none';
+            document.getElementById('fileList').innerHTML = '';
+            
+            searchBtn.disabled = true;
+            searchBtn.innerHTML = 'Searching... <span class="spinner"></span>';
+            
+            try {
+                // Search for company
+                showStatus('info', 'Searching for company...');
+                
+                const searchUrl = `https://api.companieshouse.gov.uk/search/companies?q=${encodeURIComponent(companyName)}&items_per_page=1`;
+                const searchResponse = await fetchWithAuth(searchUrl, apiKey);
+                
+                if (!searchResponse.ok) {
+                    throw new Error(searchResponse.status === 401 ? 'Invalid API key' : 'Failed to search company');
+                }
+                
+                const searchData = await searchResponse.json();
+                
+                if (!searchData.items || searchData.items.length === 0) {
+                    throw new Error('No company found with that name');
+                }
+                
+                const company = searchData.items[0];
+                const companyNumber = company.company_number;
+                
+                showStatus('success', `Found: ${company.title} (${companyNumber})`);
+                
+                // Get filing history
+                showStatus('info', 'Fetching filing history...');
+                
+                const filingUrl = `https://api.companieshouse.gov.uk/company/${companyNumber}/filing-history?items_per_page=100`;
+                const filingResponse = await fetchWithAuth(filingUrl, apiKey);
+                
+                if (!filingResponse.ok) {
+                    throw new Error('Failed to fetch filing history');
+                }
+                
+                const filingData = await filingResponse.json();
+                const documents = filingData.items || [];
+                
+                if (documents.length === 0) {
+                    throw new Error('No documents found');
+                }
+                
+                showStatus('success', `Found ${documents.length} documents`);
+                
+                // Show progress
+                progress.style.display = 'block';
+                
+                // Process documents
+                const downloadableFiles = [];
+                let processed = 0;
+                
+                for (const doc of documents) {
+                    processed++;
+                    updateProgress(processed, documents.length, 'Processing documents...');
+                    
+                    if (doc.links && doc.links.document_metadata) {
+                        const date = doc.date || 'unknown';
+                        const category = doc.category || 'document';
+                        const description = (doc.description || 'document').substring(0, 50);
+                        const filename = `${date}_${category}_${description}.pdf`.replace(/[^a-z0-9_\-\.]/gi, '_');
+                        
+                        const docMetadataUrl = doc.links.document_metadata.startsWith('/')
+                            ? `https://api.companieshouse.gov.uk${doc.links.document_metadata}`
+                            : doc.links.document_metadata;
+                        
+                        downloadableFiles.push({
+                            filename: filename,
+                            url: `${docMetadataUrl}/content`,
+                            description: doc.description,
+                            date: date
+                        });
+                    }
+                }
+                
+                // Display download links
+                displayDownloadLinks(downloadableFiles, apiKey, company.title);
+                
+                showStatus('success', `Ready to download ${downloadableFiles.length} PDF files!`);
+                
+            } catch (error) {
+                showStatus('error', error.message);
+            } finally {
+                searchBtn.disabled = false;
+                searchBtn.innerHTML = 'Search & Download PDFs';
+            }
+        });
+        
+        async function fetchWithAuth(url, apiKey) {
+            // Use CORS proxy for all requests
+            const proxyUrl = CORS_PROXY + encodeURIComponent(url);
+            
+            // Create the auth header
+            const authHeader = btoa(apiKey + ':');
+            
+            try {
+                const response = await fetch(proxyUrl);
+                
+                // Check if we need to handle auth differently
+                if (response.status === 401) {
+                    throw new Error('Authentication failed - please check your API key');
+                }
+                
+                return response;
+            } catch (error) {
+                console.error('Fetch error:', error);
+                throw error;
+            }
+        }
+        
+        function showStatus(type, message) {
+            const status = document.getElementById('status');
+            status.className = `status ${type}`;
+            status.textContent = message;
+            status.style.display = 'block';
+        }
+        
+        function updateProgress(current, total, message) {
+            const percentage = (current / total) * 100;
+            document.getElementById('progressFill').style.width = `${percentage}%`;
+            document.getElementById('progressText').textContent = message;
+            document.getElementById('progressStats').textContent = `${current} / ${total}`;
+        }
+        
+        function displayDownloadLinks(files, apiKey, companyName) {
+            const fileList = document.getElementById('fileList');
+            fileList.innerHTML = '<h3>📄 Available PDFs (click to download):</h3>';
+            
+            if (files.length > 0) {
+                // Add download all button
+                const downloadAllBtn = document.createElement('button');
+                downloadAllBtn.className = 'btn download-all-btn';
+                downloadAllBtn.textContent = `Download All ${files.length} PDFs`;
+                downloadAllBtn.onclick = () => downloadAll(files, apiKey, companyName);
+                fileList.appendChild(downloadAllBtn);
+            }
+            
+            files.forEach((file, index) => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                fileItem.innerHTML = `
+                    <div>
+                        <strong>${file.filename}</strong><br>
+                        <small>${file.description}</small>
+                    </div>
+                    <a href="#" class="download-link" onclick="downloadFile('${file.url}', '${file.filename}', '${apiKey}'); return false;">
+                        Download
+                    </a>
+                `;
+                fileList.appendChild(fileItem);
+            });
+        }
+        
+        async function downloadFile(url, filename, apiKey) {
+            try {
+                showStatus('info', `Downloading ${filename}...`);
+                
+                const response = await fetchWithAuth(url, apiKey);
+                
+                if (!response.ok) {
+                    throw new Error('Failed to download file');
+                }
+                
+                const blob = await response.blob();
+                const downloadUrl = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = downloadUrl;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(downloadUrl);
+                document.body.removeChild(a);
+                
+                showStatus('success', `Downloaded: ${filename}`);
+            } catch (error) {
+                showStatus('error', `Failed to download ${filename}: ${error.message}`);
+            }
+        }
+        
+        async function downloadAll(files, apiKey, companyName) {
+            showStatus('info', `Downloading ${files.length} files...`);
+            
+            for (let i = 0; i < files.length; i++) {
+                updateProgress(i + 1, files.length, `Downloading file ${i + 1} of ${files.length}...`);
+                await downloadFile(files[i].url, files[i].filename, apiKey);
+                // Add delay to avoid rate limiting
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+            
+            showStatus('success', `Downloaded all ${files.length} files!`);
+        }
+    </script>
+</body>
+</html>
