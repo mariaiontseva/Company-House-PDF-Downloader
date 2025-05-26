@@ -273,6 +273,12 @@
             animation: fadeIn 0.8s ease 0.3s both;
         }
 
+        body.light-mode .price-badge {
+            background: rgba(99, 102, 241, 0.15);
+            border-color: rgba(99, 102, 241, 0.3);
+            color: #6366f1;
+        }
+
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
@@ -663,7 +669,7 @@
         .info-section-single {
             width: 100%;
             max-width: 600px;
-            margin: 60px auto;
+            margin: 24px auto 60px;
         }
 
         .info-container {
@@ -698,13 +704,25 @@
             list-style: none;
             padding: 0;
             margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
         }
 
         .feature-list.compact .feature-item {
-            padding: 8px 0;
+            padding: 12px 16px;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 8px;
             color: #e2e8f0;
-            font-size: 15px;
+            font-size: 14px;
             display: block;
+            transition: all 0.2s ease;
+        }
+
+        .feature-list.compact .feature-item:hover {
+            background: rgba(99, 102, 241, 0.15);
+            transform: translateX(4px);
         }
 
         .user-list {
@@ -926,7 +944,13 @@
         }
 
         body.light-mode .feature-list.compact .feature-item {
+            background: rgba(99, 102, 241, 0.08);
+            border-color: rgba(99, 102, 241, 0.15);
             color: #475569;
+        }
+
+        body.light-mode .feature-list.compact .feature-item:hover {
+            background: rgba(99, 102, 241, 0.12);
         }
 
         body.light-mode .user-item strong {
