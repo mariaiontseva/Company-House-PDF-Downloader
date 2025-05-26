@@ -921,6 +921,119 @@
             }
         }
 
+        /* Autocomplete styles */
+        .autocomplete-wrapper {
+            position: relative;
+            width: 100%;
+        }
+
+        .autocomplete-dropdown {
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius);
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+            z-index: 100;
+            box-shadow: var(--shadow-xl);
+        }
+
+        .autocomplete-dropdown.show {
+            display: block;
+        }
+
+        .autocomplete-item {
+            padding: 16px 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .autocomplete-item:last-child {
+            border-bottom: none;
+        }
+
+        .autocomplete-item:hover,
+        .autocomplete-item.active {
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .autocomplete-item .company-title {
+            font-weight: 600;
+            color: white;
+            margin-bottom: 4px;
+            font-size: 15px;
+        }
+
+        .autocomplete-item .company-details {
+            font-size: 13px;
+            color: #94a3b8;
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .autocomplete-item .company-number {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .autocomplete-item .company-status {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .autocomplete-item .company-status.active {
+            color: #10b981;
+        }
+
+        .autocomplete-item .company-status.dissolved {
+            color: #ef4444;
+        }
+
+        .autocomplete-loading {
+            padding: 20px;
+            text-align: center;
+            color: #94a3b8;
+        }
+
+        .autocomplete-loading .spinner {
+            margin: 0 auto;
+        }
+
+        .autocomplete-empty {
+            padding: 20px;
+            text-align: center;
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        /* Light mode autocomplete */
+        body.light-mode .autocomplete-dropdown {
+            background: white;
+            border-color: #e2e8f0;
+        }
+
+        body.light-mode .autocomplete-item {
+            border-bottom-color: #f1f5f9;
+        }
+
+        body.light-mode .autocomplete-item:hover,
+        body.light-mode .autocomplete-item.active {
+            background: rgba(99, 102, 241, 0.08);
+        }
+
+        body.light-mode .autocomplete-item .company-title {
+            color: #1e293b;
+        }
+
         /* Light mode styles */
         body.light-mode {
             background: #f8fafc;
@@ -1080,15 +1193,18 @@
         <div class="search-container">
             <form id="searchForm">
                 <div class="form-group">
-                    <input 
-                        type="text" 
-                        id="companyName" 
-                        name="companyName" 
-                        class="form-input"
-                        placeholder="Enter company name or number"
-                        required
-                        autocomplete="off"
-                    >
+                    <div class="autocomplete-wrapper">
+                        <input 
+                            type="text" 
+                            id="companyName" 
+                            name="companyName" 
+                            class="form-input"
+                            placeholder="Enter company name or number"
+                            required
+                            autocomplete="off"
+                        >
+                        <div class="autocomplete-dropdown" id="autocompleteDropdown"></div>
+                    </div>
                     <div class="form-helper">Search any UK registered company</div>
                 </div>
                 
@@ -1225,6 +1341,11 @@
         
         // Initialize Stripe
         const stripe = Stripe(STRIPE_PUBLIC_KEY);
+        
+        // Autocomplete variables
+        let autocompleteTimeout = null;
+        let selectedIndex = -1;
+        let suggestions = [];
         
         // Dark mode toggle
         const themeToggle = document.getElementById('themeToggle');
@@ -1590,6 +1711,163 @@
         function sanitizeFilename(name) {
             return name.replace(/[^a-z0-9\s\-\_]/gi, '').trim().replace(/\s+/g, '_');
         }
+        
+        // Autocomplete functionality
+        const companyInput = document.getElementById('companyName');
+        const autocompleteDropdown = document.getElementById('autocompleteDropdown');
+        
+        // Debounce function
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+        
+        // Search companies for autocomplete
+        async function searchCompanies(query) {
+            if (query.length < 2) {
+                hideAutocomplete();
+                return;
+            }
+            
+            // Show loading state
+            autocompleteDropdown.innerHTML = '<div class="autocomplete-loading"><div class="spinner"></div></div>';
+            autocompleteDropdown.classList.add('show');
+            
+            try {
+                const searchUrl = `https://api.companieshouse.gov.uk/search/companies?q=${encodeURIComponent(query)}&items_per_page=5`;
+                const response = await fetchWithWorker(searchUrl, API_KEY);
+                
+                if (!response.ok) {
+                    hideAutocomplete();
+                    return;
+                }
+                
+                const data = await response.json();
+                suggestions = data.items || [];
+                
+                if (suggestions.length === 0) {
+                    autocompleteDropdown.innerHTML = '<div class="autocomplete-empty">No companies found</div>';
+                    return;
+                }
+                
+                // Render suggestions
+                renderSuggestions();
+                
+            } catch (error) {
+                console.error('Autocomplete error:', error);
+                hideAutocomplete();
+            }
+        }
+        
+        // Render autocomplete suggestions
+        function renderSuggestions() {
+            autocompleteDropdown.innerHTML = suggestions.map((company, index) => {
+                const statusClass = company.company_status === 'active' ? 'active' : 'dissolved';
+                const statusIcon = company.company_status === 'active' 
+                    ? '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>'
+                    : '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>';
+                
+                return `
+                    <div class="autocomplete-item ${index === selectedIndex ? 'active' : ''}" data-index="${index}">
+                        <div class="company-title">${company.title}</div>
+                        <div class="company-details">
+                            <span class="company-number">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="14" height="14">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
+                                </svg>
+                                ${company.company_number}
+                            </span>
+                            <span class="company-status ${statusClass}">
+                                ${statusIcon}
+                                ${company.company_status.charAt(0).toUpperCase() + company.company_status.slice(1)}
+                            </span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            // Add click handlers
+            const items = autocompleteDropdown.querySelectorAll('.autocomplete-item');
+            items.forEach((item, index) => {
+                item.addEventListener('click', () => selectCompany(index));
+            });
+        }
+        
+        // Select a company from autocomplete
+        function selectCompany(index) {
+            const company = suggestions[index];
+            if (company) {
+                companyInput.value = company.title;
+                hideAutocomplete();
+                // Trigger search
+                document.getElementById('searchForm').dispatchEvent(new Event('submit'));
+            }
+        }
+        
+        // Hide autocomplete dropdown
+        function hideAutocomplete() {
+            autocompleteDropdown.classList.remove('show');
+            autocompleteDropdown.innerHTML = '';
+            selectedIndex = -1;
+            suggestions = [];
+        }
+        
+        // Debounced search function
+        const debouncedSearch = debounce(searchCompanies, 300);
+        
+        // Input event listener
+        companyInput.addEventListener('input', (e) => {
+            const query = e.target.value.trim();
+            if (query.length >= 2) {
+                debouncedSearch(query);
+            } else {
+                hideAutocomplete();
+            }
+        });
+        
+        // Keyboard navigation
+        companyInput.addEventListener('keydown', (e) => {
+            if (!autocompleteDropdown.classList.contains('show')) return;
+            
+            switch (e.key) {
+                case 'ArrowDown':
+                    e.preventDefault();
+                    selectedIndex = Math.min(selectedIndex + 1, suggestions.length - 1);
+                    renderSuggestions();
+                    break;
+                    
+                case 'ArrowUp':
+                    e.preventDefault();
+                    selectedIndex = Math.max(selectedIndex - 1, -1);
+                    renderSuggestions();
+                    break;
+                    
+                case 'Enter':
+                    if (selectedIndex >= 0) {
+                        e.preventDefault();
+                        selectCompany(selectedIndex);
+                    }
+                    break;
+                    
+                case 'Escape':
+                    hideAutocomplete();
+                    break;
+            }
+        });
+        
+        // Hide autocomplete on click outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.autocomplete-wrapper')) {
+                hideAutocomplete();
+            }
+        });
         
         // Check for payment status on page load
         window.addEventListener('DOMContentLoaded', async () => {
