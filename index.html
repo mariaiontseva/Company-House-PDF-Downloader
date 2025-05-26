@@ -1114,8 +1114,8 @@
                         <div class="stat-label">Total Documents</div>
                     </div>
                     <div class="stat-item">
-                        <div class="stat-number" id="pdfDocs">0</div>
-                        <div class="stat-label">PDF Files</div>
+                        <div class="stat-number" id="companyAge">0</div>
+                        <div class="stat-label">Years Old</div>
                     </div>
                 </div>
                 <button class="btn btn-success" id="downloadZipBtn">
@@ -1431,7 +1431,16 @@
                 
                 // Update stats
                 document.getElementById('totalDocs').textContent = documents.length;
-                document.getElementById('pdfDocs').textContent = allDocuments.length;
+                
+                // Calculate company age
+                if (companyData.date_of_creation) {
+                    const incorporationDate = new Date(companyData.date_of_creation);
+                    const currentDate = new Date();
+                    const ageInYears = Math.floor((currentDate - incorporationDate) / (365.25 * 24 * 60 * 60 * 1000));
+                    document.getElementById('companyAge').textContent = ageInYears;
+                } else {
+                    document.getElementById('companyAge').textContent = 'N/A';
+                }
                 
                 if (allDocuments.length === 0) {
                     throw new Error('No downloadable PDFs found');
@@ -1602,7 +1611,13 @@
                             
                             displayCompanyInfo(companyData);
                             document.getElementById('totalDocs').textContent = docs.length;
-                            document.getElementById('pdfDocs').textContent = docs.length;
+                            // Company age should already be set from stored data
+                            if (stored.companyData && stored.companyData.date_of_creation) {
+                                const incorporationDate = new Date(stored.companyData.date_of_creation);
+                                const currentDate = new Date();
+                                const ageInYears = Math.floor((currentDate - incorporationDate) / (365.25 * 24 * 60 * 60 * 1000));
+                                document.getElementById('companyAge').textContent = ageInYears;
+                            }
                             document.getElementById('resultsContainer').style.display = 'block';
                             
                             showStatus('success', 'Payment successful! Starting download...');
