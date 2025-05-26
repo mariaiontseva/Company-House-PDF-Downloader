@@ -283,6 +283,10 @@
         let companyData = null;
         let paymentCompleted = false;
         
+        // Detect Telegram browser
+        const isTelegram = /Telegram/i.test(navigator.userAgent);
+        const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+        
         // Initialize Stripe
         const stripe = Stripe(STRIPE_PUBLIC_KEY);
         
@@ -585,7 +589,29 @@
                         allDocuments: allDocuments,
                         timestamp: Date.now()
                     };
-                    localStorage.setItem('pendingCompany', JSON.stringify(dataToStore));
+                    
+                    try {
+                        localStorage.setItem('pendingCompany', JSON.stringify(dataToStore));
+                    } catch (e) {
+                        console.error('localStorage failed:', e);
+                        // Fallback: encode in URL for Telegram
+                        if (isTelegram) {
+                            showStatus('error', 'Payment not supported in Telegram browser. Please open in Safari or Chrome.');
+                            downloadZipBtn.disabled = false;
+                            downloadZipBtn.innerHTML = '📦 Download All as ZIP';
+                            
+                            // Add "Open in Browser" button
+                            const openButton = document.createElement('button');
+                            openButton.className = 'btn download-zip-btn';
+                            openButton.style.marginTop = '10px';
+                            openButton.innerHTML = '🌐 Open in Safari/Chrome';
+                            openButton.onclick = () => {
+                                window.open(window.location.href, '_system');
+                            };
+                            document.querySelector('.container').appendChild(openButton);
+                            return;
+                        }
+                    }
                     
                     console.log('Storing company data before payment:', companyData.title);
                     console.log('Document count:', allDocuments.length);
@@ -623,6 +649,11 @@
         
         // Check URL parameters on page load for payment status
         window.addEventListener('DOMContentLoaded', async () => {
+            // Show warning for Telegram browser
+            if (isTelegram && isIOS) {
+                showStatus('info', '📱 For best experience, please open this link in Safari or Chrome');
+            }
+            
             const urlParams = new URLSearchParams(window.location.search);
             const paymentStatus = urlParams.get('payment');
             
