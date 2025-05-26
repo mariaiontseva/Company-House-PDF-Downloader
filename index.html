@@ -625,11 +625,16 @@
                     
                     // Update UI
                     document.getElementById('companyName').value = companyData.title;
-                    showStatus('success', 'Payment successful! Ready to download your files.');
+                    showStatus('success', 'Payment successful! Starting download...');
                     document.getElementById('downloadZipBtn').style.display = 'block';
                     
                     // Clear stored data
                     sessionStorage.removeItem('pendingCompany');
+                    
+                    // Automatically trigger download after a short delay
+                    setTimeout(() => {
+                        document.getElementById('downloadZipBtn').click();
+                    }, 1500);
                 }
                 
                 // Clean URL
