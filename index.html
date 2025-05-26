@@ -135,11 +135,51 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* Dark mode toggle */
-        .theme-toggle {
+        /* Top bar */
+        .top-bar {
             position: fixed;
             top: 20px;
+            left: 20px;
             right: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            max-width: 1200px;
+            margin: 0 auto;
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 40px);
+        }
+
+        .logo-small {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            background: var(--gradient-2);
+            border-radius: 12px;
+            box-shadow: var(--shadow-md);
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+
+        .logo-small:hover {
+            transform: scale(1.05);
+        }
+
+        .logo-small svg {
+            width: 28px;
+            height: 28px;
+            color: white;
+        }
+
+        /* Dark mode toggle */
+        .theme-toggle {
+            position: relative;
+            top: 0;
+            right: 0;
             z-index: 1000;
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
@@ -183,7 +223,7 @@
         /* Hero section */
         .hero {
             text-align: center;
-            margin-bottom: 60px;
+            margin-bottom: 40px;
             animation: fadeInUp 0.8s ease;
         }
 
@@ -196,30 +236,6 @@
                 opacity: 1;
                 transform: translateY(0);
             }
-        }
-
-        .logo {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 80px;
-            height: 80px;
-            background: var(--gradient-2);
-            border-radius: 20px;
-            margin-bottom: 24px;
-            box-shadow: var(--shadow-lg);
-            animation: pulse 2s ease infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); box-shadow: var(--shadow-lg); }
-            50% { transform: scale(1.05); box-shadow: 0 25px 50px -12px rgba(99, 102, 241, 0.5); }
-        }
-
-        .logo svg {
-            width: 48px;
-            height: 48px;
-            color: white;
         }
 
         h1 {
@@ -767,6 +783,10 @@
 
         /* Responsive design */
         @media (max-width: 768px) {
+            .top-bar {
+                width: calc(100% - 32px);
+            }
+
             h1 {
                 font-size: 2.5rem;
             }
@@ -893,22 +913,25 @@
     <!-- Animated background -->
     <div class="bg-animation"></div>
     
-    <!-- Dark mode toggle -->
-    <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-        </svg>
-    </button>
+    <!-- Top bar -->
+    <div class="top-bar">
+        <div class="logo-small">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+            </svg>
+        </div>
+        <!-- Dark mode toggle -->
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+            </svg>
+        </button>
+    </div>
     
     <!-- Main container -->
     <div class="main-container">
         <!-- Hero section -->
         <div class="hero">
-            <div class="logo">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                </svg>
-            </div>
             <h1>DocSpace</h1>
             <p class="hero-subtitle">Download all Companies House documents for any UK company in seconds</p>
             <div class="price-badge">
