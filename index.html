@@ -249,7 +249,6 @@
                     type="text" 
                     id="companyName" 
                     placeholder="e.g. Tesco PLC, Sainsbury's" 
-                    value="Lobster IT Limited"
                     required
                 >
             </div>
@@ -470,47 +469,12 @@
             }
         });
         
-        document.getElementById('downloadZipBtn').addEventListener('click', async () => {
-            const apiKey = API_KEY; // Use the constant API key
+        async function startDownload() {
+            const apiKey = API_KEY;
             const progressContainer = document.getElementById('progressContainer');
             const downloadZipBtn = document.getElementById('downloadZipBtn');
             
-            // Check if payment already completed for this session
-            if (!paymentCompleted) {
-                downloadZipBtn.disabled = true;
-                downloadZipBtn.innerHTML = 'Processing payment... <span class="spinner"></span>';
-                
-                try {
-                    showStatus('info', 'Redirecting to payment...');
-                    
-                    // Store company data in localStorage to retrieve after payment
-                    const dataToStore = {
-                        companyData: companyData,
-                        allDocuments: allDocuments,
-                        timestamp: Date.now()
-                    };
-                    localStorage.setItem('pendingCompany', JSON.stringify(dataToStore));
-                    
-                    console.log('Storing company data before payment:', companyData.title);
-                    console.log('Document count:', allDocuments.length);
-                    
-                    // Create a Stripe Payment Link URL with metadata
-                    const paymentUrl = 'https://buy.stripe.com/test_4gM14m2IhcZL9yw0Fpcwg00';
-                    
-                    // Redirect to Stripe payment
-                    window.location.href = paymentUrl;
-                    return;
-                    
-                } catch (error) {
-                    showStatus('error', 'Payment error: ' + error.message);
-                    downloadZipBtn.disabled = false;
-                    downloadZipBtn.innerHTML = '📦 Download All as ZIP';
-                    return;
-                }
-            }
-            
-            // If payment completed, proceed with download
-            downloadZipBtn.disabled = true;
+            if (downloadZipBtn) downloadZipBtn.disabled = true;
             progressContainer.style.display = 'block';
             
             showStatus('info', 'Downloading PDFs... This may take a few minutes.');
@@ -599,7 +563,50 @@
                 showStatus('error', 'No files could be downloaded. Check the debug info below.');
             }
             
-            downloadZipBtn.disabled = false;
+            if (downloadZipBtn) downloadZipBtn.disabled = false;
+        }
+        
+        document.getElementById('downloadZipBtn').addEventListener('click', async () => {
+            const apiKey = API_KEY; // Use the constant API key
+            const progressContainer = document.getElementById('progressContainer');
+            const downloadZipBtn = document.getElementById('downloadZipBtn');
+            
+            // Check if payment already completed for this session
+            if (!paymentCompleted) {
+                downloadZipBtn.disabled = true;
+                downloadZipBtn.innerHTML = 'Processing payment... <span class="spinner"></span>';
+                
+                try {
+                    showStatus('info', 'Redirecting to payment...');
+                    
+                    // Store company data in localStorage to retrieve after payment
+                    const dataToStore = {
+                        companyData: companyData,
+                        allDocuments: allDocuments,
+                        timestamp: Date.now()
+                    };
+                    localStorage.setItem('pendingCompany', JSON.stringify(dataToStore));
+                    
+                    console.log('Storing company data before payment:', companyData.title);
+                    console.log('Document count:', allDocuments.length);
+                    
+                    // Create a Stripe Payment Link URL with metadata
+                    const paymentUrl = 'https://buy.stripe.com/test_4gM14m2IhcZL9yw0Fpcwg00';
+                    
+                    // Redirect to Stripe payment
+                    window.location.href = paymentUrl;
+                    return;
+                    
+                } catch (error) {
+                    showStatus('error', 'Payment error: ' + error.message);
+                    downloadZipBtn.disabled = false;
+                    downloadZipBtn.innerHTML = '📦 Download All as ZIP';
+                    return;
+                }
+            }
+            
+            // If payment completed, proceed with download
+            await startDownload();
         });
         
         function generateFilename(doc) {
@@ -638,18 +645,19 @@
                             console.log('Restored company:', companyData.title);
                             console.log('Document count:', allDocuments.length);
                             
-                            // Update UI
-                            document.getElementById('companyName').value = companyData.title;
-                            showStatus('success', 'Payment successful! Starting download...');
-                            document.getElementById('downloadZipBtn').style.display = 'block';
+                            // Update UI - don't update the input field as it might trigger search
+                            showStatus('success', `Payment successful! Starting download for ${companyData.title}...`);
+                            
+                            // Show progress container
+                            document.getElementById('progressContainer').style.display = 'block';
                             
                             // Clear stored data
                             localStorage.removeItem('pendingCompany');
                             
-                            // Automatically trigger download after a short delay
-                            setTimeout(() => {
-                                console.log('Auto-clicking download button');
-                                document.getElementById('downloadZipBtn').click();
+                            // Directly start download process without clicking button
+                            setTimeout(async () => {
+                                console.log('Starting automatic download for:', companyData.title);
+                                await startDownload();
                             }, 1500);
                         } else {
                             console.log('Stored data too old');
