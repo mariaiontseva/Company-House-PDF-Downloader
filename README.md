@@ -2,7 +2,7 @@
 
 A web-based tool to download all PDF documents filed by UK companies from Companies House.
 
-🌐 **[Live Demo](https://yourusername.github.io/companies-house-downloader/)**
+🌐 **[Live Demo](https://mariaiontseva.github.io/Company-House-PDF-Downloader/)**
 
 ## Features
 
@@ -14,7 +14,7 @@ A web-based tool to download all PDF documents filed by UK companies from Compan
 
 ## How to Use
 
-1. Visit the [live demo](https://yourusername.github.io/companies-house-downloader/)
+1. Visit the [live demo](https://mariaiontseva.github.io/Company-House-PDF-Downloader/)
 2. Enter a company name (e.g., "Tesco PLC")
 3. Enter your Companies House API key
 4. Click "Search & Download PDFs"
@@ -36,7 +36,7 @@ A web-based tool to download all PDF documents filed by UK companies from Compan
 3. Select "Deploy from a branch"
 4. Choose "main" branch and "/ (root)" folder
 5. Click Save
-6. Your site will be available at `https://yourusername.github.io/companies-house-downloader/`
+6. Your site will be available at `https://mariaiontseva.github.io/Company-House-PDF-Downloader/`
 
 ### Local Development
 
