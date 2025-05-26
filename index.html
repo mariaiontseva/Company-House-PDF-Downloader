@@ -38,7 +38,7 @@
     <meta name="geo.region" content="GB">
     <meta name="geo.placename" content="United Kingdom">
     <meta name="copyright" content="DocSpace UK 2025">
-    <meta name="theme-color" content="#1e40af">
+    <meta name="theme-color" content="#6366f1">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -49,151 +49,355 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="dns-prefetch" href="https://blue-flower-d40f.mahin84.workers.dev">
     <link rel="dns-prefetch" href="https://checkout.stripe.com">
-    <meta property="twitter:description" content="Download all Companies House documents for any UK company. Fast, reliable service for just £5 per company download.">
-    <meta property="twitter:image" content="https://docspace.uk/twitter-image.png">
     
-    <!-- Additional SEO Meta Tags -->
-    <meta name="revisit-after" content="7 days">
-    <meta name="distribution" content="global">
-    <meta name="rating" content="general">
-    <meta name="expires" content="never">
-    <meta name="copyright" content="DocSpace UK 2025">
-    <meta name="geo.region" content="GB">
-    <meta name="geo.placename" content="United Kingdom">
-    
-    <!-- Mobile App Meta Tags -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="DocSpace">
-    <meta name="application-name" content="DocSpace">
-    <meta name="msapplication-TileColor" content="#667eea">
-    <meta name="theme-color" content="#667eea">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     
     <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%23667eea'/%3E%3Cstop offset='100%25' style='stop-color:%23764ba2'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='6' fill='url(%23g)'/%3E%3Cpath d='M16 6L8 11v13h16V11L16 6z' fill='white'/%3E%3Crect x='11' y='14' width='3' height='3' fill='%23667eea'/%3E%3Crect x='18' y='14' width='3' height='3' fill='%23667eea'/%3E%3Crect x='11' y='19' width='3' height='3' fill='%23667eea'/%3E%3Crect x='18' y='19' width='3' height='3' fill='%23667eea'/%3E%3C/svg%3E">
-    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%23667eea'/%3E%3Cstop offset='100%25' style='stop-color:%23764ba2'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='6' fill='url(%23g)'/%3E%3Cpath d='M16 6L8 11v13h16V11L16 6z' fill='white'/%3E%3Crect x='11' y='14' width='3' height='3' fill='%23667eea'/%3E%3Crect x='18' y='14' width='3' height='3' fill='%23667eea'/%3E%3Crect x='11' y='19' width='3' height='3' fill='%23667eea'/%3E%3Crect x='18' y='19' width='3' height='3' fill='%23667eea'/%3E%3C/svg%3E">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%236366f1'/%3E%3Cstop offset='100%25' style='stop-color:%238b5cf6'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='6' fill='url(%23g)'/%3E%3Cpath d='M16 6L8 11v13h16V11L16 6z' fill='white'/%3E%3Crect x='11' y='14' width='3' height='3' fill='%236366f1'/%3E%3Crect x='18' y='14' width='3' height='3' fill='%236366f1'/%3E%3Crect x='11' y='19' width='3' height='3' fill='%236366f1'/%3E%3Crect x='18' y='19' width='3' height='3' fill='%236366f1'/%3E%3C/svg%3E">
     
-    <!-- Preconnect to external domains for performance -->
-    <link rel="preconnect" href="https://js.stripe.com">
-    <link rel="preconnect" href="https://api.companieshouse.gov.uk">
-    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
-    
-    <!-- Web App Manifest -->
-    <link rel="manifest" href="/manifest.json">
-    
-    <!-- Google Analytics 4 -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-XXXXXXXXXX');
-    </script>
-    
+    <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <script src="https://js.stripe.com/v3/"></script>
+    
     <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #818cf8;
+            --secondary: #8b5cf6;
+            --accent: #ec4899;
+            --dark: #0f172a;
+            --dark-light: #1e293b;
+            --gray: #64748b;
+            --gray-light: #94a3b8;
+            --gray-lighter: #cbd5e1;
+            --white: #ffffff;
+            --success: #10b981;
+            --error: #ef4444;
+            --warning: #f59e0b;
+            --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-2: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            --gradient-3: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-md: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+            --radius: 12px;
+            --radius-lg: 16px;
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f172a;
+            color: #1e293b;
+            line-height: 1.6;
             min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .bg-animation::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 20% 80%, #6366f1 0%, transparent 50%),
+                        radial-gradient(circle at 80% 20%, #8b5cf6 0%, transparent 50%),
+                        radial-gradient(circle at 40% 40%, #3b82f6 0%, transparent 50%);
+            animation: rotate 30s linear infinite;
+            opacity: 0.1;
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Dark mode toggle */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
         }
-        
-        .container {
-            background: white;
-            padding: 40px;
+
+        .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+
+        .theme-toggle svg {
+            width: 24px;
+            height: 24px;
+            color: white;
+            transition: transform 0.3s ease;
+        }
+
+        .theme-toggle:hover svg {
+            transform: rotate(180deg);
+        }
+
+        /* Main container */
+        .main-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+            position: relative;
+        }
+
+        /* Hero section */
+        .hero {
+            text-align: center;
+            margin-bottom: 60px;
+            animation: fadeInUp 0.8s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 80px;
+            height: 80px;
+            background: var(--gradient-2);
             border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 700px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow-lg);
+            animation: pulse 2s ease infinite;
         }
-        
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); box-shadow: var(--shadow-lg); }
+            50% { transform: scale(1.05); box-shadow: 0 25px 50px -12px rgba(99, 102, 241, 0.5); }
+        }
+
+        .logo svg {
+            width: 48px;
+            height: 48px;
+            color: white;
+        }
+
         h1 {
-            color: #2d3748;
-            margin-bottom: 10px;
-            text-align: center;
-            font-size: 32px;
+            font-size: 3.5rem;
+            font-weight: 800;
+            background: var(--gradient-2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 16px;
+            letter-spacing: -0.02em;
         }
-        
-        .subtitle {
-            color: #718096;
-            text-align: center;
-            margin-bottom: 30px;
-            font-size: 16px;
+
+        .hero-subtitle {
+            font-size: 1.25rem;
+            color: #94a3b8;
+            max-width: 600px;
+            margin: 0 auto 12px;
         }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 8px;
-            color: #4a5568;
+
+        .price-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            padding: 8px 20px;
+            border-radius: 100px;
             font-weight: 600;
-            font-size: 14px;
+            color: #a5b4fc;
+            margin-top: 12px;
+            animation: fadeIn 0.8s ease 0.3s both;
         }
-        
-        input {
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Search container */
+        .search-container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-lg);
+            padding: 40px;
             width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #e2e8f0;
-            border-radius: 10px;
+            max-width: 600px;
+            margin-bottom: 40px;
+            box-shadow: var(--shadow-xl);
+            animation: fadeInUp 0.8s ease 0.2s both;
+        }
+
+        /* Form styles */
+        .form-group {
+            position: relative;
+            margin-bottom: 24px;
+        }
+
+        .form-label {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
             font-size: 16px;
-            transition: all 0.3s;
+            font-weight: 500;
+            pointer-events: none;
+            transition: all 0.3s ease;
+            background: transparent;
+            padding: 0 4px;
         }
-        
-        input:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-        
-        .btn {
+
+        .form-input {
             width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius);
+            font-size: 16px;
+            color: white;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .form-input:focus,
+        .form-input:not(:placeholder-shown) {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .form-input:focus ~ .form-label,
+        .form-input:not(:placeholder-shown) ~ .form-label {
+            top: -12px;
+            left: 12px;
+            font-size: 14px;
+            color: var(--primary-light);
+            background: #1a1f36;
+            padding: 0 8px;
+        }
+
+        .form-helper {
+            font-size: 14px;
+            color: #64748b;
+            margin-top: 8px;
+        }
+
+        /* Button styles */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 16px 32px;
+            background: var(--gradient-2);
             color: white;
             border: none;
-            border-radius: 10px;
+            border-radius: var(--radius);
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
+            text-decoration: none;
+            width: 100%;
         }
-        
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0);
+            transition: background 0.3s ease;
+        }
+
         .btn:hover:not(:disabled) {
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 20px 40px -12px rgba(99, 102, 241, 0.5);
         }
-        
+
+        .btn:hover:not(:disabled)::before {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .btn:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
         .btn:disabled {
-            background: #cbd5e0;
+            background: #334155;
             cursor: not-allowed;
-            transform: none;
+            opacity: 0.7;
         }
-        
-        .status-box {
-            margin-top: 20px;
-            padding: 16px;
-            border-radius: 10px;
+
+        .btn-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+
+        .btn-success:hover:not(:disabled) {
+            box-shadow: 0 20px 40px -12px rgba(16, 185, 129, 0.5);
+        }
+
+        /* Status messages */
+        .status-message {
+            margin-top: 24px;
+            padding: 16px 20px;
+            border-radius: var(--radius);
             display: none;
             animation: slideIn 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid transparent;
         }
-        
+
         @keyframes slideIn {
             from {
                 opacity: 0;
@@ -204,121 +408,478 @@
                 transform: translateY(0);
             }
         }
-        
-        .success {
-            background: #c6f6d5;
-            color: #276749;
-            border: 1px solid #9ae6b4;
+
+        .status-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+            border-color: rgba(16, 185, 129, 0.2);
         }
-        
-        .error {
-            background: #fed7d7;
-            color: #9b2c2c;
-            border: 1px solid #feb2b2;
+
+        .status-error {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border-color: rgba(239, 68, 68, 0.2);
         }
-        
-        .info {
-            background: #bee3f8;
-            color: #2c5282;
-            border: 1px solid #90cdf4;
+
+        .status-info {
+            background: rgba(59, 130, 246, 0.1);
+            color: #3b82f6;
+            border-color: rgba(59, 130, 246, 0.2);
         }
-        
-        .progress-container {
-            margin-top: 20px;
+
+        /* Progress section */
+        .progress-section {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-lg);
+            padding: 32px;
+            margin-top: 24px;
             display: none;
+            animation: fadeIn 0.3s ease;
         }
-        
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .progress-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .progress-count {
+            font-size: 14px;
+            color: #94a3b8;
+        }
+
         .progress-bar {
-            background: #e2e8f0;
-            height: 20px;
-            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            height: 8px;
+            border-radius: 100px;
             overflow: hidden;
-            margin: 10px 0;
+            margin-bottom: 24px;
         }
-        
+
         .progress-fill {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--gradient-2);
             height: 100%;
             width: 0%;
             transition: width 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 1.5s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* File list */
+        .file-list {
+            max-height: 300px;
+            overflow-y: auto;
+            padding-right: 8px;
+        }
+
+        .file-list::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .file-list::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 100px;
+        }
+
+        .file-list::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 100px;
+        }
+
+        .file-list::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .file-item {
             display: flex;
             align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 12px;
-            font-weight: 600;
-        }
-        
-        .file-count {
-            text-align: center;
-            color: #4a5568;
-            margin: 10px 0;
-            font-size: 14px;
-        }
-        
-        .file-list {
-            max-height: 200px;
-            overflow-y: auto;
-            margin-top: 10px;
-            padding: 10px;
-            background: #f7fafc;
+            gap: 12px;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.03);
             border-radius: 8px;
-            font-size: 12px;
-            color: #4a5568;
+            margin-bottom: 8px;
+            font-size: 14px;
+            transition: all 0.2s ease;
         }
-        
-        .file-item {
-            padding: 4px 0;
+
+        .file-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .file-icon {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+
+        .file-item.success {
+            color: #10b981;
+        }
+
+        .file-item.error {
+            color: #ef4444;
+        }
+
+        .file-name {
+            flex: 1;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            color: #cbd5e1;
         }
-        
-        .file-item.success {
-            color: #38a169;
+
+        /* Search results */
+        .results-container {
+            width: 100%;
+            max-width: 600px;
+            display: none;
+            animation: fadeIn 0.3s ease;
         }
-        
-        .file-item.error {
-            color: #e53e3e;
+
+        .company-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-lg);
+            padding: 32px;
+            margin-bottom: 24px;
+            transition: all 0.3s ease;
         }
-        
-        .spinner {
-            display: inline-block;
+
+        .company-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+            box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.3);
+        }
+
+        .company-name {
+            font-size: 24px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 8px;
+        }
+
+        .company-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #94a3b8;
+        }
+
+        .info-item svg {
             width: 16px;
             height: 16px;
-            border: 2px solid #f3f3f3;
-            border-top: 2px solid #667eea;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-left: 10px;
+            color: #64748b;
         }
-        
+
+        .document-stats {
+            display: flex;
+            gap: 24px;
+            padding: 20px;
+            background: rgba(99, 102, 241, 0.1);
+            border-radius: var(--radius);
+            margin-bottom: 24px;
+        }
+
+        .stat-item {
+            flex: 1;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--primary-light);
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #94a3b8;
+        }
+
+        /* Loading states */
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        
-        .download-zip-btn {
-            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
-            margin-top: 20px;
+
+        .skeleton {
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.05) 25%, rgba(255, 255, 255, 0.1) 50%, rgba(255, 255, 255, 0.05) 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+            border-radius: 4px;
         }
-        
-        .download-zip-btn:hover {
-            box-shadow: 0 10px 20px rgba(72, 187, 120, 0.3);
+
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
         }
-        
-        .api-note {
-            font-size: 12px;
-            color: #718096;
-            margin-top: 5px;
+
+        /* Info section */
+        .info-section {
+            width: 100%;
+            max-width: 1200px;
+            margin-top: 80px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
         }
-        
-        .api-note a {
-            color: #667eea;
+
+        .info-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-lg);
+            padding: 32px;
+            transition: all 0.3s ease;
+        }
+
+        .info-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.15);
+            transform: translateY(-4px);
+        }
+
+        .info-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--gradient-2);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+
+        .info-icon svg {
+            width: 24px;
+            height: 24px;
+            color: white;
+        }
+
+        .info-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 12px;
+        }
+
+        .info-description {
+            font-size: 14px;
+            color: #94a3b8;
+            line-height: 1.7;
+        }
+
+        /* Feature list */
+        .feature-list {
+            list-style: none;
+            margin-top: 16px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 12px;
+            font-size: 14px;
+            color: #cbd5e1;
+        }
+
+        .feature-item svg {
+            width: 20px;
+            height: 20px;
+            color: var(--primary-light);
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        /* Footer */
+        footer {
+            width: 100%;
+            text-align: center;
+            padding: 60px 20px 40px;
+            margin-top: 100px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 20px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 24px;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 32px;
+            margin-bottom: 24px;
+        }
+
+        .footer-links a {
+            color: #94a3b8;
             text-decoration: none;
+            font-size: 14px;
+            transition: color 0.2s ease;
         }
-        
+
+        .footer-links a:hover {
+            color: var(--primary-light);
+        }
+
+        .footer-copyright {
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero-subtitle {
+                font-size: 1.1rem;
+            }
+
+            .search-container {
+                padding: 24px;
+            }
+
+            .company-card {
+                padding: 24px;
+            }
+
+            .document-stats {
+                flex-direction: column;
+                gap: 16px;
+            }
+
+            .footer-links {
+                flex-direction: column;
+                gap: 16px;
+            }
+        }
+
+        /* Light mode styles */
+        body.light-mode {
+            background: #f8fafc;
+            color: #1e293b;
+        }
+
+        body.light-mode .bg-animation::before {
+            opacity: 0.05;
+        }
+
+        body.light-mode .theme-toggle {
+            background: rgba(0, 0, 0, 0.05);
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+
+        body.light-mode .theme-toggle svg {
+            color: #1e293b;
+        }
+
+        body.light-mode .search-container,
+        body.light-mode .company-card,
+        body.light-mode .progress-section,
+        body.light-mode .info-card {
+            background: white;
+            border-color: #e2e8f0;
+        }
+
+        body.light-mode .form-input {
+            background: #f8fafc;
+            border-color: #e2e8f0;
+            color: #1e293b;
+        }
+
+        body.light-mode .form-input:focus {
+            background: white;
+        }
+
+        body.light-mode .form-label,
+        body.light-mode .form-input:focus ~ .form-label,
+        body.light-mode .form-input:not(:placeholder-shown) ~ .form-label {
+            background: white;
+        }
+
+        body.light-mode .company-name,
+        body.light-mode .info-title,
+        body.light-mode .footer-logo {
+            color: #1e293b;
+        }
+
+        body.light-mode .progress-title {
+            color: #1e293b;
+        }
+
+        body.light-mode .file-item {
+            background: #f8fafc;
+        }
+
+        body.light-mode .file-item:hover {
+            background: #f1f5f9;
+        }
+
+        body.light-mode footer {
+            border-top-color: #e2e8f0;
+        }
     </style>
+    
     <!-- Schema.org Structured Data -->
     <script type="application/ld+json">
     {
@@ -352,185 +913,233 @@
       }
     }
     </script>
-    
-    <!-- Additional Schema.org for Service -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "Service",
-      "name": "Companies House Document Download Service",
-      "description": "Professional service for downloading all Companies House documents for UK companies including annual returns, accounts, incorporation documents, and all other filings.",
-      "provider": {
-        "@type": "Organization",
-        "name": "DocSpace UK"
-      },
-      "areaServed": {
-        "@type": "Country",
-        "name": "United Kingdom"
-      },
-      "hasOfferCatalog": {
-        "@type": "OfferCatalog",
-        "name": "Document Download Services",
-        "itemListElement": [
-          {
-            "@type": "Offer",
-            "itemOffered": {
-              "@type": "Service",
-              "name": "Company Document Bundle Download",
-              "description": "Download all available Companies House documents for a single company"
-            },
-            "price": "5.00",
-            "priceCurrency": "GBP"
-          }
-        ]
-      }
-    }
-    </script>
-    
-    <!-- Breadcrumb Schema -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "BreadcrumbList",
-      "itemListElement": [{
-        "@type": "ListItem",
-        "position": 1,
-        "name": "Home",
-        "item": "https://docspace.uk"
-      }]
-    }
-    </script>
-    
-    <!-- Organization Schema -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "Organization",
-      "name": "DocSpace UK",
-      "url": "https://docspace.uk",
-      "logo": "https://docspace.uk/logo.png",
-      "description": "Fast and reliable Companies House document download service",
-      "address": {
-        "@type": "PostalAddress",
-        "@id": "https://docspace.uk/#address",
-        "addressCountry": "GB"
-      },
-      "sameAs": []
-    }
-    </script>
-    
-    <!-- FAQ Schema -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": [{
-        "@type": "Question",
-        "name": "How much does it cost to download Companies House documents?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "DocSpace charges a flat fee of £5 per company to download all available Companies House documents as a single ZIP file."
-        }
-      },{
-        "@type": "Question",
-        "name": "What documents are included in the download?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "The download includes all available Companies House filings such as Annual Returns, Accounts, Incorporation documents, Change of name documents, Registered office address changes, Officer appointments and resignations, Share capital changes, Mortgage charges, and Dissolution documents."
-        }
-      },{
-        "@type": "Question",
-        "name": "How quickly can I download the documents?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Documents are available for download immediately after payment. The download process typically takes 30-60 seconds depending on the number of documents."
-        }
-      }]
-    }
-    </script>
 </head>
 <body>
-    <div class="container">
-        <h1>🏢 Companies House Document Downloader</h1>
-        <p class="subtitle">Download all official documents filed by UK companies as a ZIP file - Annual Returns, Accounts, Incorporation Documents & More</p>
-        <p style="text-align: center; color: #667eea; font-weight: 600; margin-top: -20px; margin-bottom: 25px;">
-            £5 per company download
-        </p>
-        
-        <form id="searchForm">
-            <div class="form-group">
-                <label for="companyName">Company Name</label>
-                <input 
-                    type="text" 
-                    id="companyName" 
-                    name="companyName"
-                    placeholder="e.g. Tesco PLC, Sainsbury's" 
-                    required
-                    aria-label="Enter UK company name to download documents"
-                    aria-describedby="company-help"
-                >
-                <small id="company-help" style="color: #718096; font-size: 12px; margin-top: 5px; display: block;">Enter the name of any UK registered company</small>
+    <!-- Animated background -->
+    <div class="bg-animation"></div>
+    
+    <!-- Dark mode toggle -->
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+    </button>
+    
+    <!-- Main container -->
+    <div class="main-container">
+        <!-- Hero section -->
+        <div class="hero">
+            <div class="logo">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
             </div>
-            
-            
-            <button type="submit" class="btn" id="searchBtn" aria-label="Search for company documents">
-                Search Company
-            </button>
-        </form>
-        
-        <div class="status-box" id="statusBox"></div>
-        
-        <div class="progress-container" id="progressContainer">
-            <div class="progress-bar">
-                <div class="progress-fill" id="progressFill">0%</div>
+            <h1>DocSpace</h1>
+            <p class="hero-subtitle">Download all Companies House documents for any UK company in seconds</p>
+            <div class="price-badge">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                £5 per company download
             </div>
-            <div class="file-count" id="fileCount"></div>
-            <div class="file-list" id="fileList"></div>
         </div>
         
-        <button class="btn download-zip-btn" id="downloadZipBtn" style="display: none;" aria-label="Download all company documents as ZIP file">
-            📦 Download All as ZIP
-        </button>
-        
-        <!-- SEO Content Section -->
-        <div style="margin-top: 40px; padding-top: 40px; border-top: 1px solid #e2e8f0;">
-            <h2 style="color: #2d3748; font-size: 24px; margin-bottom: 16px;">About DocSpace UK</h2>
-            <p style="color: #4a5568; line-height: 1.6; margin-bottom: 16px;">
-                DocSpace is the UK's fastest and most reliable Companies House document downloader. 
-                Access all official company filings including annual returns, accounts, incorporation 
-                documents, change of director forms, and more - all in one convenient ZIP file.
-            </p>
-            <h3 style="color: #2d3748; font-size: 20px; margin-bottom: 12px; margin-top: 24px;">What Documents Can You Download?</h3>
-            <ul style="color: #4a5568; line-height: 1.8; margin-left: 20px;">
-                <li>Annual Returns and Confirmation Statements</li>
-                <li>Annual Accounts and Financial Statements</li>
-                <li>Incorporation Documents and Articles of Association</li>
-                <li>Change of Director and Secretary Forms</li>
-                <li>Share Capital and Allotment Documents</li>
-                <li>Registered Office Changes</li>
-                <li>Mortgage and Charge Documents</li>
-                <li>All other Companies House filings</li>
-            </ul>
-            <h3 style="color: #2d3748; font-size: 20px; margin-bottom: 12px; margin-top: 24px;">Why Choose DocSpace?</h3>
-            <p style="color: #4a5568; line-height: 1.6;">
-                <strong>✓ Complete Archives:</strong> Download every document filed for a company<br>
-                <strong>✓ Fast Downloads:</strong> Get all documents in seconds, not hours<br>
-                <strong>✓ One Low Price:</strong> Just £5 per company for unlimited documents<br>
-                <strong>✓ Secure Payment:</strong> Processed safely through Stripe<br>
-                <strong>✓ Instant Access:</strong> No registration or subscription required
-            </p>
+        <!-- Search container -->
+        <div class="search-container">
+            <form id="searchForm">
+                <div class="form-group">
+                    <input 
+                        type="text" 
+                        id="companyName" 
+                        name="companyName" 
+                        class="form-input"
+                        placeholder=" "
+                        required
+                        autocomplete="off"
+                    >
+                    <label for="companyName" class="form-label">Company Name</label>
+                    <div class="form-helper">Enter the name of any UK registered company</div>
+                </div>
+                
+                <button type="submit" class="btn" id="searchBtn">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    Search Company
+                </button>
+            </form>
+            
+            <div class="status-message" id="statusBox"></div>
         </div>
         
-        <!-- Footer with additional SEO links -->
-        <footer style="text-align: center; margin-top: 60px; padding: 20px 0; font-size: 14px;">
-            <p style="color: #6b7280;">© 2025 DocSpace UK - Companies House Document Download Service</p>
-            <p style="margin-top: 10px;">
-                <a href="/terms" style="color: #6b7280; text-decoration: none; margin: 0 10px;">Terms of Service</a>
-                <a href="/privacy" style="color: #6b7280; text-decoration: none; margin: 0 10px;">Privacy Policy</a>
-                <a href="/contact" style="color: #6b7280; text-decoration: none; margin: 0 10px;">Contact</a>
-            </p>
-        </footer>
+        <!-- Results container -->
+        <div class="results-container" id="resultsContainer">
+            <div class="company-card" id="companyCard">
+                <div class="company-name" id="companyNameDisplay"></div>
+                <div class="company-info" id="companyInfo"></div>
+                <div class="document-stats" id="documentStats">
+                    <div class="stat-item">
+                        <div class="stat-number" id="totalDocs">0</div>
+                        <div class="stat-label">Total Documents</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="pdfDocs">0</div>
+                        <div class="stat-label">PDF Files</div>
+                    </div>
+                </div>
+                <button class="btn btn-success" id="downloadZipBtn">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+                    </svg>
+                    Download All Documents
+                </button>
+            </div>
+            
+            <!-- Progress section -->
+            <div class="progress-section" id="progressContainer">
+                <div class="progress-header">
+                    <div class="progress-title">Downloading Documents</div>
+                    <div class="progress-count" id="fileCount">0 of 0</div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="file-list" id="fileList"></div>
+            </div>
+        </div>
+        
+        <!-- Info section -->
+        <div class="info-section">
+            <div class="info-card">
+                <div class="info-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                </div>
+                <h3 class="info-title">Complete Document Archive</h3>
+                <p class="info-description">Access every document filed at Companies House for your chosen company, including:</p>
+                <ul class="feature-list">
+                    <li class="feature-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        Annual Returns & Confirmation Statements
+                    </li>
+                    <li class="feature-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        Financial Accounts & Statements
+                    </li>
+                    <li class="feature-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        Incorporation & Articles of Association
+                    </li>
+                    <li class="feature-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        Director & Secretary Changes
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="info-card">
+                <div class="info-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                </div>
+                <h3 class="info-title">Lightning Fast Downloads</h3>
+                <p class="info-description">Our advanced infrastructure ensures you get your documents quickly:</p>
+                <ul class="feature-list">
+                    <li class="feature-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        Parallel document processing
+                    </li>
+                    <li class="feature-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        Real-time progress tracking
+                    </li>
+                    <li class="feature-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        Automatic retry for failed downloads
+                    </li>
+                    <li class="feature-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        Compressed ZIP for faster delivery
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="info-card">
+                <div class="info-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                </div>
+                <h3 class="info-title">Secure & Reliable</h3>
+                <p class="info-description">Your data security is our top priority:</p>
+                <ul class="feature-list">
+                    <li class="feature-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        Secure payment via Stripe
+                    </li>
+                    <li class="feature-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        No data stored after download
+                    </li>
+                    <li class="feature-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        Direct from Companies House API
+                    </li>
+                    <li class="feature-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        SSL encrypted connections
+                    </li>
+                </ul>
+            </div>
+        </div>
     </div>
+    
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-logo">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="24" height="24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+                DocSpace UK
+            </div>
+            <div class="footer-links">
+                <a href="/terms">Terms of Service</a>
+                <a href="/privacy">Privacy Policy</a>
+                <a href="/contact">Contact</a>
+                <a href="/api">API Access</a>
+            </div>
+            <div class="footer-copyright">
+                © 2025 DocSpace UK - Companies House Document Download Service
+            </div>
+        </div>
+    </footer>
     
     <script>
         const WORKER_URL = 'https://blue-flower-d40f.mahin84.workers.dev';
@@ -540,19 +1149,41 @@
         let companyData = null;
         let paymentCompleted = false;
         
-        // Detect Telegram browser
-        const isTelegram = /Telegram/i.test(navigator.userAgent);
-        const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-        
         // Initialize Stripe
         const stripe = Stripe(STRIPE_PUBLIC_KEY);
         
+        // Dark mode toggle
+        const themeToggle = document.getElementById('themeToggle');
+        const body = document.body;
+        
+        // Check for saved theme preference
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'light') {
+            body.classList.add('light-mode');
+            updateThemeIcon();
+        }
+        
+        themeToggle.addEventListener('click', () => {
+            body.classList.toggle('light-mode');
+            updateThemeIcon();
+            localStorage.setItem('theme', body.classList.contains('light-mode') ? 'light' : 'dark');
+        });
+        
+        function updateThemeIcon() {
+            const icon = themeToggle.querySelector('svg');
+            if (body.classList.contains('light-mode')) {
+                icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />';
+            } else {
+                icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />';
+            }
+        }
+        
+        // Helper functions
         function addDebug(message) {
             console.log(`${new Date().toISOString().substr(11, 8)} - ${message}`);
         }
         
         async function fetchWithWorker(url, apiKey) {
-            // Build the proxy URL with parameters
             const params = new URLSearchParams({
                 url: url,
                 apiKey: apiKey
@@ -561,7 +1192,6 @@
             
             addDebug(`Worker URL: ${WORKER_URL}`);
             addDebug(`Target URL: ${url}`);
-            addDebug(`Full proxy URL: ${proxyUrl}`);
             
             try {
                 const response = await fetch(proxyUrl, {
@@ -572,7 +1202,6 @@
                 });
                 addDebug(`Response status: ${response.status}`);
                 
-                // If error, log the response
                 if (!response.ok) {
                     try {
                         const errorText = await response.text();
@@ -591,7 +1220,7 @@
         
         function showStatus(type, message) {
             const statusBox = document.getElementById('statusBox');
-            statusBox.className = `status-box ${type}`;
+            statusBox.className = `status-message status-${type}`;
             statusBox.textContent = message;
             statusBox.style.display = 'block';
         }
@@ -600,36 +1229,70 @@
             const percentage = Math.round((current / total) * 100);
             const progressFill = document.getElementById('progressFill');
             progressFill.style.width = `${percentage}%`;
-            progressFill.textContent = `${percentage}%`;
             
-            document.getElementById('fileCount').textContent = 
-                `Processing ${current} of ${total} documents`;
+            document.getElementById('fileCount').textContent = `${current} of ${total}`;
         }
         
         function addFileToList(filename, status, error = null) {
             const fileList = document.getElementById('fileList');
             const fileItem = document.createElement('div');
             fileItem.className = `file-item ${status}`;
-            const errorText = error ? ` (${error})` : '';
-            fileItem.textContent = `${status === 'success' ? '✓' : '✗'} ${filename}${errorText}`;
+            
+            const icon = status === 'success' 
+                ? '<svg class="file-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>'
+                : '<svg class="file-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>';
+            
+            const errorText = error ? ` - ${error}` : '';
+            fileItem.innerHTML = `${icon}<span class="file-name">${filename}${errorText}</span>`;
+            
             fileList.appendChild(fileItem);
             fileList.scrollTop = fileList.scrollHeight;
         }
         
+        function displayCompanyInfo(company) {
+            document.getElementById('companyNameDisplay').textContent = company.title;
+            
+            const companyInfo = document.getElementById('companyInfo');
+            companyInfo.innerHTML = `
+                <div class="info-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
+                    </svg>
+                    ${company.company_number}
+                </div>
+                ${company.company_status ? `
+                <div class="info-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    ${company.company_status.charAt(0).toUpperCase() + company.company_status.slice(1)}
+                </div>
+                ` : ''}
+                ${company.date_of_creation ? `
+                <div class="info-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    Incorporated ${company.date_of_creation}
+                </div>
+                ` : ''}
+            `;
+        }
+        
+        // Search form handler
         document.getElementById('searchForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
             const companyName = document.getElementById('companyName').value.trim();
-            const apiKey = API_KEY; // Use the constant API key
             const searchBtn = document.getElementById('searchBtn');
+            const resultsContainer = document.getElementById('resultsContainer');
             const progressContainer = document.getElementById('progressContainer');
-            const downloadZipBtn = document.getElementById('downloadZipBtn');
             
             // Reset UI
             searchBtn.disabled = true;
-            searchBtn.innerHTML = 'Searching... <span class="spinner"></span>';
+            searchBtn.innerHTML = '<span class="spinner"></span> Searching...';
+            resultsContainer.style.display = 'none';
             progressContainer.style.display = 'none';
-            downloadZipBtn.style.display = 'none';
             document.getElementById('fileList').innerHTML = '';
             allDocuments = [];
             
@@ -638,11 +1301,9 @@
                 showStatus('info', 'Searching for company...');
                 
                 const searchUrl = `https://api.companieshouse.gov.uk/search/companies?q=${encodeURIComponent(companyName)}&items_per_page=1`;
-                const searchResponse = await fetchWithWorker(searchUrl, apiKey);
+                const searchResponse = await fetchWithWorker(searchUrl, API_KEY);
                 
                 if (!searchResponse.ok) {
-                    const errorText = await searchResponse.text();
-                    addDebug(`Search error response: ${errorText}`);
                     if (searchResponse.status === 401) {
                         throw new Error('Invalid API key. Please check your credentials.');
                     }
@@ -650,31 +1311,26 @@
                 }
                 
                 const searchData = await searchResponse.json();
-                addDebug(`Found ${searchData.items?.length || 0} companies`);
                 
                 if (!searchData.items || searchData.items.length === 0) {
                     throw new Error('No company found with that name');
                 }
                 
                 companyData = searchData.items[0];
-                showStatus('success', `Found: ${companyData.title}`);
-                addDebug(`Company number: ${companyData.company_number}`);
+                displayCompanyInfo(companyData);
                 
                 // Get filing history
                 showStatus('info', 'Fetching filing history...');
                 
                 const filingUrl = `https://api.companieshouse.gov.uk/company/${companyData.company_number}/filing-history?items_per_page=100`;
-                const filingResponse = await fetchWithWorker(filingUrl, apiKey);
+                const filingResponse = await fetchWithWorker(filingUrl, API_KEY);
                 
                 if (!filingResponse.ok) {
-                    const errorText = await filingResponse.text();
-                    addDebug(`Filing history error: ${errorText}`);
                     throw new Error('Failed to fetch filing history');
                 }
                 
                 const filingData = await filingResponse.json();
                 const documents = filingData.items || [];
-                addDebug(`Found ${documents.length} filing history items`);
                 
                 if (documents.length === 0) {
                     throw new Error('No documents found for this company');
@@ -682,20 +1338,13 @@
                 
                 // Filter documents with PDF links
                 allDocuments = documents.filter(doc => {
-                    const hasLink = doc.links && doc.links.document_metadata;
-                    if (!hasLink) {
-                        addDebug(`No document link for: ${doc.description}`);
-                    }
-                    return hasLink;
+                    return doc.links && doc.links.document_metadata;
                 }).map(doc => {
-                    // Document metadata URLs can be in different formats
                     let metadataUrl = doc.links.document_metadata;
                     
-                    // If it's a relative URL, make it absolute
                     if (metadataUrl.startsWith('/')) {
                         metadataUrl = `https://api.companieshouse.gov.uk${metadataUrl}`;
                     }
-                    // If it's already a full URL with different domain, keep it as is
                     
                     return {
                         date: doc.date || 'unknown',
@@ -706,36 +1355,38 @@
                     };
                 });
                 
-                addDebug(`${allDocuments.length} documents have downloadable PDFs`);
+                // Update stats
+                document.getElementById('totalDocs').textContent = documents.length;
+                document.getElementById('pdfDocs').textContent = allDocuments.length;
                 
                 if (allDocuments.length === 0) {
                     throw new Error('No downloadable PDFs found');
                 }
                 
-                // Show first few document URLs for debugging
-                allDocuments.slice(0, 3).forEach(doc => {
-                    addDebug(`Document URL: ${doc.metadataUrl}`);
-                });
-                
-                // Show download button
-                showStatus('success', `Found ${allDocuments.length} PDF files. Click below to download all.`);
-                downloadZipBtn.style.display = 'block';
+                // Show results
+                showStatus('success', `Found ${companyData.title} with ${allDocuments.length} downloadable documents`);
+                resultsContainer.style.display = 'block';
                 
             } catch (error) {
                 showStatus('error', error.message);
                 addDebug(`Error: ${error.message}`);
             } finally {
                 searchBtn.disabled = false;
-                searchBtn.innerHTML = 'Search Company';
+                searchBtn.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    Search Company
+                `;
             }
         });
         
+        // Download handler
         async function startDownload() {
-            const apiKey = API_KEY;
             const progressContainer = document.getElementById('progressContainer');
             const downloadZipBtn = document.getElementById('downloadZipBtn');
             
-            if (downloadZipBtn) downloadZipBtn.disabled = true;
+            downloadZipBtn.disabled = true;
             progressContainer.style.display = 'block';
             
             showStatus('info', 'Downloading PDFs... This may take a few minutes.');
@@ -747,30 +1398,19 @@
             let failed = 0;
             
             // Download all documents
-            const documentsToDownload = allDocuments;
-            addDebug(`Attempting to download ${documentsToDownload.length} documents`);
-            
-            for (let i = 0; i < documentsToDownload.length; i++) {
-                const doc = documentsToDownload[i];
-                updateProgress(i + 1, documentsToDownload.length);
+            for (let i = 0; i < allDocuments.length; i++) {
+                const doc = allDocuments[i];
+                updateProgress(i + 1, allDocuments.length);
                 
                 try {
-                    // Get PDF content - the content endpoint is at the document URL
-                    // For document-api URLs, we need to use the URL as-is
                     const pdfUrl = doc.metadataUrl.includes('document-api.') 
                         ? doc.metadataUrl 
                         : `${doc.metadataUrl}/content`;
-                    addDebug(`Downloading PDF ${i + 1}: ${pdfUrl}`);
                     
-                    const pdfResponse = await fetchWithWorker(pdfUrl, apiKey);
-                    addDebug(`PDF response status: ${pdfResponse.status}`);
+                    const pdfResponse = await fetchWithWorker(pdfUrl, API_KEY);
                     
                     if (pdfResponse.ok) {
-                        const contentType = pdfResponse.headers.get('content-type');
-                        addDebug(`Content-Type: ${contentType}`);
-                        
                         const pdfBlob = await pdfResponse.blob();
-                        addDebug(`Blob size: ${pdfBlob.size} bytes`);
                         
                         if (pdfBlob.size > 0) {
                             companyFolder.file(doc.filename, pdfBlob);
@@ -781,8 +1421,6 @@
                             addFileToList(doc.filename, 'error', 'Empty file');
                         }
                     } else {
-                        const errorText = await pdfResponse.text();
-                        addDebug(`PDF download error: ${errorText}`);
                         failed++;
                         addFileToList(doc.filename, 'error', `Status ${pdfResponse.status}`);
                     }
@@ -791,7 +1429,6 @@
                     await new Promise(resolve => setTimeout(resolve, 500));
                     
                 } catch (error) {
-                    addDebug(`Download error: ${error.message}`);
                     failed++;
                     addFileToList(doc.filename, 'error', error.message);
                 }
@@ -801,94 +1438,61 @@
                 showStatus('info', 'Creating ZIP file...');
                 
                 try {
-                    // Generate ZIP file
                     const content = await zip.generateAsync({ 
                         type: 'blob',
                         compression: 'DEFLATE',
                         compressionOptions: { level: 6 }
                     });
                     
-                    addDebug(`ZIP file size: ${content.size} bytes`);
-                    
-                    // Download ZIP
                     saveAs(content, `${sanitizeFilename(companyData.title)}_documents.zip`);
                     
                     showStatus('success', 
                         `✨ Download complete! ${downloaded} files downloaded${failed > 0 ? `, ${failed} failed` : ''}.`
                     );
                 } catch (error) {
-                    addDebug(`ZIP creation error: ${error.message}`);
                     showStatus('error', 'Failed to create ZIP file');
                 }
             } else {
-                showStatus('error', 'No files could be downloaded. Check the debug info below.');
+                showStatus('error', 'No files could be downloaded.');
             }
             
-            if (downloadZipBtn) downloadZipBtn.disabled = false;
+            downloadZipBtn.disabled = false;
         }
         
         document.getElementById('downloadZipBtn').addEventListener('click', async () => {
-            const apiKey = API_KEY; // Use the constant API key
-            const progressContainer = document.getElementById('progressContainer');
             const downloadZipBtn = document.getElementById('downloadZipBtn');
             
-            // Check if payment already completed for this session
             if (!paymentCompleted) {
                 downloadZipBtn.disabled = true;
-                downloadZipBtn.innerHTML = 'Processing payment... <span class="spinner"></span>';
+                downloadZipBtn.innerHTML = '<span class="spinner"></span> Processing payment...';
                 
                 try {
                     showStatus('info', 'Redirecting to payment...');
                     
-                    // Store company data in localStorage to retrieve after payment
                     const dataToStore = {
                         companyData: companyData,
                         allDocuments: allDocuments,
                         timestamp: Date.now()
                     };
                     
-                    try {
-                        localStorage.setItem('pendingCompany', JSON.stringify(dataToStore));
-                    } catch (e) {
-                        console.error('localStorage failed:', e);
-                        // Fallback: encode in URL for Telegram
-                        if (isTelegram) {
-                            showStatus('error', 'Payment not supported in Telegram browser. Please open in Safari or Chrome.');
-                            downloadZipBtn.disabled = false;
-                            downloadZipBtn.innerHTML = '📦 Download All as ZIP';
-                            
-                            // Add "Open in Browser" button
-                            const openButton = document.createElement('button');
-                            openButton.className = 'btn download-zip-btn';
-                            openButton.style.marginTop = '10px';
-                            openButton.innerHTML = '🌐 Open in Safari/Chrome';
-                            openButton.onclick = () => {
-                                window.open(window.location.href, '_system');
-                            };
-                            document.querySelector('.container').appendChild(openButton);
-                            return;
-                        }
-                    }
+                    localStorage.setItem('pendingCompany', JSON.stringify(dataToStore));
                     
-                    console.log('Storing company data before payment:', companyData.title);
-                    console.log('Document count:', allDocuments.length);
-                    
-                    // Create a Stripe Payment Link URL with metadata
                     const paymentUrl = 'https://buy.stripe.com/6oU14m6YxcZL9ywgEncwg01';
-                    
-                    // Redirect to Stripe payment
                     window.location.href = paymentUrl;
-                    return;
                     
                 } catch (error) {
                     showStatus('error', 'Payment error: ' + error.message);
                     downloadZipBtn.disabled = false;
-                    downloadZipBtn.innerHTML = '📦 Download All as ZIP';
-                    return;
+                    downloadZipBtn.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+                        </svg>
+                        Download All Documents
+                    `;
                 }
+                return;
             }
             
-            // If payment completed, proceed with download
             await startDownload();
         });
         
@@ -904,67 +1508,49 @@
             return name.replace(/[^a-z0-9\s\-\_]/gi, '').trim().replace(/\s+/g, '_');
         }
         
-        // Check URL parameters on page load for payment status
+        // Check for payment status on page load
         window.addEventListener('DOMContentLoaded', async () => {
-            // Show warning for Telegram browser
-            if (isTelegram && isIOS) {
-                showStatus('info', '📱 For best experience, please open this link in Safari or Chrome');
-            }
-            
             const urlParams = new URLSearchParams(window.location.search);
             const paymentStatus = urlParams.get('payment');
             
             if (paymentStatus === 'success') {
-                // Retrieve stored company data
                 const storedData = localStorage.getItem('pendingCompany');
-                console.log('Payment success - checking for stored data:', storedData ? 'Found' : 'Not found');
                 
                 if (storedData) {
                     try {
                         const parsed = JSON.parse(storedData);
                         const { companyData: stored, allDocuments: docs, timestamp } = parsed;
                         
-                        // Check if data is recent (within 30 minutes)
                         if (Date.now() - timestamp < 30 * 60 * 1000) {
                             companyData = stored;
                             allDocuments = docs;
                             paymentCompleted = true;
                             
-                            console.log('Restored company:', companyData.title);
-                            console.log('Document count:', allDocuments.length);
+                            displayCompanyInfo(companyData);
+                            document.getElementById('totalDocs').textContent = docs.length;
+                            document.getElementById('pdfDocs').textContent = docs.length;
+                            document.getElementById('resultsContainer').style.display = 'block';
                             
-                            // Update UI - don't update the input field as it might trigger search
-                            showStatus('success', `Payment successful! Starting download for ${companyData.title}...`);
-                            
-                            // Show progress container
-                            document.getElementById('progressContainer').style.display = 'block';
-                            
-                            // Clear stored data
+                            showStatus('success', 'Payment successful! Starting download...');
                             localStorage.removeItem('pendingCompany');
                             
-                            // Directly start download process without clicking button
                             setTimeout(async () => {
-                                console.log('Starting automatic download for:', companyData.title);
                                 await startDownload();
                             }, 1500);
                         } else {
-                            console.log('Stored data too old');
                             localStorage.removeItem('pendingCompany');
                             showStatus('error', 'Payment session expired. Please search again.');
                         }
                     } catch (error) {
-                        console.error('Error parsing stored data:', error);
                         showStatus('error', 'Error restoring session. Please search again.');
                     }
                 } else {
                     showStatus('info', 'Payment successful! Please search for the company again to download.');
                 }
                 
-                // Clean URL
                 window.history.replaceState({}, document.title, window.location.pathname);
             } else if (paymentStatus === 'cancelled') {
                 showStatus('info', 'Payment cancelled. Search for a company to try again.');
-                // Clean URL
                 window.history.replaceState({}, document.title, window.location.pathname);
             }
         });
