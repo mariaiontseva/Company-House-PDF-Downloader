@@ -14,7 +14,7 @@
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
@@ -46,35 +46,6 @@
             font-size: 16px;
         }
         
-        .tabs {
-            display: flex;
-            border-bottom: 2px solid #e2e8f0;
-            margin-bottom: 30px;
-        }
-        
-        .tab {
-            flex: 1;
-            padding: 12px;
-            text-align: center;
-            cursor: pointer;
-            color: #718096;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-        
-        .tab.active {
-            color: #667eea;
-            border-bottom: 3px solid #667eea;
-        }
-        
-        .tab-content {
-            display: none;
-        }
-        
-        .tab-content.active {
-            display: block;
-        }
-        
         .form-group {
             margin-bottom: 20px;
         }
@@ -87,22 +58,16 @@
             font-size: 14px;
         }
         
-        input, textarea {
+        input {
             width: 100%;
             padding: 12px 16px;
             border: 2px solid #e2e8f0;
             border-radius: 10px;
             font-size: 16px;
             transition: all 0.3s;
-            font-family: inherit;
         }
         
-        textarea {
-            resize: vertical;
-            min-height: 200px;
-        }
-        
-        input:focus, textarea:focus {
+        input:focus {
             outline: none;
             border-color: #667eea;
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
@@ -119,7 +84,8 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
-            margin-top: 10px;
+            position: relative;
+            overflow: hidden;
         }
         
         .btn:hover:not(:disabled) {
@@ -130,44 +96,93 @@
         .btn:disabled {
             background: #cbd5e0;
             cursor: not-allowed;
+            transform: none;
         }
         
-        .btn-success {
-            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
-        }
-        
-        .btn-success:hover {
-            box-shadow: 0 10px 20px rgba(72, 187, 120, 0.3);
-        }
-        
-        .instructions {
-            background: #f7fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 10px;
-            padding: 20px;
+        .status-box {
             margin-top: 20px;
+            padding: 16px;
+            border-radius: 10px;
+            display: none;
+            animation: slideIn 0.3s ease;
         }
         
-        .instructions h3 {
-            color: #2d3748;
-            margin-bottom: 15px;
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
         
-        .instructions ol, .instructions ul {
-            margin-left: 20px;
+        .success {
+            background: #c6f6d5;
+            color: #276749;
+            border: 1px solid #9ae6b4;
+        }
+        
+        .error {
+            background: #fed7d7;
+            color: #9b2c2c;
+            border: 1px solid #feb2b2;
+        }
+        
+        .info {
+            background: #bee3f8;
+            color: #2c5282;
+            border: 1px solid #90cdf4;
+        }
+        
+        .warning {
+            background: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fde68a;
+        }
+        
+        .progress-container {
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .progress-bar {
+            background: #e2e8f0;
+            height: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .progress-fill {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .file-count {
+            text-align: center;
             color: #4a5568;
-        }
-        
-        .instructions li {
-            margin-bottom: 10px;
-        }
-        
-        .instructions code {
-            background: #edf2f7;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-family: 'Courier New', monospace;
+            margin: 10px 0;
             font-size: 14px;
+        }
+        
+        .download-zip-btn {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .download-zip-btn:hover {
+            box-shadow: 0 10px 20px rgba(72, 187, 120, 0.3);
         }
         
         .api-note {
@@ -181,381 +196,387 @@
             text-decoration: none;
         }
         
-        .example-urls {
-            background: #f7fafc;
-            padding: 15px;
-            border-radius: 8px;
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .file-list {
+            max-height: 200px;
+            overflow-y: auto;
             margin-top: 10px;
+            padding: 10px;
+            background: #f7fafc;
+            border-radius: 8px;
             font-size: 12px;
             color: #4a5568;
         }
         
-        .example-urls h4 {
-            margin-bottom: 10px;
-            color: #2d3748;
+        .file-item {
+            padding: 4px 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         
-        .example-urls code {
-            display: block;
-            margin: 5px 0;
-            background: #e2e8f0;
+        .file-item.success {
+            color: #38a169;
+        }
+        
+        .file-item.error {
+            color: #e53e3e;
+        }
+        
+        .proxy-selector {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f7fafc;
+            border-radius: 8px;
+        }
+        
+        .proxy-selector label {
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+        
+        .proxy-selector select {
+            width: 100%;
             padding: 8px;
-            border-radius: 4px;
-            font-family: monospace;
-            font-size: 11px;
-            overflow-x: auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 14px;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>🏢 Companies House PDF Downloader</h1>
-        <p class="subtitle">Download PDF documents from Companies House</p>
+        <p class="subtitle">Download all PDF documents filed by UK companies as a ZIP file</p>
         
-        <div class="tabs">
-            <div class="tab active" onclick="switchTab('auto')">Automatic Search</div>
-            <div class="tab" onclick="switchTab('manual')">Manual URLs</div>
-        </div>
-        
-        <!-- Automatic Search Tab -->
-        <div id="auto-tab" class="tab-content active">
-            <form id="searchForm">
-                <div class="form-group">
-                    <label for="companyName">Company Name</label>
-                    <input 
-                        type="text" 
-                        id="companyName" 
-                        placeholder="e.g. Tesco PLC, Sainsbury's" 
-                        required
-                    >
-                </div>
-                
-                <div class="form-group">
-                    <label for="apiKey">Companies House API Key</label>
-                    <input 
-                        type="password" 
-                        id="apiKey" 
-                        placeholder="Your API key" 
-                        value="22aefa40-ee9e-47c0-b40a-2dd3c03165c6"
-                        required
-                    >
-                    <p class="api-note">
-                        Need an API key? <a href="https://developer.company-information.service.gov.uk/get-started" target="_blank">Get one free here</a>
-                    </p>
-                </div>
-                
-                <button type="submit" class="btn">
-                    Generate Python Download Script
-                </button>
-            </form>
-            
-            <div class="instructions">
-                <h3>⚠️ Note: Direct Browser Download Limitations</h3>
-                <p>Due to browser security restrictions (CORS), we cannot directly download files from Companies House API in the browser.</p>
-                <br>
-                <p><strong>Instead, this tool generates a Python script that you can run locally to download all PDFs.</strong></p>
+        <form id="searchForm">
+            <div class="form-group">
+                <label for="companyName">Company Name</label>
+                <input 
+                    type="text" 
+                    id="companyName" 
+                    placeholder="e.g. Tesco PLC, Sainsbury's" 
+                    value="Lobster IT Limited"
+                    required
+                >
             </div>
-        </div>
+            
+            <div class="form-group">
+                <label for="apiKey">Companies House API Key</label>
+                <input 
+                    type="password" 
+                    id="apiKey" 
+                    placeholder="Your API key" 
+                    value="22aefa40-ee9e-47c0-b40a-2dd3c03165c6"
+                    required
+                >
+                <p class="api-note">
+                    Need an API key? <a href="https://developer.company-information.service.gov.uk/get-started" target="_blank">Get one free here</a>
+                </p>
+            </div>
+            
+            <div class="proxy-selector">
+                <label>CORS Proxy Service</label>
+                <select id="proxySelect">
+                    <option value="https://api.codetabs.com/v1/proxy?quest=">CodeTabs Proxy</option>
+                    <option value="https://corsproxy.io/?">CorsProxy.io</option>
+                    <option value="https://api.allorigins.win/raw?url=">AllOrigins</option>
+                    <option value="https://thingproxy.freeboard.io/fetch/">ThingProxy</option>
+                </select>
+            </div>
+            
+            <button type="submit" class="btn" id="searchBtn">
+                Search & Download All PDFs
+            </button>
+        </form>
         
-        <!-- Manual URLs Tab -->
-        <div id="manual-tab" class="tab-content">
-            <form id="manualForm">
-                <div class="form-group">
-                    <label for="pdfUrls">PDF URLs (one per line)</label>
-                    <textarea 
-                        id="pdfUrls" 
-                        placeholder="Paste Companies House PDF URLs here, one per line"
-                        required
-                    ></textarea>
-                    <div class="example-urls">
-                        <h4>How to get PDF URLs:</h4>
-                        <ol>
-                            <li>Go to <a href="https://find-and-update.company-information.service.gov.uk/" target="_blank">Companies House website</a></li>
-                            <li>Search for a company</li>
-                            <li>Go to "Filing history"</li>
-                            <li>Right-click on "View PDF" links and copy the URL</li>
-                            <li>Paste the URLs above</li>
-                        </ol>
-                        <h4>Example URLs:</h4>
-                        <code>https://find-and-update.company-information.service.gov.uk/company/08510890/filing-history/MzQxNzYzNjEzMmFkaXF6a2N4/document?format=pdf</code>
-                    </div>
-                </div>
-                
-                <button type="submit" class="btn btn-success">
-                    Download PDFs as ZIP
-                </button>
-            </form>
-        </div>
+        <div class="status-box" id="statusBox"></div>
         
-        <button id="downloadBtn" class="btn btn-success" style="display: none; margin-top: 20px;">
-            📥 Download Generated Script
-        </button>
+        <div class="progress-container" id="progressContainer">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill">0%</div>
+            </div>
+            <div class="file-count" id="fileCount"></div>
+            <div class="file-list" id="fileList"></div>
+        </div>
     </div>
     
     <script>
-        let generatedScript = '';
+        let currentProxy = 'https://api.codetabs.com/v1/proxy?quest=';
         
-        function switchTab(tab) {
-            // Update tab buttons
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            event.target.classList.add('active');
+        document.getElementById('proxySelect').addEventListener('change', (e) => {
+            currentProxy = e.target.value;
+        });
+        
+        async function fetchWithProxy(url, apiKey) {
+            const encodedUrl = encodeURIComponent(url);
+            const proxyUrl = currentProxy + encodedUrl;
             
-            // Update tab content
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            document.getElementById(`${tab}-tab`).classList.add('active');
-            
-            // Hide download button when switching tabs
-            document.getElementById('downloadBtn').style.display = 'none';
+            try {
+                // For CodeTabs, we need to handle auth differently
+                if (currentProxy.includes('codetabs')) {
+                    // CodeTabs doesn't forward auth headers properly, so we'll try without
+                    const response = await fetch(proxyUrl);
+                    return response;
+                } else {
+                    const response = await fetch(proxyUrl, {
+                        headers: {
+                            'Authorization': 'Basic ' + btoa(apiKey + ':')
+                        }
+                    });
+                    return response;
+                }
+            } catch (error) {
+                console.error('Proxy fetch error:', error);
+                throw error;
+            }
         }
         
-        // Automatic search form
-        document.getElementById('searchForm').addEventListener('submit', (e) => {
+        async function fetchPdfDirect(url) {
+            // Try to fetch PDF directly from the document store
+            try {
+                const response = await fetch(url);
+                if (response.ok) {
+                    return await response.blob();
+                }
+            } catch (error) {
+                console.error('Direct PDF fetch error:', error);
+            }
+            return null;
+        }
+        
+        function showStatus(type, message) {
+            const statusBox = document.getElementById('statusBox');
+            statusBox.className = `status-box ${type}`;
+            statusBox.textContent = message;
+            statusBox.style.display = 'block';
+        }
+        
+        function updateProgress(current, total) {
+            const percentage = Math.round((current / total) * 100);
+            const progressFill = document.getElementById('progressFill');
+            progressFill.style.width = `${percentage}%`;
+            progressFill.textContent = `${percentage}%`;
+            
+            document.getElementById('fileCount').textContent = 
+                `Processing ${current} of ${total} documents`;
+        }
+        
+        function addFileToList(filename, status) {
+            const fileList = document.getElementById('fileList');
+            const fileItem = document.createElement('div');
+            fileItem.className = `file-item ${status}`;
+            fileItem.textContent = `${status === 'success' ? '✓' : '✗'} ${filename}`;
+            fileList.appendChild(fileItem);
+            fileList.scrollTop = fileList.scrollHeight;
+        }
+        
+        document.getElementById('searchForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
             const companyName = document.getElementById('companyName').value.trim();
             const apiKey = document.getElementById('apiKey').value.trim();
+            const searchBtn = document.getElementById('searchBtn');
+            const progressContainer = document.getElementById('progressContainer');
             
-            // Generate Python script
-            generatedScript = `#!/usr/bin/env python3
-"""
-Companies House PDF Downloader
-Generated for: ${companyName}
-"""
+            searchBtn.disabled = true;
+            searchBtn.innerHTML = 'Processing... <span class="spinner"></span>';
+            progressContainer.style.display = 'none';
+            document.getElementById('fileList').innerHTML = '';
+            
+            try {
+                // Try a different approach - use the public Companies House website data
+                showStatus('info', 'Searching for company...');
+                
+                // First, try to get company number via search
+                const searchUrl = `https://api.companieshouse.gov.uk/search/companies?q=${encodeURIComponent(companyName)}&items_per_page=1`;
+                
+                let companyNumber = null;
+                let companyTitle = null;
+                
+                try {
+                    const searchResponse = await fetchWithProxy(searchUrl, apiKey);
+                    if (searchResponse.ok) {
+                        const searchData = await searchResponse.json();
+                        if (searchData.items && searchData.items.length > 0) {
+                            companyNumber = searchData.items[0].company_number;
+                            companyTitle = searchData.items[0].title;
+                        }
+                    }
+                } catch (error) {
+                    console.error('Search error:', error);
+                }
+                
+                if (!companyNumber) {
+                    // If API search fails, generate a download script instead
+                    showStatus('warning', 'Direct download not available. Generating download script...');
+                    generateDownloadScript(companyName, apiKey);
+                    return;
+                }
+                
+                showStatus('success', `Found: ${companyTitle} (${companyNumber})`);
+                
+                // Try to get filing history
+                showStatus('info', 'Fetching filing history...');
+                const filingUrl = `https://api.companieshouse.gov.uk/company/${companyNumber}/filing-history?items_per_page=100`;
+                
+                try {
+                    const filingResponse = await fetchWithProxy(filingUrl, apiKey);
+                    if (!filingResponse.ok) {
+                        throw new Error('Failed to fetch filing history');
+                    }
+                    
+                    const filingData = await filingResponse.json();
+                    const documents = filingData.items || [];
+                    
+                    if (documents.length === 0) {
+                        throw new Error('No documents found');
+                    }
+                    
+                    // Try to download PDFs
+                    progressContainer.style.display = 'block';
+                    const zip = new JSZip();
+                    const folder = zip.folder(sanitizeFilename(companyTitle));
+                    
+                    let downloaded = 0;
+                    let failed = 0;
+                    
+                    for (let i = 0; i < Math.min(documents.length, 20); i++) { // Limit to 20 for demo
+                        const doc = documents[i];
+                        updateProgress(i + 1, Math.min(documents.length, 20));
+                        
+                        if (doc.links && doc.links.document_metadata) {
+                            const filename = generateFilename(doc);
+                            
+                            // Try multiple approaches to get the PDF
+                            let pdfBlob = null;
+                            
+                            // Approach 1: Try the website URL pattern
+                            const webUrl = `https://find-and-update.company-information.service.gov.uk/company/${companyNumber}/filing-history/${getDocumentId(doc.links.self)}/document?format=pdf`;
+                            pdfBlob = await fetchPdfDirect(webUrl);
+                            
+                            if (pdfBlob && pdfBlob.size > 0) {
+                                folder.file(filename, pdfBlob);
+                                downloaded++;
+                                addFileToList(filename, 'success');
+                            } else {
+                                failed++;
+                                addFileToList(filename, 'error');
+                            }
+                            
+                            await new Promise(resolve => setTimeout(resolve, 500));
+                        }
+                    }
+                    
+                    if (downloaded > 0) {
+                        showStatus('info', 'Creating ZIP file...');
+                        const content = await zip.generateAsync({
+                            type: 'blob',
+                            compression: 'DEFLATE'
+                        });
+                        saveAs(content, `${sanitizeFilename(companyTitle)}_documents.zip`);
+                        showStatus('success', `Downloaded ${downloaded} files!`);
+                    } else {
+                        throw new Error('Could not download any files');
+                    }
+                    
+                } catch (error) {
+                    throw error;
+                }
+                
+            } catch (error) {
+                showStatus('warning', 'Direct download failed. Generating Python script instead...');
+                generateDownloadScript(companyName, apiKey);
+            } finally {
+                searchBtn.disabled = false;
+                searchBtn.innerHTML = 'Search & Download All PDFs';
+            }
+        });
+        
+        function getDocumentId(selfLink) {
+            const parts = selfLink.split('/');
+            return parts[parts.length - 1];
+        }
+        
+        function generateFilename(doc) {
+            const date = doc.date || 'unknown';
+            const category = doc.category || 'document';
+            const desc = (doc.description || 'document').substring(0, 50);
+            return `${date}_${category}_${sanitizeFilename(desc)}.pdf`;
+        }
+        
+        function sanitizeFilename(name) {
+            return name.replace(/[^a-z0-9\s\-\_]/gi, '').trim().replace(/\s+/g, '_');
+        }
+        
+        function generateDownloadScript(companyName, apiKey) {
+            const script = `#!/usr/bin/env python3
+"""Companies House PDF Downloader for ${companyName}"""
 
-import os
-import sys
-import time
-import requests
-from datetime import datetime
+import os, sys, time, requests
 
 API_KEY = "${apiKey}"
 COMPANY_NAME = "${companyName}"
 
-def download_companies_house_pdfs():
-    print(f"\\n🔍 Searching for company: {COMPANY_NAME}")
-    
-    session = requests.Session()
-    session.auth = (API_KEY, '')
-    
-    try:
-        # Search for company
-        search_url = "https://api.companieshouse.gov.uk/search/companies"
-        params = {"q": COMPANY_NAME, "items_per_page": 1}
-        
-        response = session.get(search_url, params=params)
-        if response.status_code == 401:
-            print("❌ Authentication failed. Please check your API key.")
-            print("Get a free API key at: https://developer.company-information.service.gov.uk/get-started")
-            return
-        
-        response.raise_for_status()
-        data = response.json()
-        
-        if not data.get("items"):
-            print(f"❌ No company found with name: {COMPANY_NAME}")
-            return
-        
-        company = data["items"][0]
-        company_number = company["company_number"]
-        actual_name = company["title"]
-        
-        print(f"✅ Found company: {actual_name} (Number: {company_number})")
-        
-        # Get filing history
-        print("📋 Fetching filing history...")
-        filing_url = f"https://api.companieshouse.gov.uk/company/{company_number}/filing-history"
-        
-        all_items = []
-        start_index = 0
-        items_per_page = 100
-        
-        while True:
-            params = {"items_per_page": items_per_page, "start_index": start_index}
-            response = session.get(filing_url, params=params)
-            response.raise_for_status()
-            
-            data = response.json()
-            items = data.get("items", [])
-            
-            if not items:
-                break
-                
-            all_items.extend(items)
-            
-            total_count = data.get("total_count", 0)
-            if start_index + items_per_page >= total_count:
-                break
-                
-            start_index += items_per_page
-            time.sleep(0.5)
-        
-        if not all_items:
-            print("❌ No filing history found")
-            return
-        
-        print(f"📄 Found {len(all_items)} documents")
-        
-        # Create output directory
-        safe_name = "".join(c for c in actual_name if c.isalnum() or c in (' ', '-', '_')).rstrip()
-        output_dir = os.path.join("downloads", safe_name)
-        os.makedirs(output_dir, exist_ok=True)
-        
-        print(f"📁 Saving to: {output_dir}")
-        print("\\n🚀 Starting downloads...\\n")
-        
-        downloaded = 0
-        failed = 0
-        
-        # Download PDFs
-        for i, item in enumerate(all_items, 1):
-            links = item.get("links", {})
-            doc_metadata_link = links.get("document_metadata")
-            
-            if doc_metadata_link:
-                try:
-                    # Get document URL
-                    if doc_metadata_link.startswith('/'):
-                        doc_url = f"https://api.companieshouse.gov.uk{doc_metadata_link}"
-                    else:
-                        doc_url = doc_metadata_link
-                    
-                    # Get document metadata
-                    response = session.get(doc_url)
-                    if response.status_code == 200:
-                        # Download actual document
-                        content_url = f"{doc_url}/content"
-                        response = session.get(content_url, headers={"Accept": "application/pdf"})
-                        
-                        if response.status_code == 200:
-                            # Generate filename
-                            date = item.get("date", "unknown")
-                            category = item.get("category", "doc")
-                            desc = item.get("description", "document")[:50]
-                            safe_desc = "".join(c for c in desc if c.isalnum() or c in (' ', '-', '_'))
-                            filename = f"{date}_{category}_{safe_desc}.pdf"
-                            
-                            filepath = os.path.join(output_dir, filename)
-                            with open(filepath, 'wb') as f:
-                                f.write(response.content)
-                            
-                            downloaded += 1
-                            print(f"✅ [{i}/{len(all_items)}] Downloaded: {filename}")
-                        else:
-                            failed += 1
-                    else:
-                        failed += 1
-                    
-                    time.sleep(0.5)  # Rate limiting
-                        
-                except Exception as e:
-                    failed += 1
-                    print(f"❌ [{i}/{len(all_items)}] Failed to download document: {str(e)}")
-        
-        print(f"\\n✨ Download complete!")
-        print(f"📊 Summary: {downloaded} downloaded, {failed} failed")
-        print(f"📁 Files saved to: {os.path.abspath(output_dir)}")
-        
-    except Exception as e:
-        print(f"\\n❌ Error: {str(e)}")
+session = requests.Session()
+session.auth = (API_KEY, '')
 
-if __name__ == "__main__":
-    print("\\n" + "="*50)
-    print("🏢 Companies House PDF Downloader")
-    print("="*50)
-    
-    # Check for requests library
-    try:
-        import requests
-    except ImportError:
-        print("\\n❌ Error: 'requests' library not installed")
-        print("Please install it by running: pip install requests")
-        sys.exit(1)
-    
-    download_companies_house_pdfs()
-`;
+# Search for company
+response = session.get("https://api.companieshouse.gov.uk/search/companies", 
+                      params={"q": COMPANY_NAME, "items_per_page": 1})
+if response.status_code == 401:
+    print("Invalid API key. Get one at: https://developer.company-information.service.gov.uk/")
+    sys.exit(1)
+
+data = response.json()
+if not data.get("items"):
+    print(f"No company found: {COMPANY_NAME}")
+    sys.exit(1)
+
+company = data["items"][0]
+print(f"Found: {company['title']} ({company['company_number']})")
+
+# Get filing history
+response = session.get(f"https://api.companieshouse.gov.uk/company/{company['company_number']}/filing-history",
+                      params={"items_per_page": 100})
+items = response.json().get("items", [])
+
+# Download PDFs
+output_dir = f"downloads/{company['title'].replace('/', '-')}"
+os.makedirs(output_dir, exist_ok=True)
+
+for i, item in enumerate(items):
+    if item.get("links", {}).get("document_metadata"):
+        doc_url = "https://api.companieshouse.gov.uk" + item["links"]["document_metadata"] + "/content"
+        response = session.get(doc_url, headers={"Accept": "application/pdf"})
+        if response.status_code == 200:
+            filename = f"{item.get('date', 'unknown')}_{item.get('category', 'doc')}.pdf"
+            with open(os.path.join(output_dir, filename), 'wb') as f:
+                f.write(response.content)
+            print(f"Downloaded: {filename}")
+        time.sleep(0.5)
+
+print(f"Done! Files saved to: {output_dir}")`;
             
-            document.getElementById('downloadBtn').style.display = 'block';
-            document.getElementById('downloadBtn').onclick = () => downloadScript();
-        });
-        
-        // Manual URLs form
-        document.getElementById('manualForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
+            const blob = new Blob([script], { type: 'text/plain' });
+            saveAs(blob, 'companies_house_downloader.py');
             
-            const urlsText = document.getElementById('pdfUrls').value.trim();
-            const urls = urlsText.split('\n').filter(url => url.trim());
-            
-            if (urls.length === 0) {
-                alert('Please enter at least one URL');
-                return;
-            }
-            
-            const zip = new JSZip();
-            const folder = zip.folder("companies_house_pdfs");
-            
-            let downloaded = 0;
-            const button = e.target.querySelector('button');
-            button.disabled = true;
-            button.textContent = `Downloading ${urls.length} PDFs...`;
-            
-            for (let i = 0; i < urls.length; i++) {
-                const url = urls[i].trim();
-                if (!url) continue;
-                
-                try {
-                    button.textContent = `Downloading ${i + 1} of ${urls.length}...`;
-                    
-                    // Extract filename from URL or create one
-                    const urlParts = url.split('/');
-                    const docId = urlParts[urlParts.length - 2] || `document_${i + 1}`;
-                    const filename = `${docId}.pdf`;
-                    
-                    // Fetch the PDF
-                    const response = await fetch(url);
-                    if (response.ok) {
-                        const blob = await response.blob();
-                        folder.file(filename, blob);
-                        downloaded++;
-                    }
-                } catch (error) {
-                    console.error(`Failed to download: ${url}`, error);
-                }
-                
-                // Small delay between downloads
-                await new Promise(resolve => setTimeout(resolve, 500));
-            }
-            
-            if (downloaded > 0) {
-                button.textContent = 'Creating ZIP file...';
-                
-                const content = await zip.generateAsync({
-                    type: 'blob',
-                    compression: 'DEFLATE',
-                    compressionOptions: { level: 6 }
-                });
-                
-                saveAs(content, 'companies_house_documents.zip');
-                button.textContent = `✅ Downloaded ${downloaded} of ${urls.length} PDFs`;
-            } else {
-                button.textContent = '❌ No PDFs could be downloaded';
-            }
-            
-            setTimeout(() => {
-                button.disabled = false;
-                button.textContent = 'Download PDFs as ZIP';
-            }, 3000);
-        });
-        
-        function downloadScript() {
-            const blob = new Blob([generatedScript], { type: 'text/plain' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'companies_house_downloader.py';
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
-            document.body.removeChild(a);
+            showStatus('info', 'Python script downloaded. Run it with: python3 companies_house_downloader.py');
         }
     </script>
 </body>
