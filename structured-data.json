@@ -1,0 +1,123 @@
+{
+  "organization": {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "DocSpace UK",
+    "alternateName": "DocSpace Companies House Document Downloader",
+    "url": "https://docspace.uk",
+    "logo": "https://docspace.uk/logo.png",
+    "description": "Professional Companies House document download service for UK businesses",
+    "address": {
+      "@type": "PostalAddress",
+      "addressCountry": "GB"
+    },
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "contactType": "customer service",
+      "email": "support@docspace.uk",
+      "availableLanguage": "English"
+    },
+    "sameAs": [
+      "https://twitter.com/docspaceuk",
+      "https://www.linkedin.com/company/docspace-uk",
+      "https://www.facebook.com/docspaceuk"
+    ]
+  },
+  "website": {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "DocSpace UK",
+    "url": "https://docspace.uk",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "@id": "https://docspace.uk/#search",
+      "target": {
+        "@type": "EntryPoint",
+        "urlTemplate": "https://docspace.uk/?company={search_term_string}"
+      },
+      "query-input": "required name=search_term_string"
+    }
+  },
+  "faqPage": {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What documents can I download from Companies House?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "You can download all publicly available documents including annual returns, accounts, incorporation documents, director changes, share allotments, registered office changes, and mortgage documents."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How much does it cost to download company documents?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "DocSpace charges a flat fee of £5 per company. This gives you access to download ALL available documents for that company as a single ZIP file."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How quickly can I download the documents?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Documents are downloaded and compiled into a ZIP file within seconds to minutes, depending on the number of documents available for the company."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is the service secure?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, all payments are processed securely through Stripe, and we don't store any payment information. Documents are obtained directly from Companies House official API."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What format are the documents in?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "All documents are downloaded as PDF files and compiled into a convenient ZIP archive for easy storage and sharing."
+        }
+      }
+    ]
+  },
+  "howTo": {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "How to Download Companies House Documents",
+    "description": "Simple steps to download all Companies House documents for any UK company",
+    "totalTime": "PT2M",
+    "supply": [],
+    "tool": [],
+    "step": [
+      {
+        "@type": "HowToStep",
+        "text": "Enter the name of the UK company you want to download documents for",
+        "name": "Search for Company"
+      },
+      {
+        "@type": "HowToStep",
+        "text": "Click 'Search Company' to find the company in Companies House records",
+        "name": "Initiate Search"
+      },
+      {
+        "@type": "HowToStep",
+        "text": "Review the number of documents found and click 'Download All as ZIP'",
+        "name": "Review Results"
+      },
+      {
+        "@type": "HowToStep",
+        "text": "Complete the secure £5 payment through Stripe",
+        "name": "Make Payment"
+      },
+      {
+        "@type": "HowToStep",
+        "text": "Wait for the automatic download of your ZIP file containing all documents",
+        "name": "Download Documents"
+      }
+    ]
+  }
+}
