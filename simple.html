@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple Companies House Downloader</title>
+    <style>
+        body { font-family: Arial; max-width: 600px; margin: 50px auto; padding: 20px; }
+        input, button { padding: 10px; margin: 10px 0; width: 100%; }
+        button { background: #667eea; color: white; border: none; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Companies House PDF Downloader - Simple Version</h1>
+    <p>This version bypasses all complex code</p>
+    
+    <input type="text" id="company" placeholder="Enter company name" value="Tesco">
+    
+    <button onclick="goToPayment()">Download PDFs - £5</button>
+    
+    <script>
+        function goToPayment() {
+            // Store company name
+            localStorage.setItem('companyToPay', document.getElementById('company').value);
+            // Go to LIVE payment
+            window.location.href = 'https://buy.stripe.com/6oU14m6YxcZL9ywgEncwg01';
+        }
+    </script>
+</body>
+</html>
