@@ -590,7 +590,7 @@
                             successMsg.textContent = 'Account created and signed in! Redirecting...';
                             localStorage.setItem('docspace-auth-debug', JSON.stringify(signInResult.data));
                             setTimeout(() => {
-                                window.location.href = '/';
+                                window.location.href = window.location.origin;
                             }, 1500);
                         } else {
                             // If auto sign-in fails, show the email confirmation message

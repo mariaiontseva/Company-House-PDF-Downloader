@@ -2293,10 +2293,17 @@
         };
         
         // Listen for auth state changes
-        supabaseClient.auth.onAuthStateChange((event, session) => {
+        supabaseClient.auth.onAuthStateChange(async (event, session) => {
             console.log('Auth state changed:', event, session);
             currentUser = session?.user || null;
             updateAuthUI();
+            
+            // Special handling for sign in
+            if (event === 'SIGNED_IN' && session) {
+                console.log('User signed in successfully:', session.user.email);
+                currentUser = session.user;
+                updateAuthUI();
+            }
         });
         
         // Force update auth UI immediately
@@ -2507,20 +2514,32 @@
         }
         
         // Listen for auth state changes
-        supabaseClient.auth.onAuthStateChange((event, session) => {
+        supabaseClient.auth.onAuthStateChange(async (event, session) => {
             console.log('Auth state changed:', event, session);
             currentUser = session?.user || null;
             updateAuthUI();
+            
+            // Special handling for sign in
+            if (event === 'SIGNED_IN' && session) {
+                console.log('User signed in successfully:', session.user.email);
+                currentUser = session.user;
+                updateAuthUI();
+            }
         });
         
         // Check for payment status on page load
         window.addEventListener('DOMContentLoaded', async () => {
+            // Wait a bit for Supabase to initialize
+            await new Promise(resolve => setTimeout(resolve, 100));
             // First check if we're coming back from auth redirect
             const hashParams = new URLSearchParams(window.location.hash.substring(1));
             const accessToken = hashParams.get('access_token');
             
             if (accessToken) {
                 console.log('Found access token in URL, setting session...');
+                // Give Supabase time to process the URL
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
                 // Clean up the URL
                 window.history.replaceState({}, document.title, window.location.pathname);
             }
