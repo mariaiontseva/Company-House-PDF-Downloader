@@ -1392,15 +1392,57 @@
         <div class="top-bar-actions">
             <!-- Auth button container with dropdown -->
             <div style="position: relative;">
-                <button class="create-account-btn profile-mode" id="authBtn" aria-label="Account" onclick="handleAuthButtonClick(event)">
+                <!-- Guest button (shown when not logged in) -->
+                <button class="create-account-btn profile-mode" id="guestBtn" aria-label="Account" style="display: none;" onclick="document.getElementById('guestDropdown').classList.toggle('show')">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
                 </button>
                 
-                <!-- Profile dropdown menu -->
-                <div class="profile-dropdown" id="profileDropdown">
-                    <!-- Content will be dynamically populated based on auth state -->
+                <!-- User button (shown when logged in) -->
+                <button class="create-account-btn profile-mode" id="userBtn" aria-label="Account" style="display: flex;" onclick="document.getElementById('userDropdown').classList.toggle('show')">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </button>
+                
+                <!-- Guest dropdown -->
+                <div class="profile-dropdown" id="guestDropdown">
+                    <button class="dropdown-item" onclick="window.location.href='auth.html'">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                        </svg>
+                        Create Account
+                    </button>
+                    <button class="dropdown-item" onclick="window.location.href='auth.html?mode=signin'">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                        Sign In
+                    </button>
+                </div>
+                
+                <!-- User dropdown -->
+                <div class="profile-dropdown" id="userDropdown">
+                    <button class="dropdown-item" onclick="alert('Companies I Follow - Coming soon!')">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                        </svg>
+                        Companies I Follow
+                    </button>
+                    <button class="dropdown-item" onclick="window.location.href='/search-history.html'">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Search History
+                    </button>
+                    <div class="dropdown-divider"></div>
+                    <button class="dropdown-item danger" onclick="signOut()">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                        Log Out
+                    </button>
                 </div>
             </div>
             <!-- Dark mode toggle -->
@@ -2535,13 +2577,19 @@
             dropdown.classList.toggle('show');
         }
         
-        // Close dropdown when clicking outside
+        // Close dropdowns when clicking outside
         document.addEventListener('click', (e) => {
-            const dropdown = document.getElementById('profileDropdown');
-            const authBtn = document.getElementById('authBtn');
+            const userDropdown = document.getElementById('userDropdown');
+            const guestDropdown = document.getElementById('guestDropdown');
+            const userBtn = document.getElementById('userBtn');
+            const guestBtn = document.getElementById('guestBtn');
             
-            if (!authBtn.contains(e.target) && !dropdown.contains(e.target)) {
-                dropdown.classList.remove('show');
+            if (userDropdown && userBtn && !userBtn.contains(e.target) && !userDropdown.contains(e.target)) {
+                userDropdown.classList.remove('show');
+            }
+            
+            if (guestDropdown && guestBtn && !guestBtn.contains(e.target) && !guestDropdown.contains(e.target)) {
+                guestDropdown.classList.remove('show');
             }
         });
         
