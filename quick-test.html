@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Quick PDF Test</title>
+</head>
+<body>
+    <h1>Quick PDF Download Test</h1>
+    <p>Testing if our worker fix is working...</p>
+    <button onclick="testPDF()">Download Test PDF</button>
+    <div id="result"></div>
+    
+    <script>
+        async function testPDF() {
+            const result = document.getElementById('result');
+            result.innerHTML = 'Testing...';
+            
+            try {
+                // Direct test of SmarterQueue PDF
+                const url = 'https://blue-flower-d40f.mahin84.workers.dev?url=https://document-api.company-information.service.gov.uk/document/tfevHrLDjHts_YtEFgSsc9rv6FO2-WFizsof6TwjwLU/content&apiKey=22aefa40-ee9e-47c0-b40a-2dd3c03165c6';
+                
+                const response = await fetch(url, {
+                    headers: { 'Accept': 'application/pdf' }
+                });
+                
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const size = blob.size;
+                    
+                    if (size > 6000) {
+                        result.innerHTML = `✅ SUCCESS! PDF is ${size.toLocaleString()} bytes (working correctly)`;
+                        
+                        // Download the file
+                        const downloadUrl = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = downloadUrl;
+                        a.download = 'test-pdf-working.pdf';
+                        a.click();
+                        URL.revokeObjectURL(downloadUrl);
+                    } else {
+                        result.innerHTML = `❌ FAILED! PDF is only ${size} bytes (still broken)`;
+                    }
+                } else {
+                    result.innerHTML = `❌ ERROR! Response status: ${response.status}`;
+                }
+            } catch (error) {
+                result.innerHTML = `❌ ERROR! ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>
