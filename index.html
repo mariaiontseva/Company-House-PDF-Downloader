@@ -1986,18 +1986,29 @@
         
         // Check auth state
         async function checkAuthState() {
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            currentUser = session?.user || null;
-            updateAuthUI();
+            try {
+                const { data: { session }, error } = await supabaseClient.auth.getSession();
+                console.log('Auth check - Session:', session);
+                console.log('Auth check - User:', session?.user);
+                if (error) {
+                    console.error('Auth error:', error);
+                }
+                currentUser = session?.user || null;
+                updateAuthUI();
+            } catch (err) {
+                console.error('Failed to check auth:', err);
+            }
         }
         
         // Update UI based on auth state
         function updateAuthUI() {
+            console.log('Updating auth UI, currentUser:', currentUser);
             const authBtn = document.getElementById('authBtn');
             const authBtnText = document.getElementById('authBtnText');
             const signOutBtn = document.getElementById('signOutBtn');
             
             if (currentUser) {
+                console.log('User is logged in:', currentUser.email);
                 // User is logged in - show profile icon
                 authBtn.style.display = 'flex';
                 signOutBtn.style.display = 'none';
@@ -2051,15 +2062,15 @@
         
         // Listen for auth state changes
         supabaseClient.auth.onAuthStateChange((event, session) => {
+            console.log('Auth state changed:', event, session);
             currentUser = session?.user || null;
             updateAuthUI();
         });
         
-        // Check auth state on load
-        checkAuthState();
-        
         // Check for payment status on page load
         window.addEventListener('DOMContentLoaded', async () => {
+            // Check auth state after DOM is loaded
+            await checkAuthState();
             const urlParams = new URLSearchParams(window.location.search);
             const paymentStatus = urlParams.get('payment');
             
