@@ -1393,14 +1393,14 @@
             <!-- Auth button container with dropdown -->
             <div style="position: relative;">
                 <!-- Guest button (shown when not logged in) -->
-                <button class="create-account-btn profile-mode" id="guestBtn" aria-label="Account" style="display: none;" onclick="document.getElementById('guestDropdown').classList.toggle('show')">
+                <button class="create-account-btn profile-mode" id="guestBtn" aria-label="Account" style="display: flex;" onclick="document.getElementById('guestDropdown').classList.toggle('show')">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
                 </button>
                 
                 <!-- User button (shown when logged in) -->
-                <button class="create-account-btn profile-mode" id="userBtn" aria-label="Account" style="display: flex;" onclick="document.getElementById('userDropdown').classList.toggle('show')">
+                <button class="create-account-btn profile-mode" id="userBtn" aria-label="Account" style="display: none;" onclick="document.getElementById('userDropdown').classList.toggle('show')">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
@@ -2475,52 +2475,25 @@
         // Update UI based on auth state
         function updateAuthUI() {
             console.log('Updating auth UI, currentUser:', currentUser);
-            const authBtn = document.getElementById('authBtn');
+            const userBtn = document.getElementById('userBtn');
+            const guestBtn = document.getElementById('guestBtn');
             const marketingSection = document.getElementById('marketingSection');
-            
-            if (!authBtn) {
-                console.error('Auth button not found!');
-                return;
-            }
             
             if (currentUser) {
                 console.log('User is logged in:', currentUser.email);
+                // Show user button, hide guest button
+                if (userBtn) userBtn.style.display = 'flex';
+                if (guestBtn) guestBtn.style.display = 'none';
+                
                 // Hide marketing section for logged-in users
                 if (marketingSection) {
                     marketingSection.style.display = 'none';
                 }
-                // User is logged in - show profile icon
-                authBtn.style.display = 'flex';
-                authBtn.classList.add('profile-mode');
-                authBtn.innerHTML = `
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                `;
-                
-                // Update onclick handler for logged in user
-                authBtn.onclick = (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    showUserMenu();
-                };
-                
             } else {
-                // User is not logged in - show profile icon button with dropdown
-                authBtn.style.display = 'flex';
-                authBtn.classList.add('profile-mode');
-                authBtn.innerHTML = `
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
-                `;
-                
-                // Update onclick handler for guest
-                authBtn.onclick = (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    showGuestMenu();
-                };
+                console.log('User is not logged in');
+                // Show guest button, hide user button
+                if (guestBtn) guestBtn.style.display = 'flex';
+                if (userBtn) userBtn.style.display = 'none';
                 
                 // Show marketing section for guests
                 if (marketingSection) {
