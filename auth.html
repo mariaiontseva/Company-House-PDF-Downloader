@@ -140,6 +140,23 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .coming-soon-badge {
+            position: absolute;
+            top: 0;
+            right: -35px;
+            background: linear-gradient(135deg, #f59e0b, #f97316);
+            color: white;
+            font-size: 9px;
+            font-weight: 700;
+            padding: 2px 40px;
+            transform: rotate(45deg);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 10px rgba(245, 158, 11, 0.3);
         }
 
         .social-btn:hover {
@@ -413,6 +430,7 @@
                     <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                 </svg>
                 Continue with Google
+                <span class="coming-soon-badge">Coming Soon</span>
             </button>
             
             <button class="social-btn facebook" onclick="authWithFacebook()">
@@ -420,6 +438,7 @@
                     <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
                 </svg>
                 Continue with Facebook
+                <span class="coming-soon-badge">Coming Soon</span>
             </button>
         </div>
         
@@ -463,11 +482,8 @@
         </form>
         
         <!-- Footer -->
-        <div class="auth-footer">
-            <p>
-                Already have an account? 
-                <a href="#" onclick="toggleMode()">Sign in</a>
-            </p>
+        <div class="auth-footer" style="display: none;">
+            <!-- Footer removed to avoid duplication with toggle chip -->
         </div>
     </div>
     
@@ -496,19 +512,16 @@
             isSignUp = !isSignUp;
             const subtitle = document.getElementById('authSubtitle');
             const submitBtn = document.getElementById('submitBtn');
-            const footerText = document.querySelector('.auth-footer p');
             const toggleBtn = document.getElementById('toggleModeBtn');
             
             if (isSignUp) {
                 subtitle.textContent = 'Create your account to start monitoring companies';
                 submitBtn.textContent = 'Create Account';
-                footerText.innerHTML = 'Already have an account? <a href="#" onclick="toggleMode()">Sign in</a>';
                 toggleBtn.textContent = 'Already have an account? Sign in';
             } else {
                 subtitle.textContent = 'Welcome back! Sign in to your account';
                 submitBtn.textContent = 'Sign In';
-                footerText.innerHTML = 'Don\'t have an account? <a href="#" onclick="toggleMode()">Create one</a>';
-                toggleBtn.textContent = 'Don\'t have an account? Create one';
+                toggleBtn.textContent = 'Don\'t have an account? Sign up';
             }
         }
         
@@ -565,14 +578,32 @@
                 if (isSignUp) {
                     // Check if email confirmation is required
                     if (result.data?.user && !result.data?.session) {
-                        successMsg.textContent = 'Please check your email to confirm your account before signing in.';
-                        submitBtn.disabled = false;
-                        submitBtn.textContent = 'Create Account';
+                        // Email confirmation required by Supabase, but let's try to sign them in automatically
+                        successMsg.textContent = 'Account created! Signing you in...';
                         
-                        // Switch to sign in mode
-                        setTimeout(() => {
-                            toggleMode();
-                        }, 3000);
+                        // Attempt to sign in immediately
+                        const signInResult = await supabaseClient.auth.signInWithPassword({
+                            email: email,
+                            password: password
+                        });
+                        
+                        if (signInResult.data?.session) {
+                            successMsg.textContent = 'Account created and signed in! Redirecting...';
+                            localStorage.setItem('docspace-auth-debug', JSON.stringify(signInResult.data));
+                            setTimeout(() => {
+                                window.location.href = '/';
+                            }, 1500);
+                        } else {
+                            // If auto sign-in fails, show the email confirmation message
+                            successMsg.textContent = 'Account created! You can now sign in.';
+                            submitBtn.disabled = false;
+                            submitBtn.textContent = 'Create Account';
+                            
+                            // Switch to sign in mode
+                            setTimeout(() => {
+                                toggleMode();
+                            }, 2000);
+                        }
                     } else if (result.data?.session) {
                         // Session created, user can sign in
                         successMsg.textContent = 'Account created and signed in! Redirecting...';
@@ -651,6 +682,16 @@
                 window.location.href = '/';
             }
         });
+        
+        // Check URL parameter for mode
+        const urlParams = new URLSearchParams(window.location.search);
+        const mode = urlParams.get('mode');
+        if (mode === 'signin' && !isSignUp) {
+            // Already in sign-in mode, no need to toggle
+        } else if (mode === 'signin' && isSignUp) {
+            // Switch to sign-in mode
+            toggleMode();
+        }
     </script>
 </body>
 </html>
