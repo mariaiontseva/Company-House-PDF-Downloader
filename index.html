@@ -516,6 +516,7 @@
             padding: 8px 16px 8px 8px;
             display: flex;
             align-items: center;
+            justify-content: flex-start;
             gap: 8px;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -1361,8 +1362,15 @@
             
             /* Fix profile button on mobile */
             .create-account-btn.profile-mode {
-                padding: 8px 12px 8px 8px;
+                padding: 6px 12px 6px 6px;
                 white-space: nowrap;
+                min-height: 44px;
+            }
+            
+            .profile-icon {
+                width: 32px;
+                height: 32px;
+                margin: 0;
             }
             
             .profile-text {
