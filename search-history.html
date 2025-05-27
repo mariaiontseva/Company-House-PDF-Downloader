@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search History - DocSpace</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%236366f1'/%3E%3Cstop offset='100%25' style='stop-color:%238b5cf6'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='6' fill='url(%23g)'/%3E%3Cpath d='M16 6L8 11v13h16V11L16 6z' fill='white'/%3E%3Crect x='11' y='14' width='3' height='3' fill='%236366f1'/%3E%3Crect x='18' y='14' width='3' height='3' fill='%236366f1'/%3E%3Crect x='11' y='19' width='3' height='3' fill='%236366f1'/%3E%3Crect x='18' y='19' width='3' height='3' fill='%236366f1'/%3E%3C/svg%3E">
+    
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #818cf8;
+            --secondary: #8b5cf6;
+            --accent: #ec4899;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --card-bg: rgba(30, 41, 59, 0.5);
+            --border: rgba(255, 255, 255, 0.1);
+            
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-muted: #64748b;
+            
+            --gradient-1: linear-gradient(135deg, var(--primary), var(--secondary));
+            --gradient-2: linear-gradient(135deg, var(--secondary), var(--accent));
+            
+            --shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
+            
+            --radius: 12px;
+        }
+
+        body.light-mode {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-tertiary: #e2e8f0;
+            --card-bg: rgba(255, 255, 255, 0.8);
+            --border: rgba(0, 0, 0, 0.1);
+            
+            --text-primary: #1e293b;
+            --text-secondary: #475569;
+            --text-muted: #64748b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Top bar */
+        .top-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        body.light-mode .top-bar {
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 14px;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        .back-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .back-btn svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .logo-small {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: var(--gradient-2);
+            border-radius: 10px;
+            box-shadow: var(--shadow-md);
+        }
+
+        .logo-small svg {
+            width: 24px;
+            height: 24px;
+            color: white;
+        }
+
+        .page-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* Theme toggle */
+        .theme-toggle {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+
+        .theme-toggle svg {
+            width: 20px;
+            height: 20px;
+            color: #a5b4fc;
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle:hover svg {
+            color: white;
+            transform: scale(1.1);
+        }
+
+        body.light-mode .theme-toggle {
+            background: white;
+            border-color: #e2e8f0;
+            box-shadow: var(--shadow);
+        }
+
+        body.light-mode .theme-toggle svg {
+            color: #6366f1;
+        }
+
+        /* Main content */
+        .main-container {
+            padding-top: 100px;
+            padding-bottom: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding-left: 24px;
+            padding-right: 24px;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+
+        .page-header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        /* History container */
+        .history-container {
+            display: grid;
+            gap: 16px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .history-item {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .history-item:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary-light);
+        }
+
+        .history-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--gradient-1);
+        }
+
+        .company-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .company-main {
+            flex: 1;
+        }
+
+        .company-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .company-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .company-number {
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            background: var(--bg-tertiary);
+            padding: 2px 8px;
+            border-radius: 6px;
+        }
+
+        .company-status {
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            text-transform: capitalize;
+            font-weight: 500;
+        }
+
+        .search-date {
+            color: var(--text-muted);
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .search-date svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        /* Status badges */
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            margin-left: 12px;
+        }
+
+        .status-downloaded {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .status-not-downloaded {
+            background: rgba(107, 114, 128, 0.2);
+            color: var(--text-secondary);
+            border: 1px solid rgba(107, 114, 128, 0.3);
+        }
+
+        /* Action buttons */
+        .history-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+        }
+
+        .btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            border: none;
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-secondary);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-primary {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #059669;
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state svg {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .empty-state p {
+            margin-bottom: 24px;
+            font-size: 1rem;
+        }
+
+        .btn-home {
+            background: var(--primary);
+            color: white;
+            padding: 12px 24px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-home:hover {
+            background: var(--primary-dark);
+        }
+
+        /* Loading state */
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 32px;
+            height: 32px;
+            border: 3px solid rgba(99, 102, 241, 0.2);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 16px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main-container {
+                padding-left: 16px;
+                padding-right: 16px;
+            }
+
+            .page-header h1 {
+                font-size: 2rem;
+            }
+
+            .history-item {
+                padding: 16px;
+            }
+
+            .company-header {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .status-badge {
+                margin-left: 0;
+                align-self: flex-start;
+            }
+
+            .history-actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top bar -->
+    <div class="top-bar">
+        <div class="nav-left">
+            <a href="/" class="back-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                </svg>
+                Back to DocSpace
+            </a>
+            <div class="logo-small">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+            </div>
+            <h1 class="page-title">Search History</h1>
+        </div>
+        
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+            </svg>
+        </button>
+    </div>
+
+    <!-- Main content -->
+    <div class="main-container">
+        <div class="page-header">
+            <h1>Your Search History</h1>
+            <p>Companies you've searched for and downloaded</p>
+        </div>
+
+        <!-- Loading state -->
+        <div class="loading" id="loadingState">
+            <div class="spinner"></div>
+            <p>Loading your search history...</p>
+        </div>
+
+        <!-- History container -->
+        <div class="history-container" id="historyContainer" style="display: none;">
+            <!-- Items will be populated by JavaScript -->
+        </div>
+
+        <!-- Empty state -->
+        <div class="empty-state" id="emptyState" style="display: none;">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <h3>No search history yet</h3>
+            <p>Start searching for companies to see them here</p>
+            <a href="/" class="btn btn-home">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+                Go to DocSpace
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Theme toggle
+        const themeToggle = document.getElementById('themeToggle');
+        const body = document.body;
+
+        // Check for saved theme preference or default to dark mode
+        const currentTheme = localStorage.getItem('theme') || 'dark';
+        if (currentTheme === 'light') {
+            body.classList.add('light-mode');
+            themeToggle.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+            `;
+        }
+
+        themeToggle.addEventListener('click', () => {
+            body.classList.toggle('light-mode');
+            const theme = body.classList.contains('light-mode') ? 'light' : 'dark';
+            localStorage.setItem('theme', theme);
+            
+            if (theme === 'light') {
+                themeToggle.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                `;
+            } else {
+                themeToggle.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                    </svg>
+                `;
+            }
+        });
+
+        // Initialize Supabase
+        const SUPABASE_URL = 'https://iotwhyiisbazeqmowljv.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlvdHdoeWlpc2JhemVxbW93bGp2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgzMDUwMzUsImV4cCI6MjA2Mzg4MTAzNX0.HYAZLeIjR9b9C9k0p3wgf73GvpVH4-Ag9wQbACLcsLc';
+        const { createClient } = supabase;
+        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+            auth: {
+                persistSession: true,
+                storageKey: 'docspace-auth',
+                storage: window.localStorage,
+                detectSessionInUrl: true,
+                autoRefreshToken: true
+            }
+        });
+
+        // Search history functions
+        async function getSearchHistory() {
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            if (!user) return [];
+
+            const { data, error } = await supabaseClient
+                .from('search_history')
+                .select('*')
+                .order('searched_at', { ascending: false })
+                .limit(50);
+
+            if (error) {
+                console.error('Error getting search history:', error);
+                return [];
+            }
+            return data || [];
+        }
+
+        // Render search history
+        function renderSearchHistory(history) {
+            const container = document.getElementById('historyContainer');
+            const loadingState = document.getElementById('loadingState');
+            const emptyState = document.getElementById('emptyState');
+
+            loadingState.style.display = 'none';
+
+            if (history.length === 0) {
+                emptyState.style.display = 'block';
+                container.style.display = 'none';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+            container.style.display = 'grid';
+
+            container.innerHTML = history.map(item => `
+                <div class="history-item">
+                    <div class="company-header">
+                        <div class="company-main">
+                            <div class="company-name">${item.company_name}</div>
+                            <div class="company-details">
+                                <span class="company-number">#${item.company_number}</span>
+                                ${item.company_status ? `<span class="company-status">${item.company_status}</span>` : ''}
+                            </div>
+                            <div class="search-date">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                Searched ${new Date(item.searched_at).toLocaleDateString('en-GB', { 
+                                    day: 'numeric', 
+                                    month: 'short', 
+                                    year: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                })}
+                            </div>
+                        </div>
+                        <div class="status-badge ${item.download_status === 'downloaded' ? 'status-downloaded' : 'status-not-downloaded'}">
+                            ${item.download_status === 'downloaded' ? 
+                                `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                </svg>
+                                Downloaded` : 
+                                `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                Not Downloaded`
+                            }
+                        </div>
+                    </div>
+                    
+                    <div class="history-actions">
+                        <button class="btn btn-secondary" onclick="searchAgain('${item.company_number}', '${item.company_name.replace(/'/g, "\\'")}')">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                            Search Again
+                        </button>
+                        ${item.download_status === 'downloaded' ? 
+                            `<button class="btn btn-primary" onclick="redownloadFree('${item.company_number}', '${item.company_name.replace(/'/g, "\\'")}')">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                </svg>
+                                Free Re-download
+                            </button>` : 
+                            ''
+                        }
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Action functions
+        function searchAgain(companyNumber, companyName) {
+            // Store search data and redirect
+            sessionStorage.setItem('searchData', JSON.stringify({
+                companyNumber,
+                companyName
+            }));
+            window.location.href = '/';
+        }
+
+        function redownloadFree(companyNumber, companyName) {
+            // Store search data for free redownload and redirect
+            sessionStorage.setItem('searchData', JSON.stringify({
+                companyNumber,
+                companyName,
+                freeRedownload: true
+            }));
+            window.location.href = '/';
+        }
+
+        // Load search history on page load
+        async function loadPage() {
+            try {
+                // Check if user is logged in
+                const { data: { user } } = await supabaseClient.auth.getUser();
+                if (!user) {
+                    // Redirect to home if not logged in
+                    window.location.href = '/';
+                    return;
+                }
+
+                const history = await getSearchHistory();
+                renderSearchHistory(history);
+            } catch (error) {
+                console.error('Error loading search history:', error);
+                document.getElementById('loadingState').innerHTML = `
+                    <p style="color: var(--error);">Failed to load search history. Please try refreshing the page.</p>
+                `;
+            }
+        }
+
+        // Initialize
+        window.addEventListener('DOMContentLoaded', loadPage);
+    </script>
+</body>
+</html>
