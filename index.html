@@ -2381,17 +2381,16 @@
                     address: companyData.registered_office_address ? 
                         `${companyData.registered_office_address.address_line_1 || ''}, ${companyData.registered_office_address.locality || ''}, ${companyData.registered_office_address.postal_code || ''}`.replace(/^,\s*|,\s*$/g, '') : 
                         null,
-                    file_count: fileCount,
                     searched_at: new Date().toISOString()
+                    // Note: file_count column doesn't exist in database yet
                 };
                 
                 console.log('Attempting to upsert:', recordData);
                 
                 const { data, error } = await supabaseClient
                     .from('search_history')
-                    .upsert(recordData, {
-                        onConflict: 'user_id,company_number'
-                    });
+                    .upsert(recordData)
+                    .select();
                 
                 if (error) {
                     console.error('Error adding to search history:', error);
@@ -2427,8 +2426,9 @@
                 const { data, error } = await supabaseClient
                     .from('search_history')
                     .select('download_status, downloaded_at, company_name, download_count')
+                    .eq('user_id', user.id)
                     .eq('company_number', companyNumber)
-                    .single();
+                    .maybeSingle();
 
                 if (error && error.code !== 'PGRST116') console.error('Error checking download status:', error);
                 return error ? null : data;
