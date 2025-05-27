@@ -1869,10 +1869,16 @@
                 document.getElementById('totalDocs').textContent = documents.length;
                 
                 // Add to search history for logged-in users with file count
-                if (currentUser && window.searchHistory) {
+                if (window.searchHistory) {
                     try {
-                        await window.searchHistory.addSearch(companyData, documents.length);
-                        console.log('Added to search history:', companyData.company_name, 'with', documents.length, 'documents');
+                        // Double-check auth state before saving
+                        const { data: { user } } = await supabaseClient.auth.getUser();
+                        if (user) {
+                            const result = await window.searchHistory.addSearch(companyData, documents.length);
+                            console.log('Added to search history:', companyData.company_name, 'with', documents.length, 'documents', result);
+                        } else {
+                            console.log('User not logged in, skipping search history');
+                        }
                     } catch (error) {
                         console.error('Failed to add to search history:', error);
                     }
