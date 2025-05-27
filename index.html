@@ -253,16 +253,29 @@
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
-            width: 48px;
-            height: 48px;
-            padding: 0;
+            border-radius: 100px;
+            padding: 8px 16px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             transition: all 0.3s ease;
             box-shadow: none;
+            font-size: 14px;
+            font-weight: 600;
+            gap: 8px;
+        }
+        
+        /* Circle style for logged-in users */
+        #userBtn.profile-mode {
+            width: 48px;
+            height: 48px;
+            padding: 0;
+            border-radius: 50%;
+        }
+        
+        #userBtn.profile-mode span {
+            display: none;
         }
         
         .create-account-btn.profile-mode:hover {
@@ -1436,6 +1449,7 @@
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
+                    <span style="margin-left: 8px;">Create Account</span>
                 </button>
                 
                 <!-- User button (shown when logged in) -->
@@ -1458,6 +1472,13 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                         </svg>
                         Sign In
+                    </button>
+                    <div class="dropdown-divider"></div>
+                    <button class="dropdown-item" onclick="toggleTheme()">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                        </svg>
+                        <span id="themeText">Dark Mode</span>
                     </button>
                 </div>
                 
@@ -1482,14 +1503,14 @@
                         </svg>
                         Log Out
                     </button>
+                    <button class="dropdown-item" onclick="toggleTheme()">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                        </svg>
+                        <span id="themeTextUser">Dark Mode</span>
+                    </button>
                 </div>
             </div>
-            <!-- Dark mode toggle -->
-            <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                </svg>
-            </button>
         </div>
     </div>
     
@@ -1745,29 +1766,30 @@
         let suggestions = [];
         
         // Dark mode toggle
-        const themeToggle = document.getElementById('themeToggle');
         const body = document.body;
         
         // Check for saved theme preference
         const savedTheme = localStorage.getItem('theme');
         if (savedTheme === 'light') {
             body.classList.add('light-mode');
-            updateThemeIcon();
+            updateThemeText();
         }
         
-        themeToggle.addEventListener('click', () => {
+        function toggleTheme() {
             body.classList.toggle('light-mode');
-            updateThemeIcon();
+            updateThemeText();
             localStorage.setItem('theme', body.classList.contains('light-mode') ? 'light' : 'dark');
-        });
+            // Close any open dropdowns
+            document.getElementById('guestDropdown').classList.remove('show');
+            document.getElementById('userDropdown').classList.remove('show');
+        }
         
-        function updateThemeIcon() {
-            const icon = themeToggle.querySelector('svg');
-            if (body.classList.contains('light-mode')) {
-                icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />';
-            } else {
-                icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />';
-            }
+        function updateThemeText() {
+            const themeText = document.getElementById('themeText');
+            const themeTextUser = document.getElementById('themeTextUser');
+            const newText = body.classList.contains('light-mode') ? 'Dark Mode' : 'Light Mode';
+            if (themeText) themeText.textContent = newText;
+            if (themeTextUser) themeTextUser.textContent = newText;
         }
         
         // Helper functions
