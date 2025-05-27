@@ -2580,6 +2580,13 @@
                             allDocuments = docs;
                             paymentCompleted = true;
                             
+                            console.log('Restoring after payment:', companyData, docs);
+                            
+                            // Ensure we have the right data
+                            if (!companyData.title && companyData.company_name) {
+                                companyData.title = companyData.company_name;
+                            }
+                            
                             displayCompanyInfo(companyData);
                             document.getElementById('totalDocs').textContent = docs.length;
                             // Company age should already be set from stored data
@@ -2594,8 +2601,15 @@
                             showStatus('success', 'Payment successful! Starting download...');
                             localStorage.removeItem('pendingCompany');
                             
+                            console.log('Starting download in 1.5 seconds...');
                             setTimeout(async () => {
-                                await startDownload();
+                                console.log('Starting download now...');
+                                try {
+                                    await startDownload();
+                                } catch (error) {
+                                    console.error('Download error:', error);
+                                    showStatus('error', 'Download failed: ' + error.message);
+                                }
                             }, 1500);
                         } else {
                             localStorage.removeItem('pendingCompany');
