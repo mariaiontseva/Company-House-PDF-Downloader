@@ -382,8 +382,8 @@
         }
 
         .btn-download:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px -2px rgba(99, 102, 241, 0.6);
+            background: rgba(99, 102, 241, 0.9);
+            box-shadow: 0 4px 14px 0 rgba(99, 102, 241, 0.5);
         }
 
         .btn-free {
@@ -394,8 +394,7 @@
 
         .btn-free:hover {
             background: #059669;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px -2px rgba(16, 185, 129, 0.6);
+            box-shadow: 0 4px 14px 0 rgba(16, 185, 129, 0.5);
         }
 
         .btn svg {
@@ -686,7 +685,7 @@
                                 </svg>
                                 Download Free
                             </button>` : 
-                            `<button class="btn btn-download" onclick="searchAndDownload('${item.company_number}', '${item.company_name.replace(/'/g, "\\'")}')">
+                            `<button class="btn btn-download" onclick="initiatePayment('${item.company_number}', '${item.company_name.replace(/'/g, "\\'")}')">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                                 </svg>
@@ -707,6 +706,23 @@
                 autoDownload: true
             }));
             window.location.href = '/';
+        }
+        
+        // Function to handle paid downloads
+        function initiatePayment(companyNumber, companyName) {
+            // Store company data for after payment
+            const dataToStore = {
+                companyNumber: companyNumber,
+                companyName: companyName,
+                fromHistory: true,
+                timestamp: Date.now()
+            };
+            
+            localStorage.setItem('pendingCompany', JSON.stringify(dataToStore));
+            
+            // Redirect to Stripe payment
+            const paymentUrl = 'https://buy.stripe.com/6oU14m6YxcZL9ywgEncwg01';
+            window.location.href = paymentUrl;
         }
 
         // Load search history on page load

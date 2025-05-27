@@ -2553,6 +2553,20 @@
                 if (storedData) {
                     try {
                         const parsed = JSON.parse(storedData);
+                        
+                        // Check if this is from history page
+                        if (parsed.fromHistory) {
+                            // Redirect to search with the company details
+                            sessionStorage.setItem('searchData', JSON.stringify({
+                                companyNumber: parsed.companyNumber,
+                                companyName: parsed.companyName,
+                                autoDownload: true
+                            }));
+                            localStorage.removeItem('pendingCompany');
+                            window.location.href = window.location.origin;
+                            return;
+                        }
+                        
                         const { companyData: stored, allDocuments: docs, timestamp } = parsed;
                         
                         if (Date.now() - timestamp < 30 * 60 * 1000) {
