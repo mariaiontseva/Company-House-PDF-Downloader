@@ -102,6 +102,102 @@
             --radius-lg: 16px;
         }
         
+        /* Tab navigation */
+        .tab-navigation {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 32px;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 4px;
+            border-radius: 12px;
+        }
+        
+        .tab-button {
+            flex: 1;
+            padding: 12px 24px;
+            background: transparent;
+            border: none;
+            border-radius: 8px;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .tab-button:hover {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .tab-button.active {
+            background: rgba(255, 255, 255, 0.08);
+            color: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .tab-button .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 2px 8px;
+            background: rgba(99, 102, 241, 0.2);
+            color: #a5b4fc;
+            font-size: 11px;
+            font-weight: 600;
+            border-radius: 100px;
+            margin-left: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* Explore tab content */
+        .explore-content {
+            text-align: center;
+            padding: 40px 20px;
+        }
+        
+        .explore-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 24px;
+            background: var(--gradient-2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 40px rgba(99, 102, 241, 0.3);
+        }
+        
+        .explore-icon svg {
+            width: 40px;
+            height: 40px;
+            color: white;
+        }
+        
+        .explore-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 12px;
+        }
+        
+        .explore-description {
+            font-size: 16px;
+            color: #64748b;
+            line-height: 1.6;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        
         /* Toast notification system */
         .toast-container {
             position: fixed;
@@ -1774,29 +1870,59 @@
         
         <!-- Search container -->
         <div class="search-container">
-            <form id="searchForm">
-                <div class="search-wrapper">
-                    <div class="autocomplete-wrapper" style="flex: 1;">
-                        <input 
-                            type="text" 
-                            id="companyName" 
-                            name="companyName" 
-                            class="form-input"
-                            placeholder="Enter company name or number"
-                            required
-                            autocomplete="off"
-                        >
-                        <div class="autocomplete-dropdown" id="autocompleteDropdown"></div>
+            <!-- Tab navigation -->
+            <div class="tab-navigation">
+                <button class="tab-button active" onclick="switchTab('search')">
+                    Search
+                </button>
+                <button class="tab-button" onclick="switchTab('explore')">
+                    Explore
+                    <span class="badge">Coming Soon</span>
+                </button>
+            </div>
+            
+            <!-- Search tab content -->
+            <div class="tab-content active" id="searchTab">
+                <form id="searchForm">
+                    <div class="search-wrapper">
+                        <div class="autocomplete-wrapper" style="flex: 1;">
+                            <input 
+                                type="text" 
+                                id="companyName" 
+                                name="companyName" 
+                                class="form-input"
+                                placeholder="Enter company name or number"
+                                required
+                                autocomplete="off"
+                            >
+                            <div class="autocomplete-dropdown" id="autocompleteDropdown"></div>
+                        </div>
+                        <button type="submit" class="search-btn" id="searchBtn">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                            Search
+                        </button>
                     </div>
-                    <button type="submit" class="search-btn" id="searchBtn">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    <div class="form-helper">Search any UK registered company</div>
+                </form>
+            </div>
+            
+            <!-- Explore tab content -->
+            <div class="tab-content" id="exploreTab">
+                <div class="explore-content">
+                    <div class="explore-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        Search
-                    </button>
+                    </div>
+                    <h3 class="explore-title">Explore UK Companies</h3>
+                    <p class="explore-description">
+                        Discover trending companies, industry insights, and powerful search filters. 
+                        Advanced exploration features coming soon to help you find exactly what you need.
+                    </p>
                 </div>
-                <div class="form-helper">Search any UK registered company</div>
-            </form>
+            </div>
         </div>
         
         <!-- Toast container -->
@@ -2038,6 +2164,26 @@
             if (themeTextUser) themeTextUser.textContent = newText;
         }
         */
+        
+        // Tab switching
+        function switchTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.closest('.tab-button').classList.add('active');
+            
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            if (tabName === 'search') {
+                document.getElementById('searchTab').classList.add('active');
+            } else if (tabName === 'explore') {
+                document.getElementById('exploreTab').classList.add('active');
+            }
+        }
         
         // Logo click effect - confetti animation
         function triggerLogoEffect() {
