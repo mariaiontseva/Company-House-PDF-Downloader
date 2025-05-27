@@ -248,22 +248,46 @@
             box-shadow: 0 4px 14px 0 rgba(99, 102, 241, 0.3);
         }
         
-        /* Profile mode - matching theme toggle style */
+        /* Profile mode - matching logo style exactly */
         .create-account-btn.profile-mode {
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 100px;
-            padding: 8px 16px;
+            padding: 8px 16px 8px 8px;
             display: flex;
             align-items: center;
-            justify-content: center;
+            gap: 8px;
             cursor: pointer;
             transition: all 0.3s ease;
             box-shadow: none;
-            font-size: 14px;
+        }
+        
+        .create-account-btn.profile-mode:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: scale(1.02);
+        }
+        
+        .profile-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            background: var(--gradient-2);
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+        }
+        
+        .create-account-btn.profile-mode:hover .profile-icon {
+            transform: rotate(15deg);
+        }
+        
+        .profile-text {
+            font-size: 15px;
             font-weight: 600;
-            gap: 8px;
+            color: white;
+            letter-spacing: -0.3px;
         }
         
         /* Circle style for logged-in users */
@@ -272,22 +296,33 @@
             height: 48px;
             padding: 0;
             border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
         
-        #userBtn.profile-mode span {
+        #userBtn.profile-mode .profile-icon {
+            width: 48px;
+            height: 48px;
+            background: none;
+        }
+        
+        #userBtn.profile-mode svg {
+            width: 24px;
+            height: 24px;
+            color: white;
+        }
+        
+        #userBtn.profile-mode .profile-text {
             display: none;
         }
         
-        .create-account-btn.profile-mode:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: scale(1.05);
         }
         
-        .create-account-btn.profile-mode svg {
-            width: 24px;
-            height: 24px;
-            color: #a5b4fc;
-            transition: all 0.3s ease;
+        .profile-icon svg {
+            width: 18px;
+            height: 18px;
+            color: white;
         }
         
         .create-account-btn.profile-mode:hover svg {
@@ -1446,17 +1481,21 @@
             <div style="position: relative;">
                 <!-- Guest button (shown when not logged in) -->
                 <button class="create-account-btn profile-mode" id="guestBtn" aria-label="Account" style="display: flex;" onclick="document.getElementById('guestDropdown').classList.toggle('show')">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
-                    <span style="margin-left: 8px;">Create Account</span>
+                    <div class="profile-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                    </div>
+                    <span class="profile-text">Create Account</span>
                 </button>
                 
                 <!-- User button (shown when logged in) -->
                 <button class="create-account-btn profile-mode" id="userBtn" aria-label="Account" style="display: none;" onclick="document.getElementById('userDropdown').classList.toggle('show')">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
+                    <div class="profile-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
                 </button>
                 
                 <!-- Guest dropdown -->
