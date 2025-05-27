@@ -1392,7 +1392,7 @@
         <div class="top-bar-actions">
             <!-- Auth button container with dropdown -->
             <div style="position: relative;">
-                <button class="create-account-btn profile-mode" id="authBtn" aria-label="Account">
+                <button class="create-account-btn profile-mode" id="authBtn" aria-label="Account" onclick="handleAuthButtonClick(event)">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
@@ -1632,6 +1632,28 @@
         
         function showSearchHistory() {
             window.location.href = '/search-history.html';
+        }
+        
+        // Global auth button handler (simple version that doesn't need supabase)
+        function handleAuthButtonClick(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            
+            console.log('Auth button clicked!');
+            
+            // For now, just toggle the dropdown
+            const dropdown = document.getElementById('profileDropdown');
+            if (dropdown) {
+                // Simple toggle for testing
+                if (dropdown.classList.contains('show')) {
+                    dropdown.classList.remove('show');
+                } else {
+                    // Just show guest menu for now
+                    showGuestMenu();
+                }
+            } else {
+                console.error('Dropdown element not found!');
+            }
         }
         
         // Initialize Stripe
