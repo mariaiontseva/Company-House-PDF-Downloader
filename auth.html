@@ -531,20 +531,41 @@
                 
                 if (result.error) throw result.error;
                 
+                console.log('Auth result:', result);
+                
                 // Show success
                 successMsg.style.display = 'block';
                 
-                if (isSignUp && result.data?.user?.identities?.length === 0) {
-                    successMsg.textContent = 'Please check your email to confirm your account.';
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = 'Create Account';
+                if (isSignUp) {
+                    // Check if email confirmation is required
+                    if (result.data?.user && !result.data?.session) {
+                        successMsg.textContent = 'Please check your email to confirm your account before signing in.';
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Create Account';
+                        
+                        // Switch to sign in mode
+                        setTimeout(() => {
+                            toggleMode();
+                        }, 3000);
+                    } else if (result.data?.session) {
+                        // Session created, user can sign in
+                        successMsg.textContent = 'Account created and signed in! Redirecting...';
+                        localStorage.setItem('docspace-auth-debug', JSON.stringify(result.data));
+                        setTimeout(() => {
+                            window.location.href = '/';
+                        }, 1500);
+                    }
                 } else {
-                    successMsg.textContent = isSignUp ? 'Account created successfully! Redirecting...' : 'Signed in successfully! Redirecting...';
-                    
-                    // Redirect after delay
-                    setTimeout(() => {
-                        window.location.href = '/';
-                    }, 1500);
+                    // Sign in
+                    if (result.data?.session) {
+                        successMsg.textContent = 'Signed in successfully! Redirecting...';
+                        localStorage.setItem('docspace-auth-debug', JSON.stringify(result.data));
+                        setTimeout(() => {
+                            window.location.href = '/';
+                        }, 1500);
+                    } else {
+                        throw new Error('Sign in failed - no session created');
+                    }
                 }
                 
             } catch (error) {
