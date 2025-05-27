@@ -1766,7 +1766,9 @@
         }
         
         // Search form handler
-        document.getElementById('searchForm').addEventListener('submit', async (e) => {
+        const searchForm = document.getElementById('searchForm');
+        if (searchForm) {
+            searchForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
             const companyInput = document.getElementById('companyName');
@@ -1915,6 +1917,7 @@
                 `;
             }
         });
+        }
         
         // Download handler
         async function startDownload() {
@@ -1994,7 +1997,9 @@
             downloadZipBtn.disabled = false;
         }
         
-        document.getElementById('downloadZipBtn').addEventListener('click', async () => {
+        const downloadBtn = document.getElementById('downloadZipBtn');
+        if (downloadBtn) {
+            downloadBtn.addEventListener('click', async () => {
             const downloadZipBtn = document.getElementById('downloadZipBtn');
             
             if (!paymentCompleted) {
@@ -2030,6 +2035,7 @@
             
             await startDownload();
         });
+        }
         
         function generateFilename(doc) {
             const date = doc.date || 'unknown';
@@ -2046,6 +2052,11 @@
         // Autocomplete functionality
         const companyInput = document.getElementById('companyName');
         const autocompleteDropdown = document.getElementById('autocompleteDropdown');
+        
+        if (!companyInput || !autocompleteDropdown) {
+            console.log('Search form elements not found, skipping autocomplete setup');
+            // Skip the rest of autocomplete setup if elements don't exist
+        } else {
         
         // Debounce function
         function debounce(func, wait) {
@@ -2201,6 +2212,8 @@
                 hideAutocomplete();
             }
         });
+        
+        } // End of autocomplete setup check
         
         // Initialize Supabase
         const SUPABASE_URL = 'https://iotwhyiisbazeqmowljv.supabase.co';
@@ -2477,9 +2490,12 @@
         };
         
         // Sign out button handler (keeping this one for the separate sign out button if needed)
-        document.getElementById('signOutBtn').addEventListener('click', async () => {
-            signOut();
-        });
+        const signOutBtn = document.getElementById('signOutBtn');
+        if (signOutBtn) {
+            signOutBtn.addEventListener('click', async () => {
+                signOut();
+            });
+        }
         
         // Listen for auth state changes
         supabaseClient.auth.onAuthStateChange((event, session) => {
