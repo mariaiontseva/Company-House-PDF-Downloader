@@ -2533,12 +2533,44 @@
             await new Promise(resolve => setTimeout(resolve, 100));
             // First check if we're coming back from auth redirect
             const hashParams = new URLSearchParams(window.location.hash.substring(1));
-            const accessToken = hashParams.get('access_token');
+            const urlParams = new URLSearchParams(window.location.search);
+            const accessToken = hashParams.get('access_token') || urlParams.get('access_token');
             
             if (accessToken) {
                 console.log('Found access token in URL, setting session...');
-                // Give Supabase time to process the URL
-                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // Try to manually handle the auth callback
+                try {
+                    // First let Supabase try to handle it automatically
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    
+                    // Check if session was created
+                    const { data: { session: autoSession } } = await supabaseClient.auth.getSession();
+                    
+                    if (!autoSession) {
+                        console.log('Auto session detection failed, trying manual exchange...');
+                        // If no session, try to exchange the hash for a session
+                        const refreshToken = hashParams.get('refresh_token') || urlParams.get('refresh_token');
+                        const { data, error } = await supabaseClient.auth.setSession({
+                            access_token: accessToken,
+                            refresh_token: refreshToken
+                        });
+                        
+                        if (error) {
+                            console.error('Error setting session:', error);
+                        } else if (data?.session) {
+                            console.log('Session set manually:', data.session);
+                            currentUser = data.session.user;
+                            updateAuthUI();
+                        }
+                    } else {
+                        console.log('Session detected automatically:', autoSession);
+                        currentUser = autoSession.user;
+                        updateAuthUI();
+                    }
+                } catch (error) {
+                    console.error('Error handling auth callback:', error);
+                }
                 
                 // Clean up the URL
                 window.history.replaceState({}, document.title, window.location.pathname);
@@ -2567,8 +2599,14 @@
             const searchData = sessionStorage.getItem('searchData');
             if (searchData) {
                 try {
-                    const { companyNumber, companyName, autoDownload } = JSON.parse(searchData);
+                    const { companyNumber, companyName, autoDownload, paymentCompleted: paidAlready } = JSON.parse(searchData);
                     sessionStorage.removeItem('searchData'); // Clear it
+                    
+                    // If payment was already completed, set the flag
+                    if (paidAlready) {
+                        paymentCompleted = true;
+                        console.log('Payment already completed, skipping payment step');
+                    }
                     
                     // Fill in the search form
                     const companyInput = document.getElementById('companyName');
@@ -2606,11 +2644,15 @@
                         
                         // Check if this is from history page
                         if (parsed.fromHistory) {
+                            // Mark payment as completed
+                            paymentCompleted = true;
+                            
                             // Redirect to search with the company details
                             sessionStorage.setItem('searchData', JSON.stringify({
                                 companyNumber: parsed.companyNumber,
                                 companyName: parsed.companyName,
-                                autoDownload: true
+                                autoDownload: true,
+                                paymentCompleted: true  // Add this flag
                             }));
                             localStorage.removeItem('pendingCompany');
                             window.location.href = window.location.origin;
