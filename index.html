@@ -2583,8 +2583,8 @@
                             displayCompanyInfo(companyData);
                             document.getElementById('totalDocs').textContent = docs.length;
                             // Company age should already be set from stored data
-                            if (stored.companyData && stored.companyData.date_of_creation) {
-                                const incorporationDate = new Date(stored.companyData.date_of_creation);
+                            if (companyData.date_of_creation) {
+                                const incorporationDate = new Date(companyData.date_of_creation);
                                 const currentDate = new Date();
                                 const ageInYears = Math.floor((currentDate - incorporationDate) / (365.25 * 24 * 60 * 60 * 1000));
                                 document.getElementById('companyAge').textContent = ageInYears;
