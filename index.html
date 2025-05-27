@@ -2644,7 +2644,7 @@
                 }
             }
             
-            const urlParams = new URLSearchParams(window.location.search);
+            // Check payment status using already declared urlParams
             const paymentStatus = urlParams.get('payment');
             
             if (paymentStatus === 'success') {
