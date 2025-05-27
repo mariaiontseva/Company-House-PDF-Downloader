@@ -36,7 +36,8 @@
             align-items: center;
             justify-content: center;
             position: relative;
-            overflow: hidden;
+            padding: 20px;
+            overflow-y: auto;
         }
 
         /* Animated background */
@@ -275,12 +276,15 @@
         .auth-footer a {
             color: var(--primary-light);
             text-decoration: none;
-            font-weight: 500;
-            transition: color 0.3s ease;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            padding: 4px 8px;
+            border-radius: 4px;
         }
 
         .auth-footer a:hover {
             color: white;
+            background: rgba(99, 102, 241, 0.2);
         }
 
         /* Back button */
@@ -370,7 +374,26 @@
             <h2>DocSpace</h2>
         </div>
         
-        <p class="auth-subtitle">Create your account to start monitoring companies</p>
+        <p class="auth-subtitle" id="authSubtitle">Create your account to start monitoring companies</p>
+        
+        <!-- Mode toggle button -->
+        <div style="text-align: center; margin-bottom: 24px;">
+            <button type="button" onclick="toggleMode()" style="
+                background: rgba(99, 102, 241, 0.1);
+                border: 1px solid rgba(99, 102, 241, 0.3);
+                color: #a5b4fc;
+                padding: 8px 20px;
+                border-radius: 100px;
+                font-size: 14px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            " onmouseover="this.style.background='rgba(99, 102, 241, 0.2)'" 
+               onmouseout="this.style.background='rgba(99, 102, 241, 0.1)'"
+               id="toggleModeBtn">
+                Already have an account? Sign in
+            </button>
+        </div>
         
         <!-- Success/Error messages -->
         <div class="success-message" id="successMessage">
@@ -471,18 +494,21 @@
         
         function toggleMode() {
             isSignUp = !isSignUp;
-            const subtitle = document.querySelector('.auth-subtitle');
+            const subtitle = document.getElementById('authSubtitle');
             const submitBtn = document.getElementById('submitBtn');
             const footerText = document.querySelector('.auth-footer p');
+            const toggleBtn = document.getElementById('toggleModeBtn');
             
             if (isSignUp) {
                 subtitle.textContent = 'Create your account to start monitoring companies';
                 submitBtn.textContent = 'Create Account';
                 footerText.innerHTML = 'Already have an account? <a href="#" onclick="toggleMode()">Sign in</a>';
+                toggleBtn.textContent = 'Already have an account? Sign in';
             } else {
                 subtitle.textContent = 'Welcome back! Sign in to your account';
                 submitBtn.textContent = 'Sign In';
                 footerText.innerHTML = 'Don\'t have an account? <a href="#" onclick="toggleMode()">Create one</a>';
+                toggleBtn.textContent = 'Don\'t have an account? Create one';
             }
         }
         
