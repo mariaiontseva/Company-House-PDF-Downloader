@@ -768,15 +768,20 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: var(--radius-lg);
             padding: 32px;
+            padding-left: 36px;
             margin-bottom: 24px;
-            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
 
-        .company-card:hover {
-            background: rgba(255, 255, 255, 0.08);
-            border-color: rgba(255, 255, 255, 0.15);
-            transform: translateY(-2px);
-            box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.3);
+        .company-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
         }
 
         .company-name {
