@@ -2067,11 +2067,10 @@
                 updateProgress(i + 1, allDocuments.length);
                 
                 try {
-                    const pdfUrl = doc.metadataUrl.includes('document-api.') 
-                        ? doc.metadataUrl 
-                        : `${doc.metadataUrl}/content`;
+                    // CRITICAL FIX: Always append /content to get actual PDF, not metadata
+                    const contentUrl = `${doc.metadataUrl}/content`;
                     
-                    const pdfResponse = await fetchWithWorker(pdfUrl, API_KEY);
+                    const pdfResponse = await fetchWithWorker(contentUrl, API_KEY);
                     
                     if (pdfResponse.ok) {
                         const pdfBlob = await pdfResponse.blob();
