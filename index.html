@@ -1998,7 +1998,12 @@
                         const { data: { user } } = await supabaseClient.auth.getUser();
                         if (user) {
                             const result = await window.searchHistory.addSearch(companyData, documents.length);
-                            console.log('Added to search history:', companyData.company_name, 'with', documents.length, 'documents', result);
+                            console.log('Search history add result:', result);
+                            if (result) {
+                                console.log('Successfully added to search history:', companyData.company_name, 'with', documents.length, 'documents');
+                            } else {
+                                console.log('Failed to add to search history - result is null/undefined');
+                            }
                         } else {
                             console.log('User not logged in, skipping search history');
                         }
@@ -2356,28 +2361,45 @@
         // Search history functions (inline since we can't import modules)
         window.searchHistory = {
             async addSearch(companyData, fileCount = null) {
+                console.log('addSearch called with:', companyData, 'fileCount:', fileCount);
+                
                 const { data: { user } } = await supabaseClient.auth.getUser();
-                if (!user) return null;
+                if (!user) {
+                    console.log('No user found in addSearch');
+                    return null;
+                }
+                
+                console.log('User found:', user.id, user.email);
+                
+                const recordData = {
+                    user_id: user.id,
+                    company_number: companyData.company_number,
+                    company_name: companyData.company_name || companyData.title,
+                    company_status: companyData.company_status,
+                    company_type: companyData.company_type,
+                    date_of_creation: companyData.date_of_creation,
+                    address: companyData.registered_office_address ? 
+                        `${companyData.registered_office_address.address_line_1 || ''}, ${companyData.registered_office_address.locality || ''}, ${companyData.registered_office_address.postal_code || ''}`.replace(/^,\s*|,\s*$/g, '') : 
+                        null,
+                    file_count: fileCount,
+                    searched_at: new Date().toISOString()
+                };
+                
+                console.log('Attempting to upsert:', recordData);
                 
                 const { data, error } = await supabaseClient
                     .from('search_history')
-                    .upsert({
-                        user_id: user.id,
-                        company_number: companyData.company_number,
-                        company_name: companyData.company_name || companyData.title,
-                        company_status: companyData.company_status,
-                        company_type: companyData.company_type,
-                        date_of_creation: companyData.date_of_creation,
-                        address: companyData.registered_office_address ? 
-                            `${companyData.registered_office_address.address_line_1 || ''}, ${companyData.registered_office_address.locality || ''}, ${companyData.registered_office_address.postal_code || ''}`.replace(/^,\s*|,\s*$/g, '') : 
-                            null,
-                        file_count: fileCount,
-                        searched_at: new Date().toISOString()
-                    }, {
+                    .upsert(recordData, {
                         onConflict: 'user_id,company_number'
                     });
                 
-                if (error) console.error('Error adding to search history:', error);
+                if (error) {
+                    console.error('Error adding to search history:', error);
+                    console.error('Error details:', error.message, error.details, error.hint);
+                } else {
+                    console.log('Successfully added to search history:', data);
+                }
+                
                 return data;
             },
 
