@@ -1377,22 +1377,13 @@
                 font-size: 14px;
             }
             
-            /* Adjust top bar to not cover content */
-            .top-bar {
-                position: relative;
-                margin-bottom: 20px;
-                transform: none;
-                left: auto;
-                width: 100%;
-                top: 0;
-            }
-            
-            .main-container {
-                padding-top: 20px;
-            }
-            
+            /* Keep top bar fixed but ensure content isn't covered */
             .hero {
-                margin-top: 0;
+                padding-top: 80px;
+            }
+            
+            h1.hero-subtitle {
+                font-size: 26px;
             }
         }
 
