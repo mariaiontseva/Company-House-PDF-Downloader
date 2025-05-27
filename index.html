@@ -2852,11 +2852,9 @@
                 await supabaseClient.auth.signOut();
                 currentUser = null;
                 
-                // Close dropdown menu
-                const dropdown = document.getElementById('profileDropdown');
-                if (dropdown) {
-                    dropdown.classList.remove('show');
-                }
+                // Close all dropdown menus
+                document.getElementById('userDropdown').classList.remove('show');
+                document.getElementById('guestDropdown').classList.remove('show');
                 
                 updateAuthUI();
                 showStatus('info', 'Signed out successfully');
