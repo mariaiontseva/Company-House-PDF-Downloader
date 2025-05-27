@@ -72,6 +72,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <script src="https://js.stripe.com/v3/"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <style>
         :root {
@@ -1220,12 +1221,19 @@
             </svg>
         </div>
         <div class="top-bar-actions">
-            <!-- Create Account button -->
-            <button class="create-account-btn" id="createAccountBtn" aria-label="Create account">
+            <!-- Auth button (changes based on auth state) -->
+            <button class="create-account-btn" id="authBtn" aria-label="Account">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
-                <span>Create Account</span>
+                <span id="authBtnText">Create Account</span>
+            </button>
+            <!-- Sign out button (hidden by default) -->
+            <button class="create-account-btn" id="signOutBtn" style="display: none;" aria-label="Sign out">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                <span>Sign Out</span>
             </button>
             <!-- Dark mode toggle -->
             <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
@@ -1953,10 +1961,64 @@
             }
         });
         
-        // Create Account button handler
-        document.getElementById('createAccountBtn').addEventListener('click', () => {
+        // Initialize Supabase
+        const SUPABASE_URL = 'YOUR_SUPABASE_URL'; // Replace with your URL
+        const SUPABASE_ANON_KEY = 'YOUR_ANON_KEY'; // Replace with your anon key
+        const { createClient } = supabase;
+        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        // Auth state management
+        let currentUser = null;
+        
+        // Check auth state
+        async function checkAuthState() {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            currentUser = session?.user || null;
+            updateAuthUI();
+        }
+        
+        // Update UI based on auth state
+        function updateAuthUI() {
+            const authBtn = document.getElementById('authBtn');
+            const authBtnText = document.getElementById('authBtnText');
+            const signOutBtn = document.getElementById('signOutBtn');
+            
+            if (currentUser) {
+                // User is logged in
+                authBtn.style.display = 'none';
+                signOutBtn.style.display = 'flex';
+                
+                // Show monitoring features (coming soon)
+                // Enable free download if user has credits
+            } else {
+                // User is not logged in
+                authBtn.style.display = 'flex';
+                signOutBtn.style.display = 'none';
+                authBtnText.textContent = 'Create Account';
+            }
+        }
+        
+        // Auth button handler
+        document.getElementById('authBtn').addEventListener('click', () => {
             window.location.href = '/auth.html';
         });
+        
+        // Sign out button handler
+        document.getElementById('signOutBtn').addEventListener('click', async () => {
+            await supabaseClient.auth.signOut();
+            currentUser = null;
+            updateAuthUI();
+            showStatus('info', 'Signed out successfully');
+        });
+        
+        // Listen for auth state changes
+        supabaseClient.auth.onAuthStateChange((event, session) => {
+            currentUser = session?.user || null;
+            updateAuthUI();
+        });
+        
+        // Check auth state on load
+        checkAuthState();
         
         // Check for payment status on page load
         window.addEventListener('DOMContentLoaded', async () => {
