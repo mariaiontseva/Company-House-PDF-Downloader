@@ -1472,7 +1472,7 @@
         </div>
         
         <!-- Info section -->
-        <div class="info-section-single">
+        <div class="info-section-single" id="marketingSection">
             <div class="info-container">
                 <div class="info-content">
                     <div class="info-column">
@@ -2162,6 +2162,7 @@
         function updateAuthUI() {
             console.log('Updating auth UI, currentUser:', currentUser);
             const authBtn = document.getElementById('authBtn');
+            const marketingSection = document.getElementById('marketingSection');
             
             if (!authBtn) {
                 console.error('Auth button not found!');
@@ -2170,6 +2171,10 @@
             
             if (currentUser) {
                 console.log('User is logged in:', currentUser.email);
+                // Hide marketing section for logged-in users
+                if (marketingSection) {
+                    marketingSection.style.display = 'none';
+                }
                 // User is logged in - show profile icon
                 authBtn.style.display = 'flex';
                 authBtn.classList.add('profile-mode');
@@ -2202,6 +2207,11 @@
                     e.preventDefault();
                     showGuestMenu();
                 };
+                
+                // Show marketing section for guests
+                if (marketingSection) {
+                    marketingSection.style.display = 'block';
+                }
             }
         }
         
