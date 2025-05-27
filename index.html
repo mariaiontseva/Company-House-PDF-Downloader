@@ -2306,6 +2306,15 @@
                 console.log('Force updating UI for logged in user:', session.user.email);
                 currentUser = session.user;
                 updateAuthUI();
+            } else {
+                console.log('No session found in force update');
+                // Try one more time with refresh
+                const { data: refreshData } = await supabaseClient.auth.refreshSession();
+                if (refreshData?.session) {
+                    console.log('Session found after refresh:', refreshData.session.user.email);
+                    currentUser = refreshData.session.user;
+                    updateAuthUI();
+                }
             }
         }, 100);
         

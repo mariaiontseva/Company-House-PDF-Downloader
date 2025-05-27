@@ -608,7 +608,7 @@
                         successMsg.textContent = 'Account created and signed in! Redirecting...';
                         localStorage.setItem('docspace-auth-debug', JSON.stringify(result.data));
                         setTimeout(() => {
-                            window.location.href = '/';
+                            window.location.href = window.location.origin;
                         }, 1500);
                     }
                 } else {
@@ -617,7 +617,7 @@
                         successMsg.textContent = 'Signed in successfully! Redirecting...';
                         localStorage.setItem('docspace-auth-debug', JSON.stringify(result.data));
                         setTimeout(() => {
-                            window.location.href = '/';
+                            window.location.href = window.location.origin;
                         }, 1500);
                     } else {
                         throw new Error('Sign in failed - no session created');
@@ -686,7 +686,7 @@
         supabaseClient.auth.getSession().then(({ data: { session } }) => {
             if (session) {
                 // User is already logged in, redirect to home
-                window.location.href = '/';
+                window.location.href = window.location.origin;
             }
         });
         
