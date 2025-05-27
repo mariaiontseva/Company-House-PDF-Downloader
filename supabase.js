@@ -235,6 +235,89 @@ export const downloads = {
     }
 };
 
+// Search History functions
+export const searchHistory = {
+    // Add company to search history
+    async addSearch(companyData) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return null; // Only track for logged-in users
+        
+        const { data, error } = await supabase
+            .from('search_history')
+            .upsert({
+                user_id: user.id,
+                company_number: companyData.company_number,
+                company_name: companyData.company_name,
+                company_status: companyData.company_status,
+                company_type: companyData.company_type,
+                date_of_creation: companyData.date_of_creation,
+                address: companyData.registered_office_address ? 
+                    `${companyData.registered_office_address.address_line_1 || ''}, ${companyData.registered_office_address.locality || ''}, ${companyData.registered_office_address.postal_code || ''}`.replace(/^,\s*|,\s*$/g, '') : 
+                    null,
+                searched_at: new Date().toISOString()
+            }, {
+                onConflict: 'user_id,company_number'
+            })
+            .select()
+            .single();
+        
+        if (error) console.error('Error adding to search history:', error);
+        return data;
+    },
+
+    // Get user's search history
+    async getHistory() {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error('User not authenticated');
+
+        const { data, error } = await supabase
+            .from('search_history')
+            .select('*')
+            .order('searched_at', { ascending: false })
+            .limit(50);
+
+        if (error) throw error;
+        return data;
+    },
+
+    // Check if company was already downloaded
+    async checkDownloadStatus(companyNumber) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return null;
+
+        const { data, error } = await supabase
+            .from('search_history')
+            .select('download_status, downloaded_at, company_name, download_count')
+            .eq('company_number', companyNumber)
+            .single();
+
+        if (error && error.code !== 'PGRST116') throw error; // PGRST116 = no rows found
+        return data;
+    },
+
+    // Mark company as downloaded
+    async markAsDownloaded(companyNumber, paymentId = null) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return null;
+
+        const { data, error } = await supabase
+            .from('search_history')
+            .update({
+                download_status: 'downloaded',
+                downloaded_at: new Date().toISOString(),
+                download_count: supabase.raw('download_count + 1'),
+                stripe_payment_id: paymentId,
+                updated_at: new Date().toISOString()
+            })
+            .eq('company_number', companyNumber)
+            .select()
+            .single();
+
+        if (error) console.error('Error marking as downloaded:', error);
+        return data;
+    }
+};
+
 // Notification functions
 export const notifications = {
     // Get user's notifications

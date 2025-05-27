@@ -48,6 +48,26 @@ CREATE TABLE public.download_history (
   stripe_payment_id TEXT
 );
 
+-- Search history table
+CREATE TABLE public.search_history (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  company_number VARCHAR(20) NOT NULL,
+  company_name VARCHAR(255) NOT NULL,
+  company_status VARCHAR(50),
+  company_type VARCHAR(100),
+  date_of_creation DATE,
+  address TEXT,
+  searched_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  download_status TEXT DEFAULT 'not_downloaded', -- not_downloaded, downloaded, free_redownload
+  downloaded_at TIMESTAMP WITH TIME ZONE,
+  download_count INTEGER DEFAULT 0,
+  stripe_payment_id VARCHAR(100),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(user_id, company_number)
+);
+
 -- Webhook notifications
 CREATE TABLE public.notifications (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -63,6 +83,7 @@ CREATE TABLE public.notifications (
 ALTER TABLE public.user_profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.monitored_companies ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.download_history ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.search_history ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
 
 -- Policies
@@ -77,6 +98,9 @@ CREATE POLICY "Users can view own monitored companies" ON public.monitored_compa
 
 CREATE POLICY "Users can view own downloads" ON public.download_history
   FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can view own search history" ON public.search_history
+  FOR ALL USING (auth.uid() = user_id);
 
 CREATE POLICY "Users can view own notifications" ON public.notifications
   FOR SELECT USING (auth.uid() = user_id);

@@ -1077,6 +1077,219 @@
             color: #64748b;
         }
 
+        /* Search History Modal */
+        .search-history-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-content {
+            position: relative;
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border);
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: var(--text-primary);
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .modal-close:hover {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        .modal-body {
+            padding: 20px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .no-history {
+            text-align: center;
+            color: var(--text-secondary);
+            font-style: italic;
+            padding: 40px 20px;
+        }
+
+        .history-item {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 1px solid var(--border);
+            transition: all 0.2s ease;
+        }
+
+        .history-item:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .history-main {
+            margin-bottom: 12px;
+        }
+
+        .history-item .company-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+
+        .company-details {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+
+        .company-number {
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-family: monospace;
+        }
+
+        .company-status {
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 12px;
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+
+        .downloaded-badge {
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 12px;
+            background: var(--success);
+            color: white;
+            font-weight: 500;
+        }
+
+        .not-downloaded {
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 12px;
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+        }
+
+        .search-date {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .history-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .history-actions .btn-secondary,
+        .history-actions .btn-primary {
+            padding: 8px 16px;
+            font-size: 14px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .history-actions .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .history-actions .btn-secondary:hover {
+            background: var(--bg-secondary);
+            transform: translateY(-1px);
+        }
+
+        .history-actions .btn-primary {
+            background: var(--success);
+            color: white;
+        }
+
+        .history-actions .btn-primary:hover {
+            background: #10b981;
+            transform: translateY(-1px);
+        }
+
+        /* Download Status Indicator */
+        .download-status-indicator {
+            margin-bottom: 12px;
+        }
+
+        .already-downloaded {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--success);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .already-downloaded svg {
+            flex-shrink: 0;
+        }
+
         /* Responsive design */
         @media (max-width: 768px) {
             .top-bar {
@@ -1660,7 +1873,7 @@
             fileList.scrollTop = fileList.scrollHeight;
         }
         
-        function displayCompanyInfo(company) {
+        async function displayCompanyInfo(company) {
             document.getElementById('companyNameDisplay').textContent = company.title;
             
             const companyInfo = document.getElementById('companyInfo');
@@ -1688,6 +1901,59 @@
                 </div>
                 ` : ''}
             `;
+            
+            // Check download status for authenticated users
+            if (currentUser && window.searchHistory) {
+                try {
+                    const downloadStatus = await window.searchHistory.checkDownloadStatus(company.company_number);
+                    const downloadBtn = document.getElementById('downloadZipBtn');
+                    const downloadBtnContainer = downloadBtn.parentElement;
+                    
+                    if (downloadStatus && downloadStatus.download_status === 'downloaded') {
+                        // Company already downloaded - show free re-download option
+                        const downloadedDate = new Date(downloadStatus.downloaded_at).toLocaleDateString();
+                        
+                        // Add downloaded indicator
+                        const existingIndicator = downloadBtnContainer.querySelector('.download-status-indicator');
+                        if (existingIndicator) existingIndicator.remove();
+                        
+                        const indicator = document.createElement('div');
+                        indicator.className = 'download-status-indicator';
+                        indicator.innerHTML = `
+                            <div class="already-downloaded">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="16" height="16">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                </svg>
+                                Already downloaded on ${downloadedDate}
+                            </div>
+                        `;
+                        downloadBtnContainer.insertBefore(indicator, downloadBtn);
+                        
+                        // Update button text
+                        downloadBtn.innerHTML = `
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            </svg>
+                            Free Re-download
+                        `;
+                        downloadBtn.className = 'btn btn-primary'; // Change to green/primary color
+                    } else {
+                        // Company not downloaded yet - show normal download button
+                        const existingIndicator = downloadBtnContainer.querySelector('.download-status-indicator');
+                        if (existingIndicator) existingIndicator.remove();
+                        
+                        downloadBtn.innerHTML = `
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+                            </svg>
+                            Download All Documents
+                        `;
+                        downloadBtn.className = 'btn btn-success';
+                    }
+                } catch (error) {
+                    console.error('Error checking download status:', error);
+                }
+            }
         }
         
         // Search form handler
@@ -1749,7 +2015,18 @@
                     
                     companyData = searchData.items[0];
                 }
-                displayCompanyInfo(companyData);
+                
+                // Add to search history for logged-in users
+                if (currentUser && window.searchHistory) {
+                    try {
+                        await window.searchHistory.addSearch(companyData);
+                        console.log('Added to search history:', companyData.company_name);
+                    } catch (error) {
+                        console.error('Failed to add to search history:', error);
+                    }
+                }
+                
+                await displayCompanyInfo(companyData);
                 
                 // Get filing history
                 showStatus('info', 'Fetching filing history...');
@@ -2125,6 +2402,65 @@
         // Auth state management
         let currentUser = null;
         
+        // Search history functions (inline since we can't import modules)
+        window.searchHistory = {
+            async addSearch(companyData) {
+                const { data: { user } } = await supabaseClient.auth.getUser();
+                if (!user) return null;
+                
+                const { data, error } = await supabaseClient
+                    .from('search_history')
+                    .upsert({
+                        user_id: user.id,
+                        company_number: companyData.company_number,
+                        company_name: companyData.company_name || companyData.title,
+                        company_status: companyData.company_status,
+                        company_type: companyData.company_type,
+                        date_of_creation: companyData.date_of_creation,
+                        address: companyData.registered_office_address ? 
+                            `${companyData.registered_office_address.address_line_1 || ''}, ${companyData.registered_office_address.locality || ''}, ${companyData.registered_office_address.postal_code || ''}`.replace(/^,\s*|,\s*$/g, '') : 
+                            null,
+                        searched_at: new Date().toISOString()
+                    }, {
+                        onConflict: 'user_id,company_number'
+                    });
+                
+                if (error) console.error('Error adding to search history:', error);
+                return data;
+            },
+
+            async getHistory() {
+                const { data: { user } } = await supabaseClient.auth.getUser();
+                if (!user) return [];
+
+                const { data, error } = await supabaseClient
+                    .from('search_history')
+                    .select('*')
+                    .order('searched_at', { ascending: false })
+                    .limit(20);
+
+                if (error) {
+                    console.error('Error getting search history:', error);
+                    return [];
+                }
+                return data || [];
+            },
+
+            async checkDownloadStatus(companyNumber) {
+                const { data: { user } } = await supabaseClient.auth.getUser();
+                if (!user) return null;
+
+                const { data, error } = await supabaseClient
+                    .from('search_history')
+                    .select('download_status, downloaded_at, company_name, download_count')
+                    .eq('company_number', companyNumber)
+                    .single();
+
+                if (error && error.code !== 'PGRST116') console.error('Error checking download status:', error);
+                return error ? null : data;
+            }
+        };
+        
         // Listen for auth state changes
         supabaseClient.auth.onAuthStateChange((event, session) => {
             console.log('Auth state changed:', event, session);
@@ -2279,9 +2615,104 @@
             // TODO: Show modal with monitored companies list
         }
         
-        function showSearchHistory() {
-            alert('Search History - Coming soon!');
-            // TODO: Show modal with search history
+        async function showSearchHistory() {
+            try {
+                const history = await window.searchHistory.getHistory();
+                
+                // Create modal HTML
+                const modal = document.createElement('div');
+                modal.className = 'search-history-modal';
+                modal.innerHTML = `
+                    <div class="modal-overlay" onclick="closeSearchHistoryModal()"></div>
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3>Search History</h3>
+                            <button class="modal-close" onclick="closeSearchHistoryModal()">×</button>
+                        </div>
+                        <div class="modal-body">
+                            ${history.length === 0 ? 
+                                '<p class="no-history">No search history yet. Start searching for companies!</p>' :
+                                history.map(item => `
+                                    <div class="history-item" data-company-number="${item.company_number}">
+                                        <div class="history-main">
+                                            <div class="company-name">${item.company_name}</div>
+                                            <div class="company-details">
+                                                <span class="company-number">#${item.company_number}</span>
+                                                ${item.company_status ? `<span class="company-status">${item.company_status}</span>` : ''}
+                                                ${item.download_status === 'downloaded' ? 
+                                                    '<span class="downloaded-badge">✓ Downloaded</span>' : 
+                                                    '<span class="not-downloaded">Not downloaded</span>'
+                                                }
+                                            </div>
+                                            <div class="search-date">Searched: ${new Date(item.searched_at).toLocaleDateString()}</div>
+                                        </div>
+                                        <div class="history-actions">
+                                            <button class="btn-secondary" onclick="searchAgain('${item.company_number}', '${item.company_name.replace(/'/g, "\\'")}')">
+                                                Search Again
+                                            </button>
+                                            ${item.download_status === 'downloaded' ? 
+                                                `<button class="btn-primary" onclick="redownloadFree('${item.company_number}', '${item.company_name.replace(/'/g, "\\'")}')">
+                                                    Free Re-download
+                                                </button>` : 
+                                                ''
+                                            }
+                                        </div>
+                                    </div>
+                                `).join('')
+                            }
+                        </div>
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
+                
+                // Close dropdown
+                const dropdown = document.getElementById('profileDropdown');
+                if (dropdown) dropdown.classList.remove('show');
+                
+            } catch (error) {
+                console.error('Error showing search history:', error);
+                alert('Failed to load search history');
+            }
+        }
+        
+        function closeSearchHistoryModal() {
+            const modal = document.querySelector('.search-history-modal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+        
+        async function searchAgain(companyNumber, companyName) {
+            closeSearchHistoryModal();
+            
+            // Fill in the search form and submit
+            const companyInput = document.getElementById('companyName');
+            companyInput.value = companyName;
+            companyInput.dataset.companyNumber = companyNumber;
+            
+            // Trigger form submission
+            document.getElementById('searchForm').dispatchEvent(new Event('submit'));
+        }
+        
+        async function redownloadFree(companyNumber, companyName) {
+            closeSearchHistoryModal();
+            
+            // Search for the company first
+            const companyInput = document.getElementById('companyName');
+            companyInput.value = companyName;
+            companyInput.dataset.companyNumber = companyNumber;
+            
+            // Trigger search, then auto-download
+            document.getElementById('searchForm').dispatchEvent(new Event('submit'));
+            
+            // Wait a bit then trigger download
+            setTimeout(() => {
+                const downloadBtn = document.getElementById('downloadZipBtn');
+                if (downloadBtn && !downloadBtn.disabled) {
+                    downloadBtn.click();
+                }
+            }, 2000);
         }
         
         // Sign out function
