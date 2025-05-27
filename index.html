@@ -318,23 +318,23 @@
             console.log(`${new Date().toISOString().substr(11, 8)} - ${message}`);
         }
         
-        async function fetchWithWorker(url, apiKey) {
+        async function fetchWithWorker(url, apiKey, isPdf = false) {
             // Build the proxy URL with parameters
             const params = new URLSearchParams({
                 url: url,
-                apiKey: apiKey
+                apiKey: apiKey  // Note: The worker needs to be updated to use 'apiKey' instead of 'key'
             });
             const proxyUrl = `${WORKER_URL}?${params.toString()}`;
             
             addDebug(`Worker URL: ${WORKER_URL}`);
             addDebug(`Target URL: ${url}`);
-            addDebug(`Full proxy URL: ${proxyUrl}`);
+            addDebug(`Is PDF: ${isPdf}`);
             
             try {
                 const response = await fetch(proxyUrl, {
                     method: 'GET',
                     headers: {
-                        'Accept': url.includes('/content') ? 'application/pdf' : 'application/json'
+                        'Accept': isPdf ? 'application/pdf' : 'application/json'
                     }
                 });
                 addDebug(`Response status: ${response.status}`);
@@ -565,7 +565,7 @@
                     
                     addDebug(`Downloading PDF from: ${documentUrl}`);
                     
-                    const pdfResponse = await fetchWithWorker(documentUrl, apiKey);
+                    const pdfResponse = await fetchWithWorker(documentUrl, apiKey, true);
                     addDebug(`PDF response status: ${pdfResponse.status}`);
                     
                     if (pdfResponse.ok) {
