@@ -2514,7 +2514,7 @@
             const searchData = sessionStorage.getItem('searchData');
             if (searchData) {
                 try {
-                    const { companyNumber, companyName, freeRedownload } = JSON.parse(searchData);
+                    const { companyNumber, companyName, autoDownload } = JSON.parse(searchData);
                     sessionStorage.removeItem('searchData'); // Clear it
                     
                     // Fill in the search form
@@ -2526,8 +2526,8 @@
                     setTimeout(() => {
                         document.getElementById('searchForm').dispatchEvent(new Event('submit'));
                         
-                        // If it's a free redownload, trigger download after search completes
-                        if (freeRedownload) {
+                        // If auto-download is requested, trigger download after search completes
+                        if (autoDownload) {
                             setTimeout(() => {
                                 const downloadBtn = document.getElementById('downloadZipBtn');
                                 if (downloadBtn && !downloadBtn.disabled) {
