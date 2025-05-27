@@ -522,50 +522,11 @@
                 updateProgress(i + 1, documentsToDownload.length);
                 
                 try {
-                    // First, fetch the document metadata to get the actual document URL
-                    addDebug(`Fetching metadata for document ${i + 1}: ${doc.metadataUrl}`);
+                    // CORRECT APPROACH: Simply append /content to metadata URL like the Python script
+                    const contentUrl = `${doc.metadataUrl}/content`;
+                    addDebug(`Downloading PDF from: ${contentUrl}`);
                     
-                    const metadataResponse = await fetchWithWorker(doc.metadataUrl, apiKey);
-                    addDebug(`Metadata response status: ${metadataResponse.status}`);
-                    
-                    if (!metadataResponse.ok) {
-                        const errorText = await metadataResponse.text();
-                        addDebug(`Metadata fetch error: ${errorText}`);
-                        failed++;
-                        addFileToList(doc.filename, 'error', `Metadata ${metadataResponse.status}`);
-                        continue;
-                    }
-                    
-                    const metadata = await metadataResponse.json();
-                    addDebug(`Metadata received: ${JSON.stringify(metadata).substring(0, 200)}...`);
-                    
-                    // Get the actual document URL from metadata
-                    let documentUrl = null;
-                    if (metadata.links && metadata.links.document) {
-                        documentUrl = metadata.links.document;
-                    } else if (metadata.links && metadata.links.self) {
-                        // Sometimes the document URL is in 'self'
-                        documentUrl = metadata.links.self + '/content';
-                    } else if (metadata.document_url) {
-                        // Alternative property name
-                        documentUrl = metadata.document_url;
-                    }
-                    
-                    if (!documentUrl) {
-                        addDebug(`No document URL found in metadata`);
-                        failed++;
-                        addFileToList(doc.filename, 'error', 'No document URL');
-                        continue;
-                    }
-                    
-                    // Make URL absolute if needed
-                    if (documentUrl.startsWith('/')) {
-                        documentUrl = `https://api.companieshouse.gov.uk${documentUrl}`;
-                    }
-                    
-                    addDebug(`Downloading PDF from: ${documentUrl}`);
-                    
-                    const pdfResponse = await fetchWithWorker(documentUrl, apiKey, true);
+                    const pdfResponse = await fetchWithWorker(contentUrl, apiKey, true);
                     addDebug(`PDF response status: ${pdfResponse.status}`);
                     
                     if (pdfResponse.ok) {
