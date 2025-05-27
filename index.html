@@ -2365,22 +2365,32 @@
         
         // Force update auth UI immediately
         setTimeout(async () => {
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (session) {
-                console.log('Force updating UI for logged in user:', session.user.email);
-                currentUser = session.user;
-                updateAuthUI();
-            } else {
-                console.log('No session found in force update');
-                // Try one more time with refresh
-                const { data: refreshData } = await supabaseClient.auth.refreshSession();
-                if (refreshData?.session) {
-                    console.log('Session found after refresh:', refreshData.session.user.email);
-                    currentUser = refreshData.session.user;
+            try {
+                const { data: { session }, error } = await supabaseClient.auth.getSession();
+                console.log('Force session check:', { session, error });
+                
+                if (session) {
+                    console.log('Force updating UI for logged in user:', session.user.email);
+                    currentUser = session.user;
                     updateAuthUI();
+                } else {
+                    console.log('No session found in force update, trying refresh...');
+                    // Try to refresh the session
+                    const { data: refreshData, error: refreshError } = await supabaseClient.auth.refreshSession();
+                    console.log('Refresh attempt:', { refreshData, refreshError });
+                    
+                    if (refreshData?.session) {
+                        console.log('Session found after refresh:', refreshData.session.user.email);
+                        currentUser = refreshData.session.user;
+                        updateAuthUI();
+                    } else {
+                        console.log('No session after refresh either');
+                    }
                 }
+            } catch (err) {
+                console.error('Error in force update:', err);
             }
-        }, 100);
+        }, 500);
         
         // Check auth state
         async function checkAuthState() {
@@ -2588,13 +2598,19 @@
         document.addEventListener('DOMContentLoaded', () => {
             const authBtn = document.getElementById('authBtn');
             if (authBtn) {
-                authBtn.addEventListener('click', (e) => {
+                authBtn.addEventListener('click', async (e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    // Check current user state and show appropriate menu
-                    if (currentUser) {
+                    
+                    // Check auth state at click time
+                    const { data: { session } } = await supabaseClient.auth.getSession();
+                    console.log('Click time auth check:', session);
+                    
+                    if (session?.user) {
+                        console.log('Showing user menu for:', session.user.email);
                         showUserMenu();
                     } else {
+                        console.log('Showing guest menu');
                         showGuestMenu();
                     }
                 });
