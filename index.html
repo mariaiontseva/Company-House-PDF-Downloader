@@ -1825,15 +1825,7 @@
                     companyData = searchData.items[0];
                 }
                 
-                // Add to search history for logged-in users
-                if (currentUser && window.searchHistory) {
-                    try {
-                        await window.searchHistory.addSearch(companyData);
-                        console.log('Added to search history:', companyData.company_name);
-                    } catch (error) {
-                        console.error('Failed to add to search history:', error);
-                    }
-                }
+                // Move search history saving to after document count is available
                 
                 await displayCompanyInfo(companyData);
                 
@@ -1875,6 +1867,16 @@
                 
                 // Update stats
                 document.getElementById('totalDocs').textContent = documents.length;
+                
+                // Add to search history for logged-in users with file count
+                if (currentUser && window.searchHistory) {
+                    try {
+                        await window.searchHistory.addSearch(companyData, documents.length);
+                        console.log('Added to search history:', companyData.company_name, 'with', documents.length, 'documents');
+                    } catch (error) {
+                        console.error('Failed to add to search history:', error);
+                    }
+                }
                 
                 // Calculate company age
                 if (companyData.date_of_creation) {
@@ -2213,7 +2215,7 @@
         
         // Search history functions (inline since we can't import modules)
         window.searchHistory = {
-            async addSearch(companyData) {
+            async addSearch(companyData, fileCount = null) {
                 const { data: { user } } = await supabaseClient.auth.getUser();
                 if (!user) return null;
                 
@@ -2229,6 +2231,7 @@
                         address: companyData.registered_office_address ? 
                             `${companyData.registered_office_address.address_line_1 || ''}, ${companyData.registered_office_address.locality || ''}, ${companyData.registered_office_address.postal_code || ''}`.replace(/^,\s*|,\s*$/g, '') : 
                             null,
+                        file_count: fileCount,
                         searched_at: new Date().toISOString()
                     }, {
                         onConflict: 'user_id,company_number'

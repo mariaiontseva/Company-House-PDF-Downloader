@@ -238,7 +238,7 @@ export const downloads = {
 // Search History functions
 export const searchHistory = {
     // Add company to search history
-    async addSearch(companyData) {
+    async addSearch(companyData, fileCount = null) {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return null; // Only track for logged-in users
         
@@ -254,6 +254,7 @@ export const searchHistory = {
                 address: companyData.registered_office_address ? 
                     `${companyData.registered_office_address.address_line_1 || ''}, ${companyData.registered_office_address.locality || ''}, ${companyData.registered_office_address.postal_code || ''}`.replace(/^,\s*|,\s*$/g, '') : 
                     null,
+                file_count: fileCount,
                 searched_at: new Date().toISOString()
             }, {
                 onConflict: 'user_id,company_number'
