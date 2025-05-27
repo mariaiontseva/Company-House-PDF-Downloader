@@ -224,6 +224,20 @@
         body.light-mode .create-account-btn {
             box-shadow: 0 4px 14px 0 rgba(99, 102, 241, 0.3);
         }
+        
+        /* Profile mode - icon only */
+        .create-account-btn.profile-mode {
+            width: 48px;
+            height: 48px;
+            padding: 0;
+            justify-content: center;
+            border-radius: 50%;
+        }
+        
+        .create-account-btn.profile-mode svg {
+            width: 24px;
+            height: 24px;
+        }
 
         /* Dark mode toggle */
         .theme-toggle {
@@ -1984,31 +1998,55 @@
             const signOutBtn = document.getElementById('signOutBtn');
             
             if (currentUser) {
-                // User is logged in
-                authBtn.style.display = 'none';
-                signOutBtn.style.display = 'flex';
+                // User is logged in - show profile icon
+                authBtn.style.display = 'flex';
+                signOutBtn.style.display = 'none';
+                authBtnText.textContent = ''; // Remove text, icon only
+                authBtn.classList.add('profile-mode');
+                authBtn.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span id="authBtnText"></span>
+                `;
                 
-                // Show monitoring features (coming soon)
-                // Enable free download if user has credits
+                // Add dropdown menu on click
+                authBtn.onclick = () => showUserMenu();
+                
             } else {
                 // User is not logged in
                 authBtn.style.display = 'flex';
                 signOutBtn.style.display = 'none';
-                authBtnText.textContent = 'Create Account';
+                authBtn.classList.remove('profile-mode');
+                authBtn.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    <span id="authBtnText">Create Account</span>
+                `;
+                authBtn.onclick = () => window.location.href = '/auth.html';
             }
         }
         
-        // Auth button handler
-        document.getElementById('authBtn').addEventListener('click', () => {
-            window.location.href = '/auth.html';
-        });
+        // Show user dropdown menu
+        function showUserMenu() {
+            // Simple dropdown - for now just sign out
+            if (confirm('Sign out?')) {
+                signOut();
+            }
+        }
         
-        // Sign out button handler
-        document.getElementById('signOutBtn').addEventListener('click', async () => {
+        // Sign out function
+        async function signOut() {
             await supabaseClient.auth.signOut();
             currentUser = null;
             updateAuthUI();
             showStatus('info', 'Signed out successfully');
+        }
+        
+        // Sign out button handler (keeping this one for the separate sign out button if needed)
+        document.getElementById('signOutBtn').addEventListener('click', async () => {
+            signOut();
         });
         
         // Listen for auth state changes

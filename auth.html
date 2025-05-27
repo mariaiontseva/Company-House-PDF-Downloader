@@ -556,14 +556,17 @@
                 const { data, error } = await supabaseClient.auth.signInWithOAuth({
                     provider: 'google',
                     options: {
-                        redirectTo: window.location.origin
+                        redirectTo: `${window.location.origin}/`
                     }
                 });
                 
                 if (error) throw error;
+                
+                // If no error, the user will be redirected to Google
             } catch (error) {
+                console.error('Google auth error:', error);
                 document.getElementById('errorMessage').style.display = 'block';
-                document.getElementById('errorMessage').textContent = error.message;
+                document.getElementById('errorMessage').textContent = 'Google login is not configured yet. Please use email/password for now.';
             }
         }
         
@@ -572,14 +575,17 @@
                 const { data, error } = await supabaseClient.auth.signInWithOAuth({
                     provider: 'facebook',
                     options: {
-                        redirectTo: window.location.origin
+                        redirectTo: `${window.location.origin}/`
                     }
                 });
                 
                 if (error) throw error;
+                
+                // If no error, the user will be redirected to Facebook
             } catch (error) {
+                console.error('Facebook auth error:', error);
                 document.getElementById('errorMessage').style.display = 'block';
-                document.getElementById('errorMessage').textContent = error.message;
+                document.getElementById('errorMessage').textContent = 'Facebook login is not configured yet. Please use email/password for now.';
             }
         }
         
