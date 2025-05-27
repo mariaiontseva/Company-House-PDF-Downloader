@@ -536,6 +536,7 @@
             background: var(--gradient-2);
             border-radius: 50%;
             transition: transform 0.3s ease;
+            flex-shrink: 0;
         }
         
         .create-account-btn.profile-mode:hover .profile-icon {
@@ -1356,6 +1357,16 @@
             
             .search-wrapper {
                 gap: 8px;
+            }
+            
+            /* Fix profile button on mobile */
+            .create-account-btn.profile-mode {
+                padding: 8px 12px 8px 8px;
+                white-space: nowrap;
+            }
+            
+            .profile-text {
+                font-size: 14px;
             }
         }
 
