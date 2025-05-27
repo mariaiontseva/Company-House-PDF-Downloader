@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Direct API Test</title>
+</head>
+<body>
+    <h1>Direct API Test (No Worker)</h1>
+    <button onclick="testDirect()">Test Direct API Call</button>
+    <div id="output"></div>
+
+    <script>
+        const API_KEY = '22aefa40-ee9e-47c0-b40a-2dd3c03165c6';
+
+        async function testDirect() {
+            const output = document.getElementById('output');
+            output.innerHTML = '<h2>Testing direct API call...</h2>';
+
+            try {
+                // Direct call to Companies House API (will fail due to CORS, but let's see)
+                const contentUrl = 'https://document-api.company-information.service.gov.uk/document/XXX1cpTBG-iGXSLp0Wi201yvW0pyi49wN3r30MXIUcM/content';
+                
+                const response = await fetch(contentUrl, {
+                    headers: {
+                        'Authorization': 'Basic ' + btoa(API_KEY + ':'),
+                        'Accept': 'application/pdf'
+                    }
+                });
+                
+                console.log('Direct response status:', response.status);
+                console.log('Direct response headers:', [...response.headers.entries()]);
+                
+                if (response.ok) {
+                    const blob = await response.blob();
+                    console.log('Direct blob size:', blob.size);
+                    
+                    output.innerHTML = `
+                        <h2>Direct API Success!</h2>
+                        <p>Size: ${blob.size} bytes</p>
+                        <p>Type: ${blob.type}</p>
+                    `;
+                } else {
+                    output.innerHTML = `<h2>Direct API failed: ${response.status}</h2>`;
+                }
+                
+            } catch (error) {
+                console.error('Direct API error:', error);
+                output.innerHTML = `<h2>Direct API Error (expected CORS): ${error.message}</h2>`;
+                
+                // Now test our worker with the same URL
+                console.log('Testing worker...');
+                await testWorker();
+            }
+        }
+        
+        async function testWorker() {
+            const output = document.getElementById('output');
+            
+            try {
+                const WORKER_URL = 'https://blue-flower-d40f.mahin84.workers.dev';
+                const contentUrl = 'https://document-api.company-information.service.gov.uk/document/XXX1cpTBG-iGXSLp0Wi201yvW0pyi49wN3r30MXIUcM/content';
+                
+                const params = new URLSearchParams({
+                    url: contentUrl,
+                    apiKey: API_KEY
+                });
+                const proxyUrl = `${WORKER_URL}?${params.toString()}`;
+                
+                console.log('Worker URL:', proxyUrl);
+                
+                const response = await fetch(proxyUrl, {
+                    headers: {
+                        'Accept': 'application/pdf'
+                    }
+                });
+                
+                console.log('Worker response status:', response.status);
+                console.log('Worker response headers:', [...response.headers.entries()]);
+                
+                if (response.ok) {
+                    const blob = await response.blob();
+                    console.log('Worker blob size:', blob.size);
+                    console.log('Worker blob type:', blob.type);
+                    
+                    // Check first bytes
+                    const arrayBuffer = await blob.arrayBuffer();
+                    const bytes = new Uint8Array(arrayBuffer.slice(0, 10));
+                    const hexBytes = Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join(' ');
+                    console.log('Worker first 10 bytes:', hexBytes);
+                    
+                    const isValidPDF = bytes[0] === 0x25 && bytes[1] === 0x50 && bytes[2] === 0x44 && bytes[3] === 0x46;
+                    
+                    output.innerHTML += `
+                        <h2>Worker Test Results:</h2>
+                        <p><strong>Status:</strong> ${response.status}</p>
+                        <p><strong>Size:</strong> ${blob.size} bytes</p>
+                        <p><strong>Type:</strong> ${blob.type}</p>
+                        <p><strong>Valid PDF:</strong> ${isValidPDF}</p>
+                        <p><strong>First bytes:</strong> ${hexBytes}</p>
+                    `;
+                    
+                    if (blob.size > 0) {
+                        // Download for inspection
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = 'worker-test.pdf';
+                        a.click();
+                        URL.revokeObjectURL(url);
+                    }
+                    
+                } else {
+                    const errorText = await response.text();
+                    console.log('Worker error:', errorText);
+                    output.innerHTML += `<h2>Worker failed: ${response.status}</h2><p>${errorText}</p>`;
+                }
+                
+            } catch (error) {
+                console.error('Worker error:', error);
+                output.innerHTML += `<h2>Worker Error: ${error.message}</h2>`;
+            }
+        }
+    </script>
+</body>
+</html>

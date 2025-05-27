@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug PDF Download</title>
+</head>
+<body>
+    <h1>Debug PDF Download</h1>
+    <button onclick="testDownload()">Test Download</button>
+    <div id="output"></div>
+
+    <script>
+        const API_KEY = '22aefa40-ee9e-47c0-b40a-2dd3c03165c6';
+        const WORKER_URL = 'https://blue-flower-d40f.mahin84.workers.dev';
+
+        async function testDownload() {
+            const output = document.getElementById('output');
+            output.innerHTML = '<h2>Testing...</h2>';
+
+            try {
+                // Test the exact same company and document as Python script
+                const companyNumber = '09594068'; // PWER GWYRDD HOLDINGS LTD
+                
+                // Get filing history
+                console.log('1. Getting filing history...');
+                const filingUrl = `https://api.companieshouse.gov.uk/company/${companyNumber}/filing-history?items_per_page=1`;
+                
+                const params = new URLSearchParams({
+                    url: filingUrl,
+                    apiKey: API_KEY
+                });
+                const proxyUrl = `${WORKER_URL}?${params.toString()}`;
+                
+                console.log('Proxy URL:', proxyUrl);
+                
+                const filingResponse = await fetch(proxyUrl);
+                console.log('Filing response status:', filingResponse.status);
+                
+                if (!filingResponse.ok) {
+                    throw new Error(`Filing request failed: ${filingResponse.status}`);
+                }
+                
+                const filingData = await filingResponse.json();
+                console.log('Filing data:', filingData);
+                
+                if (!filingData.items || filingData.items.length === 0) {
+                    throw new Error('No filing items found');
+                }
+                
+                const firstItem = filingData.items[0];
+                console.log('First item:', firstItem);
+                
+                const metadataUrl = firstItem.links.document_metadata;
+                console.log('Metadata URL:', metadataUrl);
+                
+                // Make URL absolute
+                const absoluteMetadataUrl = metadataUrl.startsWith('/') 
+                    ? `https://api.companieshouse.gov.uk${metadataUrl}`
+                    : metadataUrl;
+                    
+                console.log('Absolute metadata URL:', absoluteMetadataUrl);
+                
+                // Now try to download the PDF using /content
+                const contentUrl = `${absoluteMetadataUrl}/content`;
+                console.log('Content URL:', contentUrl);
+                
+                const pdfParams = new URLSearchParams({
+                    url: contentUrl,
+                    apiKey: API_KEY
+                });
+                const pdfProxyUrl = `${WORKER_URL}?${pdfParams.toString()}`;
+                
+                console.log('PDF Proxy URL:', pdfProxyUrl);
+                
+                const pdfResponse = await fetch(pdfProxyUrl);
+                console.log('PDF response status:', pdfResponse.status);
+                console.log('PDF response headers:', [...pdfResponse.headers.entries()]);
+                
+                if (!pdfResponse.ok) {
+                    const errorText = await pdfResponse.text();
+                    throw new Error(`PDF request failed: ${pdfResponse.status} - ${errorText}`);
+                }
+                
+                const pdfBlob = await pdfResponse.blob();
+                console.log('PDF blob size:', pdfBlob.size);
+                console.log('PDF blob type:', pdfBlob.type);
+                
+                // Try to read first few bytes
+                const arrayBuffer = await pdfBlob.arrayBuffer();
+                const bytes = new Uint8Array(arrayBuffer.slice(0, 10));
+                console.log('First 10 bytes:', Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join(' '));
+                
+                // PDF files should start with %PDF
+                const isValidPDF = bytes[0] === 0x25 && bytes[1] === 0x50 && bytes[2] === 0x44 && bytes[3] === 0x46;
+                console.log('Is valid PDF header:', isValidPDF);
+                
+                output.innerHTML = `
+                    <h2>Results:</h2>
+                    <p><strong>Document:</strong> ${firstItem.description}</p>
+                    <p><strong>Content URL:</strong> ${contentUrl}</p>
+                    <p><strong>PDF Size:</strong> ${pdfBlob.size} bytes</p>
+                    <p><strong>PDF Type:</strong> ${pdfBlob.type}</p>
+                    <p><strong>Valid PDF:</strong> ${isValidPDF}</p>
+                    <p><strong>First 10 bytes:</strong> ${Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join(' ')}</p>
+                `;
+                
+                if (pdfBlob.size > 0) {
+                    // Download for testing
+                    const url = URL.createObjectURL(pdfBlob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'test.pdf';
+                    a.click();
+                    URL.revokeObjectURL(url);
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                output.innerHTML = `<h2>Error:</h2><p>${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>
