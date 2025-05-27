@@ -1888,10 +1888,19 @@
         // Logo click effect - confetti animation
         function triggerLogoEffect() {
             createConfetti();
-            // Optionally reload after animation
-            setTimeout(() => {
-                location.reload();
-            }, 3000);
+            
+            // Only reload if not on home page
+            const isHomePage = window.location.pathname === '/' || 
+                             window.location.pathname === '/index.html' ||
+                             window.location.pathname === '';
+            
+            if (!isHomePage) {
+                // Navigate to home page if on a different page
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 3000);
+            }
+            // If on home page, just show confetti without reloading
         }
         
         function createConfetti() {
