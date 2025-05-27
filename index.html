@@ -2063,6 +2063,24 @@
             showStatus('info', 'Signed out successfully');
         }
         
+        // Debug function - type debugAuth() in console
+        window.debugAuth = async function() {
+            console.log('=== AUTH DEBUG ===');
+            console.log('LocalStorage keys:', Object.keys(localStorage));
+            console.log('docspace-auth:', localStorage.getItem('docspace-auth'));
+            
+            // Try to get session directly
+            const { data: { session }, error } = await supabaseClient.auth.getSession();
+            console.log('Direct session check:', session);
+            console.log('Session error:', error);
+            
+            // Try to get user
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            console.log('Current user:', user);
+            
+            console.log('=================');
+        };
+        
         // Sign out button handler (keeping this one for the separate sign out button if needed)
         document.getElementById('signOutBtn').addEventListener('click', async () => {
             signOut();
