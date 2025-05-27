@@ -1482,7 +1482,9 @@
         document.getElementById('searchForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const companyName = document.getElementById('companyName').value.trim();
+            const companyInput = document.getElementById('companyName');
+            const companyName = companyInput.value.trim();
+            const companyNumber = companyInput.dataset.companyNumber; // Get stored company number
             const searchBtn = document.getElementById('searchBtn');
             const resultsContainer = document.getElementById('resultsContainer');
             const progressContainer = document.getElementById('progressContainer');
@@ -1495,27 +1497,46 @@
             document.getElementById('fileList').innerHTML = '';
             allDocuments = [];
             
+            // Clear the stored company number after use
+            delete companyInput.dataset.companyNumber;
+            
             try {
-                // Search for company
-                showStatus('info', 'Searching for company...');
-                
-                const searchUrl = `https://api.companieshouse.gov.uk/search/companies?q=${encodeURIComponent(companyName)}&items_per_page=1`;
-                const searchResponse = await fetchWithWorker(searchUrl, API_KEY);
-                
-                if (!searchResponse.ok) {
-                    if (searchResponse.status === 401) {
-                        throw new Error('Invalid API key. Please check your credentials.');
+                // If we have a company number from autocomplete, fetch directly
+                if (companyNumber) {
+                    showStatus('info', 'Fetching company details...');
+                    
+                    const companyUrl = `https://api.companieshouse.gov.uk/company/${companyNumber}`;
+                    const companyResponse = await fetchWithWorker(companyUrl, API_KEY);
+                    
+                    if (!companyResponse.ok) {
+                        throw new Error(`Failed to fetch company details (${companyResponse.status})`);
                     }
-                    throw new Error(`Failed to search for company (${searchResponse.status})`);
+                    
+                    companyData = await companyResponse.json();
+                    companyData.company_number = companyNumber; // Ensure number is set
+                    companyData.title = companyData.company_name; // Normalize field name
+                } else {
+                    // Otherwise, search by name
+                    showStatus('info', 'Searching for company...');
+                    
+                    const searchUrl = `https://api.companieshouse.gov.uk/search/companies?q=${encodeURIComponent(companyName)}&items_per_page=1`;
+                    const searchResponse = await fetchWithWorker(searchUrl, API_KEY);
+                    
+                    if (!searchResponse.ok) {
+                        if (searchResponse.status === 401) {
+                            throw new Error('Invalid API key. Please check your credentials.');
+                        }
+                        throw new Error(`Failed to search for company (${searchResponse.status})`);
+                    }
+                    
+                    const searchData = await searchResponse.json();
+                    
+                    if (!searchData.items || searchData.items.length === 0) {
+                        throw new Error('No company found with that name');
+                    }
+                    
+                    companyData = searchData.items[0];
                 }
-                
-                const searchData = await searchResponse.json();
-                
-                if (!searchData.items || searchData.items.length === 0) {
-                    throw new Error('No company found with that name');
-                }
-                
-                companyData = searchData.items[0];
                 displayCompanyInfo(companyData);
                 
                 // Get filing history
@@ -1809,6 +1830,8 @@
             const company = suggestions[index];
             if (company) {
                 companyInput.value = company.title;
+                // Store the company number for exact search
+                companyInput.dataset.companyNumber = company.company_number;
                 hideAutocomplete();
                 // Trigger search
                 document.getElementById('searchForm').dispatchEvent(new Event('submit'));
