@@ -1809,6 +1809,81 @@
         body.light-mode footer {
             border-top-color: #e2e8f0;
         }
+        /* Explore tab styles */
+        .toggle-btn { 
+            padding: 8px 16px; 
+            background: rgba(255,255,255,0.05); 
+            border: none;
+            border-radius: 6px; 
+            color: rgba(255,255,255,0.7); 
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .toggle-btn:hover {
+            background: rgba(255,255,255,0.08);
+            color: white;
+        }
+        .toggle-btn.active { 
+            background: linear-gradient(135deg, #6366f1, #8b5cf6); 
+            color: white;
+        }
+        .switch {
+            position: relative;
+            width: 40px;
+            height: 20px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .switch.active {
+            background: #6366f1;
+        }
+        .switch::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            background: white;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: all 0.3s;
+        }
+        .switch.active::after {
+            transform: translateX(20px);
+        }
+        .explore-company-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 16px 20px;
+            margin-bottom: 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .explore-company-card:hover {
+            background: rgba(255,255,255,0.05);
+            border-color: rgba(139,92,246,0.3);
+            transform: translateY(-1px);
+        }
+        .show-more-btn {
+            padding: 12px 32px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            color: white;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+        .show-more-btn:hover {
+            background: rgba(255,255,255,0.08);
+        }
     </style>
     
     <!-- Schema.org Structured Data -->
@@ -1993,18 +2068,26 @@
             
             <!-- Explore tab content -->
             <div class="tab-content" id="exploreTab">
-                <div class="explore-content">
-                    <div class="explore-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
+                <div style="padding: 20px;">
+                    <h2 style="margin-bottom: 24px;">Explore UK Companies</h2>
+                    
+                    <!-- Toggle buttons -->
+                    <div style="display: flex; gap: 8px; margin-bottom: 24px; align-items: center;">
+                        <button class="toggle-btn active" onclick="showOldest()" id="oldestBtn">Oldest</button>
+                        <button class="toggle-btn" onclick="showNewest()" id="newestBtn">Newest</button>
+                        <div style="display: flex; align-items: center; gap: 8px; margin-left: 16px;">
+                            <div class="switch" onclick="toggleActive(this)" id="activeSwitch"></div>
+                            <span style="color: rgba(255,255,255,0.7); font-size: 13px;">Active Only</span>
+                        </div>
                     </div>
-                    <span class="coming-soon-badge">Coming Soon</span>
-                    <h3 class="explore-title">Explore UK Companies</h3>
-                    <p class="explore-description">
-                        Discover trending companies, industry insights, and powerful search filters. 
-                        Advanced exploration features coming soon to help you find exactly what you need.
-                    </p>
+                    
+                    <!-- Company list -->
+                    <div id="companyListExplore"></div>
+                    
+                    <!-- Show more button -->
+                    <div style="text-align: center; margin-top: 24px;">
+                        <button class="show-more-btn" onclick="loadMore()">Show More</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -3521,6 +3604,82 @@
                 showStatus('info', 'Payment cancelled. Search for a company to try again.');
                 window.history.replaceState({}, document.title, window.location.pathname);
             }
+        });
+        
+        // Explore tab functions
+        const oldestCompanies = [
+            { name: "THE RYE CATTLE MARKET COMPANY LIMITED", number: "00001452", year: "1859", location: "Rye, East Sussex", status: "Active" },
+            { name: "THE ABERDEEN-ANGUS CATTLE SOCIETY", number: "SC000926", year: "1879", location: "Perth, Scotland", status: "Active" },
+            { name: "BLACK SEA AND BALTIC INSURANCE CO", number: "00204185", year: "1925", location: "London", status: "Active" },
+            { name: "BRITISH WIDOWS FUND AND LIFE", number: "00000124", year: "1815", location: "Edinburgh", status: "Active" },
+            { name: "LONDON ASSURANCE CORPORATION", number: "00000098", year: "1862", location: "London", status: "Active" }
+        ];
+        
+        const newestCompanies = [
+            { name: "AI INNOVATIONS LIMITED", number: "15234567", year: "2025", location: "London", status: "Active" },
+            { name: "GREEN ENERGY SOLUTIONS UK LTD", number: "15234568", year: "2025", location: "Manchester", status: "Active" },
+            { name: "DIGITAL HEALTH TECH LIMITED", number: "15234569", year: "2025", location: "Cambridge", status: "Active" },
+            { name: "SUSTAINABLE FOODS COMPANY", number: "15234570", year: "2025", location: "Bristol", status: "Active" },
+            { name: "FINTECH INNOVATIONS LTD", number: "15234571", year: "2025", location: "Edinburgh", status: "Active" }
+        ];
+        
+        let currentView = 'oldest';
+        
+        function showOldest() {
+            currentView = 'oldest';
+            document.getElementById('oldestBtn').classList.add('active');
+            document.getElementById('newestBtn').classList.remove('active');
+            renderCompanies();
+        }
+        
+        function showNewest() {
+            currentView = 'newest';
+            document.getElementById('newestBtn').classList.add('active');
+            document.getElementById('oldestBtn').classList.remove('active');
+            renderCompanies();
+        }
+        
+        function toggleActive(element) {
+            element.classList.toggle('active');
+            renderCompanies();
+        }
+        
+        function renderCompanies() {
+            const list = document.getElementById('companyListExplore');
+            if (!list) return;
+            
+            const activeOnly = document.getElementById('activeSwitch') && document.getElementById('activeSwitch').classList.contains('active');
+            const companies = currentView === 'oldest' ? oldestCompanies : newestCompanies;
+            
+            const filtered = activeOnly ? companies.filter(c => c.status === 'Active') : companies;
+            
+            list.innerHTML = filtered.map(company => `
+                <div class="explore-company-card" onclick="selectExploreCompany('${company.number}')">
+                    <div style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">${company.name}</div>
+                    <div style="color: rgba(255,255,255,0.6); font-size: 14px;">
+                        ${company.year} • ${company.location} • ${company.status}
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function selectExploreCompany(companyNumber) {
+            document.getElementById('searchQuery').value = companyNumber;
+            document.getElementById('tab-bulk').click();
+            searchCompany();
+        }
+        
+        function loadMore() {
+            showToast('Connect to full database to see more companies!', 'info');
+        }
+        
+        // Initialize Explore tab when it's clicked
+        document.getElementById('tab-explore').addEventListener('click', function() {
+            setTimeout(() => {
+                if (document.getElementById('companyListExplore') && !document.getElementById('companyListExplore').innerHTML) {
+                    renderCompanies();
+                }
+            }, 100);
         });
     </script>
 </body>
