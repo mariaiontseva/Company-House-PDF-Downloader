@@ -1870,17 +1870,43 @@
             transform: translateY(-1px);
         }
         .status-indicator {
-            width: 8px;
-            height: 8px;
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
             display: inline-block;
-            margin-right: 6px;
+            margin-right: 8px;
+            vertical-align: middle;
+            transform: translateY(-1px);
         }
         .status-active {
             background: #22c55e;
         }
         .status-dissolved {
             background: #6b7280;
+        }
+        .industry-badge {
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-left: 8px;
+        }
+        .industry-agriculture {
+            background: rgba(34, 197, 94, 0.15);
+            color: #22c55e;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+        .industry-financial {
+            background: rgba(139, 92, 246, 0.15);
+            color: #8b5cf6;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+        }
+        .industry-technology {
+            background: rgba(99, 102, 241, 0.15);
+            color: #6366f1;
+            border: 1px solid rgba(99, 102, 241, 0.3);
         }
         .show-more-btn {
             padding: 12px 32px;
@@ -2081,7 +2107,7 @@
             
             <!-- Explore tab content -->
             <div class="tab-content" id="exploreTab">
-                <div style="padding: 20px;">
+                <div style="padding: 24px 32px;">
                     <!-- Toggle buttons -->
                     <div style="display: flex; gap: 8px; margin-bottom: 24px; align-items: center;">
                         <button class="toggle-btn active" onclick="showOldest()" id="oldestBtn">Oldest</button>
@@ -3619,19 +3645,19 @@
         
         // Explore tab functions
         const oldestCompanies = [
-            { name: "THE RYE CATTLE MARKET COMPANY LIMITED", number: "00001452", year: "1859", location: "Rye, East Sussex", status: "Active" },
-            { name: "THE ABERDEEN-ANGUS CATTLE SOCIETY", number: "SC000926", year: "1879", location: "Perth, Scotland", status: "Active" },
-            { name: "BLACK SEA AND BALTIC INSURANCE CO", number: "00204185", year: "1925", location: "London", status: "Active" },
-            { name: "BRITISH WIDOWS FUND AND LIFE", number: "00000124", year: "1815", location: "Edinburgh", status: "Active" },
-            { name: "LONDON ASSURANCE CORPORATION", number: "00000098", year: "1862", location: "London", status: "Active" }
+            { name: "THE RYE CATTLE MARKET COMPANY LIMITED", number: "00001452", year: "1859", location: "Rye, East Sussex", status: "Active", industry: "AGRICULTURE" },
+            { name: "THE ABERDEEN-ANGUS CATTLE SOCIETY", number: "SC000926", year: "1879", location: "Perth, Scotland", status: "Active", industry: "AGRICULTURE" },
+            { name: "BLACK SEA AND BALTIC INSURANCE CO", number: "00204185", year: "1925", location: "London", status: "Active", industry: "FINANCIAL" },
+            { name: "BRITISH WIDOWS FUND AND LIFE", number: "00000124", year: "1815", location: "Edinburgh", status: "Active", industry: "FINANCIAL" },
+            { name: "LONDON ASSURANCE CORPORATION", number: "00000098", year: "1862", location: "London", status: "Active", industry: "FINANCIAL" }
         ];
         
         const newestCompanies = [
-            { name: "AI INNOVATIONS LIMITED", number: "15234567", year: "2025", location: "London", status: "Active" },
-            { name: "GREEN ENERGY SOLUTIONS UK LTD", number: "15234568", year: "2025", location: "Manchester", status: "Active" },
-            { name: "DIGITAL HEALTH TECH LIMITED", number: "15234569", year: "2025", location: "Cambridge", status: "Active" },
-            { name: "SUSTAINABLE FOODS COMPANY", number: "15234570", year: "2025", location: "Bristol", status: "Active" },
-            { name: "FINTECH INNOVATIONS LTD", number: "15234571", year: "2025", location: "Edinburgh", status: "Active" }
+            { name: "AI INNOVATIONS LIMITED", number: "15234567", year: "2025", location: "London", status: "Active", industry: "TECHNOLOGY" },
+            { name: "GREEN ENERGY SOLUTIONS UK LTD", number: "15234568", year: "2025", location: "Manchester", status: "Active", industry: "TECHNOLOGY" },
+            { name: "DIGITAL HEALTH TECH LIMITED", number: "15234569", year: "2025", location: "Cambridge", status: "Active", industry: "TECHNOLOGY" },
+            { name: "SUSTAINABLE FOODS COMPANY", number: "15234570", year: "2025", location: "Bristol", status: "Active", industry: "AGRICULTURE" },
+            { name: "FINTECH INNOVATIONS LTD", number: "15234571", year: "2025", location: "Edinburgh", status: "Active", industry: "FINANCIAL" }
         ];
         
         let currentView = 'oldest';
@@ -3662,13 +3688,15 @@
             const activeOnly = document.getElementById('activeSwitch') && document.getElementById('activeSwitch').classList.contains('active');
             const companies = currentView === 'oldest' ? oldestCompanies : newestCompanies;
             
+            // Show ALL companies when toggle is OFF, only Active when ON
             const filtered = activeOnly ? companies.filter(c => c.status === 'Active') : companies;
             
             list.innerHTML = filtered.map(company => `
                 <div class="explore-company-card" onclick="selectExploreCompany('${company.number}')">
-                    <div style="font-size: 16px; font-weight: 600; margin-bottom: 8px; color: #ffffff;">
+                    <div style="font-size: 16px; font-weight: 600; margin-bottom: 8px; color: #ffffff; display: flex; align-items: center;">
                         <span class="status-indicator status-${company.status.toLowerCase()}"></span>
                         ${company.name}
+                        <span class="industry-badge industry-${company.industry.toLowerCase()}">${company.industry}</span>
                     </div>
                     <div style="color: #94a3b8; font-size: 14px;">
                         ${company.year} • ${company.location} • ${company.number}
