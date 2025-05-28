@@ -2373,7 +2373,19 @@
             document.querySelectorAll('.tab-button').forEach(btn => {
                 btn.classList.remove('active');
             });
-            event.target.closest('.tab-button').classList.add('active');
+            
+            // Find and activate the correct tab button
+            if (event && event.target) {
+                event.target.closest('.tab-button').classList.add('active');
+            } else {
+                // When called programmatically, find the button by tabName
+                document.querySelectorAll('.tab-button').forEach(btn => {
+                    if ((tabName === 'search' && btn.textContent.includes('Search')) ||
+                        (tabName === 'explore' && btn.textContent.includes('Explore'))) {
+                        btn.classList.add('active');
+                    }
+                });
+            }
             
             // Update tab content
             document.querySelectorAll('.tab-content').forEach(content => {
@@ -2384,6 +2396,8 @@
                 document.getElementById('searchTab').classList.add('active');
             } else if (tabName === 'explore') {
                 document.getElementById('exploreTab').classList.add('active');
+                // Immediately render companies when explore tab is shown
+                renderCompanies();
             }
         }
         
@@ -3642,6 +3656,49 @@
         });
         
         // Explore tab functions
+        // Fetch real data from Railway
+        fetch('https://companies-api-production-68c2.up.railway.app/api/oldest')
+            .then(r => r.json())
+            .then(data => {
+                if (data && !data.error) {
+                    oldestCompanies.length = 0;
+                    data.forEach(company => {
+                        oldestCompanies.push({
+                            name: company.CompanyName,
+                            number: company.CompanyNumber,
+                            year: 'Historic',
+                            location: 'United Kingdom',
+                            status: company.CompanyStatus === 'Active' ? 'Active' : 'Dissolved',
+                            industry: 'OTHER'
+                        });
+                    });
+                    if (document.getElementById('exploreTab').classList.contains('active')) {
+                        renderCompanies();
+                    }
+                }
+            });
+
+        fetch('https://companies-api-production-68c2.up.railway.app/api/newest')
+            .then(r => r.json())
+            .then(data => {
+                if (data && !data.error) {
+                    newestCompanies.length = 0;
+                    data.forEach(company => {
+                        newestCompanies.push({
+                            name: company.CompanyName,
+                            number: company.CompanyNumber,
+                            year: '2025',
+                            location: 'United Kingdom',
+                            status: company.CompanyStatus === 'Active' ? 'Active' : 'Dissolved',
+                            industry: 'OTHER'
+                        });
+                    });
+                    if (document.getElementById('exploreTab').classList.contains('active')) {
+                        renderCompanies();
+                    }
+                }
+            });
+
         const oldestCompanies = [
             { name: "THE RYE CATTLE MARKET COMPANY LIMITED", number: "00001452", year: "1859", location: "Rye, East Sussex", status: "Active", industry: "AGRICULTURE" },
             { name: "THE ABERDEEN-ANGUS CATTLE SOCIETY", number: "SC000926", year: "1879", location: "Perth, Scotland", status: "Active", industry: "AGRICULTURE" },
@@ -3718,20 +3775,14 @@
             showToast('Connect to full database to see more companies!', 'info');
         }
         
-        // Override the switchTab function to ensure companies render
-        const originalSwitchTab = window.switchTab;
-        window.switchTab = function(tabName) {
-            if (originalSwitchTab) {
-                originalSwitchTab(tabName);
+        // Initial render on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if explore tab is initially active and render companies
+            if (document.getElementById('exploreTab') && document.getElementById('exploreTab').classList.contains('active')) {
+                renderCompanies();
             }
-            if (tabName === 'explore') {
-                // Force render companies when explore tab is shown
-                setTimeout(() => {
-                    renderCompanies();
-                }, 10);
-            }
-        };
+        });
     </script>
 </body>
 </html>
-<!-- Deploy trigger: Tue May 27 22:26:45 2025 -->
+<!-- Deploy trigger: Wed May 28 09:45:00 2025 -->
