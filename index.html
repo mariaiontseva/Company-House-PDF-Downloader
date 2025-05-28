@@ -2180,7 +2180,7 @@
                 
                 <!-- Show more button -->
                 <div style="text-align: center; margin-top: 24px; padding-bottom: 24px;">
-                    <button class="show-more-btn" onclick="loadMore()">Show More</button>
+                    <button class="show-more-btn" id="loadMoreBtn" onclick="loadMore()">Sign up to see more</button>
                 </div>
             </div>
         </div>
@@ -3836,15 +3836,19 @@
         
         function showOldest() {
             currentView = 'oldest';
+            companiesOffset = 5; // Reset offset
             document.getElementById('oldestBtn').classList.add('active');
             document.getElementById('newestBtn').classList.remove('active');
+            document.querySelector('.show-more-btn').style.display = 'block'; // Show button again
             renderCompanies();
         }
         
         function showNewest() {
             currentView = 'newest';
+            companiesOffset = 5; // Reset offset
             document.getElementById('newestBtn').classList.add('active');
             document.getElementById('oldestBtn').classList.remove('active');
+            document.querySelector('.show-more-btn').style.display = 'block'; // Show button again
             renderCompanies();
         }
         
@@ -3888,8 +3892,58 @@
             searchCompany();
         }
         
-        function loadMore() {
-            showToast('Connect to full database to see more companies!', 'info');
+        let companiesOffset = 5; // Start at 5 since we already loaded first 5
+        
+        async function loadMore() {
+            const user = await getCurrentUser();
+            
+            if (!user) {
+                // Show sign up modal for guests
+                document.getElementById('authModal').style.display = 'flex';
+                return;
+            }
+            
+            // For logged-in users, load more companies
+            const endpoint = currentView === 'oldest' 
+                ? `https://companies-api-production-68c2.up.railway.app/api/oldest/${companiesOffset}`
+                : `https://companies-api-production-68c2.up.railway.app/api/newest/${companiesOffset}`;
+                
+            fetch(endpoint)
+                .then(r => r.json())
+                .then(data => {
+                    if (data && Array.isArray(data) && data.length > 0) {
+                        const companies = currentView === 'oldest' ? oldestCompanies : newestCompanies;
+                        
+                        data.forEach(company => {
+                            companies.push({
+                                name: company.CompanyName,
+                                number: company.CompanyNumber,
+                                year: currentView === 'oldest' ? 'Historic' : '2025',
+                                location: 'United Kingdom',
+                                status: company.CompanyStatus,
+                                industry: guessIndustry(company.CompanyName)
+                            });
+                        });
+                        
+                        companiesOffset += 5;
+                        renderCompanies();
+                        
+                        if (data.length < 5) {
+                            // No more companies to load
+                            document.querySelector('.show-more-btn').style.display = 'none';
+                        }
+                    }
+                })
+                .catch(err => console.error('Error loading more companies:', err));
+        }
+        
+        // Update load more button text based on auth state
+        async function updateLoadMoreButton() {
+            const user = await getCurrentUser();
+            const btn = document.getElementById('loadMoreBtn');
+            if (btn) {
+                btn.textContent = user ? 'Load More' : 'Sign up to see more';
+            }
         }
         
         // Initial render on page load
@@ -3898,7 +3952,12 @@
             if (document.getElementById('exploreTab') && document.getElementById('exploreTab').classList.contains('active')) {
                 renderCompanies();
             }
+            // Update button text
+            updateLoadMoreButton();
         });
+        
+        // Also update button when auth state changes
+        window.addEventListener('authStateChanged', updateLoadMoreButton);
     </script>
 </body>
 </html>
