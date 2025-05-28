@@ -2107,24 +2107,22 @@
             
             <!-- Explore tab content -->
             <div class="tab-content" id="exploreTab">
-                <div style="padding: 24px 32px;">
-                    <!-- Toggle buttons -->
-                    <div style="display: flex; gap: 8px; margin-bottom: 24px; align-items: center;">
-                        <button class="toggle-btn active" onclick="showOldest()" id="oldestBtn">Oldest</button>
-                        <button class="toggle-btn" onclick="showNewest()" id="newestBtn">Newest</button>
-                        <div style="display: flex; align-items: center; gap: 8px; margin-left: 16px;">
-                            <div class="switch" onclick="toggleActive(this)" id="activeSwitch"></div>
-                            <span style="color: #94a3b8; font-size: 13px;">Active Only</span>
-                        </div>
+                <!-- Toggle buttons -->
+                <div style="display: flex; gap: 8px; margin-bottom: 24px; align-items: center; padding-top: 24px;">
+                    <button class="toggle-btn active" onclick="showOldest()" id="oldestBtn">Oldest</button>
+                    <button class="toggle-btn" onclick="showNewest()" id="newestBtn">Newest</button>
+                    <div style="display: flex; align-items: center; gap: 8px; margin-left: 16px;">
+                        <div class="switch" onclick="toggleActive(this)" id="activeSwitch"></div>
+                        <span style="color: #94a3b8; font-size: 13px;">Active Only</span>
                     </div>
-                    
-                    <!-- Company list -->
-                    <div id="companyListExplore"></div>
-                    
-                    <!-- Show more button -->
-                    <div style="text-align: center; margin-top: 24px;">
-                        <button class="show-more-btn" onclick="loadMore()">Show More</button>
-                    </div>
+                </div>
+                
+                <!-- Company list -->
+                <div id="companyListExplore"></div>
+                
+                <!-- Show more button -->
+                <div style="text-align: center; margin-top: 24px; padding-bottom: 24px;">
+                    <button class="show-more-btn" onclick="loadMore()">Show More</button>
                 </div>
             </div>
         </div>
