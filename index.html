@@ -1939,6 +1939,31 @@
             color: #6366f1;
             border: 1px solid rgba(99, 102, 241, 0.3);
         }
+        .industry-property {
+            background: rgba(236, 72, 153, 0.15);
+            color: #ec4899;
+            border: 1px solid rgba(236, 72, 153, 0.3);
+        }
+        .industry-transport {
+            background: rgba(14, 165, 233, 0.15);
+            color: #0ea5e9;
+            border: 1px solid rgba(14, 165, 233, 0.3);
+        }
+        .industry-energy {
+            background: rgba(251, 146, 60, 0.15);
+            color: #fb923c;
+            border: 1px solid rgba(251, 146, 60, 0.3);
+        }
+        .industry-media {
+            background: rgba(168, 85, 247, 0.15);
+            color: #a855f7;
+            border: 1px solid rgba(168, 85, 247, 0.3);
+        }
+        .industry-other {
+            background: rgba(107, 114, 128, 0.15);
+            color: #6b7280;
+            border: 1px solid rgba(107, 114, 128, 0.3);
+        }
         .show-more-btn {
             padding: 12px 32px;
             background: rgba(255,255,255,0.05);
@@ -3704,6 +3729,56 @@
             { name: "FINTECH INNOVATIONS LTD", number: "15234571", year: "2025", location: "Edinburgh", status: "Active", industry: "FINANCIAL" }
         ];
 
+        // Function to guess industry from company name
+        function guessIndustry(companyName) {
+            const name = companyName.toUpperCase();
+            
+            // Agriculture & Food
+            if (name.includes('CATTLE') || name.includes('FARM') || name.includes('AGRICULTURE') || 
+                name.includes('FOOD') || name.includes('DAIRY') || name.includes('MEAT')) {
+                return 'AGRICULTURE';
+            }
+            
+            // Financial
+            if (name.includes('INSURANCE') || name.includes('BANK') || name.includes('FINANCE') || 
+                name.includes('INVESTMENT') || name.includes('FUND') || name.includes('CAPITAL') ||
+                name.includes('HOLDINGS') || name.includes('ASSURANCE')) {
+                return 'FINANCIAL';
+            }
+            
+            // Technology
+            if (name.includes('TECH') || name.includes('SOFTWARE') || name.includes('DIGITAL') || 
+                name.includes('COMPUTER') || name.includes('IT ') || name.includes('DATA')) {
+                return 'TECHNOLOGY';
+            }
+            
+            // Property & Construction
+            if (name.includes('PROPERTIES') || name.includes('PROPERTY') || name.includes('BUILDING') || 
+                name.includes('CONSTRUCTION') || name.includes('ESTATE') || name.includes('LAND')) {
+                return 'PROPERTY';
+            }
+            
+            // Transport & Shipping
+            if (name.includes('TRANSPORT') || name.includes('SHIPPING') || name.includes('NAVIGATION') || 
+                name.includes('RAILWAY') || name.includes('LOGISTICS')) {
+                return 'TRANSPORT';
+            }
+            
+            // Energy & Utilities
+            if (name.includes('GAS') || name.includes('ELECTRIC') || name.includes('ENERGY') || 
+                name.includes('POWER') || name.includes('OIL') || name.includes('PETROLEUM')) {
+                return 'ENERGY';
+            }
+            
+            // Media & Publishing
+            if (name.includes('NEWSPAPER') || name.includes('MEDIA') || name.includes('PUBLISHING') || 
+                name.includes('BROADCAST') || name.includes('PRESS')) {
+                return 'MEDIA';
+            }
+            
+            return 'OTHER';
+        }
+
         // Fetch real data from Railway and replace the mock data
         function loadRealCompanies() {
             console.log('Loading real companies from Railway...');
@@ -3719,7 +3794,7 @@
                             year: 'Historic',
                             location: 'United Kingdom',
                             status: company.CompanyStatus,
-                            industry: 'OTHER'
+                            industry: guessIndustry(company.CompanyName)
                         }));
                         console.log('Updated oldestCompanies:', oldestCompanies);
                         if (document.getElementById('exploreTab').classList.contains('active')) {
@@ -3740,7 +3815,7 @@
                             year: '2025',
                             location: 'United Kingdom',
                             status: company.CompanyStatus,
-                            industry: 'OTHER'
+                            industry: guessIndustry(company.CompanyName)
                         }));
                         console.log('Updated newestCompanies:', newestCompanies);
                         if (document.getElementById('exploreTab').classList.contains('active')) {
