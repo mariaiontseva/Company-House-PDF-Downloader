@@ -3819,7 +3819,7 @@
                         newestCompanies = data.map(company => ({
                             name: company.CompanyName,
                             number: company.CompanyNumber,
-                            year: '2024',
+                            year: 'Recent',
                             location: 'United Kingdom',
                             status: company.CompanyStatus,
                             industry: guessIndustry(company.CompanyName)
@@ -3934,7 +3934,7 @@
                             companies.push({
                                 name: company.CompanyName,
                                 number: company.CompanyNumber,
-                                year: currentView === 'oldest' ? 'Historic' : '2024',
+                                year: currentView === 'oldest' ? 'Historic' : 'Recent',
                                 location: 'United Kingdom',
                                 status: company.CompanyStatus,
                                 industry: guessIndustry(company.CompanyName)
