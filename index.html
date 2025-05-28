@@ -2108,7 +2108,7 @@
             <!-- Explore tab content -->
             <div class="tab-content" id="exploreTab">
                 <!-- Toggle buttons -->
-                <div style="display: flex; gap: 8px; margin-bottom: 24px; align-items: center; padding-top: 24px;">
+                <div style="display: flex; gap: 8px; margin: 24px 0; align-items: center;">
                     <button class="toggle-btn active" onclick="showOldest()" id="oldestBtn">Oldest</button>
                     <button class="toggle-btn" onclick="showNewest()" id="newestBtn">Newest</button>
                     <div style="display: flex; align-items: center; gap: 8px; margin-left: 16px;">
@@ -3718,19 +3718,19 @@
             showToast('Connect to full database to see more companies!', 'info');
         }
         
-        // Initialize Explore tab when it's clicked
-        document.getElementById('tab-explore').addEventListener('click', function() {
-            // Immediate render on tab click
-            renderCompanies();
-        });
-        
-        // Initialize companies on page load
-        window.addEventListener('load', function() {
-            // Always initialize the companies list so it's ready when tab is clicked
-            if (document.getElementById('companyListExplore')) {
-                renderCompanies();
+        // Override the switchTab function to ensure companies render
+        const originalSwitchTab = window.switchTab;
+        window.switchTab = function(tabName) {
+            if (originalSwitchTab) {
+                originalSwitchTab(tabName);
             }
-        });
+            if (tabName === 'explore') {
+                // Force render companies when explore tab is shown
+                setTimeout(() => {
+                    renderCompanies();
+                }, 10);
+            }
+        };
     </script>
 </body>
 </html>
