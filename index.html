@@ -1884,6 +1884,15 @@
         .status-dissolved {
             background: #6b7280;
         }
+        .status-liquidation {
+            background: #ef4444;
+        }
+        .status-dormant {
+            background: #f59e0b;
+        }
+        .status-receivership {
+            background: #dc2626;
+        }
         .industry-badge {
             padding: 2px 8px;
             border-radius: 4px;
@@ -3687,7 +3696,7 @@
                             number: company.CompanyNumber,
                             year: 'Historic',
                             location: 'United Kingdom',
-                            status: company.CompanyStatus === 'Active' ? 'Active' : 'Dissolved',
+                            status: company.CompanyStatus,
                             industry: 'OTHER'
                         }));
                         console.log('Updated oldestCompanies:', oldestCompanies);
@@ -3708,7 +3717,7 @@
                             number: company.CompanyNumber,
                             year: '2025',
                             location: 'United Kingdom',
-                            status: company.CompanyStatus === 'Active' ? 'Active' : 'Dissolved',
+                            status: company.CompanyStatus,
                             industry: 'OTHER'
                         }));
                         console.log('Updated newestCompanies:', newestCompanies);
