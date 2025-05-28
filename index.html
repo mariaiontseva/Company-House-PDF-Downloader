@@ -2068,11 +2068,11 @@
             
             <!-- Explore tab content -->
             <div class="tab-content" id="exploreTab">
-                <div style="padding: 20px;">
-                    <h2 style="margin-bottom: 24px;">Explore UK Companies</h2>
+                <div style="max-width: 800px; margin: 0 auto; padding: 40px 20px;">
+                    <h2 style="margin-bottom: 32px; text-align: left;">Explore UK Companies</h2>
                     
                     <!-- Toggle buttons -->
-                    <div style="display: flex; gap: 8px; margin-bottom: 24px; align-items: center;">
+                    <div style="display: flex; gap: 8px; margin-bottom: 32px; align-items: center; justify-content: flex-start;">
                         <button class="toggle-btn active" onclick="showOldest()" id="oldestBtn">Oldest</button>
                         <button class="toggle-btn" onclick="showNewest()" id="newestBtn">Newest</button>
                         <div style="display: flex; align-items: center; gap: 8px; margin-left: 16px;">
@@ -2082,10 +2082,30 @@
                     </div>
                     
                     <!-- Company list -->
-                    <div id="companyListExplore"></div>
+                    <div id="companyListExplore">
+                        <!-- Initial companies will be rendered here -->
+                        <div class="explore-company-card" onclick="selectExploreCompany('00001452')">
+                            <div style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">THE RYE CATTLE MARKET COMPANY LIMITED</div>
+                            <div style="color: rgba(255,255,255,0.6); font-size: 14px;">
+                                1859 • Rye, East Sussex • Active
+                            </div>
+                        </div>
+                        <div class="explore-company-card" onclick="selectExploreCompany('SC000926')">
+                            <div style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">THE ABERDEEN-ANGUS CATTLE SOCIETY</div>
+                            <div style="color: rgba(255,255,255,0.6); font-size: 14px;">
+                                1879 • Perth, Scotland • Active
+                            </div>
+                        </div>
+                        <div class="explore-company-card" onclick="selectExploreCompany('00204185')">
+                            <div style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">BLACK SEA AND BALTIC INSURANCE CO</div>
+                            <div style="color: rgba(255,255,255,0.6); font-size: 14px;">
+                                1925 • London • Active
+                            </div>
+                        </div>
+                    </div>
                     
                     <!-- Show more button -->
-                    <div style="text-align: center; margin-top: 24px;">
+                    <div style="text-align: center; margin-top: 32px;">
                         <button class="show-more-btn" onclick="loadMore()">Show More</button>
                     </div>
                 </div>
@@ -3676,10 +3696,8 @@
         // Initialize Explore tab when it's clicked
         document.getElementById('tab-explore').addEventListener('click', function() {
             setTimeout(() => {
-                if (document.getElementById('companyListExplore') && !document.getElementById('companyListExplore').innerHTML) {
-                    renderCompanies();
-                }
-            }, 100);
+                renderCompanies();
+            }, 50);
         });
     </script>
 </body>
