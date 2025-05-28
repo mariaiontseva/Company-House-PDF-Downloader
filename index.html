@@ -1856,18 +1856,31 @@
             transform: translateX(20px);
         }
         .explore-company-card {
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.1);
-            padding: 16px 20px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.08);
+            padding: 20px;
             margin-bottom: 12px;
             border-radius: 12px;
             cursor: pointer;
             transition: all 0.2s;
         }
         .explore-company-card:hover {
-            background: rgba(255,255,255,0.05);
+            background: rgba(255,255,255,0.04);
             border-color: rgba(139,92,246,0.3);
             transform: translateY(-1px);
+        }
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 6px;
+        }
+        .status-active {
+            background: #22c55e;
+        }
+        .status-dissolved {
+            background: #6b7280;
         }
         .show-more-btn {
             padding: 12px 32px;
@@ -2068,44 +2081,22 @@
             
             <!-- Explore tab content -->
             <div class="tab-content" id="exploreTab">
-                <div style="max-width: 800px; margin: 0 auto; padding: 40px 20px;">
-                    <h2 style="margin-bottom: 32px; text-align: left;">Explore UK Companies</h2>
-                    
+                <div style="padding: 20px;">
                     <!-- Toggle buttons -->
-                    <div style="display: flex; gap: 8px; margin-bottom: 32px; align-items: center; justify-content: flex-start;">
+                    <div style="display: flex; gap: 8px; margin-bottom: 24px; align-items: center;">
                         <button class="toggle-btn active" onclick="showOldest()" id="oldestBtn">Oldest</button>
                         <button class="toggle-btn" onclick="showNewest()" id="newestBtn">Newest</button>
                         <div style="display: flex; align-items: center; gap: 8px; margin-left: 16px;">
                             <div class="switch" onclick="toggleActive(this)" id="activeSwitch"></div>
-                            <span style="color: rgba(255,255,255,0.7); font-size: 13px;">Active Only</span>
+                            <span style="color: #94a3b8; font-size: 13px;">Active Only</span>
                         </div>
                     </div>
                     
                     <!-- Company list -->
-                    <div id="companyListExplore">
-                        <!-- Initial companies will be rendered here -->
-                        <div class="explore-company-card" onclick="selectExploreCompany('00001452')">
-                            <div style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">THE RYE CATTLE MARKET COMPANY LIMITED</div>
-                            <div style="color: rgba(255,255,255,0.6); font-size: 14px;">
-                                1859 • Rye, East Sussex • Active
-                            </div>
-                        </div>
-                        <div class="explore-company-card" onclick="selectExploreCompany('SC000926')">
-                            <div style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">THE ABERDEEN-ANGUS CATTLE SOCIETY</div>
-                            <div style="color: rgba(255,255,255,0.6); font-size: 14px;">
-                                1879 • Perth, Scotland • Active
-                            </div>
-                        </div>
-                        <div class="explore-company-card" onclick="selectExploreCompany('00204185')">
-                            <div style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">BLACK SEA AND BALTIC INSURANCE CO</div>
-                            <div style="color: rgba(255,255,255,0.6); font-size: 14px;">
-                                1925 • London • Active
-                            </div>
-                        </div>
-                    </div>
+                    <div id="companyListExplore"></div>
                     
                     <!-- Show more button -->
-                    <div style="text-align: center; margin-top: 32px;">
+                    <div style="text-align: center; margin-top: 24px;">
                         <button class="show-more-btn" onclick="loadMore()">Show More</button>
                     </div>
                 </div>
@@ -3675,12 +3666,20 @@
             
             list.innerHTML = filtered.map(company => `
                 <div class="explore-company-card" onclick="selectExploreCompany('${company.number}')">
-                    <div style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">${company.name}</div>
-                    <div style="color: rgba(255,255,255,0.6); font-size: 14px;">
-                        ${company.year} • ${company.location} • ${company.status}
+                    <div style="font-size: 16px; font-weight: 600; margin-bottom: 8px; color: #ffffff;">
+                        <span class="status-indicator status-${company.status.toLowerCase()}"></span>
+                        ${company.name}
+                    </div>
+                    <div style="color: #94a3b8; font-size: 14px;">
+                        ${company.year} • ${company.location} • ${company.number}
                     </div>
                 </div>
             `).join('');
+            
+            // If no companies after filter, show message
+            if (filtered.length === 0) {
+                list.innerHTML = '<div style="text-align: center; color: #94a3b8; padding: 40px;">No companies found with current filters</div>';
+            }
         }
         
         function selectExploreCompany(companyNumber) {
@@ -3698,6 +3697,13 @@
             setTimeout(() => {
                 renderCompanies();
             }, 50);
+        });
+        
+        // Also render if explore tab is active on load
+        document.addEventListener('DOMContentLoaded', function() {
+            if (document.getElementById('exploreTab').classList.contains('active')) {
+                renderCompanies();
+            }
         });
     </script>
 </body>
