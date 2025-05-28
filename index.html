@@ -1870,14 +1870,14 @@
             transform: translateY(-1px);
         }
         .status-indicator {
-            min-width: 10px;
             width: 10px;
             height: 10px;
+            min-width: 10px;
+            min-height: 10px;
             border-radius: 50%;
             display: inline-block;
             margin-right: 8px;
             vertical-align: middle;
-            transform: translateY(-1px);
             position: relative;
             cursor: help;
             flex-shrink: 0;
@@ -3865,9 +3865,9 @@
             
             list.innerHTML = filtered.map(company => `
                 <div class="explore-company-card" onclick="selectExploreCompany('${company.number}')">
-                    <div style="font-size: 16px; font-weight: 600; margin-bottom: 8px; color: #ffffff; display: flex; align-items: flex-start;">
-                        <span class="status-indicator status-${company.status.toLowerCase()}" data-tooltip="${company.status}" style="margin-top: 5px;"></span>
-                        <span style="flex: 1;">${company.name}</span>
+                    <div style="font-size: 16px; font-weight: 600; margin-bottom: 8px; color: #ffffff; display: flex; align-items: center;">
+                        <span class="status-indicator status-${company.status.toLowerCase()}" data-tooltip="${company.status}"></span>
+                        ${company.name}
                     </div>
                     <div style="color: #94a3b8; font-size: 14px; display: flex; align-items: center;">
                         ${company.year} • ${company.location} • ${company.number}
