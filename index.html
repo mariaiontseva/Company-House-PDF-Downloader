@@ -3729,11 +3729,11 @@
         ];
         
         let newestCompanies = [
-            { name: "AI INNOVATIONS LIMITED", number: "15234567", year: "2025", location: "London", status: "Active", industry: "TECHNOLOGY" },
-            { name: "GREEN ENERGY SOLUTIONS UK LTD", number: "15234568", year: "2025", location: "Manchester", status: "Active", industry: "TECHNOLOGY" },
-            { name: "DIGITAL HEALTH TECH LIMITED", number: "15234569", year: "2025", location: "Cambridge", status: "Active", industry: "TECHNOLOGY" },
-            { name: "SUSTAINABLE FOODS COMPANY", number: "15234570", year: "2025", location: "Bristol", status: "Active", industry: "AGRICULTURE" },
-            { name: "FINTECH INNOVATIONS LTD", number: "15234571", year: "2025", location: "Edinburgh", status: "Active", industry: "FINANCIAL" }
+            { name: "TECH SOLUTIONS LIMITED", number: "15234567", year: "2024", location: "London", status: "Active", industry: "TECHNOLOGY" },
+            { name: "RENEWABLE ENERGY UK LTD", number: "15234568", year: "2024", location: "Manchester", status: "Active", industry: "ENERGY" },
+            { name: "DIGITAL SERVICES LIMITED", number: "15234569", year: "2024", location: "Cambridge", status: "Active", industry: "TECHNOLOGY" },
+            { name: "MODERN FOODS COMPANY", number: "15234570", year: "2024", location: "Bristol", status: "Active", industry: "AGRICULTURE" },
+            { name: "FINANCIAL TECH LTD", number: "15234571", year: "2024", location: "Edinburgh", status: "Active", industry: "FINANCIAL" }
         ];
 
         // Function to guess industry from company name
@@ -3819,7 +3819,7 @@
                         newestCompanies = data.map(company => ({
                             name: company.CompanyName,
                             number: company.CompanyNumber,
-                            year: '2025',
+                            year: '2024',
                             location: 'United Kingdom',
                             status: company.CompanyStatus,
                             industry: guessIndustry(company.CompanyName)
@@ -3934,7 +3934,7 @@
                             companies.push({
                                 name: company.CompanyName,
                                 number: company.CompanyNumber,
-                                year: currentView === 'oldest' ? 'Historic' : '2025',
+                                year: currentView === 'oldest' ? 'Historic' : '2024',
                                 location: 'United Kingdom',
                                 status: company.CompanyStatus,
                                 industry: guessIndustry(company.CompanyName)
