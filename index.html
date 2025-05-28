@@ -3656,50 +3656,8 @@
         });
         
         // Explore tab functions
-        // Fetch real data from Railway
-        fetch('https://companies-api-production-68c2.up.railway.app/api/oldest')
-            .then(r => r.json())
-            .then(data => {
-                if (data && !data.error) {
-                    oldestCompanies.length = 0;
-                    data.forEach(company => {
-                        oldestCompanies.push({
-                            name: company.CompanyName,
-                            number: company.CompanyNumber,
-                            year: 'Historic',
-                            location: 'United Kingdom',
-                            status: company.CompanyStatus === 'Active' ? 'Active' : 'Dissolved',
-                            industry: 'OTHER'
-                        });
-                    });
-                    if (document.getElementById('exploreTab').classList.contains('active')) {
-                        renderCompanies();
-                    }
-                }
-            });
-
-        fetch('https://companies-api-production-68c2.up.railway.app/api/newest')
-            .then(r => r.json())
-            .then(data => {
-                if (data && !data.error) {
-                    newestCompanies.length = 0;
-                    data.forEach(company => {
-                        newestCompanies.push({
-                            name: company.CompanyName,
-                            number: company.CompanyNumber,
-                            year: '2025',
-                            location: 'United Kingdom',
-                            status: company.CompanyStatus === 'Active' ? 'Active' : 'Dissolved',
-                            industry: 'OTHER'
-                        });
-                    });
-                    if (document.getElementById('exploreTab').classList.contains('active')) {
-                        renderCompanies();
-                    }
-                }
-            });
-
-        const oldestCompanies = [
+        // Initialize with existing data first
+        let oldestCompanies = [
             { name: "THE RYE CATTLE MARKET COMPANY LIMITED", number: "00001452", year: "1859", location: "Rye, East Sussex", status: "Active", industry: "AGRICULTURE" },
             { name: "THE ABERDEEN-ANGUS CATTLE SOCIETY", number: "SC000926", year: "1879", location: "Perth, Scotland", status: "Active", industry: "AGRICULTURE" },
             { name: "BLACK SEA AND BALTIC INSURANCE CO", number: "00204185", year: "1925", location: "London", status: "Active", industry: "FINANCIAL" },
@@ -3707,13 +3665,64 @@
             { name: "LONDON ASSURANCE CORPORATION", number: "00000098", year: "1862", location: "London", status: "Active", industry: "FINANCIAL" }
         ];
         
-        const newestCompanies = [
+        let newestCompanies = [
             { name: "AI INNOVATIONS LIMITED", number: "15234567", year: "2025", location: "London", status: "Active", industry: "TECHNOLOGY" },
             { name: "GREEN ENERGY SOLUTIONS UK LTD", number: "15234568", year: "2025", location: "Manchester", status: "Active", industry: "TECHNOLOGY" },
             { name: "DIGITAL HEALTH TECH LIMITED", number: "15234569", year: "2025", location: "Cambridge", status: "Active", industry: "TECHNOLOGY" },
             { name: "SUSTAINABLE FOODS COMPANY", number: "15234570", year: "2025", location: "Bristol", status: "Active", industry: "AGRICULTURE" },
             { name: "FINTECH INNOVATIONS LTD", number: "15234571", year: "2025", location: "Edinburgh", status: "Active", industry: "FINANCIAL" }
         ];
+
+        // Fetch real data from Railway and replace the mock data
+        function loadRealCompanies() {
+            console.log('Loading real companies from Railway...');
+            
+            fetch('https://companies-api-production-68c2.up.railway.app/api/oldest')
+                .then(r => r.json())
+                .then(data => {
+                    console.log('Oldest companies data:', data);
+                    if (data && Array.isArray(data) && data.length > 0) {
+                        oldestCompanies = data.map(company => ({
+                            name: company.CompanyName,
+                            number: company.CompanyNumber,
+                            year: 'Historic',
+                            location: 'United Kingdom',
+                            status: company.CompanyStatus === 'Active' ? 'Active' : 'Dissolved',
+                            industry: 'OTHER'
+                        }));
+                        console.log('Updated oldestCompanies:', oldestCompanies);
+                        if (document.getElementById('exploreTab').classList.contains('active')) {
+                            renderCompanies();
+                        }
+                    }
+                })
+                .catch(err => console.error('Error loading oldest companies:', err));
+
+            fetch('https://companies-api-production-68c2.up.railway.app/api/newest')
+                .then(r => r.json())
+                .then(data => {
+                    console.log('Newest companies data:', data);
+                    if (data && Array.isArray(data) && data.length > 0) {
+                        newestCompanies = data.map(company => ({
+                            name: company.CompanyName,
+                            number: company.CompanyNumber,
+                            year: '2025',
+                            location: 'United Kingdom',
+                            status: company.CompanyStatus === 'Active' ? 'Active' : 'Dissolved',
+                            industry: 'OTHER'
+                        }));
+                        console.log('Updated newestCompanies:', newestCompanies);
+                        if (document.getElementById('exploreTab').classList.contains('active')) {
+                            renderCompanies();
+                        }
+                    }
+                })
+                .catch(err => console.error('Error loading newest companies:', err));
+        }
+
+        // Load real data when page loads
+        setTimeout(loadRealCompanies, 1000);
+
         
         let currentView = 'oldest';
         
