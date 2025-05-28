@@ -3694,10 +3694,10 @@
                     <div style="font-size: 16px; font-weight: 600; margin-bottom: 8px; color: #ffffff; display: flex; align-items: center;">
                         <span class="status-indicator status-${company.status.toLowerCase()}"></span>
                         ${company.name}
-                        <span class="industry-badge industry-${company.industry.toLowerCase()}">${company.industry}</span>
                     </div>
-                    <div style="color: #94a3b8; font-size: 14px;">
+                    <div style="color: #94a3b8; font-size: 14px; display: flex; align-items: center;">
                         ${company.year} • ${company.location} • ${company.number}
+                        <span class="industry-badge industry-${company.industry.toLowerCase()}">${company.industry}</span>
                     </div>
                 </div>
             `).join('');
@@ -3720,14 +3720,14 @@
         
         // Initialize Explore tab when it's clicked
         document.getElementById('tab-explore').addEventListener('click', function() {
-            setTimeout(() => {
-                renderCompanies();
-            }, 50);
+            // Immediate render on tab click
+            renderCompanies();
         });
         
-        // Also render if explore tab is active on load
-        document.addEventListener('DOMContentLoaded', function() {
-            if (document.getElementById('exploreTab').classList.contains('active')) {
+        // Initialize companies on page load
+        window.addEventListener('load', function() {
+            // Always initialize the companies list so it's ready when tab is clicked
+            if (document.getElementById('companyListExplore')) {
                 renderCompanies();
             }
         });
