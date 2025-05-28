@@ -3798,7 +3798,7 @@
                         oldestCompanies = data.map(company => ({
                             name: company.CompanyName,
                             number: company.CompanyNumber,
-                            year: 'Historic',
+                            year: company.CompanyNumber.startsWith('000') ? 'Historic' : 'Recent',
                             location: 'United Kingdom',
                             status: company.CompanyStatus,
                             industry: guessIndustry(company.CompanyName)
