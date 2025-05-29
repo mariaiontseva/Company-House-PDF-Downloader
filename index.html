@@ -2235,7 +2235,7 @@
                     
                     <!-- Industry Filter -->
                     <div style="margin-left: auto;">
-                        <select id="industryFilter" onchange="renderCompanies()" style="
+                        <select id="industryFilter" onchange="onIndustryChange()" style="
                             background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
                             border: 1px solid rgba(99, 102, 241, 0.3);
                             color: #e2e8f0;
@@ -3997,7 +3997,10 @@
         function loadRealCompanies() {
             console.log('Loading real companies from Railway...');
             
-            fetch('https://companies-api-production-68c2.up.railway.app/api/oldest')
+            const industryFilter = document.getElementById('industryFilter') ? document.getElementById('industryFilter').value : 'ALL';
+            const industryParam = industryFilter !== 'ALL' ? `?industry=${industryFilter}` : '';
+            
+            fetch(`https://companies-api-production-68c2.up.railway.app/api/oldest${industryParam}`)
                 .then(r => r.json())
                 .then(data => {
                     console.log('Oldest companies data:', data);
@@ -4041,7 +4044,7 @@
                 })
                 .catch(err => console.error('Error loading oldest companies:', err));
 
-            fetch('https://companies-api-production-68c2.up.railway.app/api/newest')
+            fetch(`https://companies-api-production-68c2.up.railway.app/api/newest${industryParam}`)
                 .then(r => r.json())
                 .then(data => {
                     console.log('Newest companies data:', data);
@@ -4092,6 +4095,11 @@
         
         let currentView = 'oldest';
         
+        function onIndustryChange() {
+            companiesOffset = 5; // Reset offset when industry changes
+            loadRealCompanies(); // Reload data with new filter
+        }
+        
         function showOldest() {
             currentView = 'oldest';
             companiesOffset = 5; // Reset offset
@@ -4126,19 +4134,9 @@
             // Apply filters
             let filtered = companies;
             
-            // Filter by active status
+            // Filter by active status only (industry filtering is done server-side)
             if (activeOnly) {
                 filtered = filtered.filter(c => c.status === 'Active');
-            }
-            
-            // Filter by industry (handle both underscore and space versions)
-            if (industryFilter && industryFilter !== 'ALL') {
-                filtered = filtered.filter(c => {
-                    // Normalize both values to use underscores for comparison
-                    const normalizedCompanyIndustry = c.industry.replace(/\s+/g, '_');
-                    const normalizedFilter = industryFilter.replace(/\s+/g, '_');
-                    return normalizedCompanyIndustry === normalizedFilter;
-                });
             }
             
             list.innerHTML = filtered.map(company => `
@@ -4189,9 +4187,12 @@
             }
             
             // For logged-in users, load more companies
+            const industryFilter = document.getElementById('industryFilter') ? document.getElementById('industryFilter').value : 'ALL';
+            const industryParam = industryFilter !== 'ALL' ? `?industry=${industryFilter}` : '';
+            
             const endpoint = currentView === 'oldest' 
-                ? `https://companies-api-production-68c2.up.railway.app/api/oldest/${companiesOffset}`
-                : `https://companies-api-production-68c2.up.railway.app/api/newest/${companiesOffset}`;
+                ? `https://companies-api-production-68c2.up.railway.app/api/oldest/${companiesOffset}${industryParam}`
+                : `https://companies-api-production-68c2.up.railway.app/api/newest/${companiesOffset}${industryParam}`;
                 
             fetch(endpoint)
                 .then(r => r.json())
