@@ -4005,17 +4005,21 @@
 
         // Fetch real data from Railway and replace the mock data
         function loadRealCompanies() {
-            console.log('Loading real companies from Railway...');
+            console.log(`Loading real companies from Railway (${currentView})...`);
             
             const industryFilter = document.getElementById('industryFilter') ? document.getElementById('industryFilter').value : 'ALL';
             const industryParam = industryFilter !== 'ALL' ? `?industry=${industryFilter}` : '';
             
-            fetch(`https://companies-api-production-68c2.up.railway.app/api/oldest${industryParam}`)
+            const endpoint = currentView === 'oldest' 
+                ? `https://companies-api-production-68c2.up.railway.app/api/oldest${industryParam}`
+                : `https://companies-api-production-68c2.up.railway.app/api/newest${industryParam}`;
+            
+            fetch(endpoint)
                 .then(r => r.json())
                 .then(data => {
-                    console.log('Oldest companies data:', data);
+                    console.log(`${currentView} companies data:`, data);
                     if (data && Array.isArray(data) && data.length > 0) {
-                        oldestCompanies = data.map(company => {
+                        const companies = data.map(company => {
                             // Extract year from IncorporationDate
                             let year = 'Unknown';
                             if (company.IncorporationDate) {
@@ -4046,57 +4050,22 @@
                                 industry: industry
                             };
                         });
-                        console.log('Updated oldestCompanies:', oldestCompanies);
+                        
+                        // Assign to the correct array based on current view
+                        if (currentView === 'oldest') {
+                            oldestCompanies = companies;
+                            console.log('Updated oldestCompanies:', oldestCompanies);
+                        } else {
+                            newestCompanies = companies;
+                            console.log('Updated newestCompanies:', newestCompanies);
+                        }
+                        
                         if (document.getElementById('exploreTab').classList.contains('active')) {
                             renderCompanies();
                         }
                     }
                 })
-                .catch(err => console.error('Error loading oldest companies:', err));
-
-            fetch(`https://companies-api-production-68c2.up.railway.app/api/newest${industryParam}`)
-                .then(r => r.json())
-                .then(data => {
-                    console.log('Newest companies data:', data);
-                    if (data && Array.isArray(data) && data.length > 0) {
-                        newestCompanies = data.map(company => {
-                            // Extract year from IncorporationDate
-                            let year = 'Unknown';
-                            if (company.IncorporationDate) {
-                                const date = new Date(company.IncorporationDate);
-                                year = date.getFullYear().toString();
-                            }
-                            
-                            // Get location from address fields
-                            let location = company.RegAddress_PostTown || 
-                                          company.RegAddress_County || 
-                                          company.RegAddress_Country || 
-                                          'United Kingdom';
-                            
-                            // Determine industry from SIC codes or company name
-                            let industry = 'OTHER';
-                            if (company.SICCode_SicText_1) {
-                                industry = guessIndustryFromSIC(company.SICCode_SicText_1);
-                            } else {
-                                industry = guessIndustry(company.CompanyName);
-                            }
-                            
-                            return {
-                                name: company.CompanyName,
-                                number: company.CompanyNumber,
-                                year: year,
-                                location: location,
-                                status: company.CompanyStatus,
-                                industry: industry
-                            };
-                        });
-                        console.log('Updated newestCompanies:', newestCompanies);
-                        if (document.getElementById('exploreTab').classList.contains('active')) {
-                            renderCompanies();
-                        }
-                    }
-                })
-                .catch(err => console.error('Error loading newest companies:', err));
+                .catch(err => console.error(`Error loading ${currentView} companies:`, err));
         }
 
         // Load real data when page loads
@@ -4116,7 +4085,7 @@
             document.getElementById('oldestBtn').classList.add('active');
             document.getElementById('newestBtn').classList.remove('active');
             document.querySelector('.show-more-btn').style.display = 'block'; // Show button again
-            renderCompanies();
+            loadRealCompanies(); // Load data with current industry filter
         }
         
         function showNewest() {
@@ -4125,7 +4094,7 @@
             document.getElementById('newestBtn').classList.add('active');
             document.getElementById('oldestBtn').classList.remove('active');
             document.querySelector('.show-more-btn').style.display = 'block'; // Show button again
-            renderCompanies();
+            loadRealCompanies(); // Load data with current industry filter
         }
         
         function toggleActive(element) {
