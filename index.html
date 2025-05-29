@@ -1995,23 +1995,31 @@
         /* Industry filter dropdown styles */
         #industryFilter {
             transition: all 0.3s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
         }
         
         #industryFilter:hover {
-            background: rgba(255, 255, 255, 0.08);
-            border-color: rgba(255, 255, 255, 0.2);
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
+            border-color: rgba(99, 102, 241, 0.5);
+            transform: translateY(-1px);
+            box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.1), 0 4px 6px -4px rgba(99, 102, 241, 0.1);
         }
         
         #industryFilter:focus {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: rgba(99, 102, 241, 0.5);
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(139, 92, 246, 0.2) 100%);
+            border-color: rgba(99, 102, 241, 0.6);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1), 0 10px 15px -3px rgba(99, 102, 241, 0.1);
         }
         
         #industryFilter option {
             background: #1e293b;
-            color: white;
-            padding: 8px;
+            color: #e2e8f0;
+            padding: 10px;
+            font-weight: 500;
+        }
+        
+        #industryFilter option:hover {
+            background: #334155;
         }
         .show-more-btn {
             padding: 12px 32px;
@@ -2226,33 +2234,40 @@
                     </div>
                     
                     <!-- Industry Filter -->
-                    <div style="display: flex; align-items: center; gap: 8px; margin-left: auto;">
-                        <label style="color: #94a3b8; font-size: 13px;" for="industryFilter">Industry:</label>
+                    <div style="margin-left: auto;">
                         <select id="industryFilter" onchange="renderCompanies()" style="
-                            background: rgba(255, 255, 255, 0.05);
-                            border: 1px solid rgba(255, 255, 255, 0.1);
-                            color: white;
-                            padding: 6px 12px;
-                            border-radius: 8px;
+                            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+                            border: 1px solid rgba(99, 102, 241, 0.3);
+                            color: #e2e8f0;
+                            padding: 8px 16px 8px 12px;
+                            padding-right: 36px;
+                            border-radius: 10px;
                             font-size: 13px;
+                            font-weight: 500;
                             cursor: pointer;
                             outline: none;
-                            min-width: 150px;
+                            min-width: 180px;
+                            appearance: none;
+                            background-image: url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"12\" height=\"12\" viewBox=\"0 0 12 12\"><path fill=\"%23a5b4fc\" d=\"M6 9L1 4h10z\"/></svg>');
+                            background-repeat: no-repeat;
+                            background-position: right 12px center;
+                            transition: all 0.3s ease;
+                            position: relative;
                         ">
-                            <option value="ALL">All Industries</option>
-                            <option value="AGRICULTURE">Agriculture</option>
-                            <option value="FINANCIAL">Financial</option>
-                            <option value="TECHNOLOGY">Technology</option>
-                            <option value="RETAIL">Retail</option>
-                            <option value="MANUFACTURING">Manufacturing</option>
-                            <option value="REAL_ESTATE">Real Estate</option>
-                            <option value="ENERGY">Energy</option>
-                            <option value="HEALTHCARE">Healthcare</option>
-                            <option value="TRANSPORT">Transport</option>
-                            <option value="CONSTRUCTION">Construction</option>
-                            <option value="SERVICES">Services</option>
-                            <option value="MEDIA">Media</option>
-                            <option value="OTHER">Other</option>
+                            <option value="ALL">🌐 All Industries</option>
+                            <option value="AGRICULTURE">🌾 Agriculture</option>
+                            <option value="FINANCIAL">💰 Financial</option>
+                            <option value="TECHNOLOGY">💻 Technology</option>
+                            <option value="RETAIL">🛍️ Retail</option>
+                            <option value="MANUFACTURING">🏭 Manufacturing</option>
+                            <option value="REAL_ESTATE">🏢 Real Estate</option>
+                            <option value="ENERGY">⚡ Energy</option>
+                            <option value="HEALTHCARE">🏥 Healthcare</option>
+                            <option value="TRANSPORT">🚚 Transport</option>
+                            <option value="CONSTRUCTION">🏗️ Construction</option>
+                            <option value="SERVICES">💼 Services</option>
+                            <option value="MEDIA">📺 Media</option>
+                            <option value="OTHER">📁 Other</option>
                         </select>
                     </div>
                 </div>
@@ -4116,9 +4131,14 @@
                 filtered = filtered.filter(c => c.status === 'Active');
             }
             
-            // Filter by industry
+            // Filter by industry (handle both underscore and space versions)
             if (industryFilter && industryFilter !== 'ALL') {
-                filtered = filtered.filter(c => c.industry === industryFilter);
+                filtered = filtered.filter(c => {
+                    // Normalize both values to use underscores for comparison
+                    const normalizedCompanyIndustry = c.industry.replace(/\s+/g, '_');
+                    const normalizedFilter = industryFilter.replace(/\s+/g, '_');
+                    return normalizedCompanyIndustry === normalizedFilter;
+                });
             }
             
             list.innerHTML = filtered.map(company => `
