@@ -3736,6 +3736,83 @@
             { name: "FINANCIAL TECH LTD", number: "15234571", year: "2024", location: "Edinburgh", status: "Active", industry: "FINANCIAL" }
         ];
 
+        // Function to guess industry from SIC code
+        function guessIndustryFromSIC(sicText) {
+            if (!sicText) return 'OTHER';
+            const sic = sicText.toUpperCase();
+            
+            // Agriculture & Food (01-03, 10-11)
+            if (sic.startsWith('01') || sic.startsWith('02') || sic.startsWith('03') || 
+                sic.startsWith('10') || sic.startsWith('11') || sic.includes('AGRICULTURE') || 
+                sic.includes('FARM') || sic.includes('FOOD') || sic.includes('CATTLE')) {
+                return 'AGRICULTURE';
+            }
+            
+            // Financial (64-66)
+            if (sic.startsWith('64') || sic.startsWith('65') || sic.startsWith('66') || 
+                sic.includes('FINANC') || sic.includes('INSURANCE') || sic.includes('BANK')) {
+                return 'FINANCIAL';
+            }
+            
+            // Technology (62-63)
+            if (sic.startsWith('62') || sic.startsWith('63') || sic.includes('SOFTWARE') || 
+                sic.includes('COMPUTER') || sic.includes('INFORMATION')) {
+                return 'TECHNOLOGY';
+            }
+            
+            // Retail (45-47)
+            if (sic.startsWith('45') || sic.startsWith('46') || sic.startsWith('47') || 
+                sic.includes('RETAIL') || sic.includes('WHOLESALE') || sic.includes('SALE')) {
+                return 'RETAIL';
+            }
+            
+            // Manufacturing (10-33)
+            if ((sic.match(/^\d{2}/) && parseInt(sic.substring(0, 2)) >= 10 && parseInt(sic.substring(0, 2)) <= 33) ||
+                sic.includes('MANUFACTUR')) {
+                return 'MANUFACTURING';
+            }
+            
+            // Real Estate (68)
+            if (sic.startsWith('68') || sic.includes('REAL ESTATE') || sic.includes('PROPERTY')) {
+                return 'REAL ESTATE';
+            }
+            
+            // Energy (05-09, 35)
+            if (sic.startsWith('05') || sic.startsWith('06') || sic.startsWith('07') || 
+                sic.startsWith('08') || sic.startsWith('09') || sic.startsWith('35') || 
+                sic.includes('ENERGY') || sic.includes('ELECTRIC') || sic.includes('GAS') || 
+                sic.includes('MINING')) {
+                return 'ENERGY';
+            }
+            
+            // Healthcare (86-88)
+            if (sic.startsWith('86') || sic.startsWith('87') || sic.startsWith('88') || 
+                sic.includes('HEALTH') || sic.includes('MEDICAL') || sic.includes('HOSPITAL')) {
+                return 'HEALTHCARE';
+            }
+            
+            // Transportation (49-53)
+            if (sic.startsWith('49') || sic.startsWith('50') || sic.startsWith('51') || 
+                sic.startsWith('52') || sic.startsWith('53') || sic.includes('TRANSPORT')) {
+                return 'TRANSPORT';
+            }
+            
+            // Construction (41-43)
+            if (sic.startsWith('41') || sic.startsWith('42') || sic.startsWith('43') || 
+                sic.includes('CONSTRUCTION') || sic.includes('BUILDING')) {
+                return 'CONSTRUCTION';
+            }
+            
+            // Professional Services (69-75)
+            if (sic.startsWith('69') || sic.startsWith('70') || sic.startsWith('71') || 
+                sic.startsWith('72') || sic.startsWith('73') || sic.startsWith('74') || 
+                sic.startsWith('75') || sic.includes('CONSULTING') || sic.includes('LEGAL')) {
+                return 'SERVICES';
+            }
+            
+            return 'OTHER';
+        }
+        
         // Function to guess industry from company name
         function guessIndustry(companyName) {
             const name = companyName.toUpperCase();
@@ -3795,14 +3872,37 @@
                 .then(data => {
                     console.log('Oldest companies data:', data);
                     if (data && Array.isArray(data) && data.length > 0) {
-                        oldestCompanies = data.map(company => ({
-                            name: company.CompanyName,
-                            number: company.CompanyNumber,
-                            year: company.CompanyNumber.startsWith('000') ? 'Historic' : 'Recent',
-                            location: 'United Kingdom',
-                            status: company.CompanyStatus,
-                            industry: guessIndustry(company.CompanyName)
-                        }));
+                        oldestCompanies = data.map(company => {
+                            // Extract year from IncorporationDate
+                            let year = 'Unknown';
+                            if (company.IncorporationDate) {
+                                const date = new Date(company.IncorporationDate);
+                                year = date.getFullYear().toString();
+                            }
+                            
+                            // Get location from address fields
+                            let location = company.RegAddress_PostTown || 
+                                          company.RegAddress_County || 
+                                          company.RegAddress_Country || 
+                                          'United Kingdom';
+                            
+                            // Determine industry from SIC codes or company name
+                            let industry = 'OTHER';
+                            if (company.SICCode_SicText_1) {
+                                industry = guessIndustryFromSIC(company.SICCode_SicText_1);
+                            } else {
+                                industry = guessIndustry(company.CompanyName);
+                            }
+                            
+                            return {
+                                name: company.CompanyName,
+                                number: company.CompanyNumber,
+                                year: year,
+                                location: location,
+                                status: company.CompanyStatus,
+                                industry: industry
+                            };
+                        });
                         console.log('Updated oldestCompanies:', oldestCompanies);
                         if (document.getElementById('exploreTab').classList.contains('active')) {
                             renderCompanies();
@@ -3816,14 +3916,37 @@
                 .then(data => {
                     console.log('Newest companies data:', data);
                     if (data && Array.isArray(data) && data.length > 0) {
-                        newestCompanies = data.map(company => ({
-                            name: company.CompanyName,
-                            number: company.CompanyNumber,
-                            year: 'Recent',
-                            location: 'United Kingdom',
-                            status: company.CompanyStatus,
-                            industry: guessIndustry(company.CompanyName)
-                        }));
+                        newestCompanies = data.map(company => {
+                            // Extract year from IncorporationDate
+                            let year = 'Unknown';
+                            if (company.IncorporationDate) {
+                                const date = new Date(company.IncorporationDate);
+                                year = date.getFullYear().toString();
+                            }
+                            
+                            // Get location from address fields
+                            let location = company.RegAddress_PostTown || 
+                                          company.RegAddress_County || 
+                                          company.RegAddress_Country || 
+                                          'United Kingdom';
+                            
+                            // Determine industry from SIC codes or company name
+                            let industry = 'OTHER';
+                            if (company.SICCode_SicText_1) {
+                                industry = guessIndustryFromSIC(company.SICCode_SicText_1);
+                            } else {
+                                industry = guessIndustry(company.CompanyName);
+                            }
+                            
+                            return {
+                                name: company.CompanyName,
+                                number: company.CompanyNumber,
+                                year: year,
+                                location: location,
+                                status: company.CompanyStatus,
+                                industry: industry
+                            };
+                        });
                         console.log('Updated newestCompanies:', newestCompanies);
                         if (document.getElementById('exploreTab').classList.contains('active')) {
                             renderCompanies();
@@ -3931,13 +4054,34 @@
                         const companies = currentView === 'oldest' ? oldestCompanies : newestCompanies;
                         
                         data.forEach(company => {
+                            // Extract year from IncorporationDate
+                            let year = 'Unknown';
+                            if (company.IncorporationDate) {
+                                const date = new Date(company.IncorporationDate);
+                                year = date.getFullYear().toString();
+                            }
+                            
+                            // Get location from address fields
+                            let location = company.RegAddress_PostTown || 
+                                          company.RegAddress_County || 
+                                          company.RegAddress_Country || 
+                                          'United Kingdom';
+                            
+                            // Determine industry from SIC codes or company name
+                            let industry = 'OTHER';
+                            if (company.SICCode_SicText_1) {
+                                industry = guessIndustryFromSIC(company.SICCode_SicText_1);
+                            } else {
+                                industry = guessIndustry(company.CompanyName);
+                            }
+                            
                             companies.push({
                                 name: company.CompanyName,
                                 number: company.CompanyNumber,
-                                year: currentView === 'oldest' ? 'Historic' : 'Recent',
-                                location: 'United Kingdom',
+                                year: year,
+                                location: location,
                                 status: company.CompanyStatus,
-                                industry: guessIndustry(company.CompanyName)
+                                industry: industry
                             });
                         });
                         
