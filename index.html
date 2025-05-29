@@ -3964,6 +3964,9 @@
         
         // Initial render on page load
         document.addEventListener('DOMContentLoaded', function() {
+            // Load real companies from Railway database
+            loadRealCompanies();
+            
             // Check if explore tab is initially active and render companies
             if (document.getElementById('exploreTab') && document.getElementById('exploreTab').classList.contains('active')) {
                 renderCompanies();
