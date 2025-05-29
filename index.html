@@ -1384,13 +1384,8 @@
             }
             
             .search-btn {
-                width: 56px;
-                padding: 16px;
+                padding: 16px 24px;
                 border-radius: var(--radius);
-            }
-            
-            .search-btn span {
-                display: none;
             }
             
             .search-wrapper {
@@ -3142,7 +3137,7 @@
             
             // Reset UI
             searchBtn.disabled = true;
-            searchBtn.innerHTML = '<span class="spinner"></span> Searching...';
+            searchBtn.innerHTML = '<span class="spinner"></span>';
             resultsContainer.style.display = 'none';
             progressContainer.style.display = 'none';
             document.getElementById('fileList').innerHTML = '';
