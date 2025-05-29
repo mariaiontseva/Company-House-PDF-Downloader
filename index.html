@@ -1941,11 +1941,6 @@
             color: #6366f1;
             border: 1px solid rgba(99, 102, 241, 0.3);
         }
-        .industry-property {
-            background: rgba(236, 72, 153, 0.15);
-            color: #ec4899;
-            border: 1px solid rgba(236, 72, 153, 0.3);
-        }
         .industry-transport {
             background: rgba(14, 165, 233, 0.15);
             color: #0ea5e9;
@@ -1960,6 +1955,36 @@
             background: rgba(168, 85, 247, 0.15);
             color: #a855f7;
             border: 1px solid rgba(168, 85, 247, 0.3);
+        }
+        .industry-retail {
+            background: rgba(236, 72, 153, 0.15);
+            color: #ec4899;
+            border: 1px solid rgba(236, 72, 153, 0.3);
+        }
+        .industry-manufacturing {
+            background: rgba(217, 70, 239, 0.15);
+            color: #d946ef;
+            border: 1px solid rgba(217, 70, 239, 0.3);
+        }
+        .industry-real.estate, .industry-real_estate {
+            background: rgba(168, 85, 247, 0.15);
+            color: #a855f7;
+            border: 1px solid rgba(168, 85, 247, 0.3);
+        }
+        .industry-healthcare {
+            background: rgba(34, 211, 238, 0.15);
+            color: #22d3ee;
+            border: 1px solid rgba(34, 211, 238, 0.3);
+        }
+        .industry-construction {
+            background: rgba(245, 158, 11, 0.15);
+            color: #f59e0b;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+        .industry-services {
+            background: rgba(59, 130, 246, 0.15);
+            color: #3b82f6;
+            border: 1px solid rgba(59, 130, 246, 0.3);
         }
         .industry-other {
             background: rgba(107, 114, 128, 0.15);
@@ -3774,7 +3799,7 @@
             
             // Real Estate (68)
             if (sic.startsWith('68') || sic.includes('REAL ESTATE') || sic.includes('PROPERTY')) {
-                return 'REAL ESTATE';
+                return 'REAL_ESTATE';
             }
             
             // Energy (05-09, 35)
@@ -3810,6 +3835,14 @@
                 return 'SERVICES';
             }
             
+            // Media & Entertainment (58-60, 90-93)
+            if (sic.startsWith('58') || sic.startsWith('59') || sic.startsWith('60') || 
+                sic.startsWith('90') || sic.startsWith('91') || sic.startsWith('92') || 
+                sic.startsWith('93') || sic.includes('MEDIA') || sic.includes('BROADCAST') || 
+                sic.includes('PUBLISHING') || sic.includes('ENTERTAINMENT')) {
+                return 'MEDIA';
+            }
+            
             return 'OTHER';
         }
         
@@ -3836,10 +3869,15 @@
                 return 'TECHNOLOGY';
             }
             
-            // Property & Construction
-            if (name.includes('PROPERTIES') || name.includes('PROPERTY') || name.includes('BUILDING') || 
-                name.includes('CONSTRUCTION') || name.includes('ESTATE') || name.includes('LAND')) {
-                return 'PROPERTY';
+            // Property & Real Estate
+            if (name.includes('PROPERTIES') || name.includes('PROPERTY') || name.includes('ESTATE') || 
+                name.includes('LAND') || name.includes('DEVELOPMENT')) {
+                return 'REAL_ESTATE';
+            }
+            
+            // Construction
+            if (name.includes('CONSTRUCTION') || name.includes('BUILDING') || name.includes('BUILDER')) {
+                return 'CONSTRUCTION';
             }
             
             // Transport & Shipping
@@ -3852,6 +3890,30 @@
             if (name.includes('GAS') || name.includes('ELECTRIC') || name.includes('ENERGY') || 
                 name.includes('POWER') || name.includes('OIL') || name.includes('PETROLEUM')) {
                 return 'ENERGY';
+            }
+            
+            // Retail & Shops
+            if (name.includes('RETAIL') || name.includes('SHOP') || name.includes('STORE') || 
+                name.includes('TRADING') || name.includes('SALES')) {
+                return 'RETAIL';
+            }
+            
+            // Manufacturing
+            if (name.includes('MANUFACTUR') || name.includes('FACTORY') || name.includes('PRODUCTION') || 
+                name.includes('ENGINEERING')) {
+                return 'MANUFACTURING';
+            }
+            
+            // Healthcare
+            if (name.includes('HEALTH') || name.includes('MEDICAL') || name.includes('CLINIC') || 
+                name.includes('HOSPITAL') || name.includes('PHARMA') || name.includes('CARE')) {
+                return 'HEALTHCARE';
+            }
+            
+            // Professional Services
+            if (name.includes('CONSULTING') || name.includes('SERVICES') || name.includes('SOLUTIONS') || 
+                name.includes('LEGAL') || name.includes('ACCOUNTAN') || name.includes('MANAGEMENT')) {
+                return 'SERVICES';
             }
             
             // Media & Publishing
