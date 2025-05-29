@@ -1625,12 +1625,8 @@
                 font-size: 15px;
             }
 
-            /* Filter controls - stack vertically */
-            .tab-content > div:first-child {
-                flex-direction: column;
-                gap: 16px;
-                align-items: stretch;
-            }
+            /* Filter controls - keep two-line layout on mobile */
+            /* Removed vertical stacking to maintain desktop layout */
 
             /* Toggle buttons - larger touch targets */
             .toggle-btn {
@@ -1640,12 +1636,11 @@
                 flex: 1;
             }
 
-            /* Industry filter - full width */
+            /* Industry filter - better mobile sizing */
             #industryFilter {
-                min-height: 48px;
-                padding: 12px 16px;
-                font-size: 16px;
-                width: 100%;
+                min-height: 44px;
+                padding: 10px 14px;
+                font-size: 14px;
             }
 
             /* Company cards - mobile optimized */
@@ -2440,17 +2435,21 @@
             <!-- Explore tab content -->
             <div class="tab-content active" id="exploreTab">
                 <!-- Toggle buttons and filters -->
-                <div style="display: flex; gap: 8px; margin: 24px 0; align-items: center; flex-wrap: wrap;">
-                    <button class="toggle-btn active" onclick="showOldest()" id="oldestBtn">Oldest</button>
-                    <button class="toggle-btn" onclick="showNewest()" id="newestBtn">Newest</button>
-                    <div style="display: flex; align-items: center; gap: 8px; margin-left: 16px;">
-                        <div class="switch" onclick="toggleActive(this)" id="activeSwitch"></div>
-                        <span style="color: #94a3b8; font-size: 13px;">Active Only</span>
+                <div style="display: flex; flex-direction: column; gap: 12px; margin: 24px 0;">
+                    <!-- Line 1: Oldest, Newest, Active Only -->
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <button class="toggle-btn active" onclick="showOldest()" id="oldestBtn">Oldest</button>
+                        <button class="toggle-btn" onclick="showNewest()" id="newestBtn">Newest</button>
+                        <div style="display: flex; align-items: center; gap: 8px; margin-left: auto;">
+                            <div class="switch" onclick="toggleActive(this)" id="activeSwitch"></div>
+                            <span style="color: #94a3b8; font-size: 13px;">Active Only</span>
+                        </div>
                     </div>
                     
-                    <!-- Industry Filter -->
-                    <div style="margin-left: auto;">
+                    <!-- Line 2: Industry Filter (full width) -->
+                    <div style="width: 100%;">
                         <select id="industryFilter" onchange="onIndustryChange()" style="
+                            width: 100%;
                             background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
                             border: 1px solid rgba(99, 102, 241, 0.3);
                             color: #e2e8f0;
