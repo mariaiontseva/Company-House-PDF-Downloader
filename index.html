@@ -2194,15 +2194,6 @@
             
             <!-- Search tab content -->
             <div class="tab-content" id="searchTab">
-                <!-- Price badge in search tab -->
-                <div style="display: flex; justify-content: center; margin-bottom: 24px;">
-                    <div class="price-badge" style="display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(16, 185, 129, 0.1) 100%); border: 1px solid rgba(34, 197, 94, 0.3); padding: 12px 24px; border-radius: 100px; font-size: 16px; font-weight: 600; color: #10b981;">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        £5 per company download
-                    </div>
-                </div>
                 <form id="searchForm">
                     <div class="search-wrapper">
                         <div class="autocomplete-wrapper" style="flex: 1; min-width: 0;">
@@ -2223,6 +2214,13 @@
                             </svg>
                             <span>Search</span>
                         </button>
+                    </div>
+                    <!-- Subtle price info -->
+                    <div style="text-align: center; margin-top: 20px;">
+                        <p style="color: #64748b; font-size: 14px; font-weight: 500;">
+                            Download all company PDFs for just 
+                            <span style="color: #a5b4fc; font-weight: 600;">£5</span>
+                        </p>
                     </div>
                 </form>
             </div>
