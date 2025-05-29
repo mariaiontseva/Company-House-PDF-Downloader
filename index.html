@@ -1604,8 +1604,14 @@
             .search-container {
                 padding: 20px 16px;
                 margin: 0 16px 32px 16px;
-                max-width: none;
+                max-width: calc(100% - 32px);
                 width: calc(100% - 32px);
+            }
+            
+            /* Results container - full width on mobile */
+            .results-container {
+                max-width: calc(100% - 32px);
+                margin: 0 16px;
             }
 
             /* Search form improvements */
@@ -1646,7 +1652,12 @@
             /* Company cards - mobile optimized */
             .company-card, .explore-company-card {
                 padding: 20px 16px;
-                margin: 0 16px 16px 16px;
+                margin: 0 0 16px 0;
+            }
+            
+            /* Company list container - full width on mobile */
+            #companyListExplore {
+                max-width: 100%;
             }
 
             /* Company card content */
