@@ -18,7 +18,9 @@ const connection = mysql.createConnection({
 app.get('/api/oldest/:offset?', (req, res) => {
   const offset = parseInt(req.params.offset) || 0;
   const query = `
-    SELECT CompanyName, CompanyNumber, CompanyStatus, IncorporationDate
+    SELECT CompanyName, CompanyNumber, CompanyStatus, IncorporationDate,
+           RegAddress_PostTown, RegAddress_County, RegAddress_Country,
+           SICCode_SicText_1, SICCode_SicText_2, SICCode_SicText_3, SICCode_SicText_4
     FROM companies 
     WHERE CompanyStatus = 'Active' AND IncorporationDate IS NOT NULL
     ORDER BY IncorporationDate ASC
@@ -35,7 +37,9 @@ app.get('/api/oldest/:offset?', (req, res) => {
 app.get('/api/newest/:offset?', (req, res) => {
   const offset = parseInt(req.params.offset) || 0;
   const query = `
-    SELECT CompanyName, CompanyNumber, CompanyStatus, IncorporationDate
+    SELECT CompanyName, CompanyNumber, CompanyStatus, IncorporationDate,
+           RegAddress_PostTown, RegAddress_County, RegAddress_Country,
+           SICCode_SicText_1, SICCode_SicText_2, SICCode_SicText_3, SICCode_SicText_4
     FROM companies
     WHERE CompanyStatus = 'Active' AND IncorporationDate IS NOT NULL
     ORDER BY IncorporationDate DESC

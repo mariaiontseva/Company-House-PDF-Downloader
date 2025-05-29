@@ -4065,7 +4065,7 @@
                     </div>
                     <div style="color: #94a3b8; font-size: 14px; display: flex; align-items: center;">
                         ${company.year} • ${company.location} • ${company.number}
-                        <span class="industry-badge industry-${company.industry.toLowerCase()}">${company.industry}</span>
+                        <span class="industry-badge industry-${company.industry.toLowerCase().replace(/[\s_]/g, '_')}">${company.industry.replace(/_/g, ' ')}</span>
                     </div>
                 </div>
             `).join('');
