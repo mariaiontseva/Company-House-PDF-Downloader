@@ -1617,7 +1617,6 @@
                 width: calc(100% - 32px);
                 -webkit-box-sizing: border-box;
                 box-sizing: border-box;
-                padding: 0 6px;
             }
             
             /* Tab content container - full width on mobile */
@@ -1661,21 +1660,20 @@
                 font-size: 14px;
             }
 
-            /* Filter block - smaller padding on mobile */
+            /* Filter block - reduce padding on mobile */
             .tab-content > div:first-child {
-                padding: 0 6px;
+                margin: 24px 6px !important;
             }
             
-            /* Company cards - mobile optimized */
+            /* Company cards - mobile optimized with smaller margins */
             .company-card, .explore-company-card {
                 padding: 20px 16px;
-                margin: 0 6px 16px 6px;
+                margin: 0 0 16px 0;
             }
             
             /* Company list container - full width on mobile */
             #companyListExplore {
                 max-width: 100%;
-                padding: 0 6px;
             }
 
             /* Company card content */
