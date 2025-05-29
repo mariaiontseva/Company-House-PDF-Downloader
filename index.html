@@ -1991,6 +1991,28 @@
             color: #6b7280;
             border: 1px solid rgba(107, 114, 128, 0.3);
         }
+        
+        /* Industry filter dropdown styles */
+        #industryFilter {
+            transition: all 0.3s ease;
+        }
+        
+        #industryFilter:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        #industryFilter:focus {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(99, 102, 241, 0.5);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+        
+        #industryFilter option {
+            background: #1e293b;
+            color: white;
+            padding: 8px;
+        }
         .show-more-btn {
             padding: 12px 32px;
             background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
@@ -2194,13 +2216,44 @@
             
             <!-- Explore tab content -->
             <div class="tab-content" id="exploreTab">
-                <!-- Toggle buttons -->
-                <div style="display: flex; gap: 8px; margin: 24px 0; align-items: center;">
+                <!-- Toggle buttons and filters -->
+                <div style="display: flex; gap: 8px; margin: 24px 0; align-items: center; flex-wrap: wrap;">
                     <button class="toggle-btn active" onclick="showOldest()" id="oldestBtn">Oldest</button>
                     <button class="toggle-btn" onclick="showNewest()" id="newestBtn">Newest</button>
                     <div style="display: flex; align-items: center; gap: 8px; margin-left: 16px;">
                         <div class="switch" onclick="toggleActive(this)" id="activeSwitch"></div>
                         <span style="color: #94a3b8; font-size: 13px;">Active Only</span>
+                    </div>
+                    
+                    <!-- Industry Filter -->
+                    <div style="display: flex; align-items: center; gap: 8px; margin-left: auto;">
+                        <label style="color: #94a3b8; font-size: 13px;" for="industryFilter">Industry:</label>
+                        <select id="industryFilter" onchange="renderCompanies()" style="
+                            background: rgba(255, 255, 255, 0.05);
+                            border: 1px solid rgba(255, 255, 255, 0.1);
+                            color: white;
+                            padding: 6px 12px;
+                            border-radius: 8px;
+                            font-size: 13px;
+                            cursor: pointer;
+                            outline: none;
+                            min-width: 150px;
+                        ">
+                            <option value="ALL">All Industries</option>
+                            <option value="AGRICULTURE">Agriculture</option>
+                            <option value="FINANCIAL">Financial</option>
+                            <option value="TECHNOLOGY">Technology</option>
+                            <option value="RETAIL">Retail</option>
+                            <option value="MANUFACTURING">Manufacturing</option>
+                            <option value="REAL_ESTATE">Real Estate</option>
+                            <option value="ENERGY">Energy</option>
+                            <option value="HEALTHCARE">Healthcare</option>
+                            <option value="TRANSPORT">Transport</option>
+                            <option value="CONSTRUCTION">Construction</option>
+                            <option value="SERVICES">Services</option>
+                            <option value="MEDIA">Media</option>
+                            <option value="OTHER">Other</option>
+                        </select>
                     </div>
                 </div>
                 
@@ -4052,10 +4105,21 @@
             if (!list) return;
             
             const activeOnly = document.getElementById('activeSwitch') && document.getElementById('activeSwitch').classList.contains('active');
+            const industryFilter = document.getElementById('industryFilter') ? document.getElementById('industryFilter').value : 'ALL';
             const companies = currentView === 'oldest' ? oldestCompanies : newestCompanies;
             
-            // Show ALL companies when toggle is OFF, only Active when ON
-            const filtered = activeOnly ? companies.filter(c => c.status === 'Active') : companies;
+            // Apply filters
+            let filtered = companies;
+            
+            // Filter by active status
+            if (activeOnly) {
+                filtered = filtered.filter(c => c.status === 'Active');
+            }
+            
+            // Filter by industry
+            if (industryFilter && industryFilter !== 'ALL') {
+                filtered = filtered.filter(c => c.industry === industryFilter);
+            }
             
             list.innerHTML = filtered.map(company => `
                 <div class="explore-company-card" onclick="selectExploreCompany('${company.number}')">
