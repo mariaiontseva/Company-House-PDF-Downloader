@@ -1642,9 +1642,14 @@
             }
 
             .search-btn {
-                padding: 16px 24px;
+                padding: 16px;
                 min-height: 48px;
+                width: 48px;
                 font-size: 15px;
+            }
+            
+            .search-btn span {
+                display: none !important;
             }
 
             /* Filter controls - keep two-line layout on mobile */
@@ -3151,7 +3156,10 @@
             const btnText = searchBtn.querySelector('span');
             if (btnIcon && btnText) {
                 btnIcon.style.display = 'none';
-                btnText.innerHTML = '<span class="spinner"></span> Search';
+                btnText.innerHTML = '<span class="spinner"></span>';
+                if (window.innerWidth > 480) {
+                    btnText.innerHTML = '<span class="spinner"></span> Search';
+                }
                 btnText.style.visibility = 'visible';
             }
             resultsContainer.style.display = 'none';
