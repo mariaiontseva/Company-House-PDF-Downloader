@@ -1724,6 +1724,76 @@
                 min-height: 48px;
                 font-size: 15px;
             }
+            
+            /* Expandable card content - mobile optimization */
+            .card-expand-content {
+                font-size: 13px;
+            }
+            
+            .expand-section {
+                margin-top: 12px;
+                padding-top: 12px;
+            }
+            
+            .expand-row {
+                margin-bottom: 10px;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 4px;
+            }
+            
+            .expand-label {
+                min-width: auto;
+                font-size: 12px;
+                color: #94a3b8;
+                font-weight: 600;
+            }
+            
+            .expand-value {
+                font-size: 13px;
+                color: #e2e8f0;
+                line-height: 1.4;
+            }
+            
+            /* Charges display - mobile specific */
+            .charges-breakdown {
+                font-size: 12px;
+            }
+            
+            .charge-line {
+                padding: 6px 0;
+                margin-bottom: 4px;
+            }
+            
+            .charge-type {
+                font-size: 12px;
+            }
+            
+            .charge-count {
+                font-size: 13px;
+                font-weight: 700;
+            }
+            
+            /* SIC codes - mobile responsive */
+            .sic-code {
+                font-size: 11px;
+                padding: 3px 6px;
+                margin-bottom: 3px;
+                margin-right: 4px;
+            }
+            
+            /* Sign up button - mobile touch target */
+            .signup-btn {
+                padding: 12px 24px;
+                font-size: 14px;
+                min-height: 44px;
+                border-radius: 8px;
+            }
+            
+            /* Expanded card max-height adjustment for mobile */
+            .explore-company-card.expanded .card-expand-content {
+                max-height: 400px;
+            }
 
             /* Footer improvements */
             .footer-links {
@@ -1775,6 +1845,46 @@
                 width: 10px;
                 height: 10px;
                 margin-right: 8px;
+            }
+            
+            /* Charges indicator mobile */
+            .charges-indicator {
+                width: 14px !important;
+                height: 14px !important;
+            }
+            
+            .charges-indicator::before {
+                font-size: 10px !important;
+            }
+            
+            /* Force single line for filter area */
+            .explore-content > div > div:first-child {
+                flex-wrap: nowrap !important;
+            }
+            
+            /* Reduce gaps on mobile */
+            .explore-content > div > div:first-child > div:last-child {
+                gap: 8px !important;
+            }
+            
+            /* Show mobile text, hide desktop text */
+            .desktop-text {
+                display: none !important;
+            }
+            
+            .mobile-text {
+                display: inline !important;
+            }
+            
+            /* Smaller font for toggle labels */
+            .explore-content span[style*="font-size: 13px"] {
+                font-size: 11px !important;
+            }
+            
+            /* Reduce toggle button size on mobile */
+            .explore-content .toggle-btn {
+                padding: 10px 12px !important;
+                font-size: 13px !important;
             }
 
             /* Industry badges - better mobile sizing */
@@ -2210,6 +2320,129 @@
             border-color: rgba(139,92,246,0.3);
             transform: translateY(-1px);
         }
+        
+        /* Expanded card styles */
+        .explore-company-card.expanded {
+            background: rgba(255,255,255,0.05);
+            border-color: rgba(139,92,246,0.4);
+        }
+        
+        .card-expand-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
+            opacity: 0;
+        }
+        
+        .explore-company-card.expanded .card-expand-content {
+            max-height: 500px;
+            opacity: 1;
+            transition: max-height 0.3s ease-in, opacity 0.3s ease-in;
+        }
+        
+        .expand-section {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .expand-row {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 12px;
+            color: #e2e8f0;
+            font-size: 13px;
+        }
+        
+        .expand-label {
+            color: #94a3b8;
+            min-width: 120px;
+            font-weight: 500;
+        }
+        
+        .expand-value {
+            flex: 1;
+            color: #e2e8f0;
+        }
+        
+        .sic-code {
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-bottom: 4px;
+            display: inline-block;
+            cursor: help;
+        }
+        
+        .charges-breakdown {
+            font-size: 13px;
+            line-height: 1.4;
+        }
+        
+        .charge-line {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+            padding: 4px 0;
+        }
+        
+        .charge-line:last-child {
+            margin-bottom: 0;
+        }
+        
+        .charge-type {
+            color: #94a3b8;
+            font-weight: 500;
+        }
+        
+        .charge-count {
+            font-weight: 600;
+            color: #e2e8f0;
+        }
+        
+        .charge-count.outstanding {
+            color: #fca5a5;
+        }
+        
+        .charge-count.satisfied {
+            color: #86efac;
+        }
+        
+        .signup-cta {
+            margin-top: 20px;
+            padding: 16px;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%);
+            border: 1px solid rgba(99, 102, 241, 0.15);
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .signup-cta p {
+            color: #94a3b8;
+            font-size: 13px;
+            margin-bottom: 12px;
+            display: none;
+        }
+        
+        .signup-btn {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .signup-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+        }
         .status-indicator {
             width: 10px;
             height: 10px;
@@ -2222,27 +2455,45 @@
             position: relative;
             cursor: help;
             flex-shrink: 0;
+            /* Reset any inherited transforms */
+            transform: none !important;
+            font-size: inherit !important;
         }
-        .status-indicator::after {
+        /* Simple tooltip - 11px as requested with multiline support */
+        [data-tooltip] {
+            position: relative;
+        }
+        
+        [data-tooltip]::after {
             content: attr(data-tooltip);
             position: absolute;
-            bottom: 20px;
+            bottom: 25px;
             left: 50%;
             transform: translateX(-50%);
             background: rgba(0, 0, 0, 0.9);
             color: white;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            white-space: nowrap;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-weight: normal;
+            line-height: 1.3;
+            white-space: normal;
+            max-width: 280px;
+            width: max-content;
+            text-align: center;
+            word-wrap: break-word;
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.2s;
             z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
         }
-        .status-indicator:hover::after {
+        
+        [data-tooltip]:hover::after {
             opacity: 1;
         }
+        
         .status-active {
             background: #22c55e;
         }
@@ -2267,6 +2518,39 @@
             letter-spacing: 0.5px;
             margin-left: 8px;
         }
+        
+        /* Desktop/mobile text visibility */
+        .mobile-text {
+            display: none;
+        }
+        
+        /* Charges indicator */
+        .charges-indicator {
+            margin-left: 8px;
+            width: 16px;
+            height: 16px;
+            min-width: 16px;
+            min-height: 16px;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            border-radius: 50%;
+            display: inline-flex !important;
+            align-items: center;
+            justify-content: center;
+            cursor: help;
+            position: relative;
+            flex-shrink: 0;
+            box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+            color: white;
+            font-size: 11px;
+            font-weight: 700;
+            line-height: 1;
+        }
+        
+        .charges-indicator:hover {
+            transform: scale(1.1);
+            box-shadow: 0 3px 6px rgba(239, 68, 68, 0.4);
+        }
+        
         .industry-agriculture {
             background: rgba(34, 197, 94, 0.15);
             color: #22c55e;
@@ -2579,11 +2863,24 @@
                 <div style="display: flex; flex-direction: column; gap: 12px; margin: 24px 0;">
                     <!-- Line 1: Oldest, Newest, Active Only -->
                     <div style="display: flex; gap: 8px; align-items: center;">
-                        <button class="toggle-btn active" onclick="showOldest()" id="oldestBtn">Oldest</button>
-                        <button class="toggle-btn" onclick="showNewest()" id="newestBtn">Newest</button>
-                        <div style="display: flex; align-items: center; gap: 8px; margin-left: auto;">
-                            <div class="switch" onclick="toggleActive(this)" id="activeSwitch"></div>
-                            <span style="color: #94a3b8; font-size: 13px;">Active Only</span>
+                        <button class="toggle-btn active" onclick="showOldest()" id="oldestBtn" title="Show oldest companies">Oldest</button>
+                        <button class="toggle-btn" onclick="showNewest()" id="newestBtn" title="Show newest companies">Newest</button>
+                        <div style="display: flex; align-items: center; gap: 16px; margin-left: auto;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <div class="switch" onclick="toggleActive(this)" id="activeSwitch"></div>
+                                <span style="color: #94a3b8; font-size: 13px; white-space: nowrap;">
+                                    <span class="desktop-text">Active Only</span>
+                                    <span class="mobile-text">Active</span>
+                                </span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <div class="switch" onclick="toggleCharges(this)" id="chargesSwitch"></div>
+                                <span style="color: #94a3b8; font-size: 13px; display: flex; align-items: center; gap: 4px; white-space: nowrap;">
+                                    <span class="charges-indicator" data-tooltip="Companies with outstanding mortgages or charges">!</span>
+                                    <span class="desktop-text">Has Charges</span>
+                                    <span class="mobile-text">Charges</span>
+                                </span>
+                            </div>
                         </div>
                     </div>
                     
@@ -4351,6 +4648,11 @@
             return 'OTHER';
         }
 
+        // API Base URL - automatically detects environment
+        const API_BASE_URL = window.location.hostname === 'localhost' 
+            ? 'http://localhost:3000' 
+            : 'https://companies-api-production-2b0f.up.railway.app';
+
         // Fetch real data from Railway and replace the mock data
         function loadRealCompanies() {
             console.log(`Loading real companies from Railway (${currentView})...`);
@@ -4359,8 +4661,8 @@
             const industryParam = industryFilter !== 'ALL' ? `?industry=${industryFilter}` : '';
             
             const endpoint = currentView === 'oldest' 
-                ? `https://companies-api-production-68c2.up.railway.app/api/oldest${industryParam}`
-                : `https://companies-api-production-68c2.up.railway.app/api/newest${industryParam}`;
+                ? `${API_BASE_URL}/api/oldest${industryParam}`
+                : `${API_BASE_URL}/api/newest${industryParam}`;
             
             fetch(endpoint)
                 .then(r => r.json())
@@ -4395,7 +4697,29 @@
                                 year: year,
                                 location: location,
                                 status: company.CompanyStatus,
-                                industry: industry
+                                industry: industry,
+                                // Charges data
+                                totalCharges: parseInt(company.Mortgages_NumMortCharges) || 0,
+                                outstandingCharges: parseInt(company.Mortgages_NumMortOutstanding) || 0,
+                                satisfiedCharges: parseInt(company.Mortgages_NumMortSatisfied) || 0,
+                                partSatisfiedCharges: parseInt(company.Mortgages_NumMortPartSatisfied) || 0,
+                                // Additional data for expanded view
+                                incorporationDate: company.IncorporationDate,
+                                companyType: company.CompanyCategory,
+                                sicCodes: [
+                                    company.SICCode_SicText_1,
+                                    company.SICCode_SicText_2,
+                                    company.SICCode_SicText_3,
+                                    company.SICCode_SicText_4
+                                ].filter(Boolean),
+                                address: {
+                                    line1: company.RegAddress_AddressLine1,
+                                    line2: company.RegAddress_AddressLine2,
+                                    postTown: company.RegAddress_PostTown,
+                                    county: company.RegAddress_County,
+                                    postCode: company.RegAddress_PostCode,
+                                    country: company.RegAddress_Country
+                                }
                             };
                         });
                         
@@ -4450,11 +4774,17 @@
             renderCompanies();
         }
         
+        function toggleCharges(element) {
+            element.classList.toggle('active');
+            renderCompanies();
+        }
+        
         function renderCompanies() {
             const list = document.getElementById('companyListExplore');
             if (!list) return;
             
             const activeOnly = document.getElementById('activeSwitch') && document.getElementById('activeSwitch').classList.contains('active');
+            const chargesOnly = document.getElementById('chargesSwitch') && document.getElementById('chargesSwitch').classList.contains('active');
             const industryFilter = document.getElementById('industryFilter') ? document.getElementById('industryFilter').value : 'ALL';
             const companies = currentView === 'oldest' ? oldestCompanies : newestCompanies;
             
@@ -4466,18 +4796,91 @@
                 filtered = filtered.filter(c => c.status === 'Active');
             }
             
-            list.innerHTML = filtered.map(company => `
-                <div class="explore-company-card" onclick="selectExploreCompany('${company.number}')">
+            // Filter by charges
+            if (chargesOnly) {
+                filtered = filtered.filter(c => c.totalCharges > 0);
+            }
+            
+            list.innerHTML = filtered.map(company => {
+                const incorporationDate = company.incorporationDate ? new Date(company.incorporationDate).toLocaleDateString('en-GB', { 
+                    day: 'numeric', 
+                    month: 'short', 
+                    year: 'numeric' 
+                }) : 'Not available';
+                
+                const companyAge = company.incorporationDate ? 
+                    Math.floor((new Date() - new Date(company.incorporationDate)) / (365.25 * 24 * 60 * 60 * 1000)) : null;
+                
+                return `
+                <div class="explore-company-card" onclick="toggleCardExpansion(this, '${company.number}')" data-company-number="${company.number}">
                     <div style="font-size: 16px; font-weight: 600; margin-bottom: 8px; color: #ffffff; display: flex; align-items: center;">
                         <span class="status-indicator status-${company.status.toLowerCase()}" data-tooltip="${company.status}"></span>
                         ${company.name}
+                        ${company.totalCharges > 0 ? `
+                            <span class="charges-indicator" data-tooltip="${company.totalCharges} charge${company.totalCharges !== 1 ? 's' : ''} (${company.outstandingCharges} outstanding)">!</span>
+                        ` : ''}
                     </div>
                     <div style="color: #94a3b8; font-size: 14px; display: flex; align-items: center;">
                         ${company.year} • ${company.location} • ${company.number}
                         <span class="industry-badge industry-${company.industry.toLowerCase().replace(/[\s_]/g, '_')}">${company.industry.replace(/_/g, ' ')}</span>
                     </div>
+                    
+                    <div class="card-expand-content">
+                        <div class="expand-section">
+                            <div class="expand-row">
+                                <span class="expand-label">Incorporated:</span>
+                                <span class="expand-value">${incorporationDate}${companyAge !== null ? ` (${companyAge} years ago)` : ''}</span>
+                            </div>
+                            
+                            <div class="expand-row">
+                                <span class="expand-label">Company Type:</span>
+                                <span class="expand-value">${company.companyType || 'Private Limited Company'}</span>
+                            </div>
+                            
+                            ${company.sicCodes && company.sicCodes.length > 0 ? `
+                                <div class="expand-row">
+                                    <span class="expand-label">SIC Codes:</span>
+                                    <div class="expand-value">
+                                        ${company.sicCodes.map(sic => `
+                                            <div class="sic-code" data-tooltip="${sic}">${sic.split(' - ')[0]}</div>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            ` : ''}
+                            
+                            ${company.totalCharges > 0 ? `
+                                <div class="expand-row">
+                                    <span class="expand-label">Charges:</span>
+                                    <div class="expand-value">
+                                        <div class="charges-breakdown">
+                                            <div class="charge-line">
+                                                <span class="charge-type">Total charges</span>
+                                                <span class="charge-count">${company.totalCharges}</span>
+                                            </div>
+                                            ${company.outstandingCharges > 0 ? `
+                                                <div class="charge-line">
+                                                    <span class="charge-type">Outstanding</span>
+                                                    <span class="charge-count outstanding">${company.outstandingCharges}</span>
+                                                </div>
+                                            ` : ''}
+                                            ${company.satisfiedCharges > 0 ? `
+                                                <div class="charge-line">
+                                                    <span class="charge-type">Satisfied</span>
+                                                    <span class="charge-count satisfied">${company.satisfiedCharges}</span>
+                                                </div>
+                                            ` : ''}
+                                        </div>
+                                    </div>
+                                </div>
+                            ` : ''}
+                            
+                            <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(255, 255, 255, 0.1); text-align: center;">
+                                <button class="signup-btn" onclick="event.stopPropagation(); showSignupModal();">Sign Up for Full Access</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            `).join('');
+            `}).join('');
             
             // If no companies after filter, show message
             if (filtered.length === 0) {
@@ -4518,8 +4921,8 @@
             const industryParam = industryFilter !== 'ALL' ? `?industry=${industryFilter}` : '';
             
             const endpoint = currentView === 'oldest' 
-                ? `https://companies-api-production-68c2.up.railway.app/api/oldest/${companiesOffset}${industryParam}`
-                : `https://companies-api-production-68c2.up.railway.app/api/newest/${companiesOffset}${industryParam}`;
+                ? `${API_BASE_URL}/api/oldest/${companiesOffset}${industryParam}`
+                : `${API_BASE_URL}/api/newest/${companiesOffset}${industryParam}`;
                 
             fetch(endpoint)
                 .then(r => r.json())
@@ -4595,6 +4998,35 @@
         
         // Also update button when auth state changes
         window.addEventListener('authStateChanged', updateLoadMoreButton);
+        
+        // Toggle card expansion function
+        function toggleCardExpansion(card, companyNumber) {
+            // Prevent event from bubbling up to search functionality
+            event.stopPropagation();
+            
+            // Check if this card is already expanded
+            const isExpanded = card.classList.contains('expanded');
+            
+            // Close all other expanded cards
+            document.querySelectorAll('.explore-company-card.expanded').forEach(expandedCard => {
+                if (expandedCard !== card) {
+                    expandedCard.classList.remove('expanded');
+                }
+            });
+            
+            // Toggle the clicked card
+            if (!isExpanded) {
+                card.classList.add('expanded');
+            } else {
+                card.classList.remove('expanded');
+            }
+        }
+        
+        // Show signup modal function
+        function showSignupModal() {
+            // Navigate to auth page
+            window.location.href = '/auth.html';
+        }
     </script>
 </body>
 </html>
