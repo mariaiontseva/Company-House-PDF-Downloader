@@ -1642,8 +1642,8 @@
             .autocomplete-wrapper {
                 flex: 1 !important;
                 min-width: 0 !important;
-                width: calc(100% - 56px) !important;
-                max-width: calc(100% - 56px) !important;
+                width: calc(100% - 88px) !important;
+                max-width: calc(100% - 88px) !important;
             }
 
             #companySearch {
@@ -1654,11 +1654,11 @@
 
             .search-btn {
                 padding: 0 !important;
-                min-height: 48px !important;
-                height: 48px !important;
-                width: 48px !important;
-                max-width: 48px !important;
-                min-width: 48px !important;
+                min-height: 80px !important;
+                height: 80px !important;
+                width: 80px !important;
+                max-width: 80px !important;
+                min-width: 80px !important;
                 flex-shrink: 0 !important;
                 font-size: 15px !important;
                 box-sizing: border-box !important;
@@ -1696,7 +1696,7 @@
             
             /* Company cards - match search container width on mobile */
             .company-card, .explore-company-card {
-                padding: 20px 16px;
+                padding: 16px;
                 margin: 0 16px 16px 16px;
                 width: calc(100% - 32px);
                 max-width: calc(100% - 32px);
@@ -1959,16 +1959,17 @@
             
             .autocomplete-item .company-details {
                 font-size: 14px;
-                flex-direction: column;
-                gap: 6px;
-                align-items: flex-start;
+                flex-direction: row;
+                gap: 12px;
+                align-items: center;
                 color: #94a3b8;
                 line-height: 1.4;
+                flex-wrap: wrap;
             }
             
             .autocomplete-item .company-details span {
-                display: block;
-                padding: 2px 0;
+                display: inline-block;
+                white-space: nowrap;
             }
         }
 
