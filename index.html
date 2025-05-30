@@ -3192,8 +3192,7 @@
             try {
                 // If we have a company number from autocomplete, fetch directly
                 if (companyNumber) {
-                    showStatus('info', 'Fetching company details...');
-                    
+                        
                     const companyUrl = `https://api.companieshouse.gov.uk/company/${companyNumber}`;
                     const companyResponse = await fetchWithWorker(companyUrl, API_KEY);
                     
@@ -3206,8 +3205,7 @@
                     companyData.title = companyData.company_name; // Normalize field name
                 } else {
                     // Otherwise, search by name
-                    showStatus('info', 'Searching for company...');
-                    
+                        
                     const searchUrl = `https://api.companieshouse.gov.uk/search/companies?q=${encodeURIComponent(companyName)}&items_per_page=1`;
                     const searchResponse = await fetchWithWorker(searchUrl, API_KEY);
                     
@@ -3232,7 +3230,6 @@
                 await displayCompanyInfo(companyData);
                 
                 // Get filing history
-                showStatus('info', 'Fetching filing history...');
                 
                 const filingUrl = `https://api.companieshouse.gov.uk/company/${companyData.company_number}/filing-history?items_per_page=100`;
                 const filingResponse = await fetchWithWorker(filingUrl, API_KEY);
@@ -3333,8 +3330,6 @@
             downloadZipBtn.disabled = true;
             progressContainer.style.display = 'block';
             
-            showStatus('info', 'Downloading PDFs... This may take a few minutes.');
-            
             const zip = new JSZip();
             const companyFolder = zip.folder(sanitizeFilename(companyData.title));
             
@@ -3378,8 +3373,6 @@
             }
             
             if (downloaded > 0) {
-                showStatus('info', 'Creating ZIP file...');
-                
                 try {
                     const content = await zip.generateAsync({ 
                         type: 'blob',
