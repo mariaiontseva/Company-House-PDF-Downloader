@@ -4698,7 +4698,7 @@
                                 location: location,
                                 status: company.CompanyStatus,
                                 industry: industry,
-                                // Charges data
+                                // Charges data - convert strings to numbers
                                 totalCharges: parseInt(company.Mortgages_NumMortCharges) || 0,
                                 outstandingCharges: parseInt(company.Mortgages_NumMortOutstanding) || 0,
                                 satisfiedCharges: parseInt(company.Mortgages_NumMortSatisfied) || 0,
