@@ -935,6 +935,7 @@
             gap: 8px;
             padding: 18px 32px;
             min-width: 140px;
+            width: 140px;
             background: var(--gradient-2);
             color: white;
             border: none;
@@ -957,6 +958,14 @@
         .search-btn:disabled {
             opacity: 0.6;
             cursor: not-allowed;
+        }
+        
+        /* Ensure button text is always visible */
+        .search-btn span {
+            display: inline-flex !important;
+            align-items: center;
+            gap: 6px;
+            visibility: visible !important;
         }
         
         /* Button styles */
@@ -3138,8 +3147,13 @@
             
             // Reset UI
             searchBtn.disabled = true;
-            searchBtn.querySelector('svg').style.display = 'none';
-            searchBtn.querySelector('span').innerHTML = '<span class="spinner"></span>';
+            const btnIcon = searchBtn.querySelector('svg');
+            const btnText = searchBtn.querySelector('span');
+            if (btnIcon && btnText) {
+                btnIcon.style.display = 'none';
+                btnText.innerHTML = '<span class="spinner"></span> Search';
+                btnText.style.visibility = 'visible';
+            }
             resultsContainer.style.display = 'none';
             progressContainer.style.display = 'none';
             document.getElementById('fileList').innerHTML = '';
@@ -3273,8 +3287,13 @@
                 addDebug(`Error: ${error.message}`);
             } finally {
                 searchBtn.disabled = false;
-                searchBtn.querySelector('svg').style.display = '';
-                searchBtn.querySelector('span').innerHTML = 'Search';
+                const btnIcon = searchBtn.querySelector('svg');
+                const btnText = searchBtn.querySelector('span');
+                if (btnIcon && btnText) {
+                    btnIcon.style.display = '';
+                    btnText.innerHTML = 'Search';
+                    btnText.style.visibility = 'visible';
+                }
             }
         });
         }
