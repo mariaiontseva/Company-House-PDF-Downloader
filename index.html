@@ -1636,13 +1636,14 @@
             }
             
             .search-wrapper {
-                gap: 8px;
+                gap: 8px !important;
             }
             
             .autocomplete-wrapper {
                 flex: 1 !important;
                 min-width: 0 !important;
                 width: calc(100% - 56px) !important;
+                max-width: calc(100% - 56px) !important;
             }
 
             #companySearch {
@@ -1652,12 +1653,13 @@
             }
 
             .search-btn {
-                padding: 12px;
-                min-height: 48px;
-                width: 48px;
-                max-width: 48px;
-                flex-shrink: 0;
-                font-size: 15px;
+                padding: 12px !important;
+                min-height: 48px !important;
+                width: 48px !important;
+                max-width: 48px !important;
+                flex-shrink: 0 !important;
+                font-size: 15px !important;
+                min-width: 48px !important;
             }
             
             .search-btn span {
