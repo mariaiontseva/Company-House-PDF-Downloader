@@ -3508,17 +3508,6 @@
             
             <!-- Explore tab content -->
             <div class="tab-content active" id="exploreTab">
-                <!-- DEBUG: Test modal button -->
-                <div style="margin: 12px 0; padding: 12px; background: rgba(59, 130, 246, 0.1); border-radius: 8px; border: 1px solid #3b82f6;">
-                    <button onclick="testModal()" style="background: #3b82f6; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; margin-right: 10px;">
-                        🧪 Test Modal
-                    </button>
-                    <button onclick="testAuth()" style="background: #059669; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">
-                        🔍 Test Auth
-                    </button>
-                    <span id="testStatus" style="margin-left: 12px; color: #94a3b8;">Click buttons to test</span>
-                </div>
-            
                 <!-- Toggle buttons and filters -->
                 <div style="display: flex; flex-direction: column; gap: 12px; margin: 24px 0;">
                     <!-- Line 1: Oldest, Newest, Active Only -->
@@ -6167,34 +6156,6 @@
                     btn.classList.add('active');
                 }
             });
-        }
-        
-        // DEBUG: Test functions
-        function testModal() {
-            console.log('🧪 Testing modal');
-            const testCompany = {
-                name: "TEST COMPANY LIMITED",
-                number: "12345678",
-                status: "Active",
-                totalCharges: 2,
-                outstandingCharges: 1
-            };
-            showCompanyModal(testCompany);
-            document.getElementById('testStatus').textContent = '🧪 Modal test triggered - check console';
-        }
-        
-        async function testAuth() {
-            console.log('🔍 Testing auth');
-            const statusSpan = document.getElementById('testStatus');
-            try {
-                const { data: { user } } = await supabaseClient.auth.getUser();
-                const isSignedIn = !!user;
-                statusSpan.textContent = isSignedIn ? `✅ Signed in as ${user.email}` : '❌ Not signed in';
-                console.log('🔍 Auth result:', user ? `Signed in as ${user.email}` : 'Not signed in');
-            } catch (error) {
-                statusSpan.textContent = `❌ Auth error: ${error.message}`;
-                console.error('🔍 Auth error:', error);
-            }
         }
     </script>
     
