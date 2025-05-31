@@ -2693,6 +2693,35 @@
             animation: fadeIn 0.3s ease;
         }
         
+        #companyModal .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+        
+        #companyModal .close-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: rotate(90deg) scale(1.1);
+        }
+        
+        #companyModal .close-btn svg {
+            width: 20px;
+            height: 20px;
+            color: #e7e9ea;
+        }
+        
         #companyModal .company-card {
             background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -2705,6 +2734,17 @@
             overflow: hidden;
             position: relative;
             animation: slideUp 0.4s ease;
+        }
+        
+        @keyframes slideUp {
+            from { 
+                opacity: 0;
+                transform: translateY(30px) scale(0.95);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
         }
         
         #companyModal .card-content {
@@ -2731,39 +2771,16 @@
             background: rgba(99, 102, 241, 0.5);
         }
         
-        #companyModal .close-btn {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            width: 40px;
-            height: 40px;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            z-index: 10001;
-            transition: all 0.3s ease;
-        }
-        
-        #companyModal .close-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: rotate(90deg) scale(1.1);
-        }
-        
-        #companyModal .close-btn svg {
-            width: 20px;
-            height: 20px;
-            color: #e7e9ea;
-        }
-        
         #companyModal .card-header {
             background: #0f172a;
             padding: 40px;
+            position: relative;
             border-bottom: 1px solid #1e293b;
+        }
+        
+        #companyModal .company-info {
+            position: relative;
+            z-index: 2;
         }
         
         #companyModal .company-title {
@@ -2777,6 +2794,13 @@
         #companyModal .company-subtitle {
             color: #71767b;
             font-size: 16px;
+            font-weight: 400;
+            margin-bottom: 24px;
+        }
+        
+        #companyModal .company-meta {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 14px;
             margin-bottom: 24px;
         }
         
@@ -2809,24 +2833,70 @@
             color: #22c55e;
         }
         
-        #companyModal .risk-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: rgba(251, 146, 60, 0.1);
-            border: 1px solid rgba(251, 146, 60, 0.3);
-            color: #fb923c;
-            padding: 8px 16px;
-            border-radius: 100px;
-            font-size: 14px;
-            font-weight: 600;
+        #companyModal .company-number {
+            background: rgba(71, 85, 105, 0.3);
+            border-color: rgba(71, 85, 105, 0.5);
+            color: #cbd5e1;
+            font-family: monospace;
         }
         
-        #companyModal .risk-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: currentColor;
+        #companyModal .company-type {
+            background: rgba(71, 85, 105, 0.3);
+            border-color: rgba(71, 85, 105, 0.5);
+            color: #94a3b8;
+        }
+        
+        #companyModal .dropdown-badge {
+            background: rgba(71, 85, 105, 0.3);
+            border-color: rgba(71, 85, 105, 0.5);
+            color: #94a3b8;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        #companyModal .dropdown-badge svg {
+            width: 12px;
+            height: 12px;
+        }
+        
+        #companyModal .tooltip {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: #0f172a;
+            border: 1px solid #475569;
+            border-radius: 6px;
+            padding: 8px 12px;
+            margin-top: 4px;
+            white-space: nowrap;
+            font-size: 11px;
+            font-weight: 400;
+            color: #cbd5e1;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.2s ease;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+            width: 180px;
+            white-space: normal;
+            line-height: 1.3;
+        }
+        
+        #companyModal .tooltip::before {
+            content: '';
+            position: absolute;
+            bottom: 100%;
+            left: 16px;
+            border: 4px solid transparent;
+            border-bottom-color: #0f172a;
+        }
+        
+        #companyModal .dropdown-badge:hover .tooltip {
+            opacity: 1;
+            visibility: visible;
         }
         
         #companyModal .stats-grid {
@@ -2842,6 +2912,9 @@
             border-radius: 16px;
             padding: 20px;
             text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
         
         #companyModal .stat-value {
@@ -2863,10 +2936,59 @@
             font-size: 12px;
             color: #71767b;
             margin-top: 6px;
+            font-weight: 400;
+        }
+        
+        #companyModal .stat-detail.download-link {
+            color: #3b82f6;
+            text-decoration: underline;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+        
+        #companyModal .stat-detail.download-link:hover {
+            color: #60a5fa;
         }
         
         #companyModal .charges-number {
             color: #ef4444 !important;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+            -webkit-background-clip: text !important;
+            -webkit-text-fill-color: transparent !important;
+            background-clip: text !important;
+        }
+        
+        #companyModal .risk-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            color: #22c55e;
+            padding: 8px 16px;
+            border-radius: 100px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        #companyModal .risk-badge.medium {
+            background: rgba(251, 146, 60, 0.1);
+            border-color: rgba(251, 146, 60, 0.3);
+            color: #fb923c;
+        }
+        
+        #companyModal .risk-badge.high {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.05));
+            border-color: rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+            box-shadow: 0 4px 20px rgba(239, 68, 68, 0.2);
+        }
+        
+        #companyModal .risk-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: currentColor;
         }
         
         #companyModal .tabs-container {
@@ -2942,6 +3064,7 @@
             border-radius: 12px;
             padding: 20px;
             margin-bottom: 16px;
+            transition: all 0.3s ease;
         }
         
         #companyModal .data-item-header {
@@ -2956,54 +3079,7 @@
             line-height: 1.6;
         }
         
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        @keyframes fadeOut {
-            from { opacity: 1; }
-            to { opacity: 0; }
-        }
-        
-        @keyframes slideUp {
-            from { 
-                opacity: 0;
-                transform: translateY(30px) scale(0.95);
-            }
-            to { 
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
-        
-        /* Mobile responsive for modal */
-        @media (max-width: 768px) {
-            #companyModal.modal-backdrop {
-                padding: 0;
-            }
-            
-            #companyModal .company-card {
-                max-height: 100vh;
-                border-radius: 0;
-                width: 100vw;
-            }
-            
-            #companyModal .card-content {
-                height: 100vh;
-            }
-            
-            #companyModal .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 12px;
-            }
-            
-            #companyModal .company-title {
-                font-size: 28px;
-            }
-        }
-        
-        /* Additional responsive breakpoints for modal */
+        /* Responsive breakpoints for modal stats grid */
         @media (max-width: 1400px) {
             #companyModal .stats-grid {
                 grid-template-columns: repeat(3, 1fr);
@@ -3026,6 +3102,138 @@
             }
         }
         
+        /* Enhanced Mobile UX for modal */
+        @media (max-width: 768px) {
+            #companyModal.modal-backdrop {
+                padding: 0;
+            }
+            
+            #companyModal .company-card {
+                max-height: 100vh;
+                border-radius: 0;
+                width: 100vw;
+            }
+            
+            #companyModal .card-content {
+                height: 100vh;
+                padding-bottom: env(safe-area-inset-bottom);
+            }
+            
+            #companyModal .close-btn {
+                top: 16px;
+                right: 16px;
+                width: 36px;
+                height: 36px;
+            }
+            
+            #companyModal .close-btn svg {
+                width: 16px;
+                height: 16px;
+            }
+            
+            #companyModal .card-header {
+                padding: max(24px, calc(env(safe-area-inset-top) + 24px)) 20px 24px 20px;
+            }
+            
+            #companyModal .company-title {
+                font-size: 28px;
+                line-height: 1.2;
+                margin-bottom: 8px;
+            }
+            
+            #companyModal .company-subtitle {
+                font-size: 14px;
+                margin-bottom: 20px;
+            }
+            
+            #companyModal .badges-row {
+                flex-direction: column;
+                gap: 16px;
+                align-items: flex-start;
+                margin: 20px 0 24px 0;
+            }
+            
+            #companyModal .company-badges {
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            
+            #companyModal .badge {
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+            
+            #companyModal .risk-badge {
+                padding: 8px 16px;
+                font-size: 13px;
+                align-self: flex-start;
+            }
+            
+            #companyModal .stat-box {
+                padding: 16px 12px;
+                min-height: 100px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+            }
+            
+            #companyModal .stat-value {
+                font-size: 24px;
+                margin-bottom: 6px;
+            }
+            
+            #companyModal .stat-label {
+                font-size: 11px;
+                letter-spacing: 0.5px;
+                line-height: 1.2;
+            }
+            
+            #companyModal .stat-detail {
+                font-size: 10px;
+                margin-top: 4px;
+                line-height: 1.3;
+            }
+            
+            #companyModal .tabs-nav {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                scroll-behavior: smooth;
+                padding: 0 4px;
+            }
+            
+            #companyModal .tab-btn {
+                padding: 16px 20px;
+                font-size: 12px;
+                min-width: 120px;
+                text-align: center;
+            }
+            
+            #companyModal .tab-content {
+                padding: 20px;
+            }
+            
+            #companyModal .tab-pane h3 {
+                font-size: 20px;
+                margin-bottom: 20px;
+            }
+            
+            #companyModal .data-item {
+                padding: 16px;
+                margin-bottom: 12px;
+            }
+            
+            #companyModal .data-item-header {
+                font-size: 14px;
+                margin-bottom: 6px;
+            }
+            
+            #companyModal .data-item-detail {
+                font-size: 13px;
+                line-height: 1.5;
+            }
+        }
+        
+        /* Ultra-small screens for modal */
         @media (max-width: 375px) {
             #companyModal .card-header {
                 padding: max(20px, calc(env(safe-area-inset-top) + 20px)) 16px 20px 16px;
@@ -3034,21 +3242,78 @@
             #companyModal .company-title {
                 font-size: 24px;
             }
+            
+            #companyModal .company-badges {
+                gap: 6px;
+            }
+            
+            #companyModal .badge {
+                padding: 4px 8px;
+                font-size: 11px;
+            }
+            
+            #companyModal .stat-box {
+                padding: 12px 8px;
+                min-height: 90px;
+            }
+            
+            #companyModal .stat-value {
+                font-size: 20px;
+            }
+            
+            #companyModal .stat-label {
+                font-size: 10px;
+            }
+            
+            #companyModal .stat-detail {
+                font-size: 9px;
+            }
+            
+            #companyModal .tab-btn {
+                padding: 14px 16px;
+                font-size: 11px;
+                min-width: 100px;
+            }
+            
+            #companyModal .tab-content {
+                padding: 16px;
+            }
         }
         
-        /* Large screens - ensure 6 boxes in one row */
+        /* Large screens - ensure 6 boxes in one row for modal */
         @media (min-width: 1024px) {
             #companyModal .stats-grid {
                 grid-template-columns: repeat(6, 1fr);
                 gap: 20px;
             }
+            
+            #companyModal .stat-box {
+                min-height: 120px;
+            }
         }
         
-        /* Extra large screens */
+        /* Extra large screens for modal */
         @media (min-width: 1400px) {
             #companyModal .stats-grid {
                 grid-template-columns: repeat(6, 1fr);
                 gap: 24px;
+            }
+            
+            #companyModal .stat-box {
+                padding: 24px 20px;
+                min-height: 140px;
+            }
+            
+            #companyModal .stat-value {
+                font-size: 36px;
+            }
+            
+            #companyModal .stat-label {
+                font-size: 14px;
+            }
+            
+            #companyModal .stat-detail {
+                font-size: 13px;
             }
         }
     </style>
