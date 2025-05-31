@@ -5789,6 +5789,46 @@
                 { selector: '.stat-box:nth-child(4) .stat-detail', value: `${company.outstandingCharges || 0} outstanding` }
             ];
             
+            // Update ACCOUNTS status
+            const accountsBox = document.querySelector('#companyModal .stat-box:nth-child(5)');
+            if (accountsBox) {
+                const accountsValue = accountsBox.querySelector('.stat-value');
+                const accountsDetail = accountsBox.querySelector('.stat-detail');
+                
+                if (company.accountsDue || company.nextAccountsDue) {
+                    accountsValue.textContent = '✓';
+                    accountsDetail.textContent = `Next: ${formatAccountsDue(company.accountsDue || company.nextAccountsDue)}`;
+                } else if (company.accountsOverdue) {
+                    accountsValue.textContent = '⚠️';
+                    accountsValue.style.color = '#ef4444';
+                    accountsDetail.textContent = 'OVERDUE';
+                    accountsDetail.style.color = '#ef4444';
+                } else {
+                    accountsValue.textContent = '✓';
+                    accountsDetail.textContent = 'Up to date';
+                }
+            }
+            
+            // Update CONFIRMATION STATEMENT status
+            const confirmationBox = document.querySelector('#companyModal .stat-box:nth-child(6)');
+            if (confirmationBox) {
+                const confirmationValue = confirmationBox.querySelector('.stat-value');
+                const confirmationDetail = confirmationBox.querySelector('.stat-detail');
+                
+                if (company.confirmationStatementDue || company.nextConfirmationDue) {
+                    confirmationValue.textContent = '✓';
+                    confirmationDetail.textContent = `Next: ${formatAccountsDue(company.confirmationStatementDue || company.nextConfirmationDue)}`;
+                } else if (company.confirmationOverdue) {
+                    confirmationValue.textContent = '⚠️';
+                    confirmationValue.style.color = '#ef4444';
+                    confirmationDetail.textContent = 'OVERDUE';
+                    confirmationDetail.style.color = '#ef4444';
+                } else {
+                    confirmationValue.textContent = '✓';
+                    confirmationDetail.textContent = 'Up to date';
+                }
+            }
+            
             statUpdates.forEach(update => {
                 const element = document.querySelector(`#companyModal ${update.selector}`);
                 if (element) {
@@ -5823,6 +5863,27 @@
                 if (response.ok) {
                     const companyData = await response.json();
                     populateOverviewTab(companyData);
+                    
+                    // Update accounts and confirmation statement status from API data
+                    if (companyData.accounts) {
+                        const accountsBox = document.querySelector('#companyModal .stat-box:nth-child(5)');
+                        if (accountsBox) {
+                            const accountsDetail = accountsBox.querySelector('.stat-detail');
+                            if (companyData.accounts.next_due) {
+                                accountsDetail.textContent = `Next: ${new Date(companyData.accounts.next_due).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}`;
+                            }
+                        }
+                    }
+                    
+                    if (companyData.confirmation_statement) {
+                        const confirmationBox = document.querySelector('#companyModal .stat-box:nth-child(6)');
+                        if (confirmationBox) {
+                            const confirmationDetail = confirmationBox.querySelector('.stat-detail');
+                            if (companyData.confirmation_statement.next_due) {
+                                confirmationDetail.textContent = `Next: ${new Date(companyData.confirmation_statement.next_due).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}`;
+                            }
+                        }
+                    }
                     
                     // Fetch officers
                     fetchOfficers(companyNumber);
@@ -5887,6 +5948,19 @@
                 <div class="data-item">
                     <div class="data-item-header">Accounting Reference Date</div>
                     <div class="data-item-detail">${companyData.accounts.accounting_reference_date?.day || ''} ${companyData.accounts.accounting_reference_date?.month || ''}</div>
+                </div>
+                <div class="data-item">
+                    <div class="data-item-header">Next Accounts Due</div>
+                    <div class="data-item-detail">${companyData.accounts.next_due ? new Date(companyData.accounts.next_due).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Unknown'}</div>
+                </div>
+                <div class="data-item">
+                    <div class="data-item-header">Last Accounts</div>
+                    <div class="data-item-detail">${companyData.accounts.last_accounts?.made_up_to ? new Date(companyData.accounts.last_accounts.made_up_to).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Not filed'}</div>
+                </div>` : ''}
+                ${companyData.confirmation_statement ? `
+                <div class="data-item">
+                    <div class="data-item-header">Next Confirmation Statement Due</div>
+                    <div class="data-item-detail">${companyData.confirmation_statement.next_due ? new Date(companyData.confirmation_statement.next_due).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Unknown'}</div>
                 </div>` : ''}
             `;
         }
@@ -6116,6 +6190,12 @@
             return parts.join(', ');
         }
         
+        function formatAccountsDue(dateString) {
+            if (!dateString) return 'Unknown';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+        }
+        
         function formatSicCodes(sicCodes) {
             if (!sicCodes || sicCodes.length === 0) return 'No SIC codes available';
             
@@ -6228,6 +6308,7 @@
                             <div class="stat-box">
                                 <div class="stat-value">✓</div>
                                 <div class="stat-label">CONFIRMATION STATEMENT</div>
+                                <div class="stat-detail">Up to date</div>
                             </div>
                         </div>
                     </div>
