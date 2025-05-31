@@ -4781,18 +4781,6 @@
                 }
             }
             
-            // Update button text for company cards
-            updateCompanyCardButtons();
-        }
-        
-        // Update button text in company cards based on auth state
-        function updateCompanyCardButtons() {
-            const buttonTexts = document.querySelectorAll('.signup-btn .btn-text');
-            const buttonText = currentUser ? 'View Details' : 'Sign Up for Full Access';
-            
-            buttonTexts.forEach(textElement => {
-                textElement.textContent = buttonText;
-            });
         }
         
         // Show user dropdown menu
@@ -5548,11 +5536,8 @@
                             ` : ''}
                             
                             <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(255, 255, 255, 0.1); text-align: center;">
-                                <button class="signup-btn" onclick="event.stopPropagation(); handleCompanyCardClick(this);" data-company='${JSON.stringify(company)}'>
-                                    <span class="btn-text">Sign Up for Full Access</span>
-                                </button>
-                                <button class="signup-btn" style="background: #059669; margin-left: 8px;" onclick="event.stopPropagation(); testModalButton(this);" data-company='${JSON.stringify(company)}'>
-                                    🧪 Test Modal
+                                <button class="signup-btn" onclick="event.stopPropagation(); viewCompanyDetails(this);" data-company='${JSON.stringify(company)}'>
+                                    View Details
                                 </button>
                             </div>
                         </div>
@@ -5706,28 +5691,27 @@
             window.location.href = '/auth.html';
         }
         
-        // Handle company card button click - check auth and show modal or signup
-        async function handleCompanyCardClick(button) {
-            console.log('🔸 handleCompanyCardClick called');
+        // View company details - available for ALL users (signed in and not signed in)
+        function viewCompanyDetails(button) {
+            console.log('🔸 viewCompanyDetails called for all users');
             try {
-                const { data: { user } } = await supabaseClient.auth.getUser();
-                console.log('🔸 Auth check result:', user ? `Signed in as ${user.email}` : 'Not signed in');
-                
-                if (user) {
-                    // User is signed in - show company modal
-                    console.log('🔸 User signed in - showing modal');
-                    const companyData = JSON.parse(button.getAttribute('data-company'));
-                    console.log('🔸 Company data:', companyData);
-                    showCompanyModal(companyData);
-                } else {
-                    // User not signed in - show signup
-                    console.log('🔸 User not signed in - showing signup');
-                    showSignupModal();
-                }
+                const companyData = JSON.parse(button.getAttribute('data-company'));
+                console.log('🔸 Company data:', companyData);
+                showCompanyModal(companyData);
             } catch (error) {
-                console.error('🔸 Auth check error:', error);
-                // If auth check fails, show signup as fallback
-                showSignupModal();
+                console.error('🔸 Error parsing company data:', error);
+                // Fallback with basic data
+                const fallbackData = {
+                    name: "Company Details",
+                    number: "00000000",
+                    status: "Active",
+                    totalCharges: 0,
+                    outstandingCharges: 0,
+                    satisfiedCharges: 0,
+                    incorporationDate: "2000-01-01",
+                    companyType: "Private Limited Company"
+                };
+                showCompanyModal(fallbackData);
             }
         }
         
@@ -5747,29 +5731,6 @@
             }
         }
         
-        // Test function to trigger modal without auth check
-        function testModalButton(button) {
-            console.log('🧪 Test modal button clicked');
-            try {
-                const companyData = JSON.parse(button.getAttribute('data-company'));
-                console.log('🧪 Company data:', companyData);
-                showCompanyModal(companyData);
-            } catch (error) {
-                console.error('🧪 Error parsing company data:', error);
-                // Fallback with test data
-                const testData = {
-                    name: "TEST COMPANY LIMITED",
-                    number: "12345678",
-                    status: "Active",
-                    totalCharges: 2,
-                    outstandingCharges: 1,
-                    satisfiedCharges: 1,
-                    incorporationDate: "2020-01-01",
-                    companyType: "Private Limited Company"
-                };
-                showCompanyModal(testData);
-            }
-        }
         
         // Function to close company modal
         function closeCompanyModal() {
