@@ -1,0 +1,1210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DocSpace Portal - UK Company Intelligence</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #818cf8;
+            --secondary: #8b5cf6;
+            --accent: #ec4899;
+            --dark: #0f172a;
+            --dark-light: #1e293b;
+            --gray: #64748b;
+            --gray-light: #94a3b8;
+            --gray-lighter: #cbd5e1;
+            --white: #ffffff;
+            --success: #10b981;
+            --error: #ef4444;
+            --warning: #f59e0b;
+            --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-2: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            --gradient-3: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-md: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+            --radius: 12px;
+            --radius-lg: 16px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            line-height: 1.6;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .bg-animation::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 20% 80%, #6366f1 0%, transparent 50%),
+                        radial-gradient(circle at 80% 20%, #8b5cf6 0%, transparent 50%),
+                        radial-gradient(circle at 40% 40%, #3b82f6 0%, transparent 50%);
+            animation: rotate 30s linear infinite;
+            opacity: 0.1;
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Top navigation - minimal and clean */
+        .top-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 1000;
+            padding: 16px 0;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: white;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 20px;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--gradient-2);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .profile-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 10px 16px;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .profile-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-1px);
+        }
+
+        /* Main container */
+        .main-container {
+            padding-top: 100px;
+            min-height: 100vh;
+        }
+
+        /* Search and Filters Section */
+        .search-filters-section {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 24px;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            font-size: 48px;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, #ffffff 0%, #a5b4fc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .section-subtitle {
+            font-size: 18px;
+            color: #94a3b8;
+            margin-bottom: 32px;
+        }
+
+        /* Search Panel */
+        .search-panel {
+            background: rgba(20, 25, 40, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 32px;
+            margin-bottom: 24px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        .search-panel:hover {
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+
+        .search-input-container {
+            position: relative;
+            margin-bottom: 24px;
+        }
+
+        .search-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.08);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 20px 24px;
+            color: white;
+            font-size: 18px;
+            font-weight: 500;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .search-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .search-input:focus {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
+            transform: translateY(-2px);
+        }
+
+        /* Filters */
+        .filters-container {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 24px;
+        }
+
+        .filters-title {
+            color: #94a3b8;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .filters-row {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .toggle-btn {
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            color: rgba(255,255,255,0.7);
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-btn:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+
+        .toggle-btn.active {
+            background: var(--gradient-2);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-left: auto;
+        }
+
+        .switch-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .switch {
+            position: relative;
+            width: 44px;
+            height: 24px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .switch.active {
+            background: var(--primary);
+        }
+
+        .switch::after {
+            content: '';
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            background: white;
+            border-radius: 50%;
+            top: 3px;
+            left: 3px;
+            transition: all 0.3s ease;
+        }
+
+        .switch.active::after {
+            transform: translateX(20px);
+        }
+
+        .switch-label {
+            color: #94a3b8;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+
+        .charges-indicator {
+            width: 16px;
+            height: 16px;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 10px;
+            font-weight: 700;
+            margin-right: 4px;
+        }
+
+        .industry-select {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 12px 16px;
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .industry-select:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: var(--primary);
+        }
+
+        /* Autocomplete dropdown - exact production styles */
+        .autocomplete-dropdown {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            right: 0;
+            background: rgba(20, 25, 40, 0.98);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius);
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+            z-index: 1000;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+        }
+
+        .autocomplete-dropdown.show {
+            display: block;
+        }
+
+        .autocomplete-item {
+            padding: 16px 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .autocomplete-item:last-child {
+            border-bottom: none;
+        }
+
+        .autocomplete-item:hover,
+        .autocomplete-item.active {
+            background: rgba(99, 102, 241, 0.2);
+        }
+
+        .autocomplete-item .company-title {
+            font-weight: 600;
+            color: white;
+            margin-bottom: 4px;
+            font-size: 15px;
+        }
+
+        .autocomplete-item .company-details {
+            font-size: 13px;
+            color: #94a3b8;
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .autocomplete-item .company-status.active {
+            color: #10b981;
+        }
+
+        .autocomplete-item .company-status.dissolved {
+            color: #ef4444;
+        }
+
+        .autocomplete-loading, .autocomplete-empty {
+            padding: 20px;
+            text-align: center;
+            color: #94a3b8;
+        }
+
+        /* Results Section */
+        .results-section {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 24px 60px;
+            display: none;
+        }
+
+        .results-section.show {
+            display: block;
+            animation: fadeInUp 0.5s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Company Cards - Exact Production Styles */
+        .explore-company-card {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.08);
+            padding: 24px;
+            margin-bottom: 16px;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .explore-company-card:hover {
+            background: rgba(255,255,255,0.04);
+            border-color: rgba(139,92,246,0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(139,92,246,0.1);
+        }
+
+        .explore-company-card.expanded {
+            background: rgba(255,255,255,0.05);
+            border-color: rgba(139,92,246,0.4);
+        }
+
+        .company-header {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .company-details-line {
+            color: #94a3b8;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            flex-shrink: 0;
+        }
+
+        .status-active {
+            background: #10b981;
+            box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+        }
+
+        .status-dissolved {
+            background: #ef4444;
+            box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
+        }
+
+        .industry-badge {
+            background: rgba(99, 102, 241, 0.15);
+            color: #a5b4fc;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+
+        /* Expandable content - exact production styles */
+        .card-expand-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
+            opacity: 0;
+        }
+
+        .explore-company-card.expanded .card-expand-content {
+            max-height: 500px;
+            opacity: 1;
+            transition: max-height 0.3s ease-in, opacity 0.3s ease-in;
+        }
+
+        .expand-section {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .expand-row {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 12px;
+            color: #e2e8f0;
+            font-size: 13px;
+        }
+
+        .expand-label {
+            color: #94a3b8;
+            min-width: 120px;
+            font-weight: 500;
+        }
+
+        .expand-value {
+            flex: 1;
+            color: #e2e8f0;
+        }
+
+        .sic-code {
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            margin-bottom: 4px;
+            display: inline-block;
+            cursor: help;
+            color: #a5b4fc;
+            margin-right: 4px;
+        }
+
+        .charges-breakdown {
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .charge-line {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+            padding: 4px 0;
+        }
+
+        .charge-type {
+            color: #94a3b8;
+            font-weight: 500;
+        }
+
+        .charge-count {
+            font-weight: 600;
+            color: #e2e8f0;
+        }
+
+        .charge-count.outstanding {
+            color: #fca5a5;
+        }
+
+        .charge-count.satisfied {
+            color: #86efac;
+        }
+
+        .signup-btn {
+            background: var(--gradient-2);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .signup-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        /* Loading and error states */
+        .loading-state, .error-state {
+            text-align: center;
+            padding: 60px 24px;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            border: 2px solid #333;
+            border-radius: 50%;
+            border-top-color: #6366f1;
+            animation: spin 1s linear infinite;
+            margin-bottom: 16px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            .nav-container {
+                padding: 0 16px;
+            }
+
+            .section-title {
+                font-size: 32px;
+            }
+
+            .search-filters-section {
+                padding: 24px 16px;
+            }
+
+            .search-panel {
+                padding: 24px;
+                border-radius: 16px;
+            }
+
+            .search-input {
+                padding: 16px 20px;
+                font-size: 16px;
+            }
+
+            .filters-row {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 16px;
+            }
+
+            .filter-group {
+                margin-left: 0;
+                justify-content: space-between;
+            }
+
+            .results-section {
+                padding: 0 16px 40px;
+            }
+
+            .explore-company-card {
+                padding: 20px;
+            }
+
+            .company-header {
+                font-size: 16px;
+            }
+
+            .expand-label {
+                min-width: 100px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation"></div>
+    
+    <!-- Top Navigation -->
+    <nav class="top-nav">
+        <div class="nav-container">
+            <a href="#" class="logo">
+                <div class="logo-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                </div>
+                DocSpace
+            </a>
+            <button class="profile-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+                <span>Account</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Search and Filters Section -->
+        <div class="search-filters-section" id="searchSection">
+            <div class="section-header">
+                <h1 class="section-title">UK Company Intelligence</h1>
+                <p class="section-subtitle">Search and explore comprehensive company data with advanced insights</p>
+            </div>
+
+            <div class="search-panel">
+                <div class="search-input-container">
+                    <div class="autocomplete-wrapper">
+                        <input 
+                            type="text" 
+                            id="companyName" 
+                            class="search-input"
+                            placeholder="Search for any UK company by name or number..."
+                            autocomplete="off"
+                        >
+                        <div class="autocomplete-dropdown" id="autocompleteDropdown"></div>
+                    </div>
+                </div>
+
+                <div class="filters-container">
+                    <div class="filters-title">Filter Results</div>
+                    
+                    <div class="filters-row">
+                        <button class="toggle-btn active" onclick="showOldest()" id="oldestBtn">Oldest First</button>
+                        <button class="toggle-btn" onclick="showNewest()" id="newestBtn">Newest First</button>
+                        
+                        <div class="filter-group">
+                            <div class="switch-group">
+                                <div class="switch" onclick="toggleActive(this)" id="activeSwitch"></div>
+                                <span class="switch-label">Active Only</span>
+                            </div>
+                            <div class="switch-group">
+                                <div class="switch" onclick="toggleCharges(this)" id="chargesSwitch"></div>
+                                <span class="switch-label">
+                                    <span class="charges-indicator">!</span>
+                                    Has Charges
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <select class="industry-select" id="industryFilter" onchange="onIndustryChange()">
+                        <option value="ALL">🌐 All Industries</option>
+                        <option value="AGRICULTURE">🌾 Agriculture</option>
+                        <option value="FINANCIAL" selected>💰 Financial</option>
+                        <option value="TECHNOLOGY">💻 Technology</option>
+                        <option value="RETAIL">🛍️ Retail</option>
+                        <option value="MANUFACTURING">🏭 Manufacturing</option>
+                        <option value="REAL_ESTATE">🏢 Real Estate</option>
+                        <option value="ENERGY">⚡ Energy</option>
+                        <option value="HEALTHCARE">🏥 Healthcare</option>
+                        <option value="TRANSPORT">🚚 Transport</option>
+                        <option value="CONSTRUCTION">🏗️ Construction</option>
+                        <option value="SERVICES">💼 Services</option>
+                        <option value="MEDIA">📺 Media</option>
+                        <option value="OTHER">📁 Other</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div class="results-section" id="resultsSection">
+            <div id="companyResults"></div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const CONFIG = {
+            API_KEY: '22aefa40-ee9e-47c0-b40a-2dd3c03165c6',
+            WORKER_URL: 'https://blue-flower-d40f.mahin84.workers.dev'
+        };
+
+        // API helper function
+        async function fetchWithWorker(url, apiKey) {
+            const params = new URLSearchParams({
+                url: url,
+                apiKey: apiKey
+            });
+            const proxyUrl = `${CONFIG.WORKER_URL}?${params.toString()}`;
+            
+            const response = await fetch(proxyUrl, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error(`API request failed: ${response.status}`);
+            }
+            
+            return response.json();
+        }
+
+        // Autocomplete functionality
+        const companyInput = document.getElementById('companyName');
+        const autocompleteDropdown = document.getElementById('autocompleteDropdown');
+        
+        let autocompleteTimeout = null;
+        let selectedIndex = -1;
+        let suggestions = [];
+
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+        
+        async function searchCompanies(query) {
+            if (query.length < 2) {
+                hideAutocomplete();
+                return;
+            }
+            
+            autocompleteDropdown.innerHTML = '<div class="autocomplete-loading"><div class="spinner"></div></div>';
+            autocompleteDropdown.classList.add('show');
+            
+            try {
+                const searchUrl = `https://api.companieshouse.gov.uk/search/companies?q=${encodeURIComponent(query)}&items_per_page=5`;
+                const response = await fetchWithWorker(searchUrl, CONFIG.API_KEY);
+                const data = await response.json();
+                suggestions = data.items || [];
+                
+                if (suggestions.length === 0) {
+                    autocompleteDropdown.innerHTML = '<div class="autocomplete-empty">No companies found</div>';
+                    return;
+                }
+                
+                renderSuggestions();
+                
+            } catch (error) {
+                console.error('Autocomplete error:', error);
+                hideAutocomplete();
+            }
+        }
+        
+        function renderSuggestions() {
+            autocompleteDropdown.innerHTML = suggestions.map((company, index) => {
+                const statusClass = company.company_status === 'active' ? 'active' : 'dissolved';
+                const statusIcon = company.company_status === 'active' 
+                    ? '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>'
+                    : '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>';
+                
+                return `
+                    <div class="autocomplete-item ${index === selectedIndex ? 'active' : ''}" data-index="${index}">
+                        <div class="company-title">${company.title}</div>
+                        <div class="company-details">
+                            <span class="company-number">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="14" height="14">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
+                                </svg>
+                                ${company.company_number}
+                            </span>
+                            <span class="company-status ${statusClass}">
+                                ${statusIcon}
+                                ${company.company_status.charAt(0).toUpperCase() + company.company_status.slice(1)}
+                            </span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            const items = autocompleteDropdown.querySelectorAll('.autocomplete-item');
+            items.forEach((item, index) => {
+                item.addEventListener('click', () => selectCompany(index));
+            });
+        }
+        
+        function selectCompany(index) {
+            const company = suggestions[index];
+            if (company) {
+                companyInput.value = company.title;
+                companyInput.dataset.companyNumber = company.company_number;
+                hideAutocomplete();
+                loadCompanyDetails(company);
+            }
+        }
+        
+        function hideAutocomplete() {
+            autocompleteDropdown.classList.remove('show');
+            autocompleteDropdown.innerHTML = '';
+            selectedIndex = -1;
+            suggestions = [];
+        }
+        
+        const debouncedSearch = debounce(searchCompanies, 300);
+        
+        companyInput.addEventListener('input', (e) => {
+            const query = e.target.value.trim();
+            if (query.length >= 2) {
+                debouncedSearch(query);
+            } else {
+                hideAutocomplete();
+            }
+        });
+        
+        companyInput.addEventListener('keydown', (e) => {
+            if (!autocompleteDropdown.classList.contains('show')) return;
+            
+            switch (e.key) {
+                case 'ArrowDown':
+                    e.preventDefault();
+                    selectedIndex = Math.min(selectedIndex + 1, suggestions.length - 1);
+                    renderSuggestions();
+                    break;
+                    
+                case 'ArrowUp':
+                    e.preventDefault();
+                    selectedIndex = Math.max(selectedIndex - 1, -1);
+                    renderSuggestions();
+                    break;
+                    
+                case 'Enter':
+                    if (selectedIndex >= 0) {
+                        e.preventDefault();
+                        selectCompany(selectedIndex);
+                    }
+                    break;
+                    
+                case 'Escape':
+                    hideAutocomplete();
+                    break;
+            }
+        });
+        
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.autocomplete-wrapper')) {
+                hideAutocomplete();
+            }
+        });
+
+        // Company loading and display functions
+        async function loadCompanyDetails(company) {
+            showResults();
+            showLoadingState();
+            
+            try {
+                const detailedCompany = await fetchDetailedCompanyInfo(company.company_number);
+                
+                const companyData = {
+                    name: company.title,
+                    number: company.company_number,
+                    status: company.company_status || 'active',
+                    location: company.address_snippet || 'United Kingdom',
+                    year: detailedCompany.date_of_creation ? new Date(detailedCompany.date_of_creation).getFullYear() : '2000',
+                    industry: guessIndustryFromSIC(detailedCompany.sic_codes?.[0]),
+                    companyType: detailedCompany.type,
+                    sicCodes: detailedCompany.sic_codes,
+                    incorporationDate: detailedCompany.date_of_creation,
+                    totalCharges: 0,
+                    outstandingCharges: 0,
+                    satisfiedCharges: 0
+                };
+
+                try {
+                    const chargesData = await fetchCompanyCharges(company.company_number);
+                    if (chargesData && chargesData.items) {
+                        companyData.totalCharges = chargesData.total_count || 0;
+                        companyData.outstandingCharges = chargesData.items.filter(charge => 
+                            charge.status === 'outstanding' || !charge.satisfied_on
+                        ).length;
+                        companyData.satisfiedCharges = chargesData.items.filter(charge => 
+                            charge.satisfied_on
+                        ).length;
+                    }
+                } catch (e) {
+                    console.log('Charges data not available');
+                }
+                
+                renderCompanyCard(companyData);
+                
+            } catch (error) {
+                console.error('Error loading company details:', error);
+                showErrorState();
+            }
+        }
+
+        async function fetchDetailedCompanyInfo(companyNumber) {
+            const url = `https://api.companieshouse.gov.uk/company/${companyNumber}`;
+            const response = await fetchWithWorker(url, CONFIG.API_KEY);
+            return response.json();
+        }
+
+        async function fetchCompanyCharges(companyNumber) {
+            try {
+                const url = `https://api.companieshouse.gov.uk/company/${companyNumber}/charges`;
+                const response = await fetchWithWorker(url, CONFIG.API_KEY);
+                return response.json();
+            } catch (error) {
+                return null;
+            }
+        }
+
+        function showResults() {
+            document.getElementById('resultsSection').classList.add('show');
+        }
+
+        function showLoadingState() {
+            document.getElementById('companyResults').innerHTML = `
+                <div class="loading-state">
+                    <div class="spinner"></div>
+                    <div style="color: #94a3b8;">Loading company details...</div>
+                </div>
+            `;
+        }
+
+        function showErrorState() {
+            document.getElementById('companyResults').innerHTML = `
+                <div class="error-state">
+                    <div style="font-size: 18px; margin-bottom: 8px; color: #ef4444;">Error loading company data</div>
+                    <div style="color: #94a3b8;">Please try searching again</div>
+                </div>
+            `;
+        }
+
+        function renderCompanyCard(company) {
+            const incorporationDate = company.incorporationDate ? 
+                new Date(company.incorporationDate).toLocaleDateString('en-GB', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric'
+                }) : 'Unknown';
+            
+            const companyAge = company.incorporationDate ? 
+                new Date().getFullYear() - new Date(company.incorporationDate).getFullYear() : null;
+
+            const html = `
+                <div class="explore-company-card" onclick="toggleCardExpansion(this, '${company.number}')" data-company-number="${company.number}">
+                    <div class="company-header">
+                        <span class="status-indicator status-${company.status.toLowerCase()}"></span>
+                        ${company.name}
+                        ${company.totalCharges > 0 ? `
+                            <span class="charges-indicator" title="${company.totalCharges} charge${company.totalCharges !== 1 ? 's' : ''} (${company.outstandingCharges} outstanding)">!</span>
+                        ` : ''}
+                    </div>
+                    <div class="company-details-line">
+                        <span>${company.year} • ${company.location} • ${company.number}</span>
+                        <span class="industry-badge">${company.industry.replace(/_/g, ' ')}</span>
+                    </div>
+                    
+                    <div class="card-expand-content">
+                        <div class="expand-section">
+                            <div class="expand-row">
+                                <span class="expand-label">Incorporated:</span>
+                                <span class="expand-value">${incorporationDate}${companyAge !== null ? ` (${companyAge} years ago)` : ''}</span>
+                            </div>
+                            
+                            <div class="expand-row">
+                                <span class="expand-label">Company Type:</span>
+                                <span class="expand-value">${company.companyType || 'Private Limited Company'}</span>
+                            </div>
+                            
+                            ${company.sicCodes && company.sicCodes.length > 0 ? `
+                                <div class="expand-row">
+                                    <span class="expand-label">SIC Codes:</span>
+                                    <div class="expand-value">
+                                        ${company.sicCodes.map(sic => `
+                                            <span class="sic-code" title="${sic}">${sic.split(' - ')[0]}</span>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            ` : ''}
+                            
+                            ${company.totalCharges > 0 ? `
+                                <div class="expand-row">
+                                    <span class="expand-label">Charges:</span>
+                                    <div class="expand-value">
+                                        <div class="charges-breakdown">
+                                            <div class="charge-line">
+                                                <span class="charge-type">Total charges</span>
+                                                <span class="charge-count">${company.totalCharges}</span>
+                                            </div>
+                                            ${company.outstandingCharges > 0 ? `
+                                                <div class="charge-line">
+                                                    <span class="charge-type">Outstanding</span>
+                                                    <span class="charge-count outstanding">${company.outstandingCharges}</span>
+                                                </div>
+                                            ` : ''}
+                                            ${company.satisfiedCharges > 0 ? `
+                                                <div class="charge-line">
+                                                    <span class="charge-type">Satisfied</span>
+                                                    <span class="charge-count satisfied">${company.satisfiedCharges}</span>
+                                                </div>
+                                            ` : ''}
+                                        </div>
+                                    </div>
+                                </div>
+                            ` : ''}
+                            
+                            <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(255, 255, 255, 0.1); text-align: center;">
+                                <button class="signup-btn" onclick="event.stopPropagation(); showSignupModal();">Sign Up for Full Access</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('companyResults').innerHTML = html;
+        }
+
+        // Exact production toggle function
+        function toggleCardExpansion(card, companyNumber) {
+            event.stopPropagation();
+            
+            const isExpanded = card.classList.contains('expanded');
+            
+            document.querySelectorAll('.explore-company-card.expanded').forEach(expandedCard => {
+                if (expandedCard !== card) {
+                    expandedCard.classList.remove('expanded');
+                }
+            });
+            
+            if (!isExpanded) {
+                card.classList.add('expanded');
+            } else {
+                card.classList.remove('expanded');
+            }
+        }
+
+        // Filter functions
+        let currentView = 'oldest';
+        
+        function onIndustryChange() {
+            console.log('Industry filter changed:', document.getElementById('industryFilter').value);
+        }
+        
+        function showOldest() {
+            currentView = 'oldest';
+            document.getElementById('oldestBtn').classList.add('active');
+            document.getElementById('newestBtn').classList.remove('active');
+            console.log('Showing oldest companies');
+        }
+        
+        function showNewest() {
+            currentView = 'newest';
+            document.getElementById('newestBtn').classList.add('active');
+            document.getElementById('oldestBtn').classList.remove('active');
+            console.log('Showing newest companies');
+        }
+        
+        function toggleActive(element) {
+            element.classList.toggle('active');
+            console.log('Active only filter:', element.classList.contains('active'));
+        }
+        
+        function toggleCharges(element) {
+            element.classList.toggle('active');
+            console.log('Has charges filter:', element.classList.contains('active'));
+        }
+
+        function showSignupModal() {
+            alert('Signup functionality would be implemented here');
+        }
+
+        function guessIndustryFromSIC(sicText) {
+            if (!sicText) return 'OTHER';
+            const sic = sicText.toUpperCase();
+            
+            if (sic.startsWith('01') || sic.startsWith('02') || sic.startsWith('03') || 
+                sic.startsWith('10') || sic.startsWith('11') || sic.includes('AGRICULTURE') || 
+                sic.includes('FARM') || sic.includes('FOOD') || sic.includes('CATTLE')) {
+                return 'AGRICULTURE';
+            }
+            
+            if (sic.startsWith('64') || sic.startsWith('65') || sic.startsWith('66') || 
+                sic.includes('FINANCIAL') || sic.includes('BANK') || sic.includes('INSURANCE')) {
+                return 'FINANCIAL';
+            }
+            
+            if (sic.startsWith('62') || sic.startsWith('63') || sic.includes('COMPUTER') || 
+                sic.includes('SOFTWARE') || sic.includes('TECHNOLOGY') || sic.includes('DATA')) {
+                return 'TECHNOLOGY';
+            }
+            
+            if (sic.startsWith('46') || sic.startsWith('47') || sic.includes('RETAIL') || 
+                sic.includes('SALE') || sic.includes('SHOP')) {
+                return 'RETAIL';
+            }
+            
+            if (sic.startsWith('10') || sic.startsWith('11') || sic.startsWith('12') || 
+                sic.startsWith('13') || sic.startsWith('14') || sic.startsWith('15') || 
+                sic.startsWith('25') || sic.startsWith('26') || sic.startsWith('27') || 
+                sic.startsWith('28') || sic.includes('MANUFACTURING')) {
+                return 'MANUFACTURING';
+            }
+            
+            return 'OTHER';
+        }
+    </script>
+</body>
+</html>
