@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Production Test</title>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #0f172a;
+            color: white;
+        }
+        .test-container {
+            background: #1e293b;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background: #3b82f6;
+            color: white;
+            margin: 5px;
+        }
+        button:hover {
+            background: #2563eb;
+        }
+        .modal-test {
+            background: #059669;
+            padding: 12px 24px;
+            font-size: 16px;
+        }
+        .signup-test {
+            background: #dc2626;
+            padding: 12px 24px;
+            font-size: 16px;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            background: #374151;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Production Modal Test</h1>
+    
+    <div class="test-container">
+        <h3>Current Authentication Status</h3>
+        <button onclick="checkAuth()">Check Auth Status</button>
+        <button onclick="signOut()">Sign Out</button>
+        <div id="authStatus" class="status">Click "Check Auth Status" to see current state</div>
+    </div>
+    
+    <div class="test-container">
+        <h3>Test Functions</h3>
+        <p>Test the individual functions that are used in production:</p>
+        
+        <button class="modal-test" onclick="testShowModal()">Test showCompanyModal()</button>
+        <button class="signup-test" onclick="testShowSignup()">Test showSignupModal()</button>
+        
+        <div id="functionStatus" class="status">Click buttons above to test functions</div>
+    </div>
+    
+    <div class="test-container">
+        <h3>Simulated Company Card Behavior</h3>
+        <p>This simulates what should happen when you click the button in the production cards:</p>
+        
+        <div style="border: 1px solid #475569; padding: 15px; border-radius: 8px; margin: 10px 0;">
+            <div style="font-weight: bold; margin-bottom: 10px;">TEST COMPANY LIMITED</div>
+            <div style="margin: 10px 0;">
+                <div id="buttonContainer">
+                    <!-- Button will be rendered here based on auth status -->
+                </div>
+            </div>
+        </div>
+        
+        <button onclick="updateButtonDisplay()">Refresh Button Display</button>
+    </div>
+
+    <script>
+        // Initialize Supabase (same config as production)
+        const supabaseUrl = 'https://iotwhyiisbazeqmowljv.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlvdHdoeWlpc2JhemVxbW93bGp2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgzMDUwMzUsImV4cCI6MjA2Mzg4MTAzNX0.HYAZLeIjR9b9C9k0p3wgf73GvpVH4-Ag9wQbACLcsLc';
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+        
+        // Test company data
+        const testCompany = {
+            name: "TEST COMPANY LIMITED",
+            number: "12345678",
+            status: "Active",
+            totalCharges: 2,
+            outstandingCharges: 1,
+            satisfiedCharges: 1,
+            incorporationDate: "2020-01-01",
+            companyType: "Private Limited Company",
+            sicCodes: []
+        };
+        
+        async function checkAuth() {
+            const statusDiv = document.getElementById('authStatus');
+            try {
+                const { data: { user }, error } = await supabaseClient.auth.getUser();
+                
+                if (error) {
+                    statusDiv.textContent = `Auth Error: ${error.message}`;
+                    return;
+                }
+                
+                if (user) {
+                    statusDiv.textContent = `✅ Signed in as: ${user.email}`;
+                } else {
+                    statusDiv.textContent = `❌ Not signed in`;
+                }
+                
+                updateButtonDisplay();
+                
+            } catch (error) {
+                statusDiv.textContent = `Error: ${error.message}`;
+            }
+        }
+        
+        async function signOut() {
+            const { error } = await supabaseClient.auth.signOut();
+            if (error) {
+                console.error('Sign out error:', error);
+            }
+            setTimeout(() => {
+                checkAuth();
+            }, 100);
+        }
+        
+        function testShowModal() {
+            const statusDiv = document.getElementById('functionStatus');
+            try {
+                // Test the showCompanyModal function
+                showCompanyModal(testCompany);
+                statusDiv.textContent = '✅ showCompanyModal() called successfully';
+            } catch (error) {
+                statusDiv.textContent = `❌ showCompanyModal() error: ${error.message}`;
+            }
+        }
+        
+        function testShowSignup() {
+            const statusDiv = document.getElementById('functionStatus');
+            try {
+                // Test the showSignupModal function
+                showSignupModal();
+                statusDiv.textContent = '✅ showSignupModal() called successfully';
+            } catch (error) {
+                statusDiv.textContent = `❌ showSignupModal() error: ${error.message}`;
+            }
+        }
+        
+        async function updateButtonDisplay() {
+            const container = document.getElementById('buttonContainer');
+            
+            try {
+                const { data: { user } } = await supabaseClient.auth.getUser();
+                const isSignedIn = !!user;
+                
+                if (isSignedIn) {
+                    container.innerHTML = `
+                        <button class="modal-test" onclick="showCompanyModal(${JSON.stringify(testCompany).replace(/"/g, '&quot;')})">
+                            View Full Details
+                        </button>
+                        <div style="margin-top: 10px; color: #10b981;">
+                            ✅ Signed-in user sees: "View Full Details" button that opens modal
+                        </div>
+                    `;
+                } else {
+                    container.innerHTML = `
+                        <button class="signup-test" onclick="showSignupModal()">
+                            Sign Up for Full Access
+                        </button>
+                        <div style="margin-top: 10px; color: #f87171;">
+                            ❌ Non-signed-in user sees: "Sign Up for Full Access" button
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                container.innerHTML = `<div style="color: #f87171;">Error: ${error.message}</div>`;
+            }
+        }
+        
+        // Mock the functions from production
+        function showCompanyModal(companyData) {
+            alert(`✅ MODAL: Would show company modal for ${companyData.name}`);
+            console.log('Company data:', companyData);
+        }
+        
+        function showSignupModal() {
+            alert('❌ SIGNUP: Would show signup modal');
+        }
+        
+        // Initialize on page load
+        window.addEventListener('load', function() {
+            checkAuth();
+        });
+        
+        // Listen for auth changes
+        supabaseClient.auth.onAuthStateChange((event, session) => {
+            console.log('Auth state changed:', event);
+            setTimeout(() => {
+                checkAuth();
+            }, 100);
+        });
+    </script>
+</body>
+</html>

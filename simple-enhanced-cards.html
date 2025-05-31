@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Company Cards - Simple Search</title>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .search-container {
+            max-width: 600px;
+            margin: 40px auto;
+            text-align: center;
+        }
+        
+        .search-container h1 {
+            font-size: 32px;
+            margin-bottom: 24px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .search-box {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        input[type="text"] {
+            flex: 1;
+            padding: 12px 20px;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            background: #1e293b;
+            color: #e2e8f0;
+            font-size: 16px;
+        }
+        
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #6366f1;
+        }
+        
+        button {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .status-msg {
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .status-msg.show {
+            display: block;
+        }
+        
+        .status-msg.error {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+        
+        .status-msg.success {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+        
+        .status-msg.info {
+            background: rgba(99, 102, 241, 0.1);
+            color: #6366f1;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+        
+        /* Company Card Styles */
+        .company-card {
+            display: none;
+            max-width: 1200px;
+            margin: 40px auto;
+            background: rgba(30, 41, 59, 0.5);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            overflow: hidden;
+        }
+        
+        .company-card.show {
+            display: block;
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+            padding: 32px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .company-name {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        
+        .company-number {
+            color: #94a3b8;
+            font-size: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-top: 24px;
+        }
+        
+        .info-box {
+            background: rgba(30, 41, 59, 0.8);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+        
+        .info-label {
+            color: #94a3b8;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+        
+        .info-value {
+            font-size: 18px;
+            font-weight: 600;
+            color: #e2e8f0;
+        }
+        
+        .tab-nav {
+            display: flex;
+            background: rgba(15, 23, 42, 0.5);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            overflow-x: auto;
+        }
+        
+        .tab-btn {
+            padding: 20px 24px;
+            background: none;
+            color: #94a3b8;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            position: relative;
+        }
+        
+        .tab-btn:hover {
+            color: #e2e8f0;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .tab-btn.active {
+            color: #6366f1;
+            background: rgba(99, 102, 241, 0.05);
+        }
+        
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        }
+        
+        .tab-content {
+            padding: 32px;
+            min-height: 400px;
+        }
+        
+        .tab-pane {
+            display: none;
+        }
+        
+        .tab-pane.active {
+            display: block;
+        }
+        
+        .tab-pane h3 {
+            margin-bottom: 20px;
+            color: #e2e8f0;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #94a3b8;
+        }
+    </style>
+</head>
+<body>
+    <div class="search-container">
+        <h1>Enhanced Company Cards</h1>
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Enter company name or number (e.g. Tesco, 01158622)" />
+            <button id="searchBtn" onclick="searchCompany()">Search</button>
+        </div>
+        <div class="status-msg" id="statusMsg"></div>
+    </div>
+    
+    <div class="company-card" id="companyCard">
+        <div class="card-header">
+            <div class="company-name" id="companyName">Company Name</div>
+            <div class="company-number" id="companyNumber">#00000000</div>
+            
+            <div class="info-grid">
+                <div class="info-box">
+                    <div class="info-label">Status</div>
+                    <div class="info-value" id="companyStatus">Active</div>
+                </div>
+                <div class="info-box">
+                    <div class="info-label">Type</div>
+                    <div class="info-value" id="companyType">Ltd</div>
+                </div>
+                <div class="info-box">
+                    <div class="info-label">Incorporated</div>
+                    <div class="info-value" id="companyIncorporated">-</div>
+                </div>
+                <div class="info-box">
+                    <div class="info-label">Industry</div>
+                    <div class="info-value" id="companyIndustry">-</div>
+                </div>
+                <div class="info-box">
+                    <div class="info-label">Accounts Due</div>
+                    <div class="info-value" id="companyAccounts">-</div>
+                </div>
+                <div class="info-box">
+                    <div class="info-label">Confirmation Due</div>
+                    <div class="info-value" id="companyConfirmation">-</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="tab-nav">
+            <button class="tab-btn active" data-tab="overview">Overview</button>
+            <button class="tab-btn" data-tab="people">People & Control</button>
+            <button class="tab-btn" data-tab="charges">Charges & Securities</button>
+            <button class="tab-btn" data-tab="filings">Filing History</button>
+            <button class="tab-btn" data-tab="insights">Risk Insights</button>
+            <button class="tab-btn" data-tab="documents">Documents</button>
+        </div>
+        
+        <div class="tab-content">
+            <div class="tab-pane active" id="overview">
+                <h3>Company Overview</h3>
+                <div id="overviewContent" class="loading">Loading overview data...</div>
+            </div>
+            
+            <div class="tab-pane" id="people">
+                <h3>Officers & Control</h3>
+                <div id="peopleContent" class="loading">Click to load officers data...</div>
+            </div>
+            
+            <div class="tab-pane" id="charges">
+                <h3>Charges & Securities</h3>
+                <div id="chargesContent" class="loading">Click to load charges data...</div>
+            </div>
+            
+            <div class="tab-pane" id="filings">
+                <h3>Filing History</h3>
+                <div id="filingsContent" class="loading">Click to load filing history...</div>
+            </div>
+            
+            <div class="tab-pane" id="insights">
+                <h3>Risk Analysis & Insights</h3>
+                <div id="insightsContent" class="loading">Click to load insights...</div>
+            </div>
+            
+            <div class="tab-pane" id="documents">
+                <h3>Documents</h3>
+                <div id="documentsContent" class="loading">Click to load documents...</div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const API_KEY = '22aefa40-ee9e-47c0-b40a-2dd3c03165c6';
+        const WORKER_URL = 'https://blue-flower-d40f.mahin84.workers.dev';
+        const RAILWAY_API_URL = 'https://companies-api-production-68c2.up.railway.app';
+        let currentCompanyData = null;
+        
+        // Enter key support
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchCompany();
+            }
+        });
+        
+        // Tab switching
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tabId = btn.dataset.tab;
+                
+                // Update buttons
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                // Update panes
+                document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+                document.getElementById(tabId).classList.add('active');
+                
+                // Load tab data if needed
+                loadTabData(tabId);
+            });
+        });
+        
+        // API helper function
+        async function fetchWithWorker(url, apiKey) {
+            const params = new URLSearchParams({
+                url: url,
+                apiKey: apiKey
+            });
+            const proxyUrl = `${WORKER_URL}?${params.toString()}`;
+            
+            const response = await fetch(proxyUrl);
+            if (!response.ok) {
+                throw new Error(`API request failed: ${response.status}`);
+            }
+            return response.json();
+        }
+
+        async function searchCompany() {
+            const query = document.getElementById('searchInput').value.trim();
+            if (!query) {
+                showStatus('error', 'Please enter a company name or number');
+                return;
+            }
+            
+            const searchBtn = document.getElementById('searchBtn');
+            searchBtn.disabled = true;
+            searchBtn.textContent = 'Searching...';
+            
+            try {
+                showStatus('info', 'Searching our database...');
+                
+                // First try Railway database for faster results
+                const railwayResponse = await fetch(`${RAILWAY_API_URL}/api/search?q=${encodeURIComponent(query)}`);
+                
+                if (railwayResponse.ok) {
+                    const railwayData = await railwayResponse.json();
+                    if (railwayData && railwayData.length > 0) {
+                        // Use first result from Railway
+                        const company = railwayData[0];
+                        
+                        // Get full details from Companies House API
+                        const companyUrl = `https://api.companieshouse.gov.uk/company/${company.CompanyNumber}`;
+                        currentCompanyData = await fetchWithWorker(companyUrl, API_KEY);
+                        
+                        // Add Railway data for additional info
+                        currentCompanyData.railwayData = company;
+                        
+                        displayCompanyCard();
+                        showStatus('success', 'Company loaded successfully!');
+                        return;
+                    }
+                }
+                
+                // Fallback to Companies House API if Railway doesn't have it
+                showStatus('info', 'Searching Companies House...');
+                const searchUrl = `https://api.companieshouse.gov.uk/search/companies?q=${encodeURIComponent(query)}&items_per_page=1`;
+                const searchData = await fetchWithWorker(searchUrl, API_KEY);
+                
+                if (!searchData.items || searchData.items.length === 0) {
+                    throw new Error('No company found');
+                }
+                
+                const company = searchData.items[0];
+                
+                // Get full company details
+                const companyUrl = `https://api.companieshouse.gov.uk/company/${company.company_number}`;
+                currentCompanyData = await fetchWithWorker(companyUrl, API_KEY);
+                
+                displayCompanyCard();
+                showStatus('success', 'Company loaded successfully!');
+                
+            } catch (error) {
+                showStatus('error', error.message);
+                console.error('Search error:', error);
+            } finally {
+                searchBtn.disabled = false;
+                searchBtn.textContent = 'Search';
+            }
+        }
+        
+        function displayCompanyCard() {
+            document.getElementById('companyCard').classList.add('show');
+            
+            // Update header
+            document.getElementById('companyName').textContent = currentCompanyData.company_name;
+            document.getElementById('companyNumber').textContent = '#' + currentCompanyData.company_number;
+            
+            // Update info boxes
+            document.getElementById('companyStatus').textContent = formatStatus(currentCompanyData.company_status);
+            document.getElementById('companyType').textContent = formatType(currentCompanyData.type);
+            document.getElementById('companyIncorporated').textContent = formatDate(currentCompanyData.date_of_creation);
+            
+            // Use Railway data for industry if available
+            let industry = 'N/A';
+            if (currentCompanyData.railwayData && currentCompanyData.railwayData.SICCode_SicText_1) {
+                industry = currentCompanyData.railwayData.SICCode_SicText_1.split(' - ')[0];
+            } else if (currentCompanyData.sic_codes && currentCompanyData.sic_codes[0]) {
+                industry = currentCompanyData.sic_codes[0];
+            }
+            document.getElementById('companyIndustry').textContent = industry;
+            
+            document.getElementById('companyAccounts').textContent = currentCompanyData.accounts?.next_due_date ? formatDate(currentCompanyData.accounts.next_due_date) : 'N/A';
+            document.getElementById('companyConfirmation').textContent = currentCompanyData.confirmation_statement?.next_due_date ? formatDate(currentCompanyData.confirmation_statement.next_due_date) : 'N/A';
+            
+            // Load overview data
+            loadOverviewData();
+        }
+        
+        function loadOverviewData() {
+            const content = document.getElementById('overviewContent');
+            const address = currentCompanyData.registered_office_address;
+            
+            content.innerHTML = `
+                <div style="display: grid; gap: 20px;">
+                    <div>
+                        <h4 style="color: #94a3b8; margin-bottom: 8px;">Registered Address</h4>
+                        <p>${formatAddress(address)}</p>
+                    </div>
+                    <div>
+                        <h4 style="color: #94a3b8; margin-bottom: 8px;">Company Type</h4>
+                        <p>${currentCompanyData.type || 'N/A'}</p>
+                    </div>
+                    <div>
+                        <h4 style="color: #94a3b8; margin-bottom: 8px;">Jurisdiction</h4>
+                        <p>${currentCompanyData.jurisdiction || 'England & Wales'}</p>
+                    </div>
+                    ${currentCompanyData.sic_codes ? `
+                    <div>
+                        <h4 style="color: #94a3b8; margin-bottom: 8px;">SIC Codes</h4>
+                        <p>${currentCompanyData.sic_codes.join(', ')}</p>
+                    </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+        
+        async function loadTabData(tabId) {
+            if (!currentCompanyData) return;
+            
+            const content = document.getElementById(tabId + 'Content');
+            content.innerHTML = '<div class="loading">Loading...</div>';
+            
+            try {
+                switch(tabId) {
+                    case 'people':
+                        await loadOfficers();
+                        break;
+                    case 'charges':
+                        await loadCharges();
+                        break;
+                    case 'filings':
+                        await loadFilings();
+                        break;
+                    case 'insights':
+                        loadInsights();
+                        break;
+                    case 'documents':
+                        loadDocuments();
+                        break;
+                }
+            } catch (error) {
+                content.innerHTML = `<div style="color: #ef4444;">Error loading data: ${error.message}</div>`;
+            }
+        }
+        
+        async function loadOfficers() {
+            const url = `https://api.companieshouse.gov.uk/company/${currentCompanyData.company_number}/officers`;
+            const data = await fetchWithWorker(url, API_KEY);
+            const content = document.getElementById('peopleContent');
+            
+            if (data.items && data.items.length > 0) {
+                content.innerHTML = data.items.map(officer => `
+                    <div style="padding: 16px; background: rgba(30, 41, 59, 0.5); border-radius: 12px; margin-bottom: 12px;">
+                        <div style="font-weight: 600; margin-bottom: 4px;">${officer.name}</div>
+                        <div style="color: #94a3b8; font-size: 14px;">${officer.officer_role}</div>
+                        <div style="color: #64748b; font-size: 12px; margin-top: 4px;">Appointed: ${formatDate(officer.appointed_on)}</div>
+                    </div>
+                `).join('');
+            } else {
+                content.innerHTML = '<p style="color: #94a3b8;">No officers data available</p>';
+            }
+        }
+        
+        async function loadCharges() {
+            const url = `https://api.companieshouse.gov.uk/company/${currentCompanyData.company_number}/charges`;
+            try {
+                const data = await fetchWithWorker(url, API_KEY);
+                const content = document.getElementById('chargesContent');
+                
+                if (data.items && data.items.length > 0) {
+                content.innerHTML = data.items.map(charge => `
+                    <div style="padding: 16px; background: rgba(30, 41, 59, 0.5); border-radius: 12px; margin-bottom: 12px;">
+                        <div style="font-weight: 600; margin-bottom: 4px;">${charge.classification || 'Charge'}</div>
+                        <div style="color: #94a3b8; font-size: 14px;">Status: ${charge.status || 'Unknown'}</div>
+                        <div style="color: #64748b; font-size: 12px; margin-top: 4px;">Created: ${formatDate(charge.created_on)}</div>
+                    </div>
+                `).join('');
+            } else {
+                content.innerHTML = '<p style="color: #94a3b8;">No charges registered</p>';
+            }
+            } catch (error) {
+                document.getElementById('chargesContent').innerHTML = '<p style="color: #94a3b8;">No charges data available</p>';
+            }
+        }
+        
+        async function loadFilings() {
+            const url = `https://api.companieshouse.gov.uk/company/${currentCompanyData.company_number}/filing-history`;
+            const data = await fetchWithWorker(url, API_KEY);
+            const content = document.getElementById('filingsContent');
+            
+            if (data.items && data.items.length > 0) {
+                content.innerHTML = data.items.slice(0, 10).map(filing => `
+                    <div style="padding: 16px; background: rgba(30, 41, 59, 0.5); border-radius: 12px; margin-bottom: 12px;">
+                        <div style="font-weight: 600; margin-bottom: 4px;">${filing.description}</div>
+                        <div style="color: #94a3b8; font-size: 14px;">${filing.category || 'Filing'}</div>
+                        <div style="color: #64748b; font-size: 12px; margin-top: 4px;">${formatDate(filing.date)}</div>
+                    </div>
+                `).join('');
+            } else {
+                content.innerHTML = '<p style="color: #94a3b8;">No filing history available</p>';
+            }
+        }
+        
+        function loadInsights() {
+            const content = document.getElementById('insightsContent');
+            const age = currentCompanyData.date_of_creation ? 
+                new Date().getFullYear() - new Date(currentCompanyData.date_of_creation).getFullYear() : 0;
+            
+            content.innerHTML = `
+                <div style="display: grid; gap: 20px;">
+                    <div>
+                        <h4 style="color: #94a3b8; margin-bottom: 8px;">Company Age</h4>
+                        <p>${age} years</p>
+                    </div>
+                    <div>
+                        <h4 style="color: #94a3b8; margin-bottom: 8px;">Status Risk</h4>
+                        <p>${currentCompanyData.company_status === 'active' ? 'Low Risk - Active Company' : 'Higher Risk - ' + currentCompanyData.company_status}</p>
+                    </div>
+                    <div>
+                        <h4 style="color: #94a3b8; margin-bottom: 8px;">Compliance Status</h4>
+                        <p>${currentCompanyData.has_been_liquidated ? 'Has been liquidated' : 'No liquidation history'}</p>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function loadDocuments() {
+            const content = document.getElementById('documentsContent');
+            content.innerHTML = `
+                <p style="color: #94a3b8;">Document download functionality would be implemented here.</p>
+                <p style="color: #94a3b8; margin-top: 12px;">This would include access to filing PDFs, accounts, and other company documents.</p>
+            `;
+        }
+        
+        function showStatus(type, message) {
+            const statusMsg = document.getElementById('statusMsg');
+            statusMsg.className = `status-msg ${type} show`;
+            statusMsg.textContent = message;
+            
+            if (type !== 'error') {
+                setTimeout(() => {
+                    statusMsg.classList.remove('show');
+                }, 3000);
+            }
+        }
+        
+        function formatStatus(status) {
+            return status.charAt(0).toUpperCase() + status.slice(1).replace(/_/g, ' ');
+        }
+        
+        function formatType(type) {
+            if (!type) return 'N/A';
+            return type.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        }
+        
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-GB', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric'
+            });
+        }
+        
+        function formatAddress(address) {
+            if (!address) return 'N/A';
+            const parts = [
+                address.address_line_1,
+                address.address_line_2,
+                address.locality,
+                address.postal_code
+            ].filter(Boolean);
+            return parts.join(', ');
+        }
+    </script>
+</body>
+</html>

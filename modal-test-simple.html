@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Modal Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #0f172a;
+            color: white;
+        }
+        button {
+            padding: 20px 40px;
+            font-size: 18px;
+            background: #059669;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #047857;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Simple Modal Test</h1>
+    <p>Click the button below to test the modal:</p>
+    <button onclick="testModal()">Open Test Modal</button>
+    
+    <script>
+        function testModal() {
+            const testData = {
+                name: "THE ABERDEEN-ANGUS CATTLE SOCIETY",
+                number: "SC000926",
+                status: "Active",
+                totalCharges: 2,
+                outstandingCharges: 1,
+                satisfiedCharges: 1,
+                incorporationDate: "2008-11-19",
+                companyType: "Private Limited Company"
+            };
+            
+            // Check if we're in the main index.html context
+            if (typeof showCompanyModal === 'function') {
+                showCompanyModal(testData);
+            } else {
+                alert('Modal function not found. Please test from the main index.html page.');
+                window.location.href = '/index.html';
+            }
+        }
+    </script>
+</body>
+</html>

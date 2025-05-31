@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Quick Auth Test</title>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <h2>Quick Authentication Test</h2>
+    <div>
+        <input type="email" id="email" placeholder="Email" value="test@example.com">
+        <input type="password" id="password" placeholder="Password" value="password123">
+        <button onclick="signUp()">Sign Up</button>
+        <button onclick="signIn()">Sign In</button>
+        <button onclick="signOut()">Sign Out</button>
+        <button onclick="checkAuth()">Check Auth</button>
+    </div>
+    <div id="status" style="margin-top: 20px; padding: 10px; background: #f0f0f0;"></div>
+    
+    <div style="margin-top: 20px;">
+        <button onclick="testModalButton()">Test Modal Button</button>
+        <br><br>
+        <button id="testBtn" onclick="handleCompanyAction(this)" data-company='{"name":"Test Company","number":"12345678"}'>
+            <span class="btn-text">Loading...</span>
+        </button>
+    </div>
+
+    <script>
+        const supabaseUrl = 'https://iotwhyiisbazeqmowljv.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlvdHdoeWlpc2JhemVxbW93bGp2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgzMDUwMzUsImV4cCI6MjA2Mzg4MTAzNX0.HYAZLeIjR9b9C9k0p3wgf73GvpVH4-Ag9wQbACLcsLc';
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+        
+        async function signUp() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            const { data, error } = await supabaseClient.auth.signUp({
+                email: email,
+                password: password,
+            });
+            
+            if (error) {
+                document.getElementById('status').innerHTML = `Sign up error: ${error.message}`;
+            } else {
+                document.getElementById('status').innerHTML = `Sign up success: ${data.user?.email}`;
+                updateButtonText();
+            }
+        }
+        
+        async function signIn() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            const { data, error } = await supabaseClient.auth.signInWithPassword({
+                email: email,
+                password: password,
+            });
+            
+            if (error) {
+                document.getElementById('status').innerHTML = `Sign in error: ${error.message}`;
+            } else {
+                document.getElementById('status').innerHTML = `Sign in success: ${data.user?.email}`;
+                updateButtonText();
+            }
+        }
+        
+        async function signOut() {
+            const { error } = await supabaseClient.auth.signOut();
+            if (error) {
+                document.getElementById('status').innerHTML = `Sign out error: ${error.message}`;
+            } else {
+                document.getElementById('status').innerHTML = 'Signed out successfully';
+                updateButtonText();
+            }
+        }
+        
+        async function checkAuth() {
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            if (user) {
+                document.getElementById('status').innerHTML = `Authenticated: ${user.email}`;
+            } else {
+                document.getElementById('status').innerHTML = 'Not authenticated';
+            }
+            updateButtonText();
+        }
+        
+        async function updateButtonText() {
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            const isSignedIn = !!user;
+            const buttonText = isSignedIn ? 'Show all' : 'Sign Up for Full Access';
+            document.querySelector('.btn-text').textContent = buttonText;
+            console.log('Button text updated to:', buttonText);
+        }
+        
+        async function handleCompanyAction(button) {
+            console.log('handleCompanyAction called');
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            
+            if (user) {
+                alert('User is signed in - would show modal');
+            } else {
+                alert('User not signed in - would show signup');
+            }
+        }
+        
+        function testModalButton() {
+            updateButtonText();
+        }
+        
+        // Initialize on load
+        window.onload = function() {
+            updateButtonText();
+        };
+    </script>
+</body>
+</html>

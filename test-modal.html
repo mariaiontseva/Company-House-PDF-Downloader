@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Modal Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <h1>Modal Debug Test</h1>
+    <button id="testBtn" onclick="testAuth()">Test Auth Status</button>
+    <button id="testModal" onclick="testModal()">Test Modal</button>
+    <div id="status"></div>
+    
+    <script>
+        // Initialize Supabase client
+        const supabaseUrl = 'https://qjvfscuowqjhfxifhcqh.supabase.co';
+        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFqdmZzY3Vvd3FqaGZ4aWZoY3FoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQzNDMzNjcsImV4cCI6MjA0OTkxOTM2N30.QVAzVQf_IErKlFmShKNmjnZx9PsqqR9XP1DT02LBKJI';
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseAnonKey);
+        
+        async function testAuth() {
+            const status = document.getElementById('status');
+            try {
+                const { data: { user }, error } = await supabaseClient.auth.getUser();
+                if (error) {
+                    status.innerHTML = `<p>Auth Error: ${error.message}</p>`;
+                    return;
+                }
+                
+                if (user) {
+                    status.innerHTML = `<p style="color: green;">✅ User is signed in: ${user.email}</p>`;
+                } else {
+                    status.innerHTML = `<p style="color: red;">❌ User is NOT signed in</p>`;
+                }
+            } catch (error) {
+                status.innerHTML = `<p style="color: red;">❌ Auth check failed: ${error.message}</p>`;
+            }
+        }
+        
+        function testModal() {
+            // Test if we can find the modal
+            const modal = document.getElementById('companyModal');
+            const status = document.getElementById('status');
+            
+            if (modal) {
+                status.innerHTML += `<p style="color: green;">✅ Modal element found</p>`;
+                modal.style.display = 'flex';
+            } else {
+                status.innerHTML += `<p style="color: red;">❌ Modal element NOT found</p>`;
+            }
+        }
+        
+        // Test on page load
+        window.onload = function() {
+            testAuth();
+        };
+    </script>
+</body>
+</html>

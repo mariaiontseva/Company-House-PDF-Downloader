@@ -5878,7 +5878,7 @@
         }
     </script>
     
-    <!-- Company Modal for Signed-in Users -->
+    <!-- Company Modal for Signed-in Users - EXACT COPY FROM TESCO-CARD.HTML -->
     <div id="companyModal" class="modal-backdrop" style="display: none;">
         <div class="company-card">
             <!-- Close Button -->
@@ -5892,14 +5892,14 @@
                 <!-- Header -->
                 <div class="card-header">
                     <div class="company-info">
-                        <div class="company-title">Company Name</div>
-                        <div class="company-subtitle">Previously: Company Previous Name</div>
+                        <div class="company-title">DAMSON (GP) LIMITED</div>
+                        <div class="company-subtitle">Previously: TESCO JADE (GP) LIMITED</div>
                         
                         <!-- Company badges and risk badge row -->
                         <div class="badges-row">
                             <div class="company-badges">
                                 <span class="badge active-badge">● Active</span>
-                                <span class="badge company-number">12345678</span>
+                                <span class="badge company-number">06753188</span>
                                 <span class="badge company-type">ltd</span>
                                 <div class="badge dropdown-badge">
                                     Other Services
@@ -5932,9 +5932,9 @@
                             <div class="stat-box">
                                 <div class="stat-value">131</div>
                                 <div class="stat-label">FILINGS</div>
-                                <div class="stat-detail">Download</div>
+                                <div class="stat-detail download-link" onclick="switchModalTab('filings')">Download</div>
                             </div>
-                            <div class="stat-box">
+                            <div class="stat-box charges-box">
                                 <div class="stat-value charges-number">6</div>
                                 <div class="stat-label">CHARGES</div>
                                 <div class="stat-detail">6 outstanding</div>
@@ -5968,15 +5968,23 @@
                             <h3>Company Overview</h3>
                             <div class="data-item">
                                 <div class="data-item-header">Registered Address</div>
-                                <div class="data-item-detail">Loading company address...</div>
+                                <div class="data-item-detail">Tesco House, Shire Park, Kestrel Way, Welwyn Garden City, Hertfordshire, AL7 1GA</div>
                             </div>
                             <div class="data-item">
                                 <div class="data-item-header">Company Type</div>
-                                <div class="data-item-detail">Private Limited Company</div>
+                                <div class="data-item-detail">Public Limited Company</div>
                             </div>
                             <div class="data-item">
                                 <div class="data-item-header">Nature of Business (SIC)</div>
-                                <div class="data-item-detail">Loading SIC codes...</div>
+                                <div class="data-item-detail">
+                                    47110 - Retail sale in non-specialised stores with food, beverages or tobacco predominating<br>
+                                    47190 - Other retail sale in non-specialised stores<br>
+                                    47910 - Retail sale via mail order houses or via Internet
+                                </div>
+                            </div>
+                            <div class="data-item">
+                                <div class="data-item-header">Accounting Reference Date</div>
+                                <div class="data-item-detail">25 February</div>
                             </div>
                         </div>
                         
@@ -5984,17 +5992,29 @@
                         <div class="tab-pane" id="people">
                             <h3>People & Control</h3>
                             <div class="data-item">
-                                <div class="data-item-header">Officers</div>
-                                <div class="data-item-detail">Loading officer information...</div>
+                                <div class="data-item-header">KEN MURPHY</div>
+                                <div class="data-item-detail">Chief Executive Officer - Appointed: 01 Oct 2020</div>
+                            </div>
+                            <div class="data-item">
+                                <div class="data-item-header">IMRAN NAWAZ</div>
+                                <div class="data-item-detail">Chief Financial Officer - Appointed: 13 Apr 2021</div>
+                            </div>
+                            <div class="data-item">
+                                <div class="data-item-header">GERRY MURPHY</div>
+                                <div class="data-item-detail">Chairman - Appointed: 01 Jun 2019</div>
+                            </div>
+                            <div class="data-item">
+                                <div class="data-item-header">KAREN WHITWORTH</div>
+                                <div class="data-item-detail">Company Secretary - Appointed: 16 Apr 2019</div>
                             </div>
                         </div>
                         
                         <!-- Charges Tab -->
                         <div class="tab-pane" id="charges">
                             <h3>Charges & Securities</h3>
-                            <div class="data-item">
-                                <div class="data-item-header">Charges Information</div>
-                                <div class="data-item-detail">Loading charges data...</div>
+                            <div style="text-align: center; padding: 60px 20px; color: #71767b;">
+                                <p style="font-size: 20px; margin-bottom: 12px;">✓ No Outstanding Charges</p>
+                                <p>This company has no registered charges or securities</p>
                             </div>
                         </div>
                         
@@ -6002,8 +6022,20 @@
                         <div class="tab-pane" id="filings">
                             <h3>Filing History</h3>
                             <div class="data-item">
-                                <div class="data-item-header">Recent Filings</div>
-                                <div class="data-item-detail">Loading filing history...</div>
+                                <div class="data-item-header">Annual full accounts made up to 25 February 2024</div>
+                                <div class="data-item-detail">Filed on 21 May 2024</div>
+                            </div>
+                            <div class="data-item">
+                                <div class="data-item-header">Confirmation statement made on 13 December 2023</div>
+                                <div class="data-item-detail">Filed on 22 December 2023</div>
+                            </div>
+                            <div class="data-item">
+                                <div class="data-item-header">Change of director's details</div>
+                                <div class="data-item-detail">Filed on 15 November 2023</div>
+                            </div>
+                            <div class="data-item">
+                                <div class="data-item-header">Director appointment</div>
+                                <div class="data-item-detail">Filed on 01 September 2023</div>
                             </div>
                         </div>
                         
@@ -6011,8 +6043,18 @@
                         <div class="tab-pane" id="insights">
                             <h3>Risk Insights</h3>
                             <div class="data-item">
-                                <div class="data-item-header">Risk Assessment</div>
-                                <div class="data-item-detail">Loading risk analysis...</div>
+                                <div class="data-item-header">Overall Risk Score</div>
+                                <div class="data-item-detail">95/100 - LOW RISK</div>
+                            </div>
+                            <div class="data-item">
+                                <div class="data-item-header">Key Strengths</div>
+                                <div class="data-item-detail">
+                                    • Established company (106 years old)<br>
+                                    • Active filing status<br>
+                                    • No outstanding charges<br>
+                                    • Regular and timely filings<br>
+                                    • FTSE 100 listed company
+                                </div>
                             </div>
                         </div>
                     </div>

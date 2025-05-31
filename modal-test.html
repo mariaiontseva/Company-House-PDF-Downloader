@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modal Test</title>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .auth-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background: #007bff;
+            color: white;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .test-button {
+            background: #28a745;
+            padding: 12px 24px;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .status.success { background: #d4edda; color: #155724; }
+        .status.error { background: #f8d7da; color: #721c24; }
+        .status.info { background: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Modal Authentication Test</h1>
+    
+    <div class="test-container">
+        <h3>Authentication Test</h3>
+        <div class="auth-controls">
+            <button onclick="testAuth()">Check Auth Status</button>
+            <button onclick="signOut()">Sign Out</button>
+        </div>
+        <div id="authStatus" class="status info">Click "Check Auth Status" to see your authentication state</div>
+    </div>
+    
+    <div class="test-container">
+        <h3>Button Text Test</h3>
+        <p>This button should change text based on your authentication status:</p>
+        <button id="testButton" class="test-button" onclick="handleCompanyAction(this)" data-company='{"name":"TEST COMPANY LIMITED","number":"12345678","status":"Active","totalCharges":2,"outstandingCharges":1}'>
+            <span class="btn-text">Loading...</span>
+        </button>
+        <button onclick="updateButtonText()">Refresh Button Text</button>
+        <div id="buttonStatus" class="status info">Button text will update based on auth state</div>
+    </div>
+    
+    <div class="test-container">
+        <h3>Expected Behavior</h3>
+        <ul>
+            <li><strong>Not signed in:</strong> Button shows "Sign Up for Full Access" → Click shows alert for signup</li>
+            <li><strong>Signed in:</strong> Button shows "Show all" → Click shows alert for modal</li>
+        </ul>
+    </div>
+
+    <script>
+        // Initialize Supabase (using the same config as main site)
+        const supabaseUrl = 'https://iotwhyiisbazeqmowljv.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlvdHdoeWlpc2JhemVxbW93bGp2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgzMDUwMzUsImV4cCI6MjA2Mzg4MTAzNX0.HYAZLeIjR9b9C9k0p3wgf73GvpVH4-Ag9wQbACLcsLc';
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+        
+        async function testAuth() {
+            const statusDiv = document.getElementById('authStatus');
+            try {
+                const { data: { user }, error } = await supabaseClient.auth.getUser();
+                
+                if (error) {
+                    statusDiv.className = 'status error';
+                    statusDiv.textContent = `Auth Error: ${error.message}`;
+                    return;
+                }
+                
+                if (user) {
+                    statusDiv.className = 'status success';
+                    statusDiv.textContent = `✅ Signed in as: ${user.email}`;
+                } else {
+                    statusDiv.className = 'status info';
+                    statusDiv.textContent = `❌ Not signed in`;
+                }
+                
+                updateButtonText();
+                
+            } catch (error) {
+                statusDiv.className = 'status error';
+                statusDiv.textContent = `Error: ${error.message}`;
+            }
+        }
+        
+        async function signOut() {
+            const { error } = await supabaseClient.auth.signOut();
+            if (error) {
+                console.error('Sign out error:', error);
+            }
+            setTimeout(() => {
+                testAuth();
+            }, 100);
+        }
+        
+        async function updateButtonText() {
+            try {
+                const { data: { user } } = await supabaseClient.auth.getUser();
+                const isSignedIn = !!user;
+                const buttonText = isSignedIn ? 'Show all' : 'Sign Up for Full Access';
+                
+                document.querySelector('.btn-text').textContent = buttonText;
+                
+                const statusDiv = document.getElementById('buttonStatus');
+                statusDiv.className = 'status success';
+                statusDiv.textContent = `✅ Button text updated to: "${buttonText}"`;
+                
+            } catch (error) {
+                const statusDiv = document.getElementById('buttonStatus');
+                statusDiv.className = 'status error';
+                statusDiv.textContent = `❌ Error updating button: ${error.message}`;
+            }
+        }
+        
+        async function handleCompanyAction(button) {
+            try {
+                const { data: { user } } = await supabaseClient.auth.getUser();
+                
+                if (user) {
+                    // User is signed in - would show modal
+                    alert(`✅ SIGNED IN: Would show modal for signed-in user: ${user.email}`);
+                } else {
+                    // User not signed in - would show signup
+                    alert(`❌ NOT SIGNED IN: Would show signup modal`);
+                }
+            } catch (error) {
+                alert(`❌ AUTH ERROR: ${error.message}`);
+            }
+        }
+        
+        // Initialize on page load
+        window.addEventListener('load', function() {
+            testAuth();
+        });
+        
+        // Listen for auth changes
+        supabaseClient.auth.onAuthStateChange((event, session) => {
+            console.log('Auth state changed:', event);
+            setTimeout(() => {
+                testAuth();
+            }, 100);
+        });
+    </script>
+</body>
+</html>
