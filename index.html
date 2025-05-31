@@ -2697,7 +2697,8 @@
             background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 20px;
-            box-shadow: 0 25px 100px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 25px 100px rgba(0, 0, 0, 0.5),
+                        0 0 0 1px rgba(255, 255, 255, 0.1) inset;
             max-width: 1200px;
             width: 100%;
             max-height: 90vh;
@@ -2713,6 +2714,23 @@
             scrollbar-color: rgba(99, 102, 241, 0.3) transparent;
         }
         
+        #companyModal .card-content::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        #companyModal .card-content::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        #companyModal .card-content::-webkit-scrollbar-thumb {
+            background: rgba(99, 102, 241, 0.3);
+            border-radius: 4px;
+        }
+        
+        #companyModal .card-content::-webkit-scrollbar-thumb:hover {
+            background: rgba(99, 102, 241, 0.5);
+        }
+        
         #companyModal .close-btn {
             position: absolute;
             top: 20px;
@@ -2720,6 +2738,7 @@
             width: 40px;
             height: 40px;
             background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 50%;
             display: flex;
@@ -2859,6 +2878,11 @@
             background: #1e293b;
             border-bottom: 1px solid #334155;
             overflow-x: auto;
+            scrollbar-width: none;
+        }
+        
+        #companyModal .tabs-nav::-webkit-scrollbar {
+            display: none;
         }
         
         #companyModal .tab-btn {
@@ -2897,6 +2921,12 @@
         
         #companyModal .tab-pane.active {
             display: block;
+            animation: fadeInContent 0.3s ease;
+        }
+        
+        @keyframes fadeInContent {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
         #companyModal .tab-pane h3 {
@@ -2970,6 +3000,55 @@
             
             #companyModal .company-title {
                 font-size: 28px;
+            }
+        }
+        
+        /* Additional responsive breakpoints for modal */
+        @media (max-width: 1400px) {
+            #companyModal .stats-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 16px;
+            }
+        }
+        
+        @media (max-width: 900px) {
+            #companyModal .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+        }
+        
+        @media (max-width: 500px) {
+            #companyModal .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+                margin-top: 24px;
+            }
+        }
+        
+        @media (max-width: 375px) {
+            #companyModal .card-header {
+                padding: max(20px, calc(env(safe-area-inset-top) + 20px)) 16px 20px 16px;
+            }
+            
+            #companyModal .company-title {
+                font-size: 24px;
+            }
+        }
+        
+        /* Large screens - ensure 6 boxes in one row */
+        @media (min-width: 1024px) {
+            #companyModal .stats-grid {
+                grid-template-columns: repeat(6, 1fr);
+                gap: 20px;
+            }
+        }
+        
+        /* Extra large screens */
+        @media (min-width: 1400px) {
+            #companyModal .stats-grid {
+                grid-template-columns: repeat(6, 1fr);
+                gap: 24px;
             }
         }
     </style>
