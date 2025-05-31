@@ -5857,12 +5857,9 @@
             try {
                 console.log('🔸 Fetching detailed data for company:', companyNumber);
                 
-                // Fetch company profile
-                const response = await fetch(`https://api.company-information.service.gov.uk/company/${companyNumber}`, {
-                    headers: {
-                        'Authorization': 'Basic ' + btoa('YOUR_API_KEY:')
-                    }
-                });
+                // Fetch company profile using the worker proxy
+                const API_KEY = 'e31d47f6-c361-4fa0-a2f9-8e2c68968e90';
+                const response = await fetchWithWorker(`https://api.companieshouse.gov.uk/company/${companyNumber}`, API_KEY);
                 
                 if (response.ok) {
                     const companyData = await response.json();
@@ -5872,9 +5869,27 @@
                     if (companyData.accounts) {
                         const accountsBox = document.querySelector('#companyModal .stat-box:nth-child(5)');
                         if (accountsBox) {
+                            const accountsValue = accountsBox.querySelector('.stat-value');
                             const accountsDetail = accountsBox.querySelector('.stat-detail');
-                            if (companyData.accounts.next_due) {
+                            
+                            if (companyData.accounts.overdue === true) {
+                                accountsValue.textContent = '⚠️';
+                                accountsValue.style.color = '#ef4444';
+                                accountsDetail.textContent = 'OVERDUE';
+                                accountsDetail.style.color = '#ef4444';
+                            } else if (companyData.accounts.next_due) {
+                                accountsValue.textContent = '✓';
+                                accountsValue.style.color = '';
                                 accountsDetail.textContent = `Next: ${new Date(companyData.accounts.next_due).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}`;
+                                accountsDetail.style.color = '';
+                            } else if (companyData.accounts.next_made_up_to) {
+                                // Calculate next due based on next made up to date + 9 months
+                                const nextMadeUpTo = new Date(companyData.accounts.next_made_up_to);
+                                nextMadeUpTo.setMonth(nextMadeUpTo.getMonth() + 9);
+                                accountsValue.textContent = '✓';
+                                accountsValue.style.color = '';
+                                accountsDetail.textContent = `Next: ${nextMadeUpTo.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}`;
+                                accountsDetail.style.color = '';
                             }
                         }
                     }
@@ -5882,9 +5897,27 @@
                     if (companyData.confirmation_statement) {
                         const confirmationBox = document.querySelector('#companyModal .stat-box:nth-child(6)');
                         if (confirmationBox) {
+                            const confirmationValue = confirmationBox.querySelector('.stat-value');
                             const confirmationDetail = confirmationBox.querySelector('.stat-detail');
-                            if (companyData.confirmation_statement.next_due) {
+                            
+                            if (companyData.confirmation_statement.overdue === true) {
+                                confirmationValue.textContent = '⚠️';
+                                confirmationValue.style.color = '#ef4444';
+                                confirmationDetail.textContent = 'OVERDUE';
+                                confirmationDetail.style.color = '#ef4444';
+                            } else if (companyData.confirmation_statement.next_due) {
+                                confirmationValue.textContent = '✓';
+                                confirmationValue.style.color = '';
                                 confirmationDetail.textContent = `Next: ${new Date(companyData.confirmation_statement.next_due).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}`;
+                                confirmationDetail.style.color = '';
+                            } else if (companyData.confirmation_statement.next_made_up_to) {
+                                // Calculate next due based on next made up to date + 14 days
+                                const nextMadeUpTo = new Date(companyData.confirmation_statement.next_made_up_to);
+                                nextMadeUpTo.setDate(nextMadeUpTo.getDate() + 14);
+                                confirmationValue.textContent = '✓';
+                                confirmationValue.style.color = '';
+                                confirmationDetail.textContent = `Next: ${nextMadeUpTo.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}`;
+                                confirmationDetail.style.color = '';
                             }
                         }
                     }
@@ -5958,9 +5991,14 @@
                     <div class="data-item-detail">${companyData.accounts.next_due ? new Date(companyData.accounts.next_due).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Unknown'}</div>
                 </div>
                 <div class="data-item">
-                    <div class="data-item-header">Last Accounts</div>
+                    <div class="data-item-header">Last Accounts Made Up To</div>
                     <div class="data-item-detail">${companyData.accounts.last_accounts?.made_up_to ? new Date(companyData.accounts.last_accounts.made_up_to).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Not filed'}</div>
-                </div>` : ''}
+                </div>
+                ${companyData.accounts.overdue ? `
+                <div class="data-item" style="border-color: #ef4444;">
+                    <div class="data-item-header" style="color: #ef4444;">⚠️ Accounts Status</div>
+                    <div class="data-item-detail" style="color: #ef4444;">OVERDUE - Accounts are overdue for filing</div>
+                </div>` : ''}` : ''}
                 ${companyData.confirmation_statement ? `
                 <div class="data-item">
                     <div class="data-item-header">Next Confirmation Statement Due</div>
