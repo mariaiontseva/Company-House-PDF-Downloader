@@ -5286,6 +5286,9 @@
                                 <button class="signup-btn" onclick="event.stopPropagation(); handleCompanyCardClick(this);" data-company='${JSON.stringify(company)}'>
                                     <span class="btn-text">Sign Up for Full Access</span>
                                 </button>
+                                <button class="signup-btn" style="background: #059669; margin-left: 8px;" onclick="event.stopPropagation(); testModalButton(this);" data-company='${JSON.stringify(company)}'>
+                                    🧪 Test Modal
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -5476,6 +5479,30 @@
                 console.log('🔸 Modal should now be visible');
             } else {
                 console.error('🔸 Modal element not found!');
+            }
+        }
+        
+        // Test function to trigger modal without auth check
+        function testModalButton(button) {
+            console.log('🧪 Test modal button clicked');
+            try {
+                const companyData = JSON.parse(button.getAttribute('data-company'));
+                console.log('🧪 Company data:', companyData);
+                showCompanyModal(companyData);
+            } catch (error) {
+                console.error('🧪 Error parsing company data:', error);
+                // Fallback with test data
+                const testData = {
+                    name: "TEST COMPANY LIMITED",
+                    number: "12345678",
+                    status: "Active",
+                    totalCharges: 2,
+                    outstandingCharges: 1,
+                    satisfiedCharges: 1,
+                    incorporationDate: "2020-01-01",
+                    companyType: "Private Limited Company"
+                };
+                showCompanyModal(testData);
             }
         }
         
