@@ -5791,10 +5791,22 @@
                 titleElement.textContent = company.name;
             }
             
-            // Update company subtitle  
+            // Update company subtitle (use as simple subtitle, not number)
             const subtitleElement = document.querySelector('#companyModal .company-subtitle');
             if (subtitleElement) {
-                subtitleElement.textContent = `Company Number: ${company.number}`;
+                subtitleElement.textContent = `Previously: ${company.name || 'No previous name'}`;
+            }
+            
+            // Update company number badge
+            const numberBadge = document.querySelector('#companyModal .company-number');
+            if (numberBadge) {
+                numberBadge.textContent = company.number || '00000000';
+            }
+            
+            // Update company type badge
+            const typeBadge = document.querySelector('#companyModal .company-type');
+            if (typeBadge) {
+                typeBadge.textContent = company.companyType || 'ltd';
             }
             
             // Update stats with company data
@@ -5881,17 +5893,27 @@
                 <div class="card-header">
                     <div class="company-info">
                         <div class="company-title">Company Name</div>
-                        <div class="company-subtitle">Company Number: 12345678</div>
+                        <div class="company-subtitle">Previously: Company Previous Name</div>
                         
                         <!-- Company badges and risk badge row -->
                         <div class="badges-row">
                             <div class="company-badges">
                                 <span class="badge active-badge">● Active</span>
-                                <span class="badge">ltd</span>
+                                <span class="badge company-number">12345678</span>
+                                <span class="badge company-type">ltd</span>
+                                <div class="badge dropdown-badge">
+                                    Other Services
+                                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                        <path d="M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/>
+                                    </svg>
+                                    <div class="tooltip">
+                                        82990 - Other business support service activities
+                                    </div>
+                                </div>
                             </div>
-                            <div class="risk-badge">
+                            <div class="risk-badge medium">
                                 <div class="risk-dot"></div>
-                                MEDIUM RISK
+                                MEDIUM RISK (45/100)
                             </div>
                         </div>
                         
