@@ -7467,8 +7467,13 @@
         
         // Populate Officers tab
         function populateOfficersTab(officers, companyNumber, incorporationDate) {
+            console.log('🔸 populateOfficersTab called with', officers.length, 'officers');
             const peopleTab = document.querySelector('#companyModal #people');
-            if (!peopleTab) return;
+            if (!peopleTab) {
+                console.log('🔸 People tab element not found!');
+                return;
+            }
+            console.log('🔸 People tab found, populating...');
             
             // Sort officers - active first, then by appointment date
             const sortedOfficers = officers.sort((a, b) => {
@@ -8395,6 +8400,14 @@
                     btn.classList.add('active');
                 }
             });
+            
+            // If switching to people tab, enhance officer names
+            if (tabName === 'people') {
+                console.log('🔸 Switched to People & Control tab, enhancing officer names...');
+                setTimeout(() => {
+                    enhanceOfficerNames();
+                }, 100);
+            }
         }
         
         // ===========================================
