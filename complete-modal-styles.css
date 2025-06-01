@@ -8,7 +8,7 @@
             display: none;
             justify-content: center;
             align-items: center;
-            padding: 20px;
+            padding: 0;
             animation: fadeIn 0.3s ease;
         }
         
@@ -43,13 +43,13 @@
         
         #companyModal .company-card {
             background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            box-shadow: 0 25px 100px rgba(0, 0, 0, 0.5),
-                        0 0 0 1px rgba(255, 255, 255, 0.1) inset;
-            max-width: 1200px;
-            width: 100%;
-            max-height: 90vh;
+            border: none;
+            border-radius: 0;
+            box-shadow: none;
+            max-width: 100vw;
+            width: 100vw;
+            max-height: 100vh;
+            height: 100vh;
             overflow: hidden;
             position: relative;
             animation: slideUp 0.4s ease;
@@ -67,7 +67,7 @@
         }
         
         #companyModal .card-content {
-            height: 90vh;
+            height: 100vh;
             overflow-y: auto;
             scrollbar-width: thin;
             scrollbar-color: rgba(99, 102, 241, 0.3) transparent;
@@ -429,6 +429,7 @@
             
             #companyModal .company-card {
                 max-height: 100vh;
+                height: 100vh;
                 border-radius: 0;
                 width: 100vw;
             }

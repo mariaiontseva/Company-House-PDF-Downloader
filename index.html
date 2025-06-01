@@ -1213,15 +1213,7 @@
             overflow: hidden;
         }
 
-        .company-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            bottom: 0;
-            width: 4px;
-            background: linear-gradient(135deg, #6366f1, #8b5cf6);
-        }
+        /* Removed violet bar */
 
         .company-name {
             font-size: 24px;
@@ -2689,14 +2681,14 @@
             display: none;
             justify-content: center;
             align-items: center;
-            padding: 20px;
+            padding: 0;
             animation: fadeIn 0.3s ease;
         }
         
         #companyModal .close-btn {
-            position: absolute;
-            top: 20px;
-            right: 20px;
+            position: fixed;
+            top: 40px;
+            right: 40px;
             width: 40px;
             height: 40px;
             background: rgba(255, 255, 255, 0.1);
@@ -2708,7 +2700,7 @@
             justify-content: center;
             cursor: pointer;
             transition: all 0.3s ease;
-            z-index: 10;
+            z-index: 1001;
         }
         
         #companyModal .close-btn:hover {
@@ -2723,15 +2715,16 @@
         }
         
         #companyModal .company-card {
-            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            box-shadow: 0 25px 100px rgba(0, 0, 0, 0.5),
-                        0 0 0 1px rgba(255, 255, 255, 0.1) inset;
-            max-width: 1200px;
-            width: 100%;
-            max-height: 90vh;
-            overflow: hidden;
+            background: #0f172a;
+            border: none;
+            border-radius: 0;
+            box-shadow: none;
+            max-width: 100vw;
+            width: 100vw;
+            max-height: 100vh;
+            height: 100vh;
+            overflow-y: auto;
+            overflow-x: hidden;
             position: relative;
             animation: slideUp 0.4s ease;
         }
@@ -2748,34 +2741,37 @@
         }
         
         #companyModal .card-content {
-            height: 90vh;
-            overflow-y: auto;
-            scrollbar-width: thin;
-            scrollbar-color: rgba(99, 102, 241, 0.3) transparent;
+            min-height: 100vh;
+            overflow: visible;
+            display: flex;
+            flex-direction: column;
         }
         
-        #companyModal .card-content::-webkit-scrollbar {
+        #companyModal .company-card::-webkit-scrollbar {
             width: 8px;
         }
         
-        #companyModal .card-content::-webkit-scrollbar-track {
-            background: transparent;
+        #companyModal .company-card::-webkit-scrollbar-track {
+            background: rgba(30, 41, 59, 0.3);
         }
         
-        #companyModal .card-content::-webkit-scrollbar-thumb {
-            background: rgba(99, 102, 241, 0.3);
+        #companyModal .company-card::-webkit-scrollbar-thumb {
+            background: rgba(71, 85, 105, 0.5);
             border-radius: 4px;
         }
         
-        #companyModal .card-content::-webkit-scrollbar-thumb:hover {
-            background: rgba(99, 102, 241, 0.5);
+        #companyModal .company-card::-webkit-scrollbar-thumb:hover {
+            background: rgba(71, 85, 105, 0.7);
         }
         
+        /* Scrollbar removed for cleaner look */
+        
         #companyModal .card-header {
-            background: #0f172a;
-            padding: 40px;
+            background: rgba(15, 23, 42, 0.98);
+            padding: 30px 40px;
             position: relative;
-            border-bottom: 1px solid #1e293b;
+            border-bottom: 1px solid rgba(30, 41, 59, 0.5);
+            backdrop-filter: blur(20px);
         }
         
         #companyModal .company-info {
@@ -2784,11 +2780,12 @@
         }
         
         #companyModal .company-title {
-            font-size: 42px;
+            font-size: 32px;
             font-weight: 900;
             color: #ffffff;
-            margin-bottom: 12px;
+            margin-bottom: 8px;
             letter-spacing: -0.5px;
+            line-height: 1.2;
         }
         
         #companyModal .company-subtitle {
@@ -2808,13 +2805,16 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin: 24px 0 32px 0;
+            margin: 16px 0 20px 0;
+            width: 100%;
         }
         
         #companyModal .company-badges {
             display: flex;
             gap: 12px;
             align-items: center;
+            flex: 1;
+            min-width: 0;
         }
         
         #companyModal .badge {
@@ -2902,19 +2902,27 @@
         #companyModal .stats-grid {
             display: grid;
             grid-template-columns: repeat(6, 1fr);
-            gap: 20px;
-            margin-top: 32px;
+            gap: 16px;
+            margin-top: 20px;
         }
         
         #companyModal .stat-box {
-            background: #1e293b;
-            border: 1px solid #334155;
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(51, 65, 85, 0.6);
             border-radius: 16px;
             padding: 20px;
             text-align: center;
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+        
+        #companyModal .stat-box:hover {
+            background: rgba(30, 41, 59, 0.8);
+            border-color: rgba(51, 65, 85, 0.8);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
         }
         
         #companyModal .stat-value {
@@ -2969,6 +2977,7 @@
             border-radius: 100px;
             font-size: 14px;
             font-weight: 600;
+            flex-shrink: 0;
         }
         
         #companyModal .risk-badge.medium {
@@ -2992,15 +3001,22 @@
         }
         
         #companyModal .tabs-container {
-            background: #0f172a;
+            background: rgba(15, 23, 42, 0.95);
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            overflow: hidden;
         }
         
         #companyModal .tabs-nav {
             display: flex;
-            background: #1e293b;
-            border-bottom: 1px solid #334155;
+            background: rgba(15, 23, 42, 0.8);
+            border-bottom: 1px solid rgba(30, 41, 59, 0.5);
             overflow-x: auto;
             scrollbar-width: none;
+            align-items: stretch;
+            min-height: 60px;
+            padding: 0 40px;
         }
         
         #companyModal .tabs-nav::-webkit-scrollbar {
@@ -3008,18 +3024,22 @@
         }
         
         #companyModal .tab-btn {
-            padding: 20px 24px;
+            padding: 16px 20px;
             background: transparent;
             border: none;
             color: #94a3b8;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             border-bottom: 3px solid transparent;
             transition: all 0.3s ease;
             white-space: nowrap;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex: 0 0 auto;
         }
         
         #companyModal .tab-btn:hover {
@@ -3035,14 +3055,21 @@
         
         #companyModal .tab-content {
             padding: 40px;
+            background: rgba(15, 23, 42, 0.6);
+            min-height: 400px;
+            flex: 1;
+            overflow-y: auto;
+            display: block;
         }
         
         #companyModal .tab-pane {
             display: none;
+            opacity: 0;
         }
         
         #companyModal .tab-pane.active {
             display: block;
+            opacity: 1;
             animation: fadeInContent 0.3s ease;
         }
         
@@ -3059,12 +3086,20 @@
         }
         
         #companyModal .data-item {
-            background: #1e293b;
-            border: 1px solid #334155;
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(51, 65, 85, 0.5);
             border-radius: 12px;
             padding: 20px;
             margin-bottom: 16px;
             transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        #companyModal .data-item:hover {
+            background: rgba(30, 41, 59, 0.7);
+            border-color: rgba(51, 65, 85, 0.8);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
         }
         
         #companyModal .data-item-header {
@@ -3110,6 +3145,7 @@
             
             #companyModal .company-card {
                 max-height: 100vh;
+                height: 100vh;
                 border-radius: 0;
                 width: 100vw;
             }
@@ -5748,7 +5784,12 @@
             // Update company subtitle
             const subtitleElement = document.querySelector('#companyModal .company-subtitle');
             if (subtitleElement) {
-                subtitleElement.textContent = company.previousName ? `Previously: ${company.previousName}` : 'Loading company information...';
+                if (company.previousName) {
+                    subtitleElement.textContent = `Previously: ${company.previousName}`;
+                    subtitleElement.style.display = 'block';
+                } else {
+                    subtitleElement.style.display = 'none';
+                }
             }
             
             // Update company number badge
@@ -5895,8 +5936,64 @@
                 chargesValue.classList.add('charges-number');
             }
             
+            // Update Overview tab content
+            updateOverviewTab(company);
+            
             // Fetch and populate detailed company data
             await fetchCompanyDetails(company.number || company.company_number);
+        }
+        
+        // Update Overview tab with company data
+        function updateOverviewTab(company) {
+            // Update address
+            const addressEl = document.getElementById('modal-address');
+            if (addressEl) {
+                const addressParts = [];
+                if (company.address_line_1) addressParts.push(company.address_line_1);
+                if (company.address_line_2) addressParts.push(company.address_line_2);
+                if (company.locality) addressParts.push(company.locality);
+                if (company.region) addressParts.push(company.region);
+                if (company.postal_code) addressParts.push(company.postal_code);
+                if (company.country) addressParts.push(company.country);
+                
+                addressEl.textContent = addressParts.length > 0 ? addressParts.join(', ') : 'No address available';
+            }
+            
+            // Update company type
+            const typeEl = document.getElementById('modal-type');
+            if (typeEl) {
+                typeEl.textContent = company.companyType || company.company_type || 'Limited Company';
+            }
+            
+            // Update status
+            const statusEl = document.getElementById('modal-status');
+            if (statusEl) {
+                statusEl.textContent = company.status || 'Active';
+            }
+            
+            // Update incorporation date
+            const incDateEl = document.getElementById('modal-inc-date');
+            if (incDateEl) {
+                incDateEl.textContent = company.incorporationDate 
+                    ? new Date(company.incorporationDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+                    : 'Not available';
+            }
+            
+            // Update SIC codes
+            const sicEl = document.getElementById('modal-sic');
+            if (sicEl) {
+                if (company.sicCodes && company.sicCodes.length > 0) {
+                    sicEl.innerHTML = company.sicCodes.filter(Boolean).join('<br>');
+                } else {
+                    sicEl.textContent = 'No SIC codes available';
+                }
+            }
+            
+            // Update previous names
+            const prevNamesEl = document.getElementById('modal-prev-names');
+            if (prevNamesEl) {
+                prevNamesEl.textContent = company.previousName || 'None recorded';
+            }
         }
         
         // Fetch detailed company information from API
@@ -6670,7 +6767,7 @@
                 <div class="card-header">
                     <div class="company-info">
                         <div class="company-title">DAMSON (GP) LIMITED</div>
-                        <div class="company-subtitle">Previously: TESCO JADE (GP) LIMITED</div>
+                        <div class="company-subtitle" id="modal-subtitle" style="display: none;"></div>
                         
                         <!-- Company badges and risk badge row -->
                         <div class="badges-row">
@@ -6746,23 +6843,27 @@
                             <h3>Company Overview</h3>
                             <div class="data-item">
                                 <div class="data-item-header">Registered Address</div>
-                                <div class="data-item-detail">Tesco House, Shire Park, Kestrel Way, Welwyn Garden City, Hertfordshire, AL7 1GA</div>
+                                <div class="data-item-detail" id="modal-address">Loading address...</div>
                             </div>
                             <div class="data-item">
                                 <div class="data-item-header">Company Type</div>
-                                <div class="data-item-detail">Public Limited Company</div>
+                                <div class="data-item-detail" id="modal-type">Loading company type...</div>
+                            </div>
+                            <div class="data-item">
+                                <div class="data-item-header">Status</div>
+                                <div class="data-item-detail" id="modal-status">Active</div>
+                            </div>
+                            <div class="data-item">
+                                <div class="data-item-header">Incorporation Date</div>
+                                <div class="data-item-detail" id="modal-inc-date">Loading...</div>
                             </div>
                             <div class="data-item">
                                 <div class="data-item-header">Nature of Business (SIC)</div>
-                                <div class="data-item-detail">
-                                    47110 - Retail sale in non-specialised stores with food, beverages or tobacco predominating<br>
-                                    47190 - Other retail sale in non-specialised stores<br>
-                                    47910 - Retail sale via mail order houses or via Internet
-                                </div>
+                                <div class="data-item-detail" id="modal-sic">Loading SIC codes...</div>
                             </div>
                             <div class="data-item">
-                                <div class="data-item-header">Accounting Reference Date</div>
-                                <div class="data-item-detail">25 February</div>
+                                <div class="data-item-header">Previous Names</div>
+                                <div class="data-item-detail" id="modal-prev-names">None recorded</div>
                             </div>
                         </div>
                         
@@ -6843,4 +6944,4 @@
 
 </body>
 </html>
-<!-- Deploy trigger: Wed May 28 09:45:00 2025 -->
+<!-- Deploy trigger: Sun Jun 01 09:45:00 2025 -->
