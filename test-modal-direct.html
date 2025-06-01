@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Direct Modal Test</title>
+    <style>
+        body { background: #0f172a; color: white; padding: 20px; font-family: Arial; }
+        .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 1000; }
+        .modal.show { display: flex; align-items: center; justify-content: center; }
+        .modal-content { background: #1e293b; padding: 20px; border-radius: 8px; width: 80%; max-width: 800px; }
+        .tab-pane { display: none; }
+        .tab-pane.active { display: block; }
+        .data-item { background: #334155; padding: 15px; margin: 10px 0; border-radius: 4px; }
+        .data-item-header { font-weight: bold; margin-bottom: 5px; }
+        button { background: #3b82f6; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; margin: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Testing Modal Overview Tab Directly</h1>
+    <button onclick="openTestModal()">Open Modal with Company Data</button>
+    
+    <div id="testModal" class="modal">
+        <div class="modal-content">
+            <h2>TEST COMPANY LIMITED</h2>
+            <div class="tab-pane active" id="overview">
+                <p>Loading...</p>
+            </div>
+            <button onclick="closeModal()">Close</button>
+        </div>
+    </div>
+    
+    <script>
+        function openTestModal() {
+            console.log('Opening modal...');
+            const modal = document.getElementById('testModal');
+            modal.classList.add('show');
+            
+            // Simulate the exact same flow
+            setTimeout(() => {
+                console.log('Calling populate function...');
+                populateOverview();
+            }, 100);
+        }
+        
+        function closeModal() {
+            document.getElementById('testModal').classList.remove('show');
+        }
+        
+        function populateOverview() {
+            const overviewTab = document.querySelector('#testModal #overview');
+            console.log('Overview tab found:', overviewTab);
+            
+            if (!overviewTab) {
+                console.error('No overview tab!');
+                return;
+            }
+            
+            const content = `
+                <h3>Company Overview</h3>
+                <div class="data-item">
+                    <div class="data-item-header">Registered Address</div>
+                    <div class="data-item-detail">123 Example Street, London, Greater London, United Kingdom, XX1 1XX</div>
+                </div>
+                <div class="data-item">
+                    <div class="data-item-header">Company Type</div>
+                    <div class="data-item-detail">Private Limited Company</div>
+                </div>
+                <div class="data-item">
+                    <div class="data-item-header">Company Status</div>
+                    <div class="data-item-detail">Active</div>
+                </div>
+            `;
+            
+            console.log('Setting content...');
+            overviewTab.innerHTML = content;
+            console.log('Content set. Current HTML:', overviewTab.innerHTML);
+            
+            // Check after delay
+            setTimeout(() => {
+                const check = document.querySelector('#testModal #overview');
+                console.log('After 1 second - Content still there?', check.innerHTML.includes('123 Example Street'));
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

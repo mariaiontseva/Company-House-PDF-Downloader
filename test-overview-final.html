@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Overview Tab Fix - Final</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 20px;
+            background: #f3f4f6;
+        }
+        
+        .test-controls {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .test-controls h2 {
+            margin-top: 0;
+        }
+        
+        .test-controls button {
+            margin: 5px;
+            padding: 10px 20px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .test-controls button:hover {
+            background: #2563eb;
+        }
+        
+        .console-output {
+            background: #1e293b;
+            color: #94a3b8;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+        
+        .console-output .log { color: #94a3b8; }
+        .console-output .error { color: #ef4444; }
+        .console-output .success { color: #10b981; }
+        
+        /* Modal styles matching the original */
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .company-card {
+            background: #0f172a;
+            border-radius: 20px;
+            max-width: 1000px;
+            width: 90%;
+            max-height: 90vh;
+            overflow: hidden;
+            position: relative;
+            color: white;
+        }
+        
+        .tab-content {
+            padding: 40px;
+        }
+        
+        .tab-pane {
+            display: none;
+        }
+        
+        .tab-pane.active {
+            display: block;
+            animation: fadeInContent 0.3s ease;
+        }
+        
+        @keyframes fadeInContent {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .data-item {
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            margin-bottom: 16px;
+            background: rgba(255, 255, 255, 0.03);
+        }
+        
+        .data-item-header {
+            font-size: 14px;
+            color: #94a3b8;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .data-item-detail {
+            font-size: 16px;
+            color: #f1f5f9;
+            line-height: 1.5;
+        }
+        
+        h3 {
+            color: #f1f5f9;
+            margin: 0 0 24px 0;
+            font-size: 24px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-controls">
+        <h2>Overview Tab Display Test</h2>
+        <p>This test simulates the exact conditions in the main application to verify the Overview tab displays correctly.</p>
+        
+        <button onclick="runTest()">Run Complete Test</button>
+        <button onclick="clearConsole()">Clear Console</button>
+        
+        <div class="console-output" id="console">
+            <div class="log">Console output will appear here...</div>
+        </div>
+    </div>
+
+    <!-- Modal matching the original structure -->
+    <div id="companyModal" class="modal-backdrop" style="display: none;">
+        <div class="company-card">
+            <div class="tab-content">
+                <!-- Overview Tab -->
+                <div class="tab-pane active" id="overview">
+                    <div style="text-align: center; padding: 40px;">
+                        <div style="display: inline-block; width: 40px; height: 40px; border: 3px solid #e5e7eb; border-top-color: #3b82f6; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                        <p style="color: #94a3b8; margin-top: 16px;">Loading company overview...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Override console.log to display in our console
+        const originalLog = console.log;
+        const originalError = console.error;
+        
+        function addToConsole(message, type = 'log') {
+            const consoleEl = document.getElementById('console');
+            const entry = document.createElement('div');
+            entry.className = type;
+            entry.textContent = new Date().toLocaleTimeString() + ' - ' + message;
+            consoleEl.appendChild(entry);
+            consoleEl.scrollTop = consoleEl.scrollHeight;
+        }
+        
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            addToConsole(args.join(' '), 'log');
+        };
+        
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            addToConsole(args.join(' '), 'error');
+        };
+        
+        function clearConsole() {
+            document.getElementById('console').innerHTML = '<div class="log">Console cleared.</div>';
+        }
+        
+        // Helper functions from the original
+        function formatAddress(address) {
+            if (!address) return 'Address not available';
+            const parts = [];
+            if (address.premises) parts.push(address.premises);
+            if (address.address_line_1) parts.push(address.address_line_1);
+            if (address.address_line_2) parts.push(address.address_line_2);
+            if (address.locality) parts.push(address.locality);
+            if (address.region) parts.push(address.region);
+            if (address.postal_code) parts.push(address.postal_code);
+            if (address.country) parts.push(address.country);
+            return parts.join(', ');
+        }
+
+        function formatSicCodes(sicCodes) {
+            if (!sicCodes || sicCodes.length === 0) return 'No SIC codes available';
+            
+            const sicDescriptions = {
+                '62020': 'Information technology consultancy activities',
+                '62090': 'Other information technology service activities',
+                '47110': 'Retail sale in non-specialised stores with food, beverages or tobacco predominating',
+                '47190': 'Other retail sale in non-specialised stores'
+            };
+            
+            return sicCodes.map(code => 
+                `${code} - ${sicDescriptions[code] || 'Business activity'}`
+            ).join('<br>');
+        }
+
+        // The fixed populateOverviewTab function
+        function populateOverviewTab(companyData) {
+            console.log('🔸 populateOverviewTab called with:', JSON.stringify(companyData).substring(0, 100) + '...');
+            console.log('🔸 Address data:', JSON.stringify(companyData.registered_office_address));
+            
+            // Try multiple times with increasing delays to ensure content displays
+            const attempts = [100, 300, 500, 1000];
+            let attemptIndex = 0;
+            
+            function tryPopulate() {
+                const overviewTab = document.querySelector('#companyModal .tab-pane#overview');
+                console.log(`🔸 Attempt ${attemptIndex + 1}: Overview tab element:`, !!overviewTab);
+                
+                if (!overviewTab) {
+                    console.error('🔸 Overview tab not found!');
+                    if (attemptIndex < attempts.length - 1) {
+                        attemptIndex++;
+                        setTimeout(tryPopulate, attempts[attemptIndex]);
+                    }
+                    return;
+                }
+                
+                // Check if the tab is active
+                const isActive = overviewTab.classList.contains('active');
+                console.log('🔸 Overview tab is active:', isActive);
+                
+                // Ensure the modal is visible
+                const modal = document.getElementById('companyModal');
+                const isModalVisible = modal && modal.style.display !== 'none';
+                console.log('🔸 Modal is visible:', isModalVisible);
+                
+                const formattedAddress = formatAddress(companyData.registered_office_address);
+                console.log('🔸 Formatted address:', formattedAddress);
+                
+                const newContent = `
+                    <h3>Company Overview</h3>
+                    <div class="data-item">
+                        <div class="data-item-header">Registered Address</div>
+                        <div class="data-item-detail">${formatAddress(companyData.registered_office_address)}</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-item-header">Company Type</div>
+                        <div class="data-item-detail">${companyData.type || 'Private Limited Company'}</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-item-header">Company Status</div>
+                        <div class="data-item-detail">${companyData.company_status || 'Active'}</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-item-header">Nature of Business (SIC)</div>
+                        <div class="data-item-detail">${formatSicCodes(companyData.sic_codes)}</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-item-header">Incorporation Date</div>
+                        <div class="data-item-detail">${companyData.date_of_creation ? new Date(companyData.date_of_creation).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Unknown'}</div>
+                    </div>
+                    ${companyData.accounts ? `
+                    <div class="data-item">
+                        <div class="data-item-header">Accounting Reference Date</div>
+                        <div class="data-item-detail">${companyData.accounts.accounting_reference_date?.day || ''} ${companyData.accounts.accounting_reference_date?.month || ''}</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-item-header">Next Accounts Due</div>
+                        <div class="data-item-detail">${companyData.accounts.next_due ? new Date(companyData.accounts.next_due).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Unknown'}</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-item-header">Last Accounts Made Up To</div>
+                        <div class="data-item-detail">${companyData.accounts.last_accounts?.made_up_to ? new Date(companyData.accounts.last_accounts.made_up_to).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Not filed'}</div>
+                    </div>
+                    ${companyData.accounts.overdue ? `
+                    <div class="data-item" style="border-color: #ef4444;">
+                        <div class="data-item-header" style="color: #ef4444;">⚠️ Accounts Status</div>
+                        <div class="data-item-detail" style="color: #ef4444;">OVERDUE - Accounts are overdue for filing</div>
+                    </div>` : ''}` : ''}
+                    ${companyData.confirmation_statement ? `
+                    <div class="data-item">
+                        <div class="data-item-header">Next Confirmation Statement Due</div>
+                        <div class="data-item-detail">${companyData.confirmation_statement.next_due ? new Date(companyData.confirmation_statement.next_due).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Unknown'}</div>
+                    </div>` : ''}
+                `;
+                
+                console.log('🔸 Setting innerHTML with content length:', newContent.length);
+                
+                try {
+                    // Store the current active state
+                    const wasActive = overviewTab.classList.contains('active');
+                    
+                    // Set the content
+                    overviewTab.innerHTML = newContent;
+                    
+                    console.log('🔸 innerHTML set successfully. Current content:', overviewTab.innerHTML.substring(0, 100) + '...');
+                    
+                    // Ensure the tab remains active if it was active
+                    if (wasActive || isActive) {
+                        overviewTab.classList.add('active');
+                    }
+                    
+                    // Success! Content is set
+                    addToConsole('🔸 SUCCESS: Overview tab populated successfully', 'success');
+                    
+                    // Verify content persists after a delay
+                    setTimeout(() => {
+                        const checkTab = document.querySelector('#companyModal #overview');
+                        if (checkTab && !checkTab.innerHTML.includes('Company Overview')) {
+                            console.error('🔸 ERROR: Content was lost! Current content:', checkTab.innerHTML);
+                            // Try one more time
+                            checkTab.innerHTML = newContent;
+                            checkTab.classList.add('active');
+                        } else if (checkTab) {
+                            addToConsole('🔸 VERIFIED: Content persists correctly', 'success');
+                        }
+                    }, 500);
+                    
+                } catch (error) {
+                    console.error('🔸 ERROR setting innerHTML:', error);
+                }
+            }
+            
+            // Start the first attempt
+            setTimeout(tryPopulate, attempts[attemptIndex]);
+        }
+
+        function runTest() {
+            console.log('Starting Overview Tab Display Test...');
+            
+            // Show the modal
+            const modal = document.getElementById('companyModal');
+            modal.style.display = 'flex';
+            console.log('Modal displayed');
+            
+            // Simulate the API response data
+            const testCompanyData = {
+                company_name: "TESCO PLC",
+                company_number: "00445790",
+                company_status: "Active",
+                type: "Public Limited Company",
+                date_of_creation: "1947-11-27",
+                registered_office_address: {
+                    premises: "Tesco House",
+                    address_line_1: "Shire Park",
+                    address_line_2: "Kestrel Way",
+                    locality: "Welwyn Garden City",
+                    region: "Hertfordshire",
+                    postal_code: "AL7 1GA",
+                    country: "United Kingdom"
+                },
+                sic_codes: ["47110", "47190"],
+                accounts: {
+                    accounting_reference_date: {
+                        day: "28",
+                        month: "February"
+                    },
+                    next_due: "2024-11-30",
+                    last_accounts: {
+                        made_up_to: "2024-02-24"
+                    }
+                },
+                confirmation_statement: {
+                    next_due: "2024-12-11"
+                }
+            };
+            
+            console.log('Simulating API call delay (1 second)...');
+            
+            // Simulate the timing of a real API call
+            setTimeout(() => {
+                console.log('API response received, calling populateOverviewTab...');
+                populateOverviewTab(testCompanyData);
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

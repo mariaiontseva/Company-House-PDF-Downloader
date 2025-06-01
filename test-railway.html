@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Railway API Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin-bottom: 30px; padding: 20px; border: 1px solid #ccc; }
+        .success { color: green; }
+        .error { color: red; }
+        .loading { color: blue; }
+        pre { background: #f5f5f5; padding: 10px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>Railway API Test</h1>
+    
+    <div class="test-section">
+        <h2>Railway API Base URL Test</h2>
+        <button onclick="testBaseURL()">Test Base URL</button>
+        <div id="baseUrlResult"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Railway API Endpoints Test</h2>
+        <button onclick="testEndpoints()">Test All Endpoints</button>
+        <div id="endpointsResult"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Company Data Test</h2>
+        <button onclick="testCompanyData()">Test Company Data with Address</button>
+        <div id="companyDataResult"></div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'https://companies-api-production-68c2.up.railway.app';
+        
+        function log(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : 'loading';
+            element.innerHTML += `<div class="${className}">${message}</div>`;
+        }
+        
+        function clearLog(elementId) {
+            document.getElementById(elementId).innerHTML = '';
+        }
+        
+        async function testBaseURL() {
+            clearLog('baseUrlResult');
+            log('baseUrlResult', 'Testing Railway base URL...', 'loading');
+            
+            try {
+                const response = await fetch(API_BASE_URL);
+                const text = await response.text();
+                
+                if (response.ok) {
+                    log('baseUrlResult', `✅ Base URL works! Status: ${response.status}`, 'success');
+                    log('baseUrlResult', `Response: ${text}`, 'success');
+                } else {
+                    log('baseUrlResult', `❌ Base URL failed! Status: ${response.status}`, 'error');
+                    log('baseUrlResult', `Response: ${text}`, 'error');
+                }
+            } catch (error) {
+                log('baseUrlResult', `❌ Base URL error: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testEndpoints() {
+            clearLog('endpointsResult');
+            log('endpointsResult', 'Testing Railway API endpoints...', 'loading');
+            
+            const endpoints = [
+                '/api/oldest',
+                '/api/newest',
+                '/api/oldest?industry=FINANCE',
+                '/api/company/00001452',
+                '/companies/00001452',
+                '/health',
+                '/status'
+            ];
+            
+            for (const endpoint of endpoints) {
+                try {
+                    const url = API_BASE_URL + endpoint;
+                    log('endpointsResult', `Testing: ${endpoint}`, 'loading');
+                    
+                    const response = await fetch(url);
+                    const text = await response.text();
+                    
+                    if (response.ok) {
+                        try {
+                            const json = JSON.parse(text);
+                            log('endpointsResult', `✅ ${endpoint}: Status ${response.status} (JSON)`, 'success');
+                            if (Array.isArray(json)) {
+                                log('endpointsResult', `   Array with ${json.length} items`, 'success');
+                                if (json.length > 0) {
+                                    log('endpointsResult', `   First item keys: ${Object.keys(json[0]).join(', ')}`, 'success');
+                                }
+                            } else {
+                                log('endpointsResult', `   Response: ${JSON.stringify(json).substring(0, 100)}...`, 'success');
+                            }
+                        } catch (e) {
+                            log('endpointsResult', `✅ ${endpoint}: Status ${response.status} (Non-JSON)`, 'success');
+                            log('endpointsResult', `   Response: ${text.substring(0, 100)}...`, 'success');
+                        }
+                    } else {
+                        log('endpointsResult', `❌ ${endpoint}: Status ${response.status}`, 'error');
+                        log('endpointsResult', `   Response: ${text.substring(0, 100)}...`, 'error');
+                    }
+                } catch (error) {
+                    log('endpointsResult', `❌ ${endpoint}: Error - ${error.message}`, 'error');
+                }
+                
+                // Small delay between requests
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+        }
+        
+        async function testCompanyData() {
+            clearLog('companyDataResult');
+            log('companyDataResult', 'Testing company data with address fields...', 'loading');
+            
+            const endpoints = ['/api/oldest', '/api/newest'];
+            
+            for (const endpoint of endpoints) {
+                try {
+                    const url = API_BASE_URL + endpoint;
+                    log('companyDataResult', `Testing ${endpoint} for address data...`, 'loading');
+                    
+                    const response = await fetch(url);
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        
+                        if (Array.isArray(data) && data.length > 0) {
+                            const company = data[0];
+                            log('companyDataResult', `✅ ${endpoint}: Got ${data.length} companies`, 'success');
+                            log('companyDataResult', `Company: ${company.CompanyName || company.name}`, 'success');
+                            log('companyDataResult', `Company Number: ${company.CompanyNumber || company.number}`, 'success');
+                            
+                            // Check for address fields
+                            const addressFields = [
+                                'RegAddress_AddressLine1',
+                                'RegAddress_AddressLine2', 
+                                'RegAddress_PostTown',
+                                'RegAddress_County',
+                                'RegAddress_PostCode',
+                                'RegAddress_Country'
+                            ];
+                            
+                            log('companyDataResult', '📍 Address fields:', 'success');
+                            addressFields.forEach(field => {
+                                const value = company[field];
+                                if (value) {
+                                    log('companyDataResult', `   ${field}: ${value}`, 'success');
+                                } else {
+                                    log('companyDataResult', `   ${field}: (empty)`, 'error');
+                                }
+                            });
+                            
+                            // Show complete address
+                            const fullAddress = [
+                                company.RegAddress_AddressLine1,
+                                company.RegAddress_AddressLine2,
+                                company.RegAddress_PostTown,
+                                company.RegAddress_County,
+                                company.RegAddress_PostCode,
+                                company.RegAddress_Country
+                            ].filter(Boolean).join(', ');
+                            
+                            if (fullAddress) {
+                                log('companyDataResult', `🏠 Full Address: ${fullAddress}`, 'success');
+                            } else {
+                                log('companyDataResult', '❌ No address data found', 'error');
+                            }
+                            
+                        } else {
+                            log('companyDataResult', `❌ ${endpoint}: No data or empty array`, 'error');
+                        }
+                    } else {
+                        const errorText = await response.text();
+                        log('companyDataResult', `❌ ${endpoint}: HTTP ${response.status}`, 'error');
+                        log('companyDataResult', `   Error: ${errorText}`, 'error');
+                    }
+                } catch (error) {
+                    log('companyDataResult', `❌ ${endpoint}: ${error.message}`, 'error');
+                }
+            }
+        }
+    </script>
+</body>
+</html>

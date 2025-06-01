@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Address Display</title>
+</head>
+<body>
+    <h1>Testing Address Display in Modal</h1>
+    <p>Open the console to see the test results</p>
+    
+    <script>
+        // Simulate the company data structure
+        const testCompany = {
+            name: 'TEST COMPANY LIMITED',
+            number: '12345678',
+            year: '2024',
+            location: 'London, Greater London',
+            status: 'Active',
+            industry: 'TECHNOLOGY',
+            totalCharges: 0,
+            outstandingCharges: 0,
+            satisfiedCharges: 0,
+            incorporationDate: '2024-01-01',
+            companyType: 'Private Limited Company',
+            sicCodes: [],
+            address: {
+                line1: '123 Example Street',
+                postTown: 'London',
+                county: 'Greater London',
+                postCode: 'XX1 1XX',
+                country: 'United Kingdom'
+            }
+        };
+        
+        console.log('Test Company Data:', testCompany);
+        console.log('Address Property:', testCompany.address);
+        
+        // Test the formatAddress function
+        function formatAddress(address) {
+            if (!address) return 'Address not available';
+            
+            const parts = [];
+            if (address.careOf || address.care_of) parts.push(`c/o ${address.careOf || address.care_of}`);
+            if (address.poBox || address.po_box) parts.push(`PO Box ${address.poBox || address.po_box}`);
+            if (address.line1 || address.address_line_1) parts.push(address.line1 || address.address_line_1);
+            if (address.line2 || address.address_line_2) parts.push(address.line2 || address.address_line_2);
+            if (address.postTown || address.locality) parts.push(address.postTown || address.locality);
+            if (address.county || address.region) parts.push(address.county || address.region);
+            if (address.country) parts.push(address.country);
+            if (address.postCode || address.postal_code) parts.push(address.postCode || address.postal_code);
+            
+            return parts.filter(part => part && part !== 'null').join(', ');
+        }
+        
+        const formattedAddress = formatAddress(testCompany.address);
+        console.log('Formatted Address:', formattedAddress);
+        
+        // Expected output: "123 Example Street, London, Greater London, United Kingdom, XX1 1XX"
+        
+        // Test with undefined address
+        const companyNoAddress = { ...testCompany, address: undefined };
+        console.log('Company with no address:', formatAddress(companyNoAddress.address));
+        
+        // Test with empty address
+        const companyEmptyAddress = { ...testCompany, address: {} };
+        console.log('Company with empty address:', formatAddress(companyEmptyAddress.address));
+    </script>
+</body>
+</html>
