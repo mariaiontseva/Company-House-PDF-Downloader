@@ -3792,10 +3792,16 @@
                 // Clear the search state and reload the appropriate companies
                 if (typeof currentView !== 'undefined') {
                     if (currentView === 'oldest') {
-                        if (typeof oldestCompanies !== 'undefined') oldestCompanies = [];
+                        if (typeof oldestCompanies !== 'undefined') {
+                            oldestCompanies = [];
+                            window.oldestCompanies = [];
+                        }
                         if (typeof showOldest === 'function') showOldest();
                     } else {
-                        if (typeof newestCompanies !== 'undefined') newestCompanies = [];
+                        if (typeof newestCompanies !== 'undefined') {
+                            newestCompanies = [];
+                            window.newestCompanies = [];
+                        }
                         if (typeof showNewest === 'function') showNewest();
                     }
                 } else {
@@ -5587,10 +5593,16 @@
                         // Assign to the correct array based on current view
                         if (currentView === 'oldest') {
                             oldestCompanies = companies;
-                            console.log('Updated oldestCompanies:', oldestCompanies);
+                            window.oldestCompanies = companies;
+                            console.log('🔸 Updated oldestCompanies:', companies.length, 'companies');
+                            console.log('🔸 RC companies in oldest:', companies.filter(c => c.number?.startsWith('RC')).map(c => c.number));
+                            console.log('🔸 window.oldestCompanies now has:', window.oldestCompanies?.length || 0, 'companies');
                         } else {
                             newestCompanies = companies;
-                            console.log('Updated newestCompanies:', newestCompanies);
+                            window.newestCompanies = companies;
+                            console.log('🔸 Updated newestCompanies:', companies.length, 'companies');
+                            console.log('🔸 RC companies in newest:', companies.filter(c => c.number?.startsWith('RC')).map(c => c.number));
+                            console.log('🔸 window.newestCompanies now has:', window.newestCompanies?.length || 0, 'companies');
                         }
                         
                         if (document.getElementById('exploreTab').classList.contains('active')) {
@@ -5601,8 +5613,10 @@
                         // Initialize with empty array if no data
                         if (currentView === 'oldest') {
                             oldestCompanies = [];
+                            window.oldestCompanies = [];
                         } else {
                             newestCompanies = [];
+                            window.newestCompanies = [];
                         }
                         renderCompanies();
                     }
@@ -6025,6 +6039,13 @@
         
         // Initial render on page load
         document.addEventListener('DOMContentLoaded', function() {
+            // Load initial data if arrays are empty OR if visiting a company URL directly
+            const isCompanyURL = window.location.hash.startsWith('#company/');
+            if (oldestCompanies.length === 0 || (isCompanyURL && window.oldestCompanies?.length === 0)) {
+                console.log('🔸 Loading initial Railway data... (company URL detected:', isCompanyURL, ')');
+                loadRealCompanies();
+            }
+            
             // Check if explore tab is initially active and render companies with current filter
             if (document.getElementById('exploreTab') && document.getElementById('exploreTab').classList.contains('active')) {
                 console.log('Explore tab is active on load, rendering with filter...');
@@ -6034,7 +6055,18 @@
             updateLoadMoreButton();
             
             // Handle company hash routing on page load
-            setTimeout(handleCompanyHash, 2000); // Wait for companies to load
+            setTimeout(handleCompanyHash, 500); // Wait for companies to load
+            
+            // Also call immediately in case the company data is already available
+            handleCompanyHash();
+            
+            // Additional hash check on window load
+            window.addEventListener('load', function() {
+                console.log('🔸 Window load event, checking hash again:', window.location.hash);
+                if (window.location.hash.startsWith('#company/')) {
+                    handleCompanyHash();
+                }
+            });
         });
         
         // Also update button when auth state changes
@@ -6138,6 +6170,7 @@
         // Handle hash-based company routing
         async function handleCompanyHash() {
             const hash = window.location.hash;
+            console.log('🔸 handleCompanyHash called, hash:', hash);
             if (hash.startsWith('#company/')) {
                 const companyNumber = hash.replace('#company/', '');
                 if (companyNumber) {
@@ -6150,38 +6183,31 @@
                     if (foundCompany) {
                         console.log('🔸 Found company in loaded data:', foundCompany);
                         await showCompanyModal(foundCompany);
+                        
+                        // Always fetch fresh data from Companies House API to get accurate stats
+                        console.log('🔸 Fetching fresh Companies House data for accurate stats...');
+                        console.log('🔸 Railway company data being passed:', foundCompany);
+                        setTimeout(() => {
+                            fetchCompanyDetails(companyNumber, foundCompany);
+                        }, 100);
                     } else {
-                        console.log('🔸 Company not in loaded data, fetching from Railway...');
-                        // Try to fetch from Railway
-                        try {
-                            const response = await fetch(`${API_BASE_URL}/api/company/${companyNumber}`);
-                            if (response.ok) {
-                                const companyData = await response.json();
-                                if (companyData) {
-                                    // Transform Railway data to match expected format
-                                    const transformedCompany = {
-                                        name: companyData.CompanyName,
-                                        number: companyData.CompanyNumber,
-                                        status: companyData.CompanyStatus,
-                                        incorporationDate: companyData.IncorporationDate,
-                                        companyType: companyData.CompanyCategory,
-                                        address: {
-                                            line1: companyData.RegAddress_AddressLine1,
-                                            line2: companyData.RegAddress_AddressLine2,
-                                            postTown: companyData.RegAddress_PostTown,
-                                            county: companyData.RegAddress_County,
-                                            postCode: companyData.RegAddress_PostCode,
-                                            country: companyData.RegAddress_Country
-                                        },
-                                        railwayAccountsNextDue: companyData.Accounts_NextDueDate,
-                                        railwayConfStmtNextDue: companyData.ConfStmtNextDueDate
-                                    };
-                                    await showCompanyModal(transformedCompany);
-                                }
-                            }
-                        } catch (error) {
-                            console.error('🔸 Error fetching company from Railway:', error);
-                        }
+                        console.log('🔸 Company not in loaded data, creating fallback and loading from Companies House API...');
+                        
+                        // Skip Railway API (doesn't support individual company lookup)
+                        // Create minimal company object and show modal immediately
+                        console.log('🔸 Creating minimal company object for immediate display');
+                        const fallbackCompany = {
+                            name: `Loading Company ${companyNumber}...`,
+                            number: companyNumber,
+                            company_number: companyNumber,
+                            status: 'Loading...',
+                            company_status: 'Loading...',
+                            companyType: 'Loading...',
+                            company_type: 'Loading...',
+                            incorporationDate: 'Loading...',
+                            date_of_creation: 'Loading...'
+                        };
+                        await showCompanyModal(fallbackCompany);
                     }
                 }
             }
@@ -6479,7 +6505,10 @@
         
         // Fetch detailed company information from API
         async function fetchCompanyDetails(companyNumber, railwayCompanyData = null) {
-            if (!companyNumber) return;
+            if (!companyNumber) {
+                console.log('🔸 fetchCompanyDetails: No company number provided');
+                return;
+            }
             
             try {
                 console.log('🔸 Fetching detailed data for company:', companyNumber);
@@ -6487,9 +6516,15 @@
                 // Fetch company profile using the worker proxy
                 const API_KEY = '22aefa40-ee9e-47c0-b40a-2dd3c03165c6';
                 const response = await fetchWithWorker(`https://api.companieshouse.gov.uk/company/${companyNumber}`, API_KEY);
+                console.log('🔸 Companies House API response status:', response.status);
                 
                 if (response.ok) {
                     const companyData = await response.json();
+                    console.log('🔸 Companies House API data received:', companyData);
+                    
+                    // Update the modal header with real company data
+                    updateModalHeader(companyData);
+                    
                     populateOverviewTab(companyData);
                     
                     // Update accounts status from API data
@@ -6571,16 +6606,53 @@
                     };
                     updateRiskInsightsTab(fullCompanyData);
                 } else {
-                    console.log('🔸 Main company API failed, but still fetching officers, charges, and filings');
-                    
-                    // Even if main company API fails, still try to fetch officers, charges, filings
-                    // These might work for some companies
-                    fetchOfficers(companyNumber, railwayCompanyData ? railwayCompanyData.incorporationDate : null);
-                    fetchCharges(companyNumber);
-                    fetchFilingHistory(companyNumber, railwayCompanyData ? railwayCompanyData.incorporationDate : null);
+                    console.log('🔸 Main company API failed, using Railway data and calculating stats');
                     
                     // Use Railway company data for basic info if provided
                     if (railwayCompanyData) {
+                        console.log('🔸 Updating modal with Railway data:', railwayCompanyData);
+                        
+                        // Calculate age from Railway incorporation date
+                        if (railwayCompanyData.incorporationDate) {
+                            const ageBox = document.querySelector('#companyModal .stat-box:nth-child(1)');
+                            if (ageBox) {
+                                const ageValue = ageBox.querySelector('.stat-value');
+                                const ageDetail = ageBox.querySelector('.stat-detail');
+                                
+                                const incorporationDate = new Date(railwayCompanyData.incorporationDate);
+                                const currentDate = new Date();
+                                const ageInYears = Math.floor((currentDate - incorporationDate) / (365.25 * 24 * 60 * 60 * 1000));
+                                
+                                if (ageValue) ageValue.textContent = ageInYears;
+                                if (ageDetail) {
+                                    ageDetail.textContent = `Inc ${incorporationDate.toLocaleDateString('en-GB', { 
+                                        day: 'numeric', 
+                                        month: 'short', 
+                                        year: 'numeric' 
+                                    })}`;
+                                }
+                                
+                                console.log('🔸 Updated Railway company age to:', ageInYears, 'years');
+                            }
+                        }
+                        
+                        // Update status badge with Railway data
+                        const statusBadge = document.querySelector('#companyModal .active-badge');
+                        if (statusBadge && railwayCompanyData.status) {
+                            const status = railwayCompanyData.status.toLowerCase();
+                            if (status === 'active') {
+                                statusBadge.textContent = '● Active';
+                                statusBadge.className = 'badge active-badge';
+                            } else if (status === 'dissolved') {
+                                statusBadge.textContent = '✕ Dissolved';
+                                statusBadge.className = 'badge';
+                                statusBadge.style.background = 'rgba(239, 68, 68, 0.1)';
+                                statusBadge.style.borderColor = 'rgba(239, 68, 68, 0.3)';
+                                statusBadge.style.color = '#ef4444';
+                            }
+                            console.log('🔸 Updated Railway company status to:', railwayCompanyData.status);
+                        }
+                        
                         populateWithMockData(railwayCompanyData);
                     } else {
                         // Try to get from button as fallback
@@ -6592,9 +6664,60 @@
                             populateWithMockData({ number: companyNumber });
                         }
                     }
+                    
+                    // Still try to fetch officers, charges, filings - these might work for some companies
+                    fetchOfficers(companyNumber, railwayCompanyData ? railwayCompanyData.incorporationDate : null);
+                    fetchCharges(companyNumber);
+                    fetchFilingHistory(companyNumber, railwayCompanyData ? railwayCompanyData.incorporationDate : null);
                 }
             } catch (error) {
-                console.log('🔸 Error fetching company data, but still trying other APIs:', error);
+                console.log('🔸 Error fetching company data, using Railway data and calculating stats:', error);
+                
+                // Use Railway company data for basic info if provided
+                if (railwayCompanyData) {
+                    console.log('🔸 Updating modal with Railway data after error:', railwayCompanyData);
+                    
+                    // Calculate age from Railway incorporation date
+                    if (railwayCompanyData.incorporationDate) {
+                        const ageBox = document.querySelector('#companyModal .stat-box:nth-child(1)');
+                        if (ageBox) {
+                            const ageValue = ageBox.querySelector('.stat-value');
+                            const ageDetail = ageBox.querySelector('.stat-detail');
+                            
+                            const incorporationDate = new Date(railwayCompanyData.incorporationDate);
+                            const currentDate = new Date();
+                            const ageInYears = Math.floor((currentDate - incorporationDate) / (365.25 * 24 * 60 * 60 * 1000));
+                            
+                            if (ageValue) ageValue.textContent = ageInYears;
+                            if (ageDetail) {
+                                ageDetail.textContent = `Inc ${incorporationDate.toLocaleDateString('en-GB', { 
+                                    day: 'numeric', 
+                                    month: 'short', 
+                                    year: 'numeric' 
+                                })}`;
+                            }
+                            
+                            console.log('🔸 Updated Railway company age to:', ageInYears, 'years (after error)');
+                        }
+                    }
+                    
+                    // Update status badge with Railway data
+                    const statusBadge = document.querySelector('#companyModal .active-badge');
+                    if (statusBadge && railwayCompanyData.status) {
+                        const status = railwayCompanyData.status.toLowerCase();
+                        if (status === 'active') {
+                            statusBadge.textContent = '● Active';
+                            statusBadge.className = 'badge active-badge';
+                        } else if (status === 'dissolved') {
+                            statusBadge.textContent = '✕ Dissolved';
+                            statusBadge.className = 'badge';
+                            statusBadge.style.background = 'rgba(239, 68, 68, 0.1)';
+                            statusBadge.style.borderColor = 'rgba(239, 68, 68, 0.3)';
+                            statusBadge.style.color = '#ef4444';
+                        }
+                        console.log('🔸 Updated Railway company status to:', railwayCompanyData.status, '(after error)');
+                    }
+                }
                 
                 // Even with error, still try to fetch officers, charges, filings
                 fetchOfficers(companyNumber, railwayCompanyData ? railwayCompanyData.incorporationDate : null);
@@ -6617,10 +6740,208 @@
             }
         }
         
+        // Update modal header with real company data
+        function updateModalHeader(companyData) {
+            console.log('🔸 updateModalHeader called with:', companyData.company_name);
+            
+            // Update company name in header
+            const titleElement = document.querySelector('#companyModal .company-title');
+            if (titleElement && companyData.company_name) {
+                titleElement.textContent = companyData.company_name;
+                console.log('🔸 Updated modal title to:', companyData.company_name);
+            }
+            
+            // Update company number badge
+            const numberBadge = document.querySelector('#companyModal .company-number');
+            if (numberBadge && companyData.company_number) {
+                numberBadge.textContent = companyData.company_number;
+            }
+            
+            // Update company type badge
+            const typeBadge = document.querySelector('#companyModal .company-type');
+            if (typeBadge && companyData.type) {
+                if (companyData.type.toLowerCase().includes('public limited')) {
+                    typeBadge.textContent = 'plc';
+                } else if (companyData.type.toLowerCase().includes('limited liability partnership')) {
+                    typeBadge.textContent = 'llp';
+                } else if (companyData.type.toLowerCase().includes('limited partnership')) {
+                    typeBadge.textContent = 'lp';
+                } else if (companyData.type.toLowerCase().includes('limited') || companyData.type === 'ltd') {
+                    typeBadge.textContent = 'ltd';
+                } else {
+                    typeBadge.textContent = companyData.type.toLowerCase().substring(0, 10);
+                }
+            }
+            
+            // Update status badge from Companies House API data
+            const statusBadge = document.querySelector('#companyModal .active-badge');
+            if (statusBadge) {
+                if (companyData.company_status) {
+                    const status = companyData.company_status.toLowerCase();
+                    if (status === 'active') {
+                        statusBadge.textContent = '● Active';
+                        statusBadge.className = 'badge active-badge';
+                    } else if (status === 'dissolved') {
+                        statusBadge.textContent = '✕ Dissolved';
+                        statusBadge.className = 'badge';
+                        statusBadge.style.background = 'rgba(239, 68, 68, 0.1)';
+                        statusBadge.style.borderColor = 'rgba(239, 68, 68, 0.3)';
+                        statusBadge.style.color = '#ef4444';
+                    }
+                    console.log('🔸 Updated company status to:', companyData.company_status, '(from CH API)');
+                } else if (companyData.type === 'royal-charter') {
+                    // Royal Charter companies are presumed active if they appear in CH API
+                    statusBadge.textContent = '● Active';
+                    statusBadge.className = 'badge active-badge';
+                    console.log('🔸 Updated Royal Charter company status to: Active (presumed)');
+                }
+            }
+            
+            // Calculate and update company age from Companies House API data
+            const ageBox = document.querySelector('#companyModal .stat-box:nth-child(1)');
+            if (ageBox) {
+                const ageValue = ageBox.querySelector('.stat-value');
+                const ageDetail = ageBox.querySelector('.stat-detail');
+                
+                if (companyData.date_of_creation) {
+                    const incorporationDate = new Date(companyData.date_of_creation);
+                    const currentDate = new Date();
+                    const ageInYears = Math.floor((currentDate - incorporationDate) / (365.25 * 24 * 60 * 60 * 1000));
+                    
+                    if (ageValue) ageValue.textContent = ageInYears;
+                    if (ageDetail) {
+                        ageDetail.textContent = `Inc ${incorporationDate.toLocaleDateString('en-GB', { 
+                            day: 'numeric', 
+                            month: 'short', 
+                            year: 'numeric' 
+                        })}`;
+                    }
+                    
+                    console.log('🔸 Updated company age to:', ageInYears, 'years (from CH API)');
+                } else if (companyData.type === 'royal-charter' && companyData.company_number.startsWith('RC')) {
+                    // For Royal Charter companies, try to get incorporation date from Railway data
+                    console.log('🔸 Looking for Railway data for RC company:', companyData.company_number);
+                    
+                    const allCompanies = [...(window.oldestCompanies || []), ...(window.newestCompanies || [])];
+                    console.log('🔸 Initial check - Total companies available:', allCompanies.length);
+                    console.log('🔸 window.oldestCompanies length:', window.oldestCompanies?.length || 0);
+                    console.log('🔸 window.newestCompanies length:', window.newestCompanies?.length || 0);
+                    console.log('🔸 Available RC companies:', allCompanies.filter(c => c.number?.startsWith('RC')).map(c => c.number));
+                    const railwayCompany = allCompanies.find(c => c.number === companyData.company_number);
+                    console.log('🔸 Initial lookup result:', railwayCompany ? 'FOUND' : 'NOT FOUND');
+                    
+                    if (railwayCompany && railwayCompany.incorporationDate) {
+                        const incorporationDate = new Date(railwayCompany.incorporationDate);
+                        const currentDate = new Date();
+                        const ageInYears = Math.floor((currentDate - incorporationDate) / (365.25 * 24 * 60 * 60 * 1000));
+                        
+                        if (ageValue) ageValue.textContent = ageInYears;
+                        if (ageDetail) {
+                            ageDetail.textContent = `Inc ${incorporationDate.toLocaleDateString('en-GB', { 
+                                day: 'numeric', 
+                                month: 'short', 
+                                year: 'numeric' 
+                            })}`;
+                        }
+                        
+                        console.log('🔸 Updated Royal Charter company age to:', ageInYears, 'years (from Railway data)');
+                        
+                        // Also update the Analysis Summary with correct Railway data
+                        updateRiskInsightsTab(companyData);
+                        console.log('🔸 Updated Analysis Summary with Railway data');
+                    } else {
+                        // Railway data not loaded yet, set up a retry mechanism
+                        if (ageValue) ageValue.textContent = '...';
+                        if (ageDetail) ageDetail.textContent = 'Loading age...';
+                        
+                        console.log('🔸 Railway data not loaded yet, setting up retry for:', companyData.company_number);
+                        
+                        // Retry every 500ms up to 10 times (5 seconds total)
+                        let retryCount = 0;
+                        const maxRetries = 10;
+                        
+                        const retryInterval = setInterval(() => {
+                            retryCount++;
+                            console.log(`🔸 Retry ${retryCount}/${maxRetries} for Railway data...`);
+                            
+                            const allCompaniesRetry = [...(window.oldestCompanies || []), ...(window.newestCompanies || [])];
+                            console.log(`🔸 Total companies in window arrays:`, allCompaniesRetry.length);
+                            console.log(`🔸 window.oldestCompanies length:`, window.oldestCompanies?.length || 0);
+                            console.log(`🔸 window.newestCompanies length:`, window.newestCompanies?.length || 0);
+                            console.log(`🔸 Available RC companies:`, allCompaniesRetry.filter(c => c.number?.startsWith('RC')).map(c => c.number));
+                            console.log(`🔸 Looking for:`, companyData.company_number);
+                            const railwayCompanyRetry = allCompaniesRetry.find(c => c.number === companyData.company_number);
+                            console.log(`🔸 Found:`, railwayCompanyRetry ? 'YES' : 'NO');
+                            if (railwayCompanyRetry) {
+                                console.log(`🔸 Found company data:`, railwayCompanyRetry);
+                            }
+                            
+                            if (railwayCompanyRetry && railwayCompanyRetry.incorporationDate) {
+                                clearInterval(retryInterval);
+                                
+                                const incorporationDate = new Date(railwayCompanyRetry.incorporationDate);
+                                const currentDate = new Date();
+                                const ageInYears = Math.floor((currentDate - incorporationDate) / (365.25 * 24 * 60 * 60 * 1000));
+                                
+                                if (ageValue) ageValue.textContent = ageInYears;
+                                if (ageDetail) {
+                                    ageDetail.textContent = `Inc ${incorporationDate.toLocaleDateString('en-GB', { 
+                                        day: 'numeric', 
+                                        month: 'short', 
+                                        year: 'numeric' 
+                                    })}`;
+                                }
+                                
+                                console.log('🔸 Updated Royal Charter company age to:', ageInYears, 'years (from Railway data - retry)');
+                                
+                                // Also update the Analysis Summary with correct Railway data
+                                updateRiskInsightsTab(companyData);
+                                console.log('🔸 Updated Analysis Summary with Railway data');
+                            } else if (retryCount >= maxRetries) {
+                                clearInterval(retryInterval);
+                                // Final fallback after all retries
+                                if (ageValue) ageValue.textContent = '?';
+                                if (ageDetail) ageDetail.textContent = 'Age unknown';
+                                console.log('🔸 Failed to get Railway data after retries');
+                            }
+                        }, 500);
+                    }
+                } else {
+                    // Unknown incorporation date
+                    if (ageValue) ageValue.textContent = '?';
+                    if (ageDetail) ageDetail.textContent = 'Inc date unknown';
+                    console.log('🔸 Company age unknown - no incorporation date');
+                }
+            }
+            
+            // Update charges count (will be updated later when charges API returns)
+            const chargesBox = document.querySelector('#companyModal .stat-box:nth-child(4)');
+            if (chargesBox) {
+                const chargesValue = chargesBox.querySelector('.stat-value');
+                const chargesDetail = chargesBox.querySelector('.stat-detail');
+                
+                // Set initial values based on has_charges flag
+                if (companyData.has_charges === false) {
+                    if (chargesValue) chargesValue.textContent = '0';
+                    if (chargesDetail) chargesDetail.textContent = '0 outstanding';
+                    console.log('🔸 Company has no charges');
+                } else {
+                    // Will be updated when charges API call completes
+                    if (chargesValue) chargesValue.textContent = '...';
+                    if (chargesDetail) chargesDetail.textContent = 'Loading...';
+                    console.log('🔸 Company may have charges, waiting for charges API');
+                }
+            }
+        }
+        
         // Populate Overview tab with real data
         function populateOverviewTab(companyData) {
+            console.log('🔸 populateOverviewTab called with:', companyData);
             const overviewTab = document.querySelector('#companyModal #overview');
-            if (!overviewTab) return;
+            if (!overviewTab) {
+                console.log('🔸 Overview tab not found!');
+                return;
+            }
             
             overviewTab.innerHTML = `
                 <h3>Company Overview</h3>
@@ -6795,9 +7116,11 @@
             try {
                 const API_KEY = '22aefa40-ee9e-47c0-b40a-2dd3c03165c6';
                 const response = await fetchWithWorker(`https://api.companieshouse.gov.uk/company/${companyNumber}/charges`, API_KEY);
+                console.log('🔸 Charges API response status:', response.status);
                 
                 if (response.ok) {
                     const data = await response.json();
+                    console.log('🔸 Charges API data received:', data);
                     const charges = data.items ? data.items.map(charge => ({
                         description: charge.classification?.description || 'Charge',
                         created: charge.created_on || charge.delivered_on,
@@ -6841,6 +7164,20 @@
         function populateChargesTab(charges) {
             const chargesTab = document.querySelector('#companyModal #charges');
             if (!chargesTab) return;
+            
+            // Update charges count in stat box (4th box)
+            const chargesBox = document.querySelector('#companyModal .stat-box:nth-child(4)');
+            if (chargesBox) {
+                const chargesValue = chargesBox.querySelector('.stat-value');
+                const chargesDetail = chargesBox.querySelector('.stat-detail');
+                const outstandingCount = charges.filter(c => c.status === 'outstanding').length;
+                const totalCharges = charges.length;
+                
+                if (chargesValue) chargesValue.textContent = totalCharges.toString();
+                if (chargesDetail) chargesDetail.textContent = `${outstandingCount} outstanding`;
+                
+                console.log(`🔸 Updated charges count: ${totalCharges} total (${outstandingCount} outstanding)`);
+            }
             
             if (charges.length === 0) {
                 chargesTab.innerHTML = `
@@ -7256,9 +7593,27 @@
             const insightsTab = document.querySelector('#companyModal #insights');
             if (!insightsTab) return;
             
-            const companyAge = companyData.incorporationDate 
-                ? Math.floor((new Date() - new Date(companyData.incorporationDate)) / (365.25 * 24 * 60 * 60 * 1000))
-                : 0;
+            // Calculate company age - check Railway data for Royal Charter companies first
+            let companyAge = 0;
+            if (companyData.company_number?.startsWith('RC')) {
+                // For Royal Charter companies, try Railway data first
+                const allCompanies = [...(window.oldestCompanies || []), ...(window.newestCompanies || [])];
+                const railwayCompany = allCompanies.find(c => c.number === companyData.company_number);
+                if (railwayCompany && railwayCompany.incorporationDate) {
+                    companyAge = Math.floor((new Date() - new Date(railwayCompany.incorporationDate)) / (365.25 * 24 * 60 * 60 * 1000));
+                    console.log('🔸 Analysis Summary using Railway age:', companyAge, 'years for', companyData.company_number);
+                } else if (companyData.incorporationDate) {
+                    companyAge = Math.floor((new Date() - new Date(companyData.incorporationDate)) / (365.25 * 24 * 60 * 60 * 1000));
+                    console.log('🔸 Analysis Summary using API age:', companyAge, 'years for', companyData.company_number);
+                } else {
+                    console.log('🔸 Analysis Summary: No incorporation date available for', companyData.company_number);
+                }
+            } else {
+                // For regular companies, use API data
+                companyAge = companyData.incorporationDate 
+                    ? Math.floor((new Date() - new Date(companyData.incorporationDate)) / (365.25 * 24 * 60 * 60 * 1000))
+                    : 0;
+            }
             
             // Build risk factors
             const riskFactors = [];
@@ -7327,7 +7682,7 @@
                     <div class="data-item-header">Analysis Summary</div>
                     <div class="data-item-detail">
                         • Company age: ${companyAge} years<br>
-                        • Status: ${companyData.status || 'Unknown'}<br>
+                        • Status: ${companyData.company_number?.startsWith('RC') ? 'Active (presumed)' : (companyData.status || companyData.company_status || 'Unknown')}<br>
                         • Total charges: ${companyData.totalCharges || 0}<br>
                         • Outstanding charges: ${companyData.outstandingCharges || 0}<br>
                         • Industry: ${companyData.industry || 'Not specified'}
@@ -7714,8 +8069,10 @@
                         // Replace the current companies array with search results
                         if (currentView === 'oldest') {
                             oldestCompanies = sortedCompanies;
+                            window.oldestCompanies = sortedCompanies;
                         } else {
                             newestCompanies = sortedCompanies;
+                            window.newestCompanies = sortedCompanies;
                         }
                         
                         // Render using the same renderCompanies function
@@ -7950,6 +8307,7 @@
             </div>
         </div>
     </div>
+
 
 </body>
 </html>
