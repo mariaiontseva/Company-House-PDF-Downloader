@@ -98,6 +98,39 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="dns-prefetch" href="https://blue-flower-d40f.mahin84.workers.dev">
     <link rel="dns-prefetch" href="https://checkout.stripe.com">
+    <link rel="dns-prefetch" href="https://companies-api-production-68c2.up.railway.app">
+    
+    <!-- Additional SEO Meta Tags -->
+    <meta name="geo.region" content="GB-ENG">
+    <meta name="geo.position" content="51.5074;-0.1278">
+    <meta name="ICBM" content="51.5074, -0.1278">
+    <meta name="geo.placename" content="London, UK">
+    <meta name="distribution" content="global">
+    <meta name="rating" content="general">
+    <meta name="revisit-after" content="7 days">
+    
+    <!-- Structured Data for Organization -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "DocSpace",
+      "description": "Download all Companies House documents for any UK company instantly",
+      "url": "https://docspace.uk",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Web Browser",
+      "offers": {
+        "@type": "Offer",
+        "price": "5",
+        "priceCurrency": "GBP",
+        "description": "Complete company document download"
+      },
+      "provider": {
+        "@type": "Organization",
+        "name": "DocSpace UK"
+      }
+    }
+    </script>
     
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -6744,6 +6777,9 @@
         function updateModalHeader(companyData) {
             console.log('🔸 updateModalHeader called with:', companyData.company_name);
             
+            // Update SEO meta tags for this company
+            updateCompanySEO(companyData);
+            
             // Update company name in header
             const titleElement = document.querySelector('#companyModal .company-title');
             if (titleElement && companyData.company_name) {
@@ -8115,6 +8151,183 @@
                 });
             }
         }
+        
+        // SEO Integration - Dynamic Meta Tags and URL Management
+        function initializeSEO() {
+            // Check for URL parameters for SEO routing
+            const urlParams = new URLSearchParams(window.location.search);
+            const company = urlParams.get('company');
+            const category = urlParams.get('category');
+            
+            if (company) {
+                // Handle company URL routing
+                console.log('🔍 SEO: Loading company from URL parameter:', company);
+                setTimeout(() => {
+                    window.location.hash = `#company/${company}`;
+                }, 200);
+            } else if (category) {
+                // Handle category pages
+                updateCategoryMetaTags(category);
+            }
+        }
+        
+        // Update meta tags for category pages
+        function updateCategoryMetaTags(category) {
+            const categoryMeta = {
+                'oldest': {
+                    title: 'Oldest UK Companies - Royal Charter Companies Since 1327 | DocSpace',
+                    description: 'Explore the oldest companies in the UK, including Royal Charter companies from 1327. Download complete historical documents and filings for £5.',
+                    keywords: 'oldest UK companies, Royal Charter companies, historical companies, ancient corporations, medieval businesses'
+                },
+                'newest': {
+                    title: 'Newest UK Companies - Recently Incorporated Businesses | DocSpace',
+                    description: 'Browse the newest companies incorporated in the UK. Access complete documentation for recently registered businesses for £5.',
+                    keywords: 'newest UK companies, new businesses, recent incorporations, startup companies, new UK registrations'
+                },
+                'royal-charter': {
+                    title: 'Royal Charter Companies - Ancient UK Corporations Since 1327 | DocSpace',
+                    description: 'Complete list of Royal Charter companies in the UK. Download documents for these historic corporations, some dating back to 1327.',
+                    keywords: 'Royal Charter companies, ancient corporations, historic companies, medieval businesses, oldest UK companies'
+                },
+                'plc': {
+                    title: 'Public Limited Companies (PLC) - Download Company Documents | DocSpace',
+                    description: 'Browse all UK Public Limited Companies (PLCs). Download complete documentation including accounts, returns, and filings for £5.',
+                    keywords: 'PLC companies, public limited companies, UK corporations, listed companies, public companies'
+                }
+            };
+            
+            const meta = categoryMeta[category];
+            if (meta) {
+                document.title = meta.title;
+                updateMetaTag('description', meta.description);
+                updateMetaTag('keywords', meta.keywords);
+                updateMetaTag('og:title', meta.title);
+                updateMetaTag('og:description', meta.description);
+            }
+        }
+        
+        // Update company meta tags when modal opens
+        function updateCompanySEO(companyData) {
+            if (!companyData) return;
+            
+            const companyName = companyData.company_name || companyData.name || 'Unknown Company';
+            const companyNumber = companyData.company_number || companyData.number || '';
+            const status = companyData.company_status || companyData.status || 'Active';
+            
+            // Calculate age for SEO description
+            let ageText = '';
+            if (companyData.date_of_creation || companyData.incorporationDate) {
+                const incorporationDate = new Date(companyData.date_of_creation || companyData.incorporationDate);
+                const age = Math.floor((new Date() - incorporationDate) / (365.25 * 24 * 60 * 60 * 1000));
+                ageText = age > 0 ? `${age} years in business, ` : '';
+            }
+            
+            const title = `${companyName} (${companyNumber}) - Complete Company Documents | DocSpace`;
+            const description = `Download all ${companyName} documents from Companies House. ${ageText}${status.toLowerCase()} status, complete filing history available for £5.`;
+            const keywords = `${companyName}, company documents, Companies House, ${companyNumber}, UK company filings, ${companyName} directors, ${companyName} accounts`;
+            const url = `https://docspace.uk/company/${companyNumber}`;
+            
+            // Update meta tags
+            document.title = title;
+            updateMetaTag('description', description);
+            updateMetaTag('keywords', keywords);
+            updateMetaTag('og:title', title);
+            updateMetaTag('og:description', description);
+            updateMetaTag('og:url', url);
+            
+            // Update canonical URL
+            updateCanonicalUrl(url);
+            
+            // Update URL without page reload (for SEO)
+            if (window.history && window.history.replaceState) {
+                window.history.replaceState({}, title, `/company/${companyNumber}`);
+            }
+            
+            // Add structured data
+            addCompanyStructuredData(companyData);
+            
+            console.log('🔍 SEO: Updated meta tags for company:', companyName);
+        }
+        
+        // Helper function to update meta tags
+        function updateMetaTag(name, content) {
+            let selector;
+            if (name.startsWith('og:') || name.startsWith('twitter:')) {
+                selector = `meta[property="${name}"]`;
+            } else {
+                selector = `meta[name="${name}"]`;
+            }
+            
+            let meta = document.querySelector(selector);
+            if (!meta) {
+                meta = document.createElement('meta');
+                if (name.startsWith('og:') || name.startsWith('twitter:')) {
+                    meta.setAttribute('property', name);
+                } else {
+                    meta.setAttribute('name', name);
+                }
+                document.head.appendChild(meta);
+            }
+            meta.setAttribute('content', content);
+        }
+        
+        // Update canonical URL
+        function updateCanonicalUrl(url) {
+            let canonical = document.querySelector('link[rel="canonical"]');
+            if (!canonical) {
+                canonical = document.createElement('link');
+                canonical.setAttribute('rel', 'canonical');
+                document.head.appendChild(canonical);
+            }
+            canonical.setAttribute('href', url);
+        }
+        
+        // Add structured data for company
+        function addCompanyStructuredData(companyData) {
+            const existingSchema = document.getElementById('company-schema');
+            if (existingSchema) {
+                existingSchema.remove();
+            }
+            
+            const schema = {
+                "@context": "https://schema.org",
+                "@type": "Organization",
+                "name": companyData.company_name || companyData.name,
+                "identifier": companyData.company_number || companyData.number,
+                "url": `https://docspace.uk/company/${companyData.company_number || companyData.number}`,
+                "address": {
+                    "@type": "PostalAddress",
+                    "addressCountry": "GB"
+                }
+            };
+            
+            // Add incorporation date if available
+            if (companyData.date_of_creation || companyData.incorporationDate) {
+                schema.foundingDate = companyData.date_of_creation || companyData.incorporationDate;
+            }
+            
+            // Add address details if available
+            if (companyData.registered_office_address) {
+                const address = companyData.registered_office_address;
+                schema.address = {
+                    "@type": "PostalAddress",
+                    "streetAddress": [address.address_line_1, address.address_line_2].filter(Boolean).join(', '),
+                    "addressLocality": address.locality,
+                    "addressRegion": address.region,
+                    "postalCode": address.postal_code,
+                    "addressCountry": "GB"
+                };
+            }
+            
+            const script = document.createElement('script');
+            script.type = 'application/ld+json';
+            script.id = 'company-schema';
+            script.textContent = JSON.stringify(schema, null, 2);
+            document.head.appendChild(script);
+        }
+        
+        // Initialize SEO on page load
+        document.addEventListener('DOMContentLoaded', initializeSEO);
         
     </script>
     
