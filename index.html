@@ -2918,12 +2918,6 @@
             backdrop-filter: blur(10px);
         }
         
-        #companyModal .stat-box:hover {
-            background: rgba(30, 41, 59, 0.8);
-            border-color: rgba(51, 65, 85, 0.8);
-            transform: translateY(-4px);
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
-        }
         
         #companyModal .stat-value {
             font-size: 32px;
@@ -3095,12 +3089,6 @@
             backdrop-filter: blur(10px);
         }
         
-        #companyModal .data-item:hover {
-            background: rgba(30, 41, 59, 0.7);
-            border-color: rgba(51, 65, 85, 0.8);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-        }
         
         #companyModal .data-item-header {
             font-size: 16px;
@@ -6554,7 +6542,7 @@
                     const charges = data.items ? data.items.map(charge => ({
                         description: charge.classification?.description || 'Charge',
                         created: charge.created_on || charge.delivered_on,
-                        status: charge.status || 'outstanding',
+                        status: charge.status === 'fully-satisfied' ? 'satisfied' : (charge.status || 'outstanding'),
                         personsEntitled: charge.persons_entitled ? charge.persons_entitled.map(p => p.name).join(', ') : '',
                         amountSecured: charge.particulars?.amount_secured || '',
                         type: charge.classification?.type || charge.charge_code || ''
@@ -6745,10 +6733,14 @@
                 
                 const categoryIcon = getCategoryIcon(filing.category);
                 const dateText = filing.date ? new Date(filing.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Date not available';
+                const typeBadge = getFilingTypeBadge(filing.type, filing.category);
                 
                 return `
                     <div class="data-item">
-                        <div class="data-item-header">${categoryIcon} ${description}</div>
+                        <div class="data-item-header">
+                            ${categoryIcon} ${description}
+                            ${typeBadge}
+                        </div>
                         <div class="data-item-detail">
                             Filed on ${dateText}
                             ${filing.paperFiled ? ' • Paper filing' : ''}
@@ -6779,6 +6771,109 @@
                 'change-of-name': '✏️'
             };
             return icons[category] || '📄';
+        }
+        
+        function getFilingTypeBadge(type, category) {
+            if (!type) return '';
+            
+            // Map common filing types to user-friendly names and colors
+            const typeMap = {
+                // Accounts
+                'AA': { name: 'AA-Annual Accounts', color: '#3b82f6' },
+                'AC': { name: 'AC-Abbreviated Accounts', color: '#3b82f6' },
+                'GR': { name: 'GR-Group Accounts', color: '#3b82f6' },
+                
+                // Confirmation Statements
+                'CS01': { name: 'CS01-Confirmation Statement', color: '#10b981' },
+                
+                // Officers
+                'AP01': { name: 'AP01-Appoint Director', color: '#8b5cf6' },
+                'CH01': { name: 'CH01-Change Director Details', color: '#8b5cf6' },
+                'TM01': { name: 'TM01-Terminate Director', color: '#8b5cf6' },
+                'AP02': { name: 'AP02-Appoint Secretary', color: '#8b5cf6' },
+                'TM02': { name: 'TM02-Terminate Secretary', color: '#8b5cf6' },
+                
+                // Charges/Mortgages
+                'MR01': { name: 'MR01-Register Charge', color: '#f59e0b' },
+                'MR02': { name: 'MR02-Satisfy Charge', color: '#f59e0b' },
+                'MR04': { name: 'MR04-Update Charge', color: '#f59e0b' },
+                'MR05': { name: 'MR05-Release Property', color: '#f59e0b' },
+                'MA': { name: 'MA-Mortgage Amendment', color: '#f59e0b' },
+                
+                // Incorporation
+                'IN01': { name: 'IN01-Incorporation', color: '#ef4444' },
+                
+                // Address Changes
+                'AD01': { name: 'AD01-Address Change', color: '#06b6d4' },
+                
+                // Resolutions
+                'RES01': { name: 'RES01-Special Resolution', color: '#84cc16' },
+                'RES02': { name: 'RES02-Ordinary Resolution', color: '#84cc16' },
+                
+                // Capital
+                'SH01': { name: 'SH01-Allot Shares', color: '#ec4899' },
+                'SH02': { name: 'SH02-Return of Allotment', color: '#ec4899' },
+                
+                // Constitution & Company Changes
+                'CC01': { name: 'CC01-Change Articles', color: '#8b5cf6' },
+                'CC02': { name: 'CC02-Change Memorandum', color: '#8b5cf6' },
+                'CC03': { name: 'CC03-Change Objects', color: '#8b5cf6' },
+                'CC04': { name: 'CC04-Change Company Objects', color: '#8b5cf6' },
+                
+                // PSC (People with Significant Control)
+                'PSC01': { name: 'PSC01-Individual PSC Notice', color: '#10b981' },
+                'PSC02': { name: 'PSC02-Corporate PSC Notice', color: '#10b981' },
+                'PSC03': { name: 'PSC03-PSC Cessation', color: '#10b981' },
+                'PSC04': { name: 'PSC04-PSC Statement', color: '#10b981' },
+                'PSC05': { name: 'PSC05-PSC Register Change', color: '#10b981' },
+                'PSC06': { name: 'PSC06-Legal Entity PSC', color: '#10b981' },
+                'PSC07': { name: 'PSC07-PSC Details Change', color: '#10b981' },
+                'PSC08': { name: 'PSC08-PSC Restriction', color: '#10b981' },
+                'PSC09': { name: 'PSC09-PSC Name Change', color: '#10b981' },
+                
+                // Certificates & Registrations  
+                'CERT10': { name: 'CERT10-Certificate of Incorporation', color: '#f59e0b' },
+                'CERT11': { name: 'CERT11-Certificate of Good Standing', color: '#f59e0b' },
+                'CERT12': { name: 'CERT12-Certified Copy', color: '#f59e0b' },
+                
+                // Re-registration Forms
+                'RR01': { name: 'RR01-Re-register Private as Public', color: '#06b6d4' },
+                'RR02': { name: 'RR02-Re-register Public as Private', color: '#06b6d4' },
+                'RR03': { name: 'RR03-Re-register as Unlimited', color: '#06b6d4' },
+                'RR04': { name: 'RR04-Re-register as Limited', color: '#06b6d4' },
+                
+                // Other Common Types
+                'AR01': { name: 'AR01-Annual Return', color: '#3b82f6' },
+                'DS01': { name: 'DS01-Dissolution', color: '#dc2626' },
+                'DS02': { name: 'DS02-Strike Off Application', color: '#dc2626' },
+                'RT01': { name: 'RT01-Administrative Restoration', color: '#22c55e' },
+                'NEWINC': { name: 'NEWINC-New Incorporation', color: '#ef4444' },
+                
+                // Additional Forms
+                'RP02A': { name: 'RP02A-Correction Request', color: '#8b5cf6' },
+                'RP04': { name: 'RP04-Replace Filing', color: '#8b5cf6' },
+                'NM01': { name: 'NM01-Change Company Name', color: '#06b6d4' },
+                'NM02': { name: 'NM02-Director Name Change', color: '#06b6d4' },
+                'NM03': { name: 'NM03-Secretary Name Change', color: '#06b6d4' },
+                'LRESEX': { name: 'LRESEX-Exempt Company Info', color: '#84cc16' },
+                'LRESSP': { name: 'LRESSP-Special Resolution', color: '#84cc16' },
+                'LRESORD': { name: 'LRESORD-Ordinary Resolution', color: '#84cc16' }
+            };
+            
+            const typeInfo = typeMap[type] || { name: `${type}-Filing`, color: '#94a3b8' };
+            
+            return `<span class="filing-type-badge" style="
+                background: ${typeInfo.color}15; 
+                color: ${typeInfo.color}; 
+                border: 1px solid ${typeInfo.color}30;
+                padding: 2px 6px; 
+                border-radius: 4px; 
+                font-size: 10px; 
+                font-weight: 600; 
+                margin-left: 8px;
+                display: inline-block;
+                vertical-align: middle;
+            ">${typeInfo.name}</span>`;
         }
         
         // Populate with actual company data when API is not available
