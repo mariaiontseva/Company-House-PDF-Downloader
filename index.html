@@ -8154,7 +8154,21 @@
         
         // SEO Integration - Dynamic Meta Tags and URL Management
         function initializeSEO() {
-            // Check for URL parameters for SEO routing
+            // First check if we're on a direct company URL path
+            const path = window.location.pathname;
+            if (path.startsWith('/company/')) {
+                const companyNumber = path.split('/company/')[1].replace('/', '');
+                if (companyNumber) {
+                    console.log('🔍 SEO: Loading company from URL path:', companyNumber);
+                    // Redirect to hash-based URL for now until server routing is set up
+                    setTimeout(() => {
+                        window.location.href = `/#company/${companyNumber}`;
+                    }, 100);
+                    return;
+                }
+            }
+            
+            // Then check for URL parameters for SEO routing
             const urlParams = new URLSearchParams(window.location.search);
             const company = urlParams.get('company');
             const category = urlParams.get('category');
@@ -8239,9 +8253,10 @@
             updateCanonicalUrl(url);
             
             // Update URL without page reload (for SEO)
-            if (window.history && window.history.replaceState) {
-                window.history.replaceState({}, title, `/company/${companyNumber}`);
-            }
+            // For now, keep hash-based URLs until server routing is configured
+            // if (window.history && window.history.replaceState) {
+            //     window.history.replaceState({}, title, `/company/${companyNumber}`);
+            // }
             
             // Add structured data
             addCompanyStructuredData(companyData);
