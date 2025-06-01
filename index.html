@@ -6093,6 +6093,7 @@
                 { selector: '.stat-box:nth-child(2) .stat-value', value: company.officerCount || '0' },
                 { selector: '.stat-box:nth-child(2) .stat-detail', value: `${company.officerCount || 0} active` },
                 { selector: '.stat-box:nth-child(3) .stat-value', value: company.filingCount || '0' },
+                { selector: '.stat-box:nth-child(3) .stat-detail', value: `${company.filingCount || 0} total filings` },
                 { selector: '.stat-box:nth-child(4) .stat-value', value: company.totalCharges || '0' },
                 { selector: '.stat-box:nth-child(4) .stat-detail', value: `${company.outstandingCharges || 0} outstanding` }
             ];
@@ -6449,7 +6450,7 @@
         async function fetchOfficers(companyNumber) {
             try {
                 const API_KEY = '22aefa40-ee9e-47c0-b40a-2dd3c03165c6';
-                const response = await fetchWithWorker(`https://api.companieshouse.gov.uk/company/${companyNumber}/officers`, API_KEY);
+                const response = await fetchWithWorker(`https://api.companieshouse.gov.uk/company/${companyNumber}/officers?items_per_page=200`, API_KEY);
                 
                 if (response.ok) {
                     const data = await response.json();
@@ -6462,6 +6463,21 @@
                         nationality: officer.nationality,
                         dateOfBirth: officer.date_of_birth ? `${officer.date_of_birth.month}/${officer.date_of_birth.year}` : null
                     }));
+                    
+                    // Update officers count in stat box (2nd box) - show total like Companies House
+                    const officersBox = document.querySelector('#companyModal .stat-box:nth-child(2)');
+                    if (officersBox) {
+                        const officersValue = officersBox.querySelector('.stat-value');
+                        const officersDetail = officersBox.querySelector('.stat-detail');
+                        const activeOfficers = officers.filter(officer => !officer.resigned);
+                        const totalOfficers = data.total_count || officers.length;
+                        
+                        if (officersValue) officersValue.textContent = totalOfficers.toString();
+                        if (officersDetail) officersDetail.textContent = `${activeOfficers.length} active`;
+                        
+                        console.log(`🔸 Updated officers count: ${totalOfficers} total (${activeOfficers.length} active)`);
+                    }
+                    
                     populateOfficersTab(officers);
                 } else {
                     // Fallback to basic data
@@ -6641,6 +6657,23 @@
                         paperFiled: filing.paper_filed,
                         barcode: filing.barcode
                     })) : [];
+                    
+                    // Update filings count in stat box (3rd box)
+                    const filingsBox = document.querySelector('#companyModal .stat-box:nth-child(3)');
+                    if (filingsBox) {
+                        const filingsValue = filingsBox.querySelector('.stat-value');
+                        const filingsDetail = filingsBox.querySelector('.stat-detail');
+                        const totalFilings = data.total_count || filings.length;
+                        
+                        if (filingsValue) filingsValue.textContent = totalFilings.toString();
+                        if (filingsDetail) {
+                            filingsDetail.textContent = 'Download';
+                            filingsDetail.className = 'stat-detail download-link';
+                            filingsDetail.onclick = () => switchModalTab('filings');
+                        }
+                        
+                        console.log(`🔸 Updated filings count: ${totalFilings} total filings (showing ${filings.length})`);
+                    }
                     
                     populateFilingHistoryTab(filings);
                 } else {
