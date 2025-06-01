@@ -60,7 +60,7 @@
     <style>
         /* Director Info Badge */
         .director-info-badge {
-            display: inline-flex;
+            display: inline-flex !important;
             align-items: center;
             gap: 4px;
             margin-left: 8px;
@@ -74,6 +74,8 @@
             cursor: pointer;
             transition: all 0.2s ease;
             vertical-align: middle;
+            position: relative;
+            z-index: 10;
         }
 
         .director-info-badge:hover {
@@ -7522,9 +7524,8 @@
             `;
             
             // Enhance officer names with director lookup badges
-            setTimeout(() => {
-                enhanceOfficerNames();
-            }, 100);
+            console.log('Calling enhanceOfficerNames...');
+            enhanceOfficerNames();
         }
         
         // Fetch and populate charges data
@@ -8761,7 +8762,10 @@
         // Director lookup function
         function lookupDirector(directorName) {
             const normalizedName = directorName.toUpperCase().trim();
-            return directorDatabase[normalizedName] || null;
+            console.log('Looking up director:', normalizedName);
+            const result = directorDatabase[normalizedName] || null;
+            console.log('Lookup result:', result ? 'Found' : 'Not found');
+            return result;
         }
         
         // Create director info badge
@@ -8911,29 +8915,52 @@
         // Enhance officer names with lookup badges
         function enhanceOfficerNames() {
             // This function will be called when officers are loaded
-            const officerElements = document.querySelectorAll('.data-item-header');
+            const peopleTab = document.querySelector('#companyModal #people');
+            if (!peopleTab) {
+                console.log('People tab not found');
+                return;
+            }
             
-            officerElements.forEach(element => {
-                const officerName = element.textContent.trim();
-                const directorInfo = lookupDirector(officerName);
+            // Wait a bit more for DOM to be fully rendered
+            setTimeout(() => {
+                const officerElements = peopleTab.querySelectorAll('.data-item-header');
+                console.log('Found officer elements:', officerElements.length);
                 
-                if (directorInfo && !element.querySelector('.director-info-badge')) {
-                    // Create container if not exists
-                    if (!element.classList.contains('officer-name-container')) {
-                        element.classList.add('officer-name-container');
+                officerElements.forEach(element => {
+                    const officerName = element.textContent.trim();
+                    console.log('Checking officer:', officerName);
+                    
+                    // Important: The officer names are uppercase in the HTML but we need to match against the database
+                    const directorInfo = lookupDirector(officerName);
+                    
+                    if (directorInfo && !element.querySelector('.director-info-badge')) {
+                        console.log('Adding badge for:', officerName);
+                        
+                        // Make the element a flex container to align items
+                        element.style.display = 'inline-flex';
+                        element.style.alignItems = 'center';
+                        element.style.gap = '0';
+                        
+                        // Add badge
+                        const badge = createDirectorBadge(directorInfo);
+                        element.insertAdjacentHTML('beforeend', badge);
+                        
+                        // Add click handler
+                        const badgeElement = element.querySelector('.director-info-badge');
+                        if (badgeElement) {
+                            console.log('Badge element created and found:', badgeElement);
+                            badgeElement.addEventListener('click', (e) => {
+                                e.stopPropagation();
+                                showDirectorPopup(officerName);
+                            });
+                        } else {
+                            console.error('Badge element not found after insertion!');
+                        }
+                    } else if (!directorInfo) {
+                        console.log('No director info found for:', officerName);
                     }
-                    
-                    // Add badge
-                    const badge = createDirectorBadge(directorInfo);
-                    element.insertAdjacentHTML('beforeend', badge);
-                    
-                    // Add click handler
-                    element.querySelector('.director-info-badge').addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        showDirectorPopup(officerName);
-                    });
-                }
-            });
+                });
+            }, 100);
         }
         
     </script>
