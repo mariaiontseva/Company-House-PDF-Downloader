@@ -5671,6 +5671,31 @@
                                 <span class="expand-value">${company.companyType || 'Private Limited Company'}</span>
                             </div>
                             
+                            <div class="expand-row">
+                                <span class="expand-label">Registered Address:</span>
+                                <span class="expand-value">${(() => {
+                                    const addressParts = [];
+                                    if (company.address && typeof company.address === 'object') {
+                                        // Railway format
+                                        if (company.address.line1) addressParts.push(company.address.line1);
+                                        if (company.address.line2) addressParts.push(company.address.line2);
+                                        if (company.address.postTown) addressParts.push(company.address.postTown);
+                                        if (company.address.county) addressParts.push(company.address.county);
+                                        if (company.address.postCode) addressParts.push(company.address.postCode);
+                                        if (company.address.country) addressParts.push(company.address.country);
+                                    } else {
+                                        // API format fallback
+                                        if (company.address_line_1) addressParts.push(company.address_line_1);
+                                        if (company.address_line_2) addressParts.push(company.address_line_2);
+                                        if (company.locality) addressParts.push(company.locality);
+                                        if (company.region) addressParts.push(company.region);
+                                        if (company.postal_code) addressParts.push(company.postal_code);
+                                        if (company.country) addressParts.push(company.country);
+                                    }
+                                    return addressParts.length > 0 ? addressParts.join(', ') : 'Address not available';
+                                })()}</span>
+                            </div>
+                            
                             ${company.sicCodes && company.sicCodes.length > 0 ? `
                                 <div class="expand-row">
                                     <span class="expand-label">SIC Codes:</span>
