@@ -56,6 +56,381 @@
       gtag('config', 'G-RR9SEE0SQF');
     </script>
     
+    <!-- Director Lookup Styles -->
+    <style>
+        /* Director Info Badge */
+        .director-info-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            margin-left: 8px;
+            padding: 3px 10px;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 14px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #6366f1;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            vertical-align: middle;
+        }
+
+        .director-info-badge:hover {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(139, 92, 246, 0.2) 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.2);
+        }
+
+        .director-info-badge svg {
+            width: 12px;
+            height: 12px;
+        }
+
+        /* Director Popup Overlay */
+        .director-popup-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            padding: 20px;
+            animation: fadeIn 0.2s ease;
+        }
+
+        /* Director Popup Card */
+        .director-popup {
+            background: #ffffff;
+            border-radius: 16px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 85vh;
+            overflow: hidden;
+            box-shadow: 0 25px 100px rgba(0, 0, 0, 0.5);
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { 
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Popup Header */
+        .popup-header {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            padding: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .popup-header h3 {
+            margin: 0;
+            font-size: 22px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .director-icon {
+            width: 32px;
+            height: 32px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-popup {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: white;
+            font-size: 20px;
+        }
+
+        .close-popup:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(90deg);
+        }
+
+        /* Popup Content */
+        .popup-content {
+            padding: 24px;
+            overflow-y: auto;
+            max-height: calc(85vh - 120px);
+        }
+
+        /* Director Summary */
+        .director-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 16px;
+            padding: 20px;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-radius: 12px;
+            margin-bottom: 24px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .summary-item {
+            text-align: center;
+        }
+
+        .summary-item .value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1e293b;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .summary-item .label {
+            font-size: 12px;
+            color: #64748b;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Appointments Section */
+        .appointments-section {
+            margin-bottom: 24px;
+        }
+
+        .appointments-section h4 {
+            margin: 0 0 16px 0;
+            font-size: 18px;
+            color: #1e293b;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .appointments-section h4::before {
+            content: '🏢';
+            font-size: 20px;
+        }
+
+        /* Director Appointment Card */
+        .director-appointment {
+            background: #ffffff;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .director-appointment:hover {
+            border-color: #6366f1;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.1);
+            transform: translateX(4px);
+        }
+
+        .appointment-company {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .company-link {
+            font-weight: 700;
+            font-size: 16px;
+            color: #1e293b;
+            text-decoration: none;
+            transition: color 0.2s;
+            flex: 1;
+        }
+
+        .company-link:hover {
+            color: #6366f1;
+        }
+
+        .company-status {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .company-status.active {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .company-status.in-liquidation {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .company-status.dissolved {
+            background: #f3f4f6;
+            color: #6b7280;
+        }
+
+        .appointment-details {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        .appointment-details .role {
+            font-weight: 600;
+            color: #475569;
+        }
+
+        .appointment-note {
+            margin-top: 8px;
+            padding: 8px 12px;
+            background: #f1f5f9;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #64748b;
+            font-style: italic;
+        }
+
+        /* Director Details */
+        .director-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-top: 24px;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 12px;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .detail-item .icon {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #e2e8f0;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .detail-item .text {
+            flex: 1;
+        }
+
+        .detail-item .text .label {
+            font-size: 11px;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .detail-item .text .value {
+            font-size: 14px;
+            color: #1e293b;
+            font-weight: 600;
+        }
+
+        /* Director Links */
+        .director-links {
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 2px solid #e2e8f0;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .director-links a {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            color: #475569;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .director-links a:hover {
+            background: #6366f1;
+            border-color: #6366f1;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+        }
+
+        /* Officer Name with Badge */
+        .officer-name-container {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 600px) {
+            .director-popup {
+                max-height: 100vh;
+                border-radius: 0;
+            }
+            
+            .popup-content {
+                max-height: calc(100vh - 120px);
+            }
+            
+            .director-summary {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .director-details {
+                grid-template-columns: 1fr;
+            }
+            
+            .appointment-company {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+        }
+    </style>
+    
     <!-- FAQ Schema Markup -->
     <script type="application/ld+json">
     {
@@ -7145,6 +7520,11 @@
                 <h3>People & Control</h3>
                 ${officerHTML}
             `;
+            
+            // Enhance officer names with director lookup badges
+            setTimeout(() => {
+                enhanceOfficerNames();
+            }, 100);
         }
         
         // Fetch and populate charges data
@@ -8343,6 +8723,218 @@
         
         // Initialize SEO on page load
         document.addEventListener('DOMContentLoaded', initializeSEO);
+        
+        // Director Lookup System
+        const directorDatabase = {
+            'MARIA IONTSEVA': {
+                appointments: [
+                    {
+                        company: 'CHERRYPICKED DESIGN LIMITED',
+                        companyNumber: '12387565',
+                        role: 'Director',
+                        appointed: '6 January 2020',
+                        status: 'Active',
+                        companyStatus: 'Active',
+                        companyAddress: '38 Crouch Hill, London, N4 4AU'
+                    },
+                    {
+                        company: 'LOBSTER IT LIMITED',
+                        companyNumber: '08510890',
+                        role: 'Director',
+                        appointed: '26 July 2013',
+                        status: 'Active',
+                        companyStatus: 'In Liquidation',
+                        note: 'Co-founder, Product Designer'
+                    }
+                ],
+                details: {
+                    nationality: 'British/Russian',
+                    residence: 'United Kingdom',
+                    occupation: 'Company Director/Product Designer',
+                    totalAppointments: 2,
+                    activeAppointments: 2,
+                    website: 'mariaiontseva.com'
+                }
+            }
+        };
+        
+        // Director lookup function
+        function lookupDirector(directorName) {
+            const normalizedName = directorName.toUpperCase().trim();
+            return directorDatabase[normalizedName] || null;
+        }
+        
+        // Create director info badge
+        function createDirectorBadge(directorInfo) {
+            if (!directorInfo) return '';
+            
+            const totalCompanies = directorInfo.appointments.length;
+            return `
+                <span class="director-info-badge">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M12 16v-4"></path>
+                        <path d="M12 8h.01"></path>
+                    </svg>
+                    ${totalCompanies} ${totalCompanies === 1 ? 'company' : 'companies'}
+                </span>
+            `;
+        }
+        
+        // Show director popup
+        function showDirectorPopup(directorName) {
+            const directorInfo = lookupDirector(directorName);
+            if (!directorInfo) return;
+            
+            // Remove any existing popup
+            const existingPopup = document.querySelector('.director-popup-overlay');
+            if (existingPopup) existingPopup.remove();
+            
+            // Create appointments HTML
+            const appointments = directorInfo.appointments.map(app => {
+                const statusClass = app.companyStatus.toLowerCase().replace(/\s+/g, '-');
+                return `
+                    <div class="director-appointment">
+                        <div class="appointment-company">
+                            <a href="#company/${app.companyNumber}" class="company-link" onclick="closeDirectorPopup(); return true;">
+                                ${app.company}
+                            </a>
+                            <span class="company-status ${statusClass}">${app.companyStatus}</span>
+                        </div>
+                        <div class="appointment-details">
+                            <span class="role">${app.role}</span> • 
+                            <span class="date">Appointed ${app.appointed}</span>
+                        </div>
+                        ${app.note ? `<div class="appointment-note">${app.note}</div>` : ''}
+                    </div>
+                `;
+            }).join('');
+            
+            // Create popup HTML
+            const popupHTML = `
+                <div class="director-popup-overlay" onclick="if(event.target === this) closeDirectorPopup()">
+                    <div class="director-popup">
+                        <div class="popup-header">
+                            <h3>
+                                <div class="director-icon">👤</div>
+                                ${directorName}
+                            </h3>
+                            <button class="close-popup" onclick="closeDirectorPopup()">×</button>
+                        </div>
+                        <div class="popup-content">
+                            <div class="director-summary">
+                                <div class="summary-item">
+                                    <span class="value">${directorInfo.details.totalAppointments}</span>
+                                    <span class="label">Total Companies</span>
+                                </div>
+                                <div class="summary-item">
+                                    <span class="value">${directorInfo.details.activeAppointments}</span>
+                                    <span class="label">Active</span>
+                                </div>
+                                <div class="summary-item">
+                                    <span class="value">12+</span>
+                                    <span class="label">Years Experience</span>
+                                </div>
+                            </div>
+                            
+                            <div class="appointments-section">
+                                <h4>Company Appointments</h4>
+                                ${appointments}
+                            </div>
+                            
+                            ${directorInfo.details.nationality || directorInfo.details.occupation ? `
+                            <div class="director-details">
+                                ${directorInfo.details.nationality ? `
+                                <div class="detail-item">
+                                    <div class="icon">🌍</div>
+                                    <div class="text">
+                                        <div class="label">Nationality</div>
+                                        <div class="value">${directorInfo.details.nationality}</div>
+                                    </div>
+                                </div>` : ''}
+                                ${directorInfo.details.occupation ? `
+                                <div class="detail-item">
+                                    <div class="icon">💼</div>
+                                    <div class="text">
+                                        <div class="label">Occupation</div>
+                                        <div class="value">${directorInfo.details.occupation}</div>
+                                    </div>
+                                </div>` : ''}
+                                ${directorInfo.details.residence ? `
+                                <div class="detail-item">
+                                    <div class="icon">📍</div>
+                                    <div class="text">
+                                        <div class="label">Residence</div>
+                                        <div class="value">${directorInfo.details.residence}</div>
+                                    </div>
+                                </div>` : ''}
+                            </div>` : ''}
+                            
+                            ${directorInfo.details.website ? `
+                            <div class="director-links">
+                                <a href="https://${directorInfo.details.website}" target="_blank" rel="noopener">
+                                    🌐 Professional Website
+                                </a>
+                                <a href="https://find-and-update.company-information.service.gov.uk/search?q=${encodeURIComponent(directorName)}" target="_blank" rel="noopener">
+                                    🏛️ Companies House
+                                </a>
+                            </div>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Add popup to body
+            document.body.insertAdjacentHTML('beforeend', popupHTML);
+            
+            // Add escape key listener
+            document.addEventListener('keydown', handleEscapeKey);
+        }
+        
+        // Close director popup
+        function closeDirectorPopup() {
+            const popup = document.querySelector('.director-popup-overlay');
+            if (popup) {
+                popup.style.animation = 'fadeIn 0.2s ease reverse';
+                setTimeout(() => popup.remove(), 200);
+            }
+            document.removeEventListener('keydown', handleEscapeKey);
+        }
+        
+        // Handle escape key
+        function handleEscapeKey(e) {
+            if (e.key === 'Escape') {
+                closeDirectorPopup();
+            }
+        }
+        
+        // Enhance officer names with lookup badges
+        function enhanceOfficerNames() {
+            // This function will be called when officers are loaded
+            const officerElements = document.querySelectorAll('.data-item-header');
+            
+            officerElements.forEach(element => {
+                const officerName = element.textContent.trim();
+                const directorInfo = lookupDirector(officerName);
+                
+                if (directorInfo && !element.querySelector('.director-info-badge')) {
+                    // Create container if not exists
+                    if (!element.classList.contains('officer-name-container')) {
+                        element.classList.add('officer-name-container');
+                    }
+                    
+                    // Add badge
+                    const badge = createDirectorBadge(directorInfo);
+                    element.insertAdjacentHTML('beforeend', badge);
+                    
+                    // Add click handler
+                    element.querySelector('.director-info-badge').addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        showDirectorPopup(officerName);
+                    });
+                }
+            });
+        }
         
     </script>
     
