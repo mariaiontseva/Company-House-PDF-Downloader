@@ -88,6 +88,13 @@
             width: 12px;
             height: 12px;
         }
+        
+        /* Ensure officer names are visible containers */
+        .data-item-header {
+            display: inline-flex !important;
+            align-items: center;
+            gap: 8px;
+        }
 
         /* Director Popup Overlay */
         .director-popup-overlay {
@@ -8958,10 +8965,19 @@
                         const badge = createDirectorBadge(directorInfo);
                         element.insertAdjacentHTML('beforeend', badge);
                         
+                        // Add visual confirmation
+                        element.style.background = 'rgba(99, 102, 241, 0.05)';
+                        element.style.padding = '4px 8px';
+                        element.style.borderRadius = '4px';
+                        
                         // Add click handler
                         const badgeElement = element.querySelector('.director-info-badge');
                         if (badgeElement) {
                             console.log('Badge element created and found:', badgeElement);
+                            // Make badge more visible
+                            badgeElement.style.backgroundColor = '#6366f1';
+                            badgeElement.style.color = 'white';
+                            
                             badgeElement.addEventListener('click', (e) => {
                                 e.stopPropagation();
                                 showDirectorPopup(officerName);
