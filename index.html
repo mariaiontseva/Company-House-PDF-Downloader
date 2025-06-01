@@ -5334,10 +5334,8 @@
             return 'OTHER';
         }
 
-        // API Base URL - automatically detects environment
-        const API_BASE_URL = window.location.hostname === 'localhost' 
-            ? 'http://localhost:3000' 
-            : 'https://companies-api-production-68c2.up.railway.app';
+        // API Base URL - always use Railway for the 5.6M companies database
+        const API_BASE_URL = 'https://companies-api-production-68c2.up.railway.app';
 
         // Fetch real data from Railway and replace the mock data
         function loadRealCompanies() {
@@ -5350,8 +5348,14 @@
                 ? `${API_BASE_URL}/api/oldest${industryParam}`
                 : `${API_BASE_URL}/api/newest${industryParam}`;
             
+            console.log('Fetching from:', endpoint);
+            
             fetch(endpoint)
-                .then(r => r.json())
+                .then(r => {
+                    console.log('Response status:', r.status);
+                    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+                    return r.json();
+                })
                 .then(data => {
                     console.log(`${currentView} companies data:`, data);
                     if (data && Array.isArray(data) && data.length > 0) {
@@ -5421,13 +5425,136 @@
                         if (document.getElementById('exploreTab').classList.contains('active')) {
                             renderCompanies();
                         }
+                    } else {
+                        console.warn(`No data received from ${endpoint}`);
+                        // Initialize with empty array if no data
+                        if (currentView === 'oldest') {
+                            oldestCompanies = [];
+                        } else {
+                            newestCompanies = [];
+                        }
+                        renderCompanies();
                     }
                 })
-                .catch(err => console.error(`Error loading ${currentView} companies:`, err));
+                .catch(err => {
+                    console.error(`Error loading ${currentView} companies from Railway:`, err);
+                    console.error('Railway database connection appears to be closed');
+                    
+                    // Show error message to user about database connectivity
+                    const list = document.getElementById('companyListExplore');
+                    if (list && document.getElementById('exploreTab').classList.contains('active')) {
+                        list.innerHTML = `
+                            <div style="text-align: center; color: #ef4444; padding: 40px; border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 12px; background: rgba(239, 68, 68, 0.05);">
+                                <h3 style="margin-bottom: 16px;">Database Connection Issue</h3>
+                                <p style="margin-bottom: 16px;">The Railway database connection is currently closed. This affects access to the full 5.6M company database.</p>
+                                <p style="color: #94a3b8; font-size: 14px;">Railway Error: ${err.message}</p>
+                                <button onclick="loadRealCompanies()" style="margin-top: 16px; padding: 8px 16px; background: #6366f1; color: white; border: none; border-radius: 6px; cursor: pointer;">
+                                    Retry Connection
+                                </button>
+                            </div>
+                        `;
+                    }
+                });
         }
 
+        // Function to aggressively retry Railway connection
+        let connectionRetryCount = 0;
+        const maxRetries = 50; // Increased retries
+        
+        function checkRailwayConnection() {
+            if (connectionRetryCount >= maxRetries) {
+                console.log('Max retries reached for Railway connection');
+                const list = document.getElementById('companyListExplore');
+                if (list && document.getElementById('exploreTab').classList.contains('active')) {
+                    list.innerHTML = `
+                        <div style="text-align: center; color: #ef4444; padding: 40px; border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 12px; background: rgba(239, 68, 68, 0.05);">
+                            <h3 style="margin-bottom: 16px;">⚠️ Database Connection Lost</h3>
+                            <p style="margin-bottom: 16px;">Cannot connect to the 5.6M company database on Railway.</p>
+                            <p style="color: #94a3b8; font-size: 14px; margin-bottom: 16px;">The Railway backend service needs to restart its database connection.</p>
+                            <button onclick="connectionRetryCount = 0; checkRailwayConnection();" style="margin-top: 16px; padding: 8px 16px; background: #6366f1; color: white; border: none; border-radius: 6px; cursor: pointer;">
+                                Retry Connection
+                            </button>
+                        </div>
+                    `;
+                }
+                return;
+            }
+            
+            // Show connection attempt to user
+            const list = document.getElementById('companyListExplore');
+            if (list && document.getElementById('exploreTab').classList.contains('active') && connectionRetryCount > 0) {
+                list.innerHTML = `
+                    <div style="text-align: center; color: #6366f1; padding: 40px;">
+                        <div class="spinner" style="margin-bottom: 16px;"></div>
+                        <h3 style="margin-bottom: 8px;">Connecting to Railway Database...</h3>
+                        <p style="color: #94a3b8; font-size: 14px;">Attempt ${connectionRetryCount + 1} of ${maxRetries}</p>
+                        <p style="color: #94a3b8; font-size: 12px;">Trying to access 5.6M company database</p>
+                    </div>
+                `;
+            }
+            
+            // First try to hit the API endpoints directly to wake up the database
+            const endpointsToTry = ['/api/oldest', '/api/newest'];
+            const endpoint = endpointsToTry[connectionRetryCount % endpointsToTry.length];
+            
+            fetch(`${API_BASE_URL}${endpoint}`)
+                .then(r => r.json())
+                .then(data => {
+                    if (data && Array.isArray(data) && data.length > 0) {
+                        console.log('✅ Railway database connection restored!');
+                        connectionRetryCount = 0; // Reset counter
+                        loadRealCompanies(); // Load the data
+                        return;
+                    }
+                    throw new Error('Database still not connected');
+                })
+                .catch(err => {
+                    console.log(`Railway attempt ${connectionRetryCount + 1}: ${err.message}`);
+                    connectionRetryCount++;
+                    if (connectionRetryCount < maxRetries) {
+                        setTimeout(checkRailwayConnection, 2000); // Retry every 2 seconds
+                    }
+                });
+        }
+
+        // Manual function to force Railway reconnection
+        window.forceRailwayReconnect = function() {
+            console.log('🔄 Forcing Railway database reconnection...');
+            connectionRetryCount = 0;
+            checkRailwayConnection();
+        };
+
         // Load real data when page loads
-        setTimeout(loadRealCompanies, 1000);
+        setTimeout(() => {
+            console.log('Initial load - checking filters...');
+            const industryFilter = document.getElementById('industryFilter');
+            const activeSwitch = document.getElementById('activeSwitch');
+            const chargesSwitch = document.getElementById('chargesSwitch');
+            console.log('Filters found:', {
+                industryFilter: !!industryFilter,
+                activeSwitch: !!activeSwitch,
+                chargesSwitch: !!chargesSwitch,
+                industryValue: industryFilter ? industryFilter.value : 'none'
+            });
+            
+            // Initial render with default data (FINANCIAL filter is selected by default)
+            if (document.getElementById('exploreTab').classList.contains('active')) {
+                renderCompanies();
+            }
+            
+            // Then try to load real data from Railway
+            loadRealCompanies();
+            
+            // Start aggressive connection monitoring
+            checkRailwayConnection();
+            
+            // Also set up periodic monitoring every 30 seconds
+            setInterval(() => {
+                if (connectionRetryCount === 0) { // Only if not already retrying
+                    checkRailwayConnection();
+                }
+            }, 30000);
+        }, 1000);
 
         
         let currentView = 'oldest';
@@ -5467,17 +5594,38 @@
         
         function renderCompanies() {
             const list = document.getElementById('companyListExplore');
-            if (!list) return;
+            if (!list) {
+                console.warn('Company list element not found');
+                return;
+            }
             
-            const activeOnly = document.getElementById('activeSwitch') && document.getElementById('activeSwitch').classList.contains('active');
-            const chargesOnly = document.getElementById('chargesSwitch') && document.getElementById('chargesSwitch').classList.contains('active');
-            const industryFilter = document.getElementById('industryFilter') ? document.getElementById('industryFilter').value : 'ALL';
+            const activeSwitch = document.getElementById('activeSwitch');
+            const chargesSwitch = document.getElementById('chargesSwitch');
+            const industryFilter = document.getElementById('industryFilter');
+            
+            const activeOnly = activeSwitch ? activeSwitch.classList.contains('active') : false;
+            const chargesOnly = chargesSwitch ? chargesSwitch.classList.contains('active') : false;
+            const industryValue = industryFilter ? industryFilter.value : 'ALL';
+            
             const companies = currentView === 'oldest' ? oldestCompanies : newestCompanies;
+            
+            console.log('Rendering companies:', {
+                view: currentView,
+                totalCompanies: companies.length,
+                activeOnly,
+                chargesOnly,
+                industry: industryValue
+            });
             
             // Apply filters
             let filtered = companies;
             
-            // Filter by active status only (industry filtering is done server-side)
+            // Filter by industry (for default data when Railway is not available)
+            if (industryValue !== 'ALL') {
+                filtered = filtered.filter(c => c.industry === industryValue);
+            }
+            
+            // Filter by active status
             if (activeOnly) {
                 filtered = filtered.filter(c => c.status === 'Active');
             }
@@ -5673,11 +5821,9 @@
         
         // Initial render on page load
         document.addEventListener('DOMContentLoaded', function() {
-            // Load real companies from Railway database
-            loadRealCompanies();
-            
-            // Check if explore tab is initially active and render companies
+            // Check if explore tab is initially active and render companies with current filter
             if (document.getElementById('exploreTab') && document.getElementById('exploreTab').classList.contains('active')) {
+                console.log('Explore tab is active on load, rendering with filter...');
                 renderCompanies();
             }
             // Update button text
@@ -5949,12 +6095,25 @@
             const addressEl = document.getElementById('modal-address');
             if (addressEl) {
                 const addressParts = [];
-                if (company.address_line_1) addressParts.push(company.address_line_1);
-                if (company.address_line_2) addressParts.push(company.address_line_2);
-                if (company.locality) addressParts.push(company.locality);
-                if (company.region) addressParts.push(company.region);
-                if (company.postal_code) addressParts.push(company.postal_code);
-                if (company.country) addressParts.push(company.country);
+                
+                // Handle Railway format (company.address.line1) and API format (company.address_line_1)
+                if (company.address && typeof company.address === 'object') {
+                    // Railway format
+                    if (company.address.line1) addressParts.push(company.address.line1);
+                    if (company.address.line2) addressParts.push(company.address.line2);
+                    if (company.address.postTown) addressParts.push(company.address.postTown);
+                    if (company.address.county) addressParts.push(company.address.county);
+                    if (company.address.postCode) addressParts.push(company.address.postCode);
+                    if (company.address.country) addressParts.push(company.address.country);
+                } else {
+                    // API format
+                    if (company.address_line_1) addressParts.push(company.address_line_1);
+                    if (company.address_line_2) addressParts.push(company.address_line_2);
+                    if (company.locality) addressParts.push(company.locality);
+                    if (company.region) addressParts.push(company.region);
+                    if (company.postal_code) addressParts.push(company.postal_code);
+                    if (company.country) addressParts.push(company.country);
+                }
                 
                 addressEl.textContent = addressParts.length > 0 ? addressParts.join(', ') : 'No address available';
             }
