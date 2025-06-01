@@ -5828,6 +5828,9 @@
             }
             // Update button text
             updateLoadMoreButton();
+            
+            // Handle company hash routing on page load
+            setTimeout(handleCompanyHash, 2000); // Wait for companies to load
         });
         
         // Also update button when auth state changes
@@ -5897,6 +5900,12 @@
                 document.body.style.overflow = 'hidden';
                 console.log('🔸 Modal should now be visible');
                 
+                // Update URL hash for shareable links
+                const companyNumber = companyData.number || companyData.company_number;
+                if (companyNumber) {
+                    window.history.pushState(null, null, `#company/${companyNumber}`);
+                }
+                
                 // Update modal content with company data (async)
                 await updateModalContent(companyData);
             } else {
@@ -5913,9 +5922,67 @@
                 setTimeout(() => {
                     modal.style.display = 'none';
                     document.body.style.overflow = '';
+                    
+                    // Clear hash from URL
+                    if (window.location.hash.startsWith('#company/')) {
+                        window.history.pushState(null, null, window.location.pathname);
+                    }
                 }, 300);
             }
         }
+
+        // Handle hash-based company routing
+        async function handleCompanyHash() {
+            const hash = window.location.hash;
+            if (hash.startsWith('#company/')) {
+                const companyNumber = hash.replace('#company/', '');
+                if (companyNumber) {
+                    console.log('🔸 Loading company from hash:', companyNumber);
+                    
+                    // First try to find company in loaded data
+                    const allCompanies = [...oldestCompanies, ...newestCompanies];
+                    const foundCompany = allCompanies.find(c => c.number === companyNumber);
+                    
+                    if (foundCompany) {
+                        console.log('🔸 Found company in loaded data:', foundCompany);
+                        await showCompanyModal(foundCompany);
+                    } else {
+                        console.log('🔸 Company not in loaded data, fetching from Railway...');
+                        // Try to fetch from Railway
+                        try {
+                            const response = await fetch(`${API_BASE_URL}/api/company/${companyNumber}`);
+                            if (response.ok) {
+                                const companyData = await response.json();
+                                if (companyData) {
+                                    // Transform Railway data to match expected format
+                                    const transformedCompany = {
+                                        name: companyData.CompanyName,
+                                        number: companyData.CompanyNumber,
+                                        status: companyData.CompanyStatus,
+                                        incorporationDate: companyData.IncorporationDate,
+                                        companyType: companyData.CompanyCategory,
+                                        address: {
+                                            line1: companyData.RegAddress_AddressLine1,
+                                            line2: companyData.RegAddress_AddressLine2,
+                                            postTown: companyData.RegAddress_PostTown,
+                                            county: companyData.RegAddress_County,
+                                            postCode: companyData.RegAddress_PostCode,
+                                            country: companyData.RegAddress_Country
+                                        }
+                                    };
+                                    await showCompanyModal(transformedCompany);
+                                }
+                            }
+                        } catch (error) {
+                            console.error('🔸 Error fetching company from Railway:', error);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Listen for hash changes
+        window.addEventListener('hashchange', handleCompanyHash);
         
         // Update modal content with company data
         async function updateModalContent(company) {
@@ -6082,22 +6149,65 @@
                 chargesValue.classList.add('charges-number');
             }
             
-            // Update Overview tab content
+            // Update Overview tab content with Railway data first
             updateOverviewTab(company);
+            
+            // Store Railway address before API call overwrites it
+            const railwayAddress = company.address;
             
             // Fetch and populate detailed company data
             await fetchCompanyDetails(company.number || company.company_number);
+            
+            // Restore Railway address if it was available (with retries to ensure modal is loaded)
+            console.log('🔸 Railway address data:', railwayAddress);
+            if (railwayAddress && Object.values(railwayAddress).some(v => v)) {
+                function setRailwayAddress(attempt = 1) {
+                    const addressEl = document.getElementById('modal-address');
+                    const modal = document.getElementById('companyModal');
+                    console.log(`🔸 Attempt ${attempt} - Address element found:`, !!addressEl, 'Modal visible:', modal?.style.display === 'flex');
+                    
+                    if (addressEl && modal?.style.display === 'flex') {
+                        const addressParts = [];
+                        if (railwayAddress.line1) addressParts.push(railwayAddress.line1);
+                        if (railwayAddress.line2) addressParts.push(railwayAddress.line2);
+                        if (railwayAddress.postTown) addressParts.push(railwayAddress.postTown);
+                        if (railwayAddress.county) addressParts.push(railwayAddress.county);
+                        if (railwayAddress.postCode) addressParts.push(railwayAddress.postCode);
+                        if (railwayAddress.country) addressParts.push(railwayAddress.country);
+                        const finalAddress = addressParts.length > 0 ? addressParts.join(', ') : 'No address available';
+                        console.log('🔸 SUCCESS! Setting address to:', finalAddress);
+                        addressEl.textContent = finalAddress;
+                        // Make it visually distinctive so we know it worked
+                        addressEl.style.color = '#10b981';
+                        addressEl.style.fontWeight = '500';
+                    } else if (attempt <= 5) {
+                        console.log(`🔸 Retrying in ${attempt * 200}ms...`);
+                        setTimeout(() => setRailwayAddress(attempt + 1), attempt * 200);
+                    } else {
+                        console.error('🔸 Failed to set Railway address after 5 attempts!');
+                    }
+                }
+                setRailwayAddress();
+            } else {
+                console.log('🔸 No Railway address data available');
+            }
         }
         
         // Update Overview tab with company data
         function updateOverviewTab(company) {
+            console.log('🔸 updateOverviewTab called with company:', company);
+            console.log('🔸 Company address data:', company.address);
+            
             // Update address
             const addressEl = document.getElementById('modal-address');
+            console.log('🔸 Looking for modal-address element:', !!addressEl);
+            console.log('🔸 Modal display state:', document.getElementById('companyModal')?.style.display);
             if (addressEl) {
                 const addressParts = [];
                 
                 // Handle Railway format (company.address.line1) and API format (company.address_line_1)
                 if (company.address && typeof company.address === 'object') {
+                    console.log('🔸 Using Railway address format');
                     // Railway format
                     if (company.address.line1) addressParts.push(company.address.line1);
                     if (company.address.line2) addressParts.push(company.address.line2);
@@ -6106,6 +6216,7 @@
                     if (company.address.postCode) addressParts.push(company.address.postCode);
                     if (company.address.country) addressParts.push(company.address.country);
                 } else {
+                    console.log('🔸 Using API address format');
                     // API format
                     if (company.address_line_1) addressParts.push(company.address_line_1);
                     if (company.address_line_2) addressParts.push(company.address_line_2);
@@ -6115,7 +6226,11 @@
                     if (company.country) addressParts.push(company.country);
                 }
                 
-                addressEl.textContent = addressParts.length > 0 ? addressParts.join(', ') : 'No address available';
+                const finalAddress = addressParts.length > 0 ? addressParts.join(', ') : 'No address available';
+                console.log('🔸 updateOverviewTab setting address to:', finalAddress);
+                addressEl.textContent = finalAddress;
+            } else {
+                console.error('🔸 Address element not found in updateOverviewTab');
             }
             
             // Update company type
@@ -6631,13 +6746,30 @@
         function populateWithMockData(companyData) {
             console.log('🔸 Populating with company data:', companyData);
             
-            // Use actual company data for overview
-            populateOverviewTab({
-                registered_office_address: companyData.address || {
+            // Use Railway address data if available, otherwise fallback
+            let addressData;
+            if (companyData.address && typeof companyData.address === 'object') {
+                // Railway format - convert to API format for populateOverviewTab
+                addressData = {
+                    address_line_1: companyData.address.line1,
+                    address_line_2: companyData.address.line2,
+                    locality: companyData.address.postTown,
+                    region: companyData.address.county,
+                    postal_code: companyData.address.postCode,
+                    country: companyData.address.country
+                };
+            } else {
+                // Fallback format
+                addressData = {
                     address_line_1: companyData.addressLine1 || 'Address not available',
                     locality: companyData.locality || '',
                     postal_code: companyData.postalCode || ''
-                },
+                };
+            }
+            
+            // Use actual company data for overview
+            populateOverviewTab({
+                registered_office_address: addressData,
                 type: companyData.companyType || companyData.company_type || 'Private Limited Company',
                 company_status: companyData.status || companyData.company_status || 'Active',
                 sic_codes: companyData.sicCodes || [],
