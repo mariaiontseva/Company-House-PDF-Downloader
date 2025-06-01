@@ -5409,7 +5409,10 @@
                                     county: company.RegAddress_County,
                                     postCode: company.RegAddress_PostCode,
                                     country: company.RegAddress_Country
-                                }
+                                },
+                                // Railway date fields for accounts and confirmation statements
+                                railwayAccountsNextDue: company.Accounts_NextDueDate,
+                                railwayConfStmtNextDue: company.ConfStmtNextDueDate
                             };
                         });
                         
@@ -5968,7 +5971,9 @@
                                             county: companyData.RegAddress_County,
                                             postCode: companyData.RegAddress_PostCode,
                                             country: companyData.RegAddress_Country
-                                        }
+                                        },
+                                        railwayAccountsNextDue: companyData.Accounts_NextDueDate,
+                                        railwayConfStmtNextDue: companyData.ConfStmtNextDueDate
                                     };
                                     await showCompanyModal(transformedCompany);
                                 }
@@ -6092,7 +6097,7 @@
                 { selector: '.stat-box:nth-child(4) .stat-detail', value: `${company.outstandingCharges || 0} outstanding` }
             ];
             
-            // Update ACCOUNTS status
+            // Update ACCOUNTS status - use API data (more current)
             const accountsBox = document.querySelector('#companyModal .stat-box:nth-child(5)');
             if (accountsBox) {
                 const accountsValue = accountsBox.querySelector('.stat-value');
@@ -6114,7 +6119,7 @@
                 }
             }
             
-            // Update CONFIRMATION STATEMENT status
+            // Update CONFIRMATION STATEMENT status - use API data (more current)
             const confirmationBox = document.querySelector('#companyModal .stat-box:nth-child(6)');
             if (confirmationBox) {
                 const confirmationValue = confirmationBox.querySelector('.stat-value');
@@ -6278,14 +6283,14 @@
                 console.log('🔸 Fetching detailed data for company:', companyNumber);
                 
                 // Fetch company profile using the worker proxy
-                const API_KEY = 'e31d47f6-c361-4fa0-a2f9-8e2c68968e90';
+                const API_KEY = '22aefa40-ee9e-47c0-b40a-2dd3c03165c6';
                 const response = await fetchWithWorker(`https://api.companieshouse.gov.uk/company/${companyNumber}`, API_KEY);
                 
                 if (response.ok) {
                     const companyData = await response.json();
                     populateOverviewTab(companyData);
                     
-                    // Update accounts and confirmation statement status from API data
+                    // Update accounts status from API data
                     if (companyData.accounts) {
                         const accountsBox = document.querySelector('#companyModal .stat-box:nth-child(5)');
                         if (accountsBox) {
@@ -6314,6 +6319,7 @@
                         }
                     }
                     
+                    // Update confirmation statement status from API data
                     if (companyData.confirmation_statement) {
                         const confirmationBox = document.querySelector('#companyModal .stat-box:nth-child(6)');
                         if (confirmationBox) {
@@ -6442,7 +6448,7 @@
         // Fetch and populate officers data
         async function fetchOfficers(companyNumber) {
             try {
-                const API_KEY = 'e31d47f6-c361-4fa0-a2f9-8e2c68968e90';
+                const API_KEY = '22aefa40-ee9e-47c0-b40a-2dd3c03165c6';
                 const response = await fetchWithWorker(`https://api.companieshouse.gov.uk/company/${companyNumber}/officers`, API_KEY);
                 
                 if (response.ok) {
@@ -6524,7 +6530,7 @@
         // Fetch and populate charges data
         async function fetchCharges(companyNumber) {
             try {
-                const API_KEY = 'e31d47f6-c361-4fa0-a2f9-8e2c68968e90';
+                const API_KEY = '22aefa40-ee9e-47c0-b40a-2dd3c03165c6';
                 const response = await fetchWithWorker(`https://api.companieshouse.gov.uk/company/${companyNumber}/charges`, API_KEY);
                 
                 if (response.ok) {
@@ -6621,7 +6627,7 @@
         // Fetch and populate filing history
         async function fetchFilingHistory(companyNumber) {
             try {
-                const API_KEY = 'e31d47f6-c361-4fa0-a2f9-8e2c68968e90';
+                const API_KEY = '22aefa40-ee9e-47c0-b40a-2dd3c03165c6';
                 const response = await fetchWithWorker(`https://api.companieshouse.gov.uk/company/${companyNumber}/filing-history`, API_KEY);
                 
                 if (response.ok) {
@@ -6807,6 +6813,7 @@
                 });
             }
             populateFilingHistoryTab(filings);
+            
             
             // Update insights tab with risk calculation
             updateRiskInsightsTab(companyData);
