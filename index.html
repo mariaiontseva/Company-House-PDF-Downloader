@@ -6825,7 +6825,7 @@
                         statusBadge.style.color = '#ef4444';
                     }
                     console.log('🔸 Updated company status to:', companyData.company_status, '(from CH API)');
-                } else if (companyData.type === 'royal-charter') {
+                } else if (companyData.company_number?.startsWith('RC') || companyData.type?.toLowerCase().includes('royal charter')) {
                     // Royal Charter companies are presumed active if they appear in CH API
                     statusBadge.textContent = '● Active';
                     statusBadge.className = 'badge active-badge';
@@ -6854,7 +6854,7 @@
                     }
                     
                     console.log('🔸 Updated company age to:', ageInYears, 'years (from CH API)');
-                } else if (companyData.type === 'royal-charter' && companyData.company_number.startsWith('RC')) {
+                } else if (companyData.company_number?.startsWith('RC')) {
                     // For Royal Charter companies, try to get incorporation date from Railway data
                     console.log('🔸 Looking for Railway data for RC company:', companyData.company_number);
                     
@@ -8360,15 +8360,15 @@
                 <!-- Header -->
                 <div class="card-header">
                     <div class="company-info">
-                        <div class="company-title">DAMSON (GP) LIMITED</div>
+                        <div class="company-title">Loading Company...</div>
                         <div class="company-subtitle" id="modal-subtitle" style="display: none;"></div>
                         
                         <!-- Company badges and risk badge row -->
                         <div class="badges-row">
                             <div class="company-badges">
-                                <span class="badge active-badge">● Active</span>
-                                <span class="badge company-number">06753188</span>
-                                <span class="badge company-type">ltd</span>
+                                <span class="badge active-badge">● Loading...</span>
+                                <span class="badge company-number">Loading...</span>
+                                <span class="badge company-type">Loading...</span>
                                 <div class="badge dropdown-badge">
                                     Other Services
                                     <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
@@ -8388,34 +8388,34 @@
                         <!-- Stats Grid -->
                         <div class="stats-grid">
                             <div class="stat-box">
-                                <div class="stat-value">16</div>
+                                <div class="stat-value">...</div>
                                 <div class="stat-label">YEARS OLD</div>
-                                <div class="stat-detail">Inc 19 Nov 2008</div>
+                                <div class="stat-detail">Loading...</div>
                             </div>
                             <div class="stat-box">
-                                <div class="stat-value">4</div>
+                                <div class="stat-value">...</div>
                                 <div class="stat-label">OFFICERS</div>
-                                <div class="stat-detail">4 active</div>
+                                <div class="stat-detail">Loading...</div>
                             </div>
                             <div class="stat-box">
-                                <div class="stat-value">131</div>
+                                <div class="stat-value">...</div>
                                 <div class="stat-label">FILINGS</div>
-                                <div class="stat-detail download-link" onclick="switchModalTab('filings')">Download</div>
+                                <div class="stat-detail download-link" onclick="switchModalTab('filings')">Loading...</div>
                             </div>
                             <div class="stat-box charges-box">
-                                <div class="stat-value charges-number">6</div>
+                                <div class="stat-value charges-number">...</div>
                                 <div class="stat-label">CHARGES</div>
-                                <div class="stat-detail">6 outstanding</div>
+                                <div class="stat-detail">Loading...</div>
                             </div>
                             <div class="stat-box">
-                                <div class="stat-value">✓</div>
+                                <div class="stat-value">...</div>
                                 <div class="stat-label">ACCOUNTS</div>
-                                <div class="stat-detail">Next: 30 Sept 2025</div>
+                                <div class="stat-detail">Loading...</div>
                             </div>
                             <div class="stat-box">
-                                <div class="stat-value">✓</div>
+                                <div class="stat-value">...</div>
                                 <div class="stat-label">CONFIRMATION STATEMENT</div>
-                                <div class="stat-detail">Up to date</div>
+                                <div class="stat-detail">Loading...</div>
                             </div>
                         </div>
                     </div>
