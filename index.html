@@ -7444,6 +7444,15 @@
                     }
                     
                     populateOfficersTab(officers, companyNumber, incorporationDate);
+                    
+                    // Also enhance immediately if People tab is visible
+                    setTimeout(() => {
+                        const peopleTab = document.querySelector('#companyModal #people');
+                        if (peopleTab && peopleTab.classList.contains('active')) {
+                            console.log('🔸 People tab is active, enhancing officer names immediately...');
+                            enhanceOfficerNames();
+                        }
+                    }, 500);
                 } else {
                     // Fallback to basic data
                     const fallbackOfficers = [
@@ -7534,6 +7543,8 @@
                 <h3>People & Control</h3>
                 ${officerHTML}
             `;
+            
+            console.log('🔸 Officers HTML populated, officers count:', sortedOfficers.length);
             
             // Enhance officer names with director lookup badges
             console.log('Calling enhanceOfficerNames...');
