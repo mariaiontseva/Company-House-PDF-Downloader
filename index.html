@@ -8760,6 +8760,17 @@
                     categoryHero.style.border = '10px solid yellow';
                     categoryHero.innerHTML = '<h1 style="color: white; text-align: center; padding: 50px;">CATEGORY PAGE WORKING!</h1>';
                     console.log('🔍 SEO: EXTREME TEST - Hero element:', categoryHero);
+                    
+                    // Debug: Check if element is actually in DOM
+                    console.log('🔍 SEO: Element parent:', categoryHero.parentNode);
+                    console.log('🔍 SEO: Element in document:', document.contains(categoryHero));
+                    console.log('🔍 SEO: Element computed style:', window.getComputedStyle(categoryHero).visibility);
+                    console.log('🔍 SEO: Element computed display:', window.getComputedStyle(categoryHero).display);
+                    
+                    // Force absolute visibility
+                    categoryHero.style.visibility = 'visible !important';
+                    categoryHero.style.display = 'block !important';
+                    categoryHero.style.opacity = '1 !important';
                 }
                 
                 // Filter companies based on category
