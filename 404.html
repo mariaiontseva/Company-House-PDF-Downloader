@@ -57,14 +57,45 @@
             transform: translateY(-2px);
             box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
         }
+        
+        /* Loading state for redirects */
+        .loading {
+            display: none;
+            text-align: center;
+        }
+        .loading.show {
+            display: block;
+        }
+        .container.hide {
+            display: none;
+        }
+        .spinner {
+            border: 4px solid rgba(102, 126, 234, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid #667eea;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="container" id="errorContent">
         <h1>404</h1>
         <h2>Page Not Found</h2>
         <p>Sorry, the page you're looking for doesn't exist. You may have mistyped the URL or the page may have been moved.</p>
         <a href="/" class="btn">Return to Homepage</a>
+    </div>
+    
+    <div class="container loading" id="loadingContent">
+        <div class="spinner"></div>
+        <h2>Redirecting...</h2>
+        <p>Taking you to the right page...</p>
     </div>
 
     <!-- GitHub Pages SEO URL Routing -->
@@ -75,10 +106,20 @@
             
             console.log('GitHub Pages SEO router - Path:', path);
             
+            // Function to show loading and redirect
+            function redirectWithLoading(url, delay = 0) {
+                document.getElementById('errorContent').style.display = 'none';
+                document.getElementById('loadingContent').style.display = 'block';
+                
+                setTimeout(() => {
+                    window.location.replace(url);
+                }, delay);
+            }
+            
             // Test redirect
             if (path === '/test-htaccess') {
                 console.log('Test redirect working!');
-                window.location.replace('/#test-success');
+                redirectWithLoading('/#test-success');
                 return;
             }
             
@@ -87,7 +128,7 @@
             if (companyMatch) {
                 const companyNumber = companyMatch[1];
                 console.log('Redirecting to company:', companyNumber);
-                window.location.replace(`/#company/${companyNumber}`);
+                redirectWithLoading(`/#company/${companyNumber}`);
                 return;
             }
             
@@ -101,7 +142,7 @@
             
             if (categoryRoutes.hasOwnProperty(path)) {
                 console.log('Redirecting to category page');
-                window.location.replace('/');
+                redirectWithLoading('/');
                 return;
             }
             
@@ -110,7 +151,7 @@
             if (industryMatch) {
                 const industry = industryMatch[1];
                 console.log('Redirecting to industry:', industry);
-                window.location.replace(`/#industry/${industry}`);
+                redirectWithLoading(`/#industry/${industry}`);
                 return;
             }
             
@@ -119,7 +160,7 @@
             if (locationMatch) {
                 const location = locationMatch[1];
                 console.log('Redirecting to location:', location);
-                window.location.replace(`/#location/${location}`);
+                redirectWithLoading(`/#location/${location}`);
                 return;
             }
             
