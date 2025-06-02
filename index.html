@@ -8684,6 +8684,33 @@
             }
         }
         
+        // Always check URL parameters on page load (separate from auth flow)
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                checkURLParameters();
+            }, 1000); // Wait for companies to load
+        });
+        
+        // Check URL parameters for SEO routing
+        function checkURLParameters() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const company = urlParams.get('company');
+            const category = urlParams.get('category');
+            
+            console.log('🔍 SEO: Checking URL parameters - company:', company, 'category:', category);
+            
+            if (company) {
+                // Handle company URL routing
+                console.log('🔍 SEO: Loading company from URL parameter:', company);
+                window.location.hash = `#company/${company}`;
+            } else if (category) {
+                // Handle category pages
+                console.log('🔍 SEO: Loading category page:', category);
+                updateCategoryMetaTags(category);
+                showCategoryPage(category);
+            }
+        }
+        
         // Show category page with filtered companies
         function showCategoryPage(category) {
             console.log('🔍 SEO: Showing category page:', category);
