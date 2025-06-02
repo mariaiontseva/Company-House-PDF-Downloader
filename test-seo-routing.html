@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SEO Routing Test - DocSpace</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-link {
+            display: inline-block;
+            margin: 5px;
+            padding: 10px 15px;
+            background: #4F46E5;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+        .test-link:hover {
+            background: #4338CA;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .status.success {
+            background: #D1FAE5;
+            color: #065F46;
+        }
+        .status.error {
+            background: #FEE2E2;
+            color: #991B1B;
+        }
+        .console {
+            background: #1F2937;
+            color: #10B981;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 14px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 SEO Routing Test Page</h1>
+    
+    <div class="test-section">
+        <h2>Current URL Information</h2>
+        <div class="console">
+            <div>Full URL: <span id="fullUrl"></span></div>
+            <div>Path: <span id="path"></span></div>
+            <div>Hash: <span id="hash"></span></div>
+            <div>Query: <span id="query"></span></div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test Hash URLs (Current System)</h2>
+        <p>These should work immediately:</p>
+        <a href="/#company/12387565" class="test-link">CHERRYPICKED DESIGN</a>
+        <a href="/#company/08510890" class="test-link">LOBSTER IT</a>
+        <a href="/#company/00445790" class="test-link">TESCO PLC</a>
+        <a href="/#company/RC000941" class="test-link">Royal Charter Company</a>
+    </div>
+
+    <div class="test-section">
+        <h2>Test Clean URLs (New System)</h2>
+        <p>These will work after .htaccess deployment:</p>
+        <a href="/company/12387565" class="test-link">CHERRYPICKED DESIGN</a>
+        <a href="/company/08510890" class="test-link">LOBSTER IT</a>
+        <a href="/company/00445790" class="test-link">TESCO PLC</a>
+        <a href="/company/RC000941" class="test-link">Royal Charter Company</a>
+    </div>
+
+    <div class="test-section">
+        <h2>Test Category URLs</h2>
+        <a href="/oldest-companies" class="test-link">Oldest Companies</a>
+        <a href="/newest-companies" class="test-link">Newest Companies</a>
+        <a href="/royal-charter-companies" class="test-link">Royal Charter</a>
+        <a href="/plc-companies" class="test-link">PLC Companies</a>
+    </div>
+
+    <div class="test-section">
+        <h2>Routing Mode</h2>
+        <button onclick="toggleMode()" style="padding: 10px 20px; font-size: 16px;">
+            Toggle Clean URLs: <span id="modeStatus">OFF</span>
+        </button>
+        <div id="modeInfo" class="status"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test Results</h2>
+        <div id="testResults"></div>
+    </div>
+
+    <script>
+        // Update URL info
+        function updateUrlInfo() {
+            document.getElementById('fullUrl').textContent = window.location.href;
+            document.getElementById('path').textContent = window.location.pathname;
+            document.getElementById('hash').textContent = window.location.hash || '(none)';
+            document.getElementById('query').textContent = window.location.search || '(none)';
+        }
+
+        // Toggle routing mode
+        function toggleMode() {
+            if (window.dualRouter) {
+                const isEnabled = window.toggleCleanUrls();
+                document.getElementById('modeStatus').textContent = isEnabled ? 'ON' : 'OFF';
+                document.getElementById('modeInfo').className = 'status ' + (isEnabled ? 'success' : 'error');
+                document.getElementById('modeInfo').textContent = isEnabled ? 
+                    '✅ Clean URLs enabled - new links will use /company/123 format' : 
+                    '❌ Clean URLs disabled - using #company/123 format';
+            } else {
+                document.getElementById('modeInfo').className = 'status error';
+                document.getElementById('modeInfo').textContent = '❌ Dual router not loaded';
+            }
+        }
+
+        // Run tests
+        function runTests() {
+            const results = document.getElementById('testResults');
+            results.innerHTML = '';
+
+            const tests = [
+                {
+                    name: 'Dual Router Loaded',
+                    test: () => window.dualRouter !== undefined
+                },
+                {
+                    name: 'SEO Manager Loaded', 
+                    test: () => window.seoManager !== undefined
+                },
+                {
+                    name: 'Hash routing function exists',
+                    test: () => typeof handleCompanyHash === 'function'
+                },
+                {
+                    name: 'Can detect clean URL',
+                    test: () => {
+                        const path = '/company/12345';
+                        return path.match(/^\/company\/([A-Z0-9]+)$/i) !== null;
+                    }
+                }
+            ];
+
+            tests.forEach(test => {
+                const result = document.createElement('div');
+                try {
+                    const passed = test.test();
+                    result.className = 'status ' + (passed ? 'success' : 'error');
+                    result.textContent = (passed ? '✅ ' : '❌ ') + test.name;
+                } catch (e) {
+                    result.className = 'status error';
+                    result.textContent = '❌ ' + test.name + ' - Error: ' + e.message;
+                }
+                results.appendChild(result);
+            });
+        }
+
+        // Initialize
+        updateUrlInfo();
+        window.addEventListener('hashchange', updateUrlInfo);
+        window.addEventListener('popstate', updateUrlInfo);
+        
+        // Wait for scripts to load
+        setTimeout(() => {
+            runTests();
+            toggleMode(); // Show initial state
+        }, 1000);
+    </script>
+</body>
+</html>
