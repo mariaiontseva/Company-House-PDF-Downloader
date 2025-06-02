@@ -3177,6 +3177,261 @@
             }
         }
         
+        /* Category Landing Page Styles */
+        .category-landing-page {
+            min-height: 100vh;
+            padding: 0;
+            color: #e2e8f0;
+        }
+        
+        .category-page-header {
+            padding: 100px 40px 80px 40px;
+            text-align: center;
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(51, 65, 85, 0.3);
+        }
+        
+        .header-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .category-page-header .category-icon {
+            font-size: 80px;
+            margin-bottom: 32px;
+            text-shadow: 0 0 30px rgba(139, 92, 246, 0.3);
+        }
+        
+        .category-page-header h1 {
+            font-size: 48px;
+            font-weight: 700;
+            color: #f1f5f9;
+            margin: 0 0 24px 0;
+            text-shadow: 0 0 20px rgba(99, 102, 241, 0.2);
+        }
+        
+        .category-page-header .subtitle {
+            font-size: 24px;
+            font-weight: 500;
+            color: #cbd5e1;
+            margin: 0 0 32px 0;
+        }
+        
+        .category-page-header .description {
+            font-size: 18px;
+            color: #94a3b8;
+            line-height: 1.7;
+            margin: 0 0 32px 0;
+        }
+        
+        .stats-badge {
+            display: inline-block;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+            color: white;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 40px;
+        }
+        
+        .cta-section {
+            border-top: 1px solid rgba(51, 65, 85, 0.3);
+            padding-top: 32px;
+        }
+        
+        .price-badge {
+            display: inline-block;
+            padding: 16px 32px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 24px;
+            margin-bottom: 16px;
+        }
+        
+        .companies-section {
+            padding: 80px 40px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .companies-section h2 {
+            font-size: 36px;
+            font-weight: 700;
+            color: #f1f5f9;
+            text-align: center;
+            margin-bottom: 48px;
+        }
+        
+        .companies-count {
+            text-align: center;
+            font-size: 18px;
+            color: #94a3b8;
+            margin-bottom: 32px;
+        }
+        
+        .company-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 24px;
+        }
+        
+        .category-company-card {
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(51, 65, 85, 0.3);
+            border-radius: 12px;
+            padding: 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .category-company-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+            border-color: rgba(139, 92, 246, 0.5);
+        }
+        
+        .company-header {
+            margin-bottom: 16px;
+        }
+        
+        .company-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #f1f5f9;
+            margin: 0 0 8px 0;
+            line-height: 1.3;
+        }
+        
+        .company-number {
+            font-size: 14px;
+            color: #94a3b8;
+            font-family: monospace;
+        }
+        
+        .company-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .company-age {
+            font-size: 14px;
+            color: #cbd5e1;
+        }
+        
+        .company-status {
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .status-active {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+        
+        .download-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 16px;
+            border-top: 1px solid rgba(51, 65, 85, 0.3);
+        }
+        
+        .download-section .price {
+            font-size: 20px;
+            font-weight: 700;
+            color: #10b981;
+        }
+        
+        .download-text {
+            font-size: 14px;
+            color: #8b5cf6;
+            font-weight: 500;
+        }
+        
+        .category-info-section {
+            padding: 80px 40px;
+            background: rgba(15, 23, 42, 0.8);
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .info-card {
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(51, 65, 85, 0.3);
+            border-radius: 12px;
+            padding: 32px;
+        }
+        
+        .info-card h3 {
+            font-size: 24px;
+            font-weight: 600;
+            color: #f1f5f9;
+            margin: 0 0 24px 0;
+        }
+        
+        .info-card ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .info-card li {
+            padding: 8px 0;
+            color: #cbd5e1;
+            position: relative;
+            padding-left: 24px;
+        }
+        
+        .info-card li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #10b981;
+            font-weight: bold;
+        }
+        
+        @media (max-width: 768px) {
+            .category-page-header {
+                padding: 60px 24px 40px 24px;
+            }
+            
+            .category-page-header h1 {
+                font-size: 36px;
+            }
+            
+            .category-page-header .subtitle {
+                font-size: 20px;
+            }
+            
+            .companies-section {
+                padding: 40px 24px;
+            }
+            
+            .company-cards-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .info-grid {
+                grid-template-columns: 1fr;
+                gap: 24px;
+            }
+        }
+        
         .show-more-btn:active {
             opacity: 0.8;
         }
@@ -8716,62 +8971,220 @@
         function showCategoryPage(category) {
             console.log('🔍 SEO: Showing category page:', category);
             
-            // Wait for DOM to be ready and companies to load
-            const setupCategoryPage = () => {
-                // Remove any existing category hero
-                const existingHero = document.querySelector('.category-hero');
-                if (existingHero) {
-                    existingHero.remove();
+            // Replace the entire page content with category-specific page
+            console.log('🔍 SEO: Creating dedicated category landing page');
+            createCategoryLandingPage(category);
+        }
+        
+        // Create a complete dedicated landing page for category
+        function createCategoryLandingPage(category) {
+            // Hide the existing homepage content
+            const existingMain = document.querySelector('main') || document.body;
+            Array.from(existingMain.children).forEach(child => {
+                if (!child.classList.contains('bg-animation')) {
+                    child.style.display = 'none';
                 }
-                
-                // Find a good place to insert the hero
-                const bodyElement = document.body;
-                const tabsContainer = document.querySelector('.tabs-container');
-                
-                console.log('🔍 SEO: Body element found:', !!bodyElement);
-                console.log('🔍 SEO: Tabs container found:', !!tabsContainer);
-                
-                // Create category hero section
-                const categoryHero = createCategoryHero(category);
-                if (categoryHero && bodyElement) {
-                    // FORCE INSERT DIRECTLY INTO BODY - bypass all containers
-                    console.log('🔍 SEO: Forcing direct body insertion');
-                    document.body.appendChild(categoryHero);
-                    
-                    console.log('🔍 SEO: Category hero added to page');
-                    
-                    // EXTREME VISIBILITY TEST - Make it impossible to miss
-                    categoryHero.style.position = 'fixed';
-                    categoryHero.style.top = '0';
-                    categoryHero.style.left = '0';
-                    categoryHero.style.width = '100vw';
-                    categoryHero.style.height = '200px';
-                    categoryHero.style.backgroundColor = 'red';
-                    categoryHero.style.zIndex = '99999';
-                    categoryHero.style.border = '10px solid yellow';
-                    categoryHero.innerHTML = '<h1 style="color: white; text-align: center; padding: 50px;">CATEGORY PAGE WORKING!</h1>';
-                    console.log('🔍 SEO: EXTREME TEST - Hero element:', categoryHero);
-                    
-                    // Debug: Check if element is actually in DOM
-                    console.log('🔍 SEO: Element parent:', categoryHero.parentNode);
-                    console.log('🔍 SEO: Element in document:', document.contains(categoryHero));
-                    console.log('🔍 SEO: Element computed style:', window.getComputedStyle(categoryHero).visibility);
-                    console.log('🔍 SEO: Element computed display:', window.getComputedStyle(categoryHero).display);
-                    
-                    // Force absolute visibility
-                    categoryHero.style.visibility = 'visible !important';
-                    categoryHero.style.display = 'block !important';
-                    categoryHero.style.opacity = '1 !important';
+            });
+            
+            // Create dedicated category page
+            const categoryPage = document.createElement('div');
+            categoryPage.className = 'category-landing-page';
+            categoryPage.innerHTML = createCategoryPageHTML(category);
+            
+            // Insert the new page
+            document.body.appendChild(categoryPage);
+            
+            // Load and display companies for this category
+            setTimeout(() => {
+                populateCategoryCompanies(category);
+            }, 500);
+        }
+        
+        // Create the HTML structure for category pages
+        function createCategoryPageHTML(category) {
+            const categoryData = {
+                'plc': {
+                    title: 'Public Limited Companies (PLCs) in the UK',
+                    subtitle: 'Complete directory of UK public corporations',
+                    description: 'Browse and download documents for all UK Public Limited Companies (PLCs). These are the largest corporations in Britain, publicly traded on stock exchanges.',
+                    icon: '📈',
+                    stats: 'Over 5,000 PLCs registered in the UK'
+                },
+                'royal-charter': {
+                    title: 'Royal Charter Companies Since 1327',
+                    subtitle: 'Ancient corporations established by royal decree',
+                    description: 'Explore the oldest companies in British history. These prestigious institutions were granted special status by the Crown, some dating back 700 years.',
+                    icon: '👑',
+                    stats: 'Historic companies from 1327 onwards'
+                },
+                'oldest': {
+                    title: 'Oldest Companies in the UK',
+                    subtitle: 'Historic British businesses through the centuries',
+                    description: 'Discover companies that have survived wars, economic upheavals, and centuries of change. Many of these businesses predate entire countries.',
+                    icon: '🏛️',
+                    stats: 'Businesses spanning 700+ years of history'
+                },
+                'newest': {
+                    title: 'Recently Incorporated UK Companies',
+                    subtitle: 'Latest business registrations and startups',
+                    description: 'The newest companies shaping the future of British business. Fresh innovations, emerging technologies, and new market opportunities.',
+                    icon: '🚀',
+                    stats: 'Latest company registrations'
                 }
-                
-                // Filter companies based on category
-                setTimeout(() => {
-                    filterCompaniesByCategory(category);
-                }, 100);
             };
             
-            // Start setup
-            setupCategoryPage();
+            const data = categoryData[category] || categoryData['plc'];
+            
+            return `
+                <div class="category-page-header">
+                    <div class="header-content">
+                        <div class="category-icon">${data.icon}</div>
+                        <h1>${data.title}</h1>
+                        <p class="subtitle">${data.subtitle}</p>
+                        <p class="description">${data.description}</p>
+                        <div class="stats-badge">${data.stats}</div>
+                        <div class="cta-section">
+                            <div class="price-badge">£5 per company</div>
+                            <p>Download complete filing history including accounts, returns, and all statutory documents</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="companies-section">
+                    <h2>Featured ${data.title}</h2>
+                    <div class="companies-grid-category" id="categoryCompaniesGrid">
+                        <div class="loading-companies">Loading companies...</div>
+                    </div>
+                </div>
+                
+                <div class="category-info-section">
+                    <div class="info-grid">
+                        <div class="info-card">
+                            <h3>What You Get</h3>
+                            <ul>
+                                <li>Complete incorporation documents</li>
+                                <li>Annual accounts and returns</li>
+                                <li>Director and shareholder information</li>
+                                <li>All statutory filings</li>
+                                <li>Instant download in ZIP format</li>
+                            </ul>
+                        </div>
+                        <div class="info-card">
+                            <h3>Why Download?</h3>
+                            <ul>
+                                <li>Due diligence and background checks</li>
+                                <li>Business intelligence and research</li>
+                                <li>Legal and compliance verification</li>
+                                <li>Investment analysis</li>
+                                <li>Academic and historical research</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Populate companies for the specific category
+        function populateCategoryCompanies(category) {
+            const grid = document.getElementById('categoryCompaniesGrid');
+            if (!grid) return;
+            
+            // Filter companies based on category
+            const allCompanies = [...(window.oldestCompanies || []), ...(window.newestCompanies || [])];
+            let filteredCompanies = [];
+            
+            switch(category) {
+                case 'plc':
+                    // Get PLCs from both datasets and search for more
+                    filteredCompanies = allCompanies.filter(c => 
+                        (c.name || c.CompanyName || '').toUpperCase().includes('PLC')
+                    );
+                    // If we don't have enough PLCs, we should search for more
+                    if (filteredCompanies.length < 20) {
+                        searchForMorePLCs().then(morePLCs => {
+                            filteredCompanies = [...filteredCompanies, ...morePLCs];
+                            renderCategoryCompanies(filteredCompanies.slice(0, 100), grid);
+                        });
+                        return;
+                    }
+                    break;
+                case 'royal-charter':
+                    filteredCompanies = allCompanies.filter(c => 
+                        (c.number || c.CompanyNumber || '').startsWith('RC')
+                    );
+                    break;
+                case 'oldest':
+                    filteredCompanies = window.oldestCompanies || [];
+                    break;
+                case 'newest':
+                    filteredCompanies = window.newestCompanies || [];
+                    break;
+            }
+            
+            renderCategoryCompanies(filteredCompanies.slice(0, 100), grid);
+        }
+        
+        // Render company cards for category page
+        function renderCategoryCompanies(companies, grid) {
+            if (!companies.length) {
+                grid.innerHTML = '<p>No companies found for this category.</p>';
+                return;
+            }
+            
+            const companiesHTML = companies.map(company => {
+                const name = company.name || company.CompanyName || 'Unknown Company';
+                const number = company.number || company.CompanyNumber || '';
+                const status = company.status || company.company_status || 'Active';
+                const age = calculateCompanyAge(company.incorporationDate || company.date_of_creation);
+                
+                return `
+                    <div class="category-company-card" onclick="viewCompanyDetails(${JSON.stringify(company).replace(/"/g, '&quot;')})">
+                        <div class="company-header">
+                            <h3 class="company-name">${name}</h3>
+                            <span class="company-number">${number}</span>
+                        </div>
+                        <div class="company-details">
+                            <div class="company-age">${age}</div>
+                            <div class="company-status status-${status.toLowerCase()}">${status}</div>
+                        </div>
+                        <div class="download-section">
+                            <span class="price">£5</span>
+                            <span class="download-text">Download All Documents</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            grid.innerHTML = `
+                <div class="companies-count">${companies.length} companies found</div>
+                <div class="company-cards-grid">
+                    ${companiesHTML}
+                </div>
+            `;
+        }
+        
+        // Search for more PLCs using Companies House API
+        async function searchForMorePLCs() {
+            try {
+                const response = await fetch('https://blue-flower-d40f.mahin84.workers.dev/?target=' + 
+                    encodeURIComponent('https://api.companieshouse.gov.uk/search/companies?q=PLC&items_per_page=100'));
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    return data.items || [];
+                }
+            } catch (error) {
+                console.log('Could not fetch additional PLCs:', error);
+            }
+            return [];
+        }
+        
+        // Helper function to calculate company age
+        function calculateCompanyAge(incorporationDate) {
+            if (!incorporationDate) return 'Unknown age';
+            
+            const age = Math.floor((new Date() - new Date(incorporationDate)) / (365.25 * 24 * 60 * 60 * 1000));
+            return age > 0 ? `${age} years old` : 'Less than 1 year';
         }
         
         // Create hero section for category pages
