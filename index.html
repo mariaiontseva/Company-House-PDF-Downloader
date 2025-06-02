@@ -8749,10 +8749,17 @@
                     
                     console.log('🔍 SEO: Category hero added to page');
                     
-                    // Add a visible test element to confirm it's working
-                    categoryHero.style.border = '3px solid red';
-                    categoryHero.style.zIndex = '9999';
-                    console.log('🔍 SEO: Hero element:', categoryHero);
+                    // EXTREME VISIBILITY TEST - Make it impossible to miss
+                    categoryHero.style.position = 'fixed';
+                    categoryHero.style.top = '0';
+                    categoryHero.style.left = '0';
+                    categoryHero.style.width = '100vw';
+                    categoryHero.style.height = '200px';
+                    categoryHero.style.backgroundColor = 'red';
+                    categoryHero.style.zIndex = '99999';
+                    categoryHero.style.border = '10px solid yellow';
+                    categoryHero.innerHTML = '<h1 style="color: white; text-align: center; padding: 50px;">CATEGORY PAGE WORKING!</h1>';
+                    console.log('🔍 SEO: EXTREME TEST - Hero element:', categoryHero);
                 }
                 
                 // Filter companies based on category
