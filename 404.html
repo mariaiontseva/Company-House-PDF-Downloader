@@ -58,29 +58,45 @@
             box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
         }
         
-        /* Loading state for redirects */
+        /* Loading state for redirects - match 404 page styling */
         .loading {
             display: none;
-            text-align: center;
         }
         .loading.show {
-            display: block;
+            display: flex;
         }
         .container.hide {
             display: none;
         }
         .spinner {
-            border: 4px solid rgba(102, 126, 234, 0.3);
+            border: 4px solid rgba(102, 126, 234, 0.2);
             border-radius: 50%;
             border-top: 4px solid #667eea;
-            width: 40px;
-            height: 40px;
+            width: 60px;
+            height: 60px;
             animation: spin 1s linear infinite;
-            margin: 20px auto;
+            margin: 0 auto 30px auto;
         }
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
+        }
+        
+        /* Loading page uses same beautiful styling as 404 */
+        .loading h1 {
+            color: #2d3748;
+            font-size: 72px;
+            margin: 0;
+        }
+        .loading h2 {
+            color: #4a5568;
+            font-size: 24px;
+            margin: 20px 0;
+        }
+        .loading p {
+            color: #718096;
+            line-height: 1.6;
+            margin: 20px 0;
         }
     </style>
 </head>
@@ -94,8 +110,9 @@
     
     <div class="container loading" id="loadingContent">
         <div class="spinner"></div>
+        <h1>🚀</h1>
         <h2>Redirecting...</h2>
-        <p>Taking you to the right page...</p>
+        <p>Taking you to the right page. This will just take a moment.</p>
     </div>
 
     <!-- GitHub Pages SEO URL Routing -->
