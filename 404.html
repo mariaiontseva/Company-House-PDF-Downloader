@@ -209,17 +209,18 @@
                 return;
             }
             
-            // Category pages
+            // Category pages - redirect to index with parameters
             const categoryRoutes = {
-                '/oldest-companies': '',
-                '/newest-companies': '', 
-                '/royal-charter-companies': '',
-                '/plc-companies': ''
+                '/oldest-companies': '/?category=oldest',
+                '/newest-companies': '/?category=newest',
+                '/royal-charter-companies': '/?category=royal-charter',
+                '/plc-companies': '/?category=plc',
+                '/limited-companies': '/?category=limited'
             };
             
-            if (categoryRoutes.hasOwnProperty(path)) {
-                console.log('Redirecting to category page');
-                redirectWithLoading('/');
+            if (categoryRoutes[path]) {
+                console.log('Redirecting to category page:', categoryRoutes[path]);
+                redirectWithLoading(categoryRoutes[path]);
                 return;
             }
             

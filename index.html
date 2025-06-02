@@ -3096,6 +3096,87 @@
             opacity: 0.9;
             box-shadow: 0 4px 8px rgba(139, 92, 246, 0.3);
         }
+        
+        /* Category Hero Sections */
+        .category-hero {
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(51, 65, 85, 0.3);
+            border-radius: 16px;
+            margin: 40px auto;
+            max-width: 1200px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
+        }
+        
+        .category-hero-content {
+            padding: 60px 40px;
+            text-align: center;
+        }
+        
+        .category-icon {
+            font-size: 64px;
+            margin-bottom: 24px;
+            text-shadow: 0 0 30px rgba(139, 92, 246, 0.3);
+        }
+        
+        .category-title {
+            font-size: 48px;
+            font-weight: 700;
+            color: #f1f5f9;
+            margin: 0 0 16px 0;
+            text-shadow: 0 0 20px rgba(99, 102, 241, 0.2);
+        }
+        
+        .category-subtitle {
+            font-size: 20px;
+            font-weight: 500;
+            color: #cbd5e1;
+            margin: 0 0 24px 0;
+        }
+        
+        .category-description {
+            font-size: 16px;
+            color: #94a3b8;
+            line-height: 1.7;
+            max-width: 700px;
+            margin: 0 auto 32px auto;
+        }
+        
+        .category-stats {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        
+        .stat-badge {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+            color: white;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            box-shadow: 0 4px 14px 0 rgba(139, 92, 246, 0.3);
+        }
+        
+        @media (max-width: 768px) {
+            .category-hero-content {
+                padding: 40px 24px;
+            }
+            
+            .category-title {
+                font-size: 36px;
+            }
+            
+            .category-subtitle {
+                font-size: 18px;
+            }
+            
+            .category-icon {
+                font-size: 48px;
+            }
+        }
+        
         .show-more-btn:active {
             opacity: 0.8;
         }
@@ -8599,6 +8680,108 @@
             } else if (category) {
                 // Handle category pages
                 updateCategoryMetaTags(category);
+                showCategoryPage(category);
+            }
+        }
+        
+        // Show category page with filtered companies
+        function showCategoryPage(category) {
+            console.log('🔍 SEO: Showing category page:', category);
+            
+            // Add category header to the page
+            const companiesGrid = document.querySelector('.companies-grid');
+            if (companiesGrid) {
+                // Create category hero section
+                const categoryHero = createCategoryHero(category);
+                companiesGrid.parentNode.insertBefore(categoryHero, companiesGrid);
+                
+                // Filter companies based on category
+                setTimeout(() => {
+                    filterCompaniesByCategory(category);
+                }, 500);
+            }
+        }
+        
+        // Create hero section for category pages
+        function createCategoryHero(category) {
+            const categoryInfo = {
+                'oldest': {
+                    title: 'Oldest Companies in the UK',
+                    subtitle: 'Historic businesses including Royal Charter companies from 1327',
+                    description: 'Explore centuries of British business history. These ancient corporations have survived through wars, economic upheavals, and countless market changes.',
+                    icon: '🏛️',
+                    count: 'ancient'
+                },
+                'newest': {
+                    title: 'Recently Incorporated Companies',
+                    subtitle: 'Latest UK business registrations and startups',
+                    description: 'Discover the newest companies shaping the future of British business. Fresh innovations and emerging market opportunities.',
+                    icon: '🚀',
+                    count: 'newest'
+                },
+                'royal-charter': {
+                    title: 'Royal Charter Companies',
+                    subtitle: 'Ancient corporations established by royal decree since 1327',
+                    description: 'These prestigious institutions were granted special status by the Crown. View the complete history of Britain\'s most historic corporations.',
+                    icon: '👑',
+                    count: 'chartered'
+                },
+                'plc': {
+                    title: 'Public Limited Companies (PLCs)',
+                    subtitle: 'UK\'s largest publicly traded corporations',
+                    description: 'Browse major UK corporations listed on stock exchanges. Access complete financial filings and corporate documentation.',
+                    icon: '📈',
+                    count: 'public'
+                }
+            };
+            
+            const info = categoryInfo[category];
+            if (!info) return null;
+            
+            const heroElement = document.createElement('div');
+            heroElement.className = 'category-hero';
+            heroElement.innerHTML = `
+                <div class="category-hero-content">
+                    <div class="category-icon">${info.icon}</div>
+                    <h1 class="category-title">${info.title}</h1>
+                    <p class="category-subtitle">${info.subtitle}</p>
+                    <p class="category-description">${info.description}</p>
+                    <div class="category-stats">
+                        <span class="stat-badge">Download all documents for £5 per company</span>
+                    </div>
+                </div>
+            `;
+            
+            return heroElement;
+        }
+        
+        // Filter companies by category
+        function filterCompaniesByCategory(category) {
+            const allCompanies = [...oldestCompanies, ...newestCompanies];
+            let filteredCompanies = [];
+            
+            switch(category) {
+                case 'oldest':
+                    filteredCompanies = oldestCompanies;
+                    break;
+                case 'newest':
+                    filteredCompanies = newestCompanies;
+                    break;
+                case 'royal-charter':
+                    filteredCompanies = allCompanies.filter(c => 
+                        (c.number || c.CompanyNumber || '').startsWith('RC')
+                    );
+                    break;
+                case 'plc':
+                    filteredCompanies = allCompanies.filter(c => 
+                        (c.name || c.CompanyName || '').toUpperCase().includes('PLC')
+                    );
+                    break;
+            }
+            
+            // Render filtered companies
+            if (filteredCompanies.length > 0) {
+                renderCompanies({ companies: filteredCompanies });
             }
         }
         
@@ -8624,6 +8807,11 @@
                     title: 'Public Limited Companies (PLC) - Download Company Documents | DocSpace',
                     description: 'Browse all UK Public Limited Companies (PLCs). Download complete documentation including accounts, returns, and filings for £5.',
                     keywords: 'PLC companies, public limited companies, UK corporations, listed companies, public companies'
+                },
+                'limited': {
+                    title: 'Private Limited Companies (Ltd) - UK Company Documents | DocSpace',
+                    description: 'Browse UK Private Limited Companies. Download complete documentation for private limited companies including accounts and filings for £5.',
+                    keywords: 'limited companies, private limited companies, UK Ltd companies, small businesses, private companies'
                 }
             };
             
