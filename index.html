@@ -8734,18 +8734,9 @@
                 // Create category hero section
                 const categoryHero = createCategoryHero(category);
                 if (categoryHero && bodyElement) {
-                    // Insert after the tabs container or at the top of the page content
-                    if (tabsContainer) {
-                        tabsContainer.parentNode.insertBefore(categoryHero, tabsContainer.nextSibling);
-                    } else {
-                        // Insert after the animated background
-                        const bgAnimation = document.querySelector('.bg-animation');
-                        if (bgAnimation) {
-                            bgAnimation.parentNode.insertBefore(categoryHero, bgAnimation.nextSibling);
-                        } else {
-                            bodyElement.insertBefore(categoryHero, bodyElement.firstChild);
-                        }
-                    }
+                    // FORCE INSERT DIRECTLY INTO BODY - bypass all containers
+                    console.log('🔍 SEO: Forcing direct body insertion');
+                    document.body.appendChild(categoryHero);
                     
                     console.log('🔍 SEO: Category hero added to page');
                     
