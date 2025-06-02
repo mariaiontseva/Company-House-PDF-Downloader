@@ -430,4 +430,7 @@ if (!document.getElementById('director-lookup-styles')) {
     document.head.appendChild(styleElement.firstElementChild);
 }
 
-export default DirectorLookup;
+// Export for module systems if available
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = DirectorLookup;
+}
