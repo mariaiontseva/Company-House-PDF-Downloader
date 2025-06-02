@@ -1,0 +1,5 @@
+# MINIMAL TEST - Deploy this first to verify .htaccess is working
+RewriteEngine On
+
+# Simple test redirect - visit /test-htaccess to verify
+Redirect 302 /test-htaccess /#test-success

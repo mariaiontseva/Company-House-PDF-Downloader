@@ -1,0 +1,31 @@
+# GitHub Pages Jekyll configuration for DocSpace.uk
+title: "DocSpace.uk - Companies House Document Downloads"
+description: "Download all UK company documents from Companies House. Get complete filing history for £5 per company."
+
+# Enable GitHub Pages features
+plugins:
+  - jekyll-redirect-from
+
+# URL structure
+permalink: pretty
+
+# Include files that start with underscore
+include:
+  - _redirects
+
+# Exclude development files
+exclude:
+  - README.md
+  - package.json
+  - package-lock.json
+  - node_modules
+  - .git
+  - .gitignore
+  - "*.log"
+
+# SEO
+url: "https://docspace.uk"
+baseurl: ""
+
+# GitHub Pages settings
+github: [metadata]

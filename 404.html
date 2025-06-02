@@ -66,5 +66,66 @@
         <p>Sorry, the page you're looking for doesn't exist. You may have mistyped the URL or the page may have been moved.</p>
         <a href="/" class="btn">Return to Homepage</a>
     </div>
+
+    <!-- GitHub Pages SEO URL Routing -->
+    <script>
+        // Handle SEO-friendly URLs on GitHub Pages
+        (function() {
+            const path = window.location.pathname;
+            
+            console.log('GitHub Pages SEO router - Path:', path);
+            
+            // Test redirect
+            if (path === '/test-htaccess') {
+                console.log('Test redirect working!');
+                window.location.replace('/#test-success');
+                return;
+            }
+            
+            // Company pages: /company/12387565 -> /#company/12387565
+            const companyMatch = path.match(/^\/company\/([A-Z0-9]+)$/i);
+            if (companyMatch) {
+                const companyNumber = companyMatch[1];
+                console.log('Redirecting to company:', companyNumber);
+                window.location.replace(`/#company/${companyNumber}`);
+                return;
+            }
+            
+            // Category pages
+            const categoryRoutes = {
+                '/oldest-companies': '',
+                '/newest-companies': '', 
+                '/royal-charter-companies': '',
+                '/plc-companies': ''
+            };
+            
+            if (categoryRoutes.hasOwnProperty(path)) {
+                console.log('Redirecting to category page');
+                window.location.replace('/');
+                return;
+            }
+            
+            // Industry pages: /industries/retail -> /#industry/retail
+            const industryMatch = path.match(/^\/industries\/([a-z-]+)$/i);
+            if (industryMatch) {
+                const industry = industryMatch[1];
+                console.log('Redirecting to industry:', industry);
+                window.location.replace(`/#industry/${industry}`);
+                return;
+            }
+            
+            // Location pages: /companies/london -> /#location/london  
+            const locationMatch = path.match(/^\/companies\/([a-z-]+)$/i);
+            if (locationMatch) {
+                const location = locationMatch[1];
+                console.log('Redirecting to location:', location);
+                window.location.replace(`/#location/${location}`);
+                return;
+            }
+            
+            // If none of the above, show normal 404 page
+            console.log('Showing 404 page for:', path);
+        })();
+    </script>
 </body>
 </html>
