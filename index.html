@@ -8715,18 +8715,48 @@
         function showCategoryPage(category) {
             console.log('🔍 SEO: Showing category page:', category);
             
-            // Add category header to the page
-            const companiesGrid = document.querySelector('.companies-grid');
-            if (companiesGrid) {
+            // Wait for DOM to be ready and companies to load
+            const setupCategoryPage = () => {
+                // Remove any existing category hero
+                const existingHero = document.querySelector('.category-hero');
+                if (existingHero) {
+                    existingHero.remove();
+                }
+                
+                // Find a good place to insert the hero
+                const bodyElement = document.body;
+                const tabsContainer = document.querySelector('.tabs-container');
+                
+                console.log('🔍 SEO: Body element found:', !!bodyElement);
+                console.log('🔍 SEO: Tabs container found:', !!tabsContainer);
+                
                 // Create category hero section
                 const categoryHero = createCategoryHero(category);
-                companiesGrid.parentNode.insertBefore(categoryHero, companiesGrid);
+                if (categoryHero && bodyElement) {
+                    // Insert after the tabs container or at the top of the page content
+                    if (tabsContainer) {
+                        tabsContainer.parentNode.insertBefore(categoryHero, tabsContainer.nextSibling);
+                    } else {
+                        // Insert after the animated background
+                        const bgAnimation = document.querySelector('.bg-animation');
+                        if (bgAnimation) {
+                            bgAnimation.parentNode.insertBefore(categoryHero, bgAnimation.nextSibling);
+                        } else {
+                            bodyElement.insertBefore(categoryHero, bodyElement.firstChild);
+                        }
+                    }
+                    
+                    console.log('🔍 SEO: Category hero added to page');
+                }
                 
                 // Filter companies based on category
                 setTimeout(() => {
                     filterCompaniesByCategory(category);
-                }, 500);
-            }
+                }, 100);
+            };
+            
+            // Start setup
+            setupCategoryPage();
         }
         
         // Create hero section for category pages

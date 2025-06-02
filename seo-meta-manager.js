@@ -267,4 +267,7 @@ document.addEventListener('DOMContentLoaded', () => {
     seoManager.handlePopState();
 });
 
-export default SEOMetaManager;
+// Export for module systems if available
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = SEOMetaManager;
+}

@@ -220,4 +220,7 @@ window.generateSitemap = async function() {
     await generator.generateAndDownload();
 };
 
-export default SitemapGenerator;
+// Export for module systems if available
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = SitemapGenerator;
+}
