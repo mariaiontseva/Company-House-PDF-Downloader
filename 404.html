@@ -7,58 +7,105 @@
     <meta name="description" content="The page you're looking for cannot be found. Return to DocSpace to download Companies House documents.">
     <meta name="robots" content="noindex, follow">
     <link rel="canonical" href="https://docspace.uk/">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            line-height: 1.6;
             min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0;
             padding: 20px;
         }
+
+        /* Animated background - match homepage */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(-45deg, #0f172a, #1e293b, #334155, #475569);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            z-index: -1;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
         .container {
-            background: white;
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(51, 65, 85, 0.3);
+            padding: 60px 40px;
+            border-radius: 16px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
             text-align: center;
-            max-width: 500px;
+            max-width: 600px;
+            width: 100%;
         }
+
         h1 {
-            color: #2d3748;
-            font-size: 72px;
-            margin: 0;
+            color: #f1f5f9;
+            font-size: 96px;
+            font-weight: 700;
+            margin: 0 0 24px 0;
+            text-shadow: 0 0 30px rgba(99, 102, 241, 0.3);
         }
+
         h2 {
-            color: #4a5568;
-            font-size: 24px;
-            margin: 20px 0;
+            color: #cbd5e1;
+            font-size: 28px;
+            font-weight: 600;
+            margin: 0 0 24px 0;
         }
+
         p {
-            color: #718096;
-            line-height: 1.6;
-            margin: 20px 0;
+            color: #94a3b8;
+            font-size: 16px;
+            line-height: 1.7;
+            margin: 0 0 32px 0;
+            max-width: 480px;
+            margin-left: auto;
+            margin-right: auto;
         }
+
         .btn {
             display: inline-block;
-            padding: 14px 28px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 16px 32px;
+            background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
             color: white;
             text-decoration: none;
-            border-radius: 10px;
+            border-radius: 12px;
             font-weight: 600;
-            transition: all 0.3s;
-            margin-top: 20px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 14px 0 rgba(139, 92, 246, 0.2);
         }
+
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 8px 25px 0 rgba(139, 92, 246, 0.4);
+            background: linear-gradient(135deg, #9333ea 0%, #7c3aed 100%);
         }
         
-        /* Loading state for redirects - match 404 page styling */
+        /* Loading state - match dark theme */
         .loading {
             display: none;
         }
@@ -68,51 +115,64 @@
         .container.hide {
             display: none;
         }
+        
         .spinner {
-            border: 4px solid rgba(102, 126, 234, 0.2);
+            border: 4px solid rgba(139, 92, 246, 0.2);
             border-radius: 50%;
-            border-top: 4px solid #667eea;
-            width: 60px;
-            height: 60px;
+            border-top: 4px solid #8b5cf6;
+            width: 80px;
+            height: 80px;
             animation: spin 1s linear infinite;
-            margin: 0 auto 30px auto;
+            margin: 0 auto 32px auto;
         }
+        
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
         
-        /* Loading page uses same beautiful styling as 404 */
-        .loading h1 {
-            color: #2d3748;
-            font-size: 72px;
-            margin: 0;
-        }
-        .loading h2 {
-            color: #4a5568;
-            font-size: 24px;
-            margin: 20px 0;
-        }
-        .loading p {
-            color: #718096;
-            line-height: 1.6;
-            margin: 20px 0;
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 40px 24px;
+                margin: 20px;
+            }
+            
+            h1 {
+                font-size: 72px;
+            }
+            
+            h2 {
+                font-size: 24px;
+            }
+            
+            p {
+                font-size: 14px;
+            }
+            
+            .spinner {
+                width: 60px;
+                height: 60px;
+            }
         }
     </style>
 </head>
 <body>
+    <!-- Animated background - match homepage -->
+    <div class="bg-animation"></div>
+    
     <div class="container" id="errorContent">
         <h1>404</h1>
         <h2>Page Not Found</h2>
-        <p>Sorry, the page you're looking for doesn't exist. You may have mistyped the URL or the page may have been moved.</p>
-        <a href="/" class="btn">Return to Homepage</a>
+        <p>The page you're looking for doesn't exist. It may have been moved, deleted, or you entered the wrong URL.</p>
+        <a href="/" class="btn">Return to DocSpace</a>
     </div>
     
     <div class="container loading" id="loadingContent">
         <div class="spinner"></div>
-        <h1>🚀</h1>
-        <h2>Redirecting...</h2>
-        <p>Taking you to the right page. This will just take a moment.</p>
+        <h1>⚡</h1>
+        <h2>Loading Company Data</h2>
+        <p>Redirecting you to the company information page...</p>
     </div>
 
     <!-- GitHub Pages SEO URL Routing -->
