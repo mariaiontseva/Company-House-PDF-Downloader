@@ -1,31 +1,26 @@
-# DocSpace Robots.txt
 User-agent: *
 Allow: /
-Disallow: /api/
-Disallow: /worker/
-Disallow: /*.pdf$
 
-# Sitemap location
+# Important pages
+Allow: /company/
+Allow: /oldest-companies
+Allow: /newest-companies
+Allow: /royal-charter-companies
+Allow: /plc-companies
+Allow: /industries/
+Allow: /companies/
+
+# Sitemap
 Sitemap: https://docspace.uk/sitemap.xml
 
-# Crawl delay (in seconds)
+# Block unnecessary pages
+Disallow: /server.py
+Disallow: /*.js$
+Disallow: /*.css$
+Disallow: /test*
+Disallow: /debug*
+Disallow: /*?auth*
+Disallow: /*?payment*
+
+# Crawl delay (be nice to server)
 Crawl-delay: 1
-
-# Specific bot rules
-User-agent: Googlebot
-Allow: /
-Crawl-delay: 0
-
-User-agent: Bingbot
-Allow: /
-Crawl-delay: 1
-
-# Block bad bots
-User-agent: MJ12bot
-Disallow: /
-
-User-agent: AhrefsBot
-Disallow: /
-
-User-agent: SemrushBot
-Disallow: /
