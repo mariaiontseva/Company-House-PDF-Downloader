@@ -3,6 +3,7 @@ Allow: /
 
 # Important pages
 Allow: /company/
+Allow: /oldest-plc-companies.html
 Allow: /oldest-companies
 Allow: /newest-companies
 Allow: /royal-charter-companies
