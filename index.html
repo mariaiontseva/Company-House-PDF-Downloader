@@ -1951,6 +1951,7 @@
             justify-content: center;
             gap: 32px;
             margin-bottom: 24px;
+            flex-wrap: wrap;
         }
 
         .footer-links a {
@@ -4249,11 +4250,13 @@
         <div class="footer-content">
             <div class="footer-logo">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="24" height="24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
                 DocSpace UK
             </div>
             <div class="footer-links">
+                <a href="/oldest-plc-companies.html">Oldest PLC Companies</a>
+                <a href="/faq">FAQ</a>
                 <a href="/terms">Terms of Service</a>
                 <a href="/privacy">Privacy Policy</a>
                 <a href="/contact">Contact</a>
@@ -8670,7 +8673,6 @@
             // Then check for URL parameters for SEO routing
             const urlParams = new URLSearchParams(window.location.search);
             const company = urlParams.get('company');
-            const category = urlParams.get('category');
             
             if (company) {
                 // Handle company URL routing
@@ -8678,10 +8680,6 @@
                 setTimeout(() => {
                     window.location.hash = `#company/${company}`;
                 }, 200);
-            } else if (category) {
-                // Handle category pages
-                updateCategoryMetaTags(category);
-                showCategoryPage(category);
             }
         }
         
@@ -8696,9 +8694,8 @@
         function checkURLParameters() {
             const urlParams = new URLSearchParams(window.location.search);
             const company = urlParams.get('company');
-            const category = urlParams.get('category');
             
-            console.log('🔍 SEO: Checking URL parameters - company:', company, 'category:', category);
+            console.log('🔍 SEO: Checking URL parameters - company:', company);
             
             if (company) {
                 // Handle company URL routing
@@ -8713,189 +8710,10 @@
         }
         
         // Show category page with filtered companies
-        function showCategoryPage(category) {
-            console.log('🔍 SEO: Showing category page:', category);
-            
-            // Wait for DOM to be ready and companies to load
-            const setupCategoryPage = () => {
-                // Remove any existing category hero
-                const existingHero = document.querySelector('.category-hero');
-                if (existingHero) {
-                    existingHero.remove();
-                }
-                
-                // Find a good place to insert the hero
-                const bodyElement = document.body;
-                const tabsContainer = document.querySelector('.tabs-container');
-                
-                console.log('🔍 SEO: Body element found:', !!bodyElement);
-                console.log('🔍 SEO: Tabs container found:', !!tabsContainer);
-                
-                // Create category hero section
-                const categoryHero = createCategoryHero(category);
-                if (categoryHero && bodyElement) {
-                    // FORCE INSERT DIRECTLY INTO BODY - bypass all containers
-                    console.log('🔍 SEO: Forcing direct body insertion');
-                    document.body.appendChild(categoryHero);
-                    
-                    console.log('🔍 SEO: Category hero added to page');
-                    
-                    // EXTREME VISIBILITY TEST - Make it impossible to miss
-                    categoryHero.style.position = 'fixed';
-                    categoryHero.style.top = '0';
-                    categoryHero.style.left = '0';
-                    categoryHero.style.width = '100vw';
-                    categoryHero.style.height = '200px';
-                    categoryHero.style.backgroundColor = 'red';
-                    categoryHero.style.zIndex = '99999';
-                    categoryHero.style.border = '10px solid yellow';
-                    categoryHero.innerHTML = '<h1 style="color: white; text-align: center; padding: 50px;">CATEGORY PAGE WORKING!</h1>';
-                    console.log('🔍 SEO: EXTREME TEST - Hero element:', categoryHero);
-                    
-                    // Debug: Check if element is actually in DOM
-                    console.log('🔍 SEO: Element parent:', categoryHero.parentNode);
-                    console.log('🔍 SEO: Element in document:', document.contains(categoryHero));
-                    console.log('🔍 SEO: Element computed style:', window.getComputedStyle(categoryHero).visibility);
-                    console.log('🔍 SEO: Element computed display:', window.getComputedStyle(categoryHero).display);
-                    
-                    // Force absolute visibility
-                    categoryHero.style.visibility = 'visible !important';
-                    categoryHero.style.display = 'block !important';
-                    categoryHero.style.opacity = '1 !important';
-                }
-                
-                // Filter companies based on category
-                setTimeout(() => {
-                    filterCompaniesByCategory(category);
-                }, 100);
-            };
-            
-            // Start setup
-            setupCategoryPage();
-        }
         
-        // Create hero section for category pages
-        function createCategoryHero(category) {
-            const categoryInfo = {
-                'oldest': {
-                    title: 'Oldest Companies in the UK',
-                    subtitle: 'Historic businesses including Royal Charter companies from 1327',
-                    description: 'Explore centuries of British business history. These ancient corporations have survived through wars, economic upheavals, and countless market changes.',
-                    icon: '🏛️',
-                    count: 'ancient'
-                },
-                'newest': {
-                    title: 'Recently Incorporated Companies',
-                    subtitle: 'Latest UK business registrations and startups',
-                    description: 'Discover the newest companies shaping the future of British business. Fresh innovations and emerging market opportunities.',
-                    icon: '🚀',
-                    count: 'newest'
-                },
-                'royal-charter': {
-                    title: 'Royal Charter Companies',
-                    subtitle: 'Ancient corporations established by royal decree since 1327',
-                    description: 'These prestigious institutions were granted special status by the Crown. View the complete history of Britain\'s most historic corporations.',
-                    icon: '👑',
-                    count: 'chartered'
-                },
-                'plc': {
-                    title: 'Public Limited Companies (PLCs)',
-                    subtitle: 'UK\'s largest publicly traded corporations',
-                    description: 'Browse major UK corporations listed on stock exchanges. Access complete financial filings and corporate documentation.',
-                    icon: '📈',
-                    count: 'public'
-                }
-            };
-            
-            const info = categoryInfo[category];
-            if (!info) return null;
-            
-            const heroElement = document.createElement('div');
-            heroElement.className = 'category-hero';
-            heroElement.innerHTML = `
-                <div class="category-hero-content">
-                    <div class="category-icon">${info.icon}</div>
-                    <h1 class="category-title">${info.title}</h1>
-                    <p class="category-subtitle">${info.subtitle}</p>
-                    <p class="category-description">${info.description}</p>
-                    <div class="category-stats">
-                        <span class="stat-badge">Download all documents for £5 per company</span>
-                    </div>
-                </div>
-            `;
-            
-            return heroElement;
-        }
         
-        // Filter companies by category
-        function filterCompaniesByCategory(category) {
-            const allCompanies = [...oldestCompanies, ...newestCompanies];
-            let filteredCompanies = [];
-            
-            switch(category) {
-                case 'oldest':
-                    filteredCompanies = oldestCompanies;
-                    break;
-                case 'newest':
-                    filteredCompanies = newestCompanies;
-                    break;
-                case 'royal-charter':
-                    filteredCompanies = allCompanies.filter(c => 
-                        (c.number || c.CompanyNumber || '').startsWith('RC')
-                    );
-                    break;
-                case 'plc':
-                    filteredCompanies = allCompanies.filter(c => 
-                        (c.name || c.CompanyName || '').toUpperCase().includes('PLC')
-                    );
-                    break;
-            }
-            
-            // Render filtered companies
-            if (filteredCompanies.length > 0) {
-                renderCompanies({ companies: filteredCompanies });
-            }
-        }
         
         // Update meta tags for category pages
-        function updateCategoryMetaTags(category) {
-            const categoryMeta = {
-                'oldest': {
-                    title: 'Oldest UK Companies - Royal Charter Companies Since 1327 | DocSpace',
-                    description: 'Explore the oldest companies in the UK, including Royal Charter companies from 1327. Download complete historical documents and filings for £5.',
-                    keywords: 'oldest UK companies, Royal Charter companies, historical companies, ancient corporations, medieval businesses'
-                },
-                'newest': {
-                    title: 'Newest UK Companies - Recently Incorporated Businesses | DocSpace',
-                    description: 'Browse the newest companies incorporated in the UK. Access complete documentation for recently registered businesses for £5.',
-                    keywords: 'newest UK companies, new businesses, recent incorporations, startup companies, new UK registrations'
-                },
-                'royal-charter': {
-                    title: 'Royal Charter Companies - Ancient UK Corporations Since 1327 | DocSpace',
-                    description: 'Complete list of Royal Charter companies in the UK. Download documents for these historic corporations, some dating back to 1327.',
-                    keywords: 'Royal Charter companies, ancient corporations, historic companies, medieval businesses, oldest UK companies'
-                },
-                'plc': {
-                    title: 'Public Limited Companies (PLC) - Download Company Documents | DocSpace',
-                    description: 'Browse all UK Public Limited Companies (PLCs). Download complete documentation including accounts, returns, and filings for £5.',
-                    keywords: 'PLC companies, public limited companies, UK corporations, listed companies, public companies'
-                },
-                'limited': {
-                    title: 'Private Limited Companies (Ltd) - UK Company Documents | DocSpace',
-                    description: 'Browse UK Private Limited Companies. Download complete documentation for private limited companies including accounts and filings for £5.',
-                    keywords: 'limited companies, private limited companies, UK Ltd companies, small businesses, private companies'
-                }
-            };
-            
-            const meta = categoryMeta[category];
-            if (meta) {
-                document.title = meta.title;
-                updateMetaTag('description', meta.description);
-                updateMetaTag('keywords', meta.keywords);
-                updateMetaTag('og:title', meta.title);
-                updateMetaTag('og:description', meta.description);
-            }
-        }
         
         // Update company meta tags when modal opens
         function updateCompanySEO(companyData) {
