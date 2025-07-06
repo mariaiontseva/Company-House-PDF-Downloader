@@ -8804,28 +8804,41 @@
         // Calculate risk score based on company data
         function calculateRiskScore(company) {
             let score = 100; // Start with perfect score
+            const companyNumber = company.number || company.company_number || 'unknown';
+            console.log(`🔸 Risk calculation for company ${companyNumber}:`);
+            console.log(`🔸 Starting score: ${score}`);
             
             // Deduct points for charges
             const totalCharges = company.totalCharges || 0;
             const outstandingCharges = company.outstandingCharges || 0;
-            score -= (totalCharges * 5); // 5 points per charge
-            score -= (outstandingCharges * 10); // Additional 10 points per outstanding charge
+            const chargeDeduction = (totalCharges * 5) + (outstandingCharges * 10);
+            score -= chargeDeduction;
+            console.log(`🔸 Charges: ${totalCharges} total, ${outstandingCharges} outstanding = -${chargeDeduction} points (score: ${score})`);
             
             // Deduct points for company age (newer companies are riskier)
             const incorporationDate = company.incorporationDate || company.date_of_creation;
             const age = incorporationDate ? 
                 Math.floor((new Date() - new Date(incorporationDate)) / (365.25 * 24 * 60 * 60 * 1000)) : 0;
-            if (age < 1) score -= 20;
-            else if (age < 3) score -= 10;
-            else if (age < 5) score -= 5;
+            let ageDeduction = 0;
+            if (age < 1) ageDeduction = 20;
+            else if (age < 3) ageDeduction = 10;
+            else if (age < 5) ageDeduction = 5;
+            score -= ageDeduction;
+            console.log(`🔸 Age: ${age} years, incorporation: ${incorporationDate} = -${ageDeduction} points (score: ${score})`);
             
             // Adjust for company status - handle both field names
             const status = company.status || company.company_status;
+            let statusDeduction = 0;
             if (status && status.toLowerCase() !== 'active') {
-                score -= 30;
+                statusDeduction = 30;
+                score -= statusDeduction;
             }
+            console.log(`🔸 Status: "${status}" = -${statusDeduction} points (score: ${score})`);
             
-            return Math.max(0, Math.min(100, score));
+            const finalScore = Math.max(0, Math.min(100, score));
+            console.log(`🔸 Final risk score: ${finalScore}/100`);
+            
+            return finalScore;
         }
         
         // Generate mock officers for Railway companies
