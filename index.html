@@ -7521,6 +7521,21 @@
                     // Update the modal header with real company data
                     updateModalHeader(companyData);
                     
+                    // Recalculate risk score with real data (not placeholder "Loading..." data)
+                    const riskBadge = document.querySelector('#companyModal .risk-badge');
+                    if (riskBadge) {
+                        window.currentCompanyRiskData = {
+                            score: calculateRiskScore(companyData),
+                            company: companyData
+                        };
+                        const riskScore = window.currentCompanyRiskData.score;
+                        const riskLevel = riskScore > 80 ? 'low' : riskScore > 50 ? 'medium' : 'high';
+                        const riskText = riskScore > 80 ? 'LOW RISK' : riskScore > 50 ? 'MEDIUM RISK' : 'HIGH RISK';
+                        riskBadge.className = `risk-badge ${riskLevel}`;
+                        riskBadge.innerHTML = `<div class="risk-dot"></div>${riskText} (${riskScore}/100)`;
+                        console.log('🔸 Risk badge updated with real API data:', riskText, `(${riskScore}/100)`);
+                    }
+                    
                     populateOverviewTab(companyData);
                     
                     // Update accounts status from API data
