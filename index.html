@@ -3500,6 +3500,12 @@
             box-shadow: 0 4px 20px rgba(239, 68, 68, 0.2);
         }
         
+        #companyModal .risk-badge.neutral {
+            background: rgba(148, 163, 184, 0.1);
+            border-color: rgba(148, 163, 184, 0.3);
+            color: #94a3b8;
+        }
+        
         #companyModal .risk-dot {
             width: 10px;
             height: 10px;
@@ -7288,20 +7294,34 @@
                 }
             }
             
-            // Update risk badge using comprehensive risk calculation
+            // Update risk badge - show loading state if placeholder data, otherwise calculate
             const riskBadge = document.querySelector('#companyModal .risk-badge');
             if (riskBadge) {
-                // Store the calculated risk for both badge and Risk Insights tab
-                window.currentCompanyRiskData = {
-                    score: calculateRiskScore(company),
-                    company: company
-                };
-                const riskScore = window.currentCompanyRiskData.score;
-                const riskLevel = riskScore > 80 ? 'low' : riskScore > 50 ? 'medium' : 'high';
-                const riskText = riskScore > 80 ? 'LOW RISK' : riskScore > 50 ? 'MEDIUM RISK' : 'HIGH RISK';
-                riskBadge.className = `risk-badge ${riskLevel}`;
-                riskBadge.innerHTML = `<div class="risk-dot"></div>${riskText} (${riskScore}/100)`;
-                console.log('🔸 Risk badge updated:', riskText, `(${riskScore}/100)`);
+                const companyStatus = company.status || company.company_status;
+                const isPlaceholderData = companyStatus === 'Loading...' || 
+                                         company.incorporationDate === 'Loading...' || 
+                                         !companyStatus;
+                
+                if (isPlaceholderData) {
+                    // Show neutral loading state instead of wrong calculation
+                    riskBadge.className = 'risk-badge neutral';
+                    riskBadge.innerHTML = '<div class="risk-dot"></div>Loading...';
+                    console.log('🔸 Risk badge showing loading state (placeholder data detected)');
+                    // Clear stored risk data so Risk Insights tab knows to wait
+                    window.currentCompanyRiskData = null;
+                } else {
+                    // Calculate with real data
+                    window.currentCompanyRiskData = {
+                        score: calculateRiskScore(company),
+                        company: company
+                    };
+                    const riskScore = window.currentCompanyRiskData.score;
+                    const riskLevel = riskScore > 80 ? 'low' : riskScore > 50 ? 'medium' : 'high';
+                    const riskText = riskScore > 80 ? 'LOW RISK' : riskScore > 50 ? 'MEDIUM RISK' : 'HIGH RISK';
+                    riskBadge.className = `risk-badge ${riskLevel}`;
+                    riskBadge.innerHTML = `<div class="risk-dot"></div>${riskText} (${riskScore}/100)`;
+                    console.log('🔸 Risk badge updated with real data:', riskText, `(${riskScore}/100)`);
+                }
             }
             
             // Calculate company age
