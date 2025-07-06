@@ -131,12 +131,21 @@ const FinanceParser = {
         const filingUrl = `https://api.companieshouse.gov.uk/company/${companyNumber}/filing-history?category=accounts&items_per_page=100`;
         console.log('🔸 FinanceParser: Fetching ALL filing history from:', filingUrl);
         
-        const fetchFunc = typeof fetchWithWorker !== 'undefined' ? fetchWithWorker : fetch;
-        const headers = typeof API_KEY !== 'undefined' ? { 'Authorization': `Basic ${btoa(API_KEY + ':')}` } : {};
-        
-        const response = typeof fetchWithWorker !== 'undefined' 
-            ? await fetchWithWorker(filingUrl, API_KEY)
-            : await fetch(filingUrl, { headers });
+        // Use fetchWithWorker if available (production) or direct fetch (local)
+        let response;
+        if (typeof fetchWithWorker !== 'undefined' && typeof API_KEY !== 'undefined') {
+            response = await fetchWithWorker(filingUrl, API_KEY);
+        } else if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            // Local development - use local proxy
+            response = await fetch(filingUrl);
+        } else {
+            // Production fallback - use Cloudflare Worker directly
+            const params = new URLSearchParams({
+                url: filingUrl,
+                apiKey: '22aefa40-ee9e-47c0-b40a-2dd3c03165c6'
+            });
+            response = await fetch(`${this.PROXY_URL}?${params.toString()}`);
+        }
         
         if (!response.ok) {
             throw new Error('Failed to fetch filing history');
@@ -310,12 +319,20 @@ const FinanceParser = {
         console.log('🔸 FinanceParser: Fetching document metadata from:', metadataUrl);
         
         // Get document metadata
-        const fetchFunc = typeof fetchWithWorker !== 'undefined' ? fetchWithWorker : fetch;
-        const headers = typeof API_KEY !== 'undefined' ? { 'Authorization': `Basic ${btoa(API_KEY + ':')}` } : {};
-        
-        const metadataResponse = typeof fetchWithWorker !== 'undefined'
-            ? await fetchWithWorker(metadataUrl, API_KEY)
-            : await fetch(metadataUrl, { headers });
+        let metadataResponse;
+        if (typeof fetchWithWorker !== 'undefined' && typeof API_KEY !== 'undefined') {
+            metadataResponse = await fetchWithWorker(metadataUrl, API_KEY);
+        } else if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            // Local development - use local proxy
+            metadataResponse = await fetch(metadataUrl);
+        } else {
+            // Production fallback - use Cloudflare Worker directly
+            const params = new URLSearchParams({
+                url: metadataUrl,
+                apiKey: '22aefa40-ee9e-47c0-b40a-2dd3c03165c6'
+            });
+            metadataResponse = await fetch(`${this.PROXY_URL}?${params.toString()}`);
+        }
             
         console.log('🔸 FinanceParser: Metadata response status:', metadataResponse.status);
         
@@ -425,7 +442,13 @@ const FinanceParser = {
                 const companyNumber = filing.links.self.split('/')[2];
                 console.log('🔸 FinanceParser: Trying proxy server for iXBRL...');
                 
-                const proxyUrl = `${this.PROXY_URL}/api/proxy/ixbrl/${companyNumber}/${filing.transaction_id}?format=xhtml`;
+                // Use Cloudflare Worker format
+                const targetUrl = `https://find-and-update.company-information.service.gov.uk/company/${companyNumber}/filing-history/${filing.transaction_id}/document?format=xhtml&download=0`;
+                const params = new URLSearchParams({
+                    url: targetUrl,
+                    apiKey: typeof API_KEY !== 'undefined' ? API_KEY : '22aefa40-ee9e-47c0-b40a-2dd3c03165c6'
+                });
+                const proxyUrl = `${this.PROXY_URL}?${params.toString()}`;
                 console.log('🔸 FinanceParser: Proxy URL:', proxyUrl);
                 
                 const proxyResponse = await fetch(proxyUrl);
