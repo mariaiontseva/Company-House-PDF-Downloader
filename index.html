@@ -4028,6 +4028,10 @@
             color: #f87171;
         }
         
+        .metric-change.neutral {
+            color: #94a3b8;
+        }
+        
         .change-arrow {
             font-size: 12px;
         }
@@ -9643,47 +9647,106 @@
             // Metrics cards below chart
             html += '<div class="finance-metrics-grid">';
             
-            // Cash in Bank
+            // Calculate meaningful financial indicators instead of meaningless "Increased by" percentages
+            const latestMetrics = latestData.metrics || {};
+            const latestRatios = latestData.ratios || {};
+            
+            // 1. Cash Position & Liquidity
+            const cashValue = latestMetrics.cashAndEquivalents?.value || 0;
+            const totalAssets = latestMetrics.totalAssets?.value || 1;
+            const cashRatio = ((cashValue / totalAssets) * 100);
+            let cashHealthText = '';
+            let cashHealthClass = 'neutral';
+            
+            if (cashRatio > 15) { cashHealthText = 'Strong liquidity'; cashHealthClass = 'positive'; }
+            else if (cashRatio > 8) { cashHealthText = 'Good liquidity'; cashHealthClass = 'positive'; }
+            else if (cashRatio > 3) { cashHealthText = 'Adequate liquidity'; cashHealthClass = 'neutral'; }
+            else { cashHealthText = 'Low liquidity'; cashHealthClass = 'negative'; }
+            
             html += `<div class="finance-metric-card">
                 <h4 class="metric-title">Cash in Bank</h4>
-                <div class="metric-main-value">${cashMetric.formatted || '£0'}</div>
-                <div class="metric-change ${cashMetric.isIncrease ? 'positive' : 'negative'}">
-                    <span class="change-arrow">${cashMetric.isIncrease ? '▲' : '▼'}</span>
-                    ${cashMetric.isIncrease ? 'Increased' : 'Decreased'} by ${cashMetric.changeFormatted} 
-                    (${cashMetric.percent > 0 ? '+' : ''}${cashMetric.percent.toFixed(0)}%)
+                <div class="metric-main-value">${FinanceParser.formatCurrency(cashValue)}</div>
+                <div class="metric-change ${cashHealthClass}">
+                    ${cashRatio.toFixed(1)}% of assets • ${cashHealthText}
                 </div>
             </div>`;
             
-            // Turnover/Revenue
+            // 2. Revenue & Profitability
+            const revenueValue = latestMetrics.revenue?.value || 0;
+            const netProfit = latestMetrics.netProfit?.value || 0;
+            const profitMarginCalc = revenueValue > 0 ? ((netProfit / revenueValue) * 100) : 0;
+            let profitHealthText = '';
+            let profitHealthClass = 'neutral';
+            
+            if (profitMarginCalc > 15) { profitHealthText = 'Excellent margins'; profitHealthClass = 'positive'; }
+            else if (profitMarginCalc > 8) { profitHealthText = 'Good margins'; profitHealthClass = 'positive'; }
+            else if (profitMarginCalc > 2) { profitHealthText = 'Modest margins'; profitHealthClass = 'neutral'; }
+            else if (profitMarginCalc > 0) { profitHealthText = 'Low margins'; profitHealthClass = 'negative'; }
+            else { profitHealthText = 'Operating at loss'; profitHealthClass = 'negative'; }
+            
             html += `<div class="finance-metric-card">
                 <h4 class="metric-title">Turnover</h4>
-                <div class="metric-main-value">${revenueMetric.formatted || '£0'}</div>
-                <div class="metric-change ${revenueMetric.isIncrease ? 'positive' : 'negative'}">
-                    <span class="change-arrow">${revenueMetric.isIncrease ? '▲' : '▼'}</span>
-                    ${revenueMetric.isIncrease ? 'Increased' : 'Decreased'} by ${revenueMetric.changeFormatted} 
-                    (${revenueMetric.percent > 0 ? '+' : ''}${revenueMetric.percent.toFixed(0)}%)
+                <div class="metric-main-value">${FinanceParser.formatCurrency(revenueValue)}</div>
+                <div class="metric-change ${profitHealthClass}">
+                    ${Math.abs(profitMarginCalc).toFixed(1)}% ${netProfit >= 0 ? 'profit' : 'loss'} margin • ${profitHealthText}
                 </div>
             </div>`;
             
-            // Employees
+            // 3. Workforce Productivity
+            const employeesValue = latestMetrics.employees?.value || 0;
+            const revenuePerEmployee = employeesValue > 0 ? (revenueValue / employeesValue) : 0;
+            let productivityText = '';
+            let productivityClass = 'neutral';
+            
+            if (revenuePerEmployee > 200000) { productivityText = 'High productivity'; productivityClass = 'positive'; }
+            else if (revenuePerEmployee > 100000) { productivityText = 'Good productivity'; productivityClass = 'positive'; }
+            else if (revenuePerEmployee > 50000) { productivityText = 'Average productivity'; productivityClass = 'neutral'; }
+            else if (employeesValue > 0) { productivityText = 'Low productivity'; productivityClass = 'negative'; }
+            else { productivityText = 'Workforce data unavailable'; productivityClass = 'neutral'; }
+            
             html += `<div class="finance-metric-card">
                 <h4 class="metric-title">Employees</h4>
-                <div class="metric-main-value">${employeesMetric.value.toLocaleString()}</div>
-                <div class="metric-change ${employeesMetric.isIncrease ? 'positive' : 'negative'}">
-                    <span class="change-arrow">${employeesMetric.isIncrease ? '▲' : '▼'}</span>
-                    ${employeesMetric.isIncrease ? 'Increased' : 'Decreased'} by ${Math.abs(employeesMetric.change).toLocaleString()} 
-                    (${employeesMetric.percent > 0 ? '+' : ''}${employeesMetric.percent.toFixed(0)}%)
+                <div class="metric-main-value">${employeesValue.toLocaleString()}</div>
+                <div class="metric-change ${productivityClass}">
+                    ${revenuePerEmployee > 0 ? FinanceParser.formatCurrency(revenuePerEmployee) + ' per employee' : 'No productivity data'} • ${productivityText}
                 </div>
             </div>`;
             
-            // Total Assets
+            // 4. Financial Strength
+            const assetsValue = latestMetrics.totalAssets?.value || 0;
+            const totalLiabilities = latestMetrics.totalLiabilities?.value || 0;
+            let strengthIndicator = '';
+            let strengthClass = 'neutral';
+            
+            // Use current ratio if available, otherwise debt-to-equity, otherwise equity ratio
+            if (latestRatios.currentRatio) {
+                const ratio = parseFloat(latestRatios.currentRatio);
+                strengthIndicator = `${ratio.toFixed(1)}:1 current ratio`;
+                if (ratio > 2.5) { strengthClass = 'positive'; }
+                else if (ratio > 1.5) { strengthClass = 'positive'; }
+                else if (ratio > 1.0) { strengthClass = 'neutral'; }
+                else { strengthClass = 'negative'; }
+            } else if (latestRatios.debtToEquity) {
+                const ratio = parseFloat(latestRatios.debtToEquity);
+                strengthIndicator = `${ratio.toFixed(1)}:1 debt-to-equity`;
+                if (ratio < 0.3) { strengthClass = 'positive'; }
+                else if (ratio < 0.7) { strengthClass = 'positive'; }
+                else if (ratio < 1.2) { strengthClass = 'neutral'; }
+                else { strengthClass = 'negative'; }
+            } else {
+                // Fallback: Calculate equity ratio
+                const equityRatio = assetsValue > 0 ? (((assetsValue - totalLiabilities) / assetsValue) * 100) : 0;
+                strengthIndicator = `${equityRatio.toFixed(0)}% equity ratio`;
+                if (equityRatio > 70) { strengthClass = 'positive'; }
+                else if (equityRatio > 40) { strengthClass = 'neutral'; }
+                else { strengthClass = 'negative'; }
+            }
+            
             html += `<div class="finance-metric-card">
                 <h4 class="metric-title">Total Assets</h4>
-                <div class="metric-main-value">${assetsMetric.formatted || '£0'}</div>
-                <div class="metric-change ${assetsMetric.isIncrease ? 'positive' : 'negative'}">
-                    <span class="change-arrow">${assetsMetric.isIncrease ? '▲' : '▼'}</span>
-                    ${assetsMetric.isIncrease ? 'Increased' : 'Decreased'} by ${assetsMetric.changeFormatted} 
-                    (${assetsMetric.percent > 0 ? '+' : ''}${assetsMetric.percent.toFixed(0)}%)
+                <div class="metric-main-value">${FinanceParser.formatCurrency(assetsValue)}</div>
+                <div class="metric-change ${strengthClass}">
+                    ${strengthIndicator} • ${strengthClass === 'positive' ? 'Strong' : strengthClass === 'neutral' ? 'Stable' : 'Weak'} position
                 </div>
             </div>`;
             
