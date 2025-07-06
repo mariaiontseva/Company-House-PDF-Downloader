@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{PAGE_TITLE}} | DocSpace</title>
+    
+    <!-- Primary Meta Tags -->
+    <meta name="title" content="{{META_TITLE}} | DocSpace">
+    <meta name="description" content="{{META_DESCRIPTION}}">
+    <meta name="keywords" content="{{META_KEYWORDS}}">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://docspace.uk/{{PAGE_SLUG}}">
+    
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-RR9SEE0SQF"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-RR9SEE0SQF');
+    </script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
+        
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #818cf8;
+            --secondary: #8b5cf6;
+            --accent: #6366f1;
+            --dark: #0f172a;
+            --dark-light: #1e293b;
+            --dark-lighter: #334155;
+            --gray: #64748b;
+            --gray-light: #94a3b8;
+            --gray-lighter: #cbd5e1;
+            --white: #ffffff;
+            --success: #10b981;
+            --gradient-subtle: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+            --gradient-primary: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-md: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+            --radius: 12px;
+            --radius-lg: 16px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            line-height: 1.7;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(59, 130, 246, 0.05) 0%, transparent 50%);
+            z-index: -1;
+        }
+        
+        /* Include all the common styles from template-article.html */
+        /* Top bar, buttons, hero, footer styles... */
+        
+        /* Company Blocks */
+        .company-blocks {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+        
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: white;
+            margin: 3rem 0 2rem;
+            letter-spacing: -0.02em;
+            position: relative;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 2px;
+            background: #6366f1;
+        }
+        
+        .company-article {
+            margin-bottom: 2rem;
+            position: relative;
+        }
+        
+        .company-article::after {
+            content: '';
+            position: absolute;
+            bottom: -1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .company-article:last-child::after {
+            display: none;
+        }
+        
+        /* Company Card Container */
+        .company-card-container {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Company Header */
+        .company-header-section {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+            gap: 1rem;
+        }
+        
+        .company-header-left {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .view-company-btn {
+            background: #6366f1;
+            color: white;
+            border: none;
+            padding: 0 1.5rem;
+            height: 40px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        
+        .view-company-btn:hover {
+            background: #4f46e5;
+        }
+        
+        .company-rank-large {
+            background: rgba(99, 102, 241, 0.1);
+            color: #a5b4fc;
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 1rem;
+            flex-shrink: 0;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+        
+        .company-title-section {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .company-title {
+            font-size: 1.625rem;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+            line-height: 1.2;
+        }
+        
+        .company-subtitle {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        
+        .company-badges {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 16px;
+            font-size: 0.8125rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .badge-plc {
+            background: rgba(99, 102, 241, 0.1);
+            color: #a5b4fc;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+        
+        .badge-founded {
+            background: rgba(139, 92, 246, 0.1);
+            color: #c4b5fd;
+            border: 1px solid rgba(139, 92, 246, 0.2);
+        }
+        
+        .badge-docs {
+            background: rgba(16, 185, 129, 0.1);
+            color: #6ee7b7;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+        
+        /* Add subtle animation to articles */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .company-article {
+            animation: fadeIn 0.8s ease-out;
+            animation-fill-mode: both;
+        }
+        
+        .company-article:nth-child(2) { animation-delay: 0.1s; }
+        .company-article:nth-child(3) { animation-delay: 0.2s; }
+        .company-article:nth-child(4) { animation-delay: 0.3s; }
+        .company-article:nth-child(5) { animation-delay: 0.4s; }
+        .company-article:nth-child(6) { animation-delay: 0.5s; }
+        .company-article:nth-child(7) { animation-delay: 0.6s; }
+        .company-article:nth-child(8) { animation-delay: 0.7s; }
+        .company-article:nth-child(9) { animation-delay: 0.8s; }
+        .company-article:nth-child(10) { animation-delay: 0.9s; }
+        
+        /* Company Content */
+        .company-content {
+            margin-bottom: 0;
+            max-width: 650px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .story-text {
+            font-size: 1.0625rem;
+            line-height: 1.8;
+            color: #cbd5e1;
+            margin-bottom: 0;
+            font-weight: 400;
+            text-align: justify;
+            hyphens: auto;
+            -webkit-hyphens: auto;
+            -moz-hyphens: auto;
+        }
+        
+        .story-text + .story-text {
+            margin-top: 1rem;
+            text-indent: 1.5em;
+        }
+        
+        .fun-fact {
+            background: transparent;
+            border-left: 3px solid #6366f1;
+            padding: 0.75rem 0 0.75rem 1.25rem;
+            margin-top: 1.25rem;
+            font-size: 1.125rem;
+            color: #e2e8f0;
+            line-height: 1.6;
+            position: relative;
+            font-style: normal;
+            letter-spacing: -0.01em;
+        }
+        
+        .fun-fact::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            top: 0.75rem;
+            color: #6366f1;
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+    <!-- Include top bar from template -->
+    
+    <!-- Hero Section -->
+    <section class="hero">
+        <h1>{{HERO_TITLE}}</h1>
+        <p class="hero-subtitle">{{HERO_SUBTITLE}}</p>
+        <p class="hero-description">
+            {{HERO_DESCRIPTION}}
+        </p>
+    </section>
+    
+    <!-- Company Blocks -->
+    <section class="company-blocks">
+        <h2 class="section-title">{{SECTION_TITLE}}</h2>
+        
+        {{#each COMPANIES}}
+        <article class="company-article">
+            <div class="company-card-container">
+                <div class="company-header-section">
+                    <div class="company-header-left">
+                        <div class="company-rank-large">{{rank}}</div>
+                        <div class="company-title-section">
+                            <h2 class="company-title">{{name}}</h2>
+                            <div class="company-subtitle">
+                                <div class="company-badges">
+                                    <span class="badge badge-plc">{{plc_badge}}</span>
+                                    <span class="badge badge-founded">{{founded_badge}}</span>
+                                    <span class="badge badge-docs">{{docs_badge}}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <a href="/#company/{{company_id}}" class="view-company-btn">View Company</a>
+                </div>
+                
+                <div class="company-content">
+                    {{#each story_paragraphs}}
+                    <p class="story-text">
+                        {{this}}
+                    </p>
+                    {{/each}}
+                    <div class="fun-fact">
+                        {{fun_fact}}
+                    </div>
+                </div>
+            </div>
+        </article>
+        {{/each}}
+    </section>
+    
+    <!-- Include footer from template -->
+</body>
+</html>

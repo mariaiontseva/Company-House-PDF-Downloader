@@ -4504,6 +4504,171 @@
             }
         }
         
+        // Function to download a charge document
+        async function downloadChargeDocument(chargeUrl, description, chargeNumber) {
+            console.log('Downloading charge document:', chargeUrl, description, chargeNumber);
+            
+            const button = event.target.closest('button');
+            const originalHTML = button.innerHTML;
+            
+            try {
+                // Show loading state on button
+                button.disabled = true;
+                button.innerHTML = '<span class="spinner"></span> Downloading...';
+                
+                // Extract company number from charge URL
+                // chargeUrl format: /company/{number}/charges/{id}
+                const match = chargeUrl.match(/\/company\/([A-Z0-9]+)\/charges\/([^\/]+)/);
+                if (!match) {
+                    throw new Error('Invalid charge URL format');
+                }
+                
+                const companyNumber = match[1];
+                const chargeId = match[2];
+                
+                console.log('Parsed - Company:', companyNumber, 'Charge ID:', chargeId);
+                
+                // Define the API key properly
+                const API_KEY = '22aefa40-ee9e-47c0-b40a-2dd3c03165c6';
+                
+                // Simply try to download the charge document directly
+                // Companies House pattern: many charges don't have downloadable documents
+                // We'll search filing history for the creation document
+                
+                const filingHistoryUrl = `https://api.companieshouse.gov.uk/company/${companyNumber}/filing-history?category=mortgage&items_per_page=100`;
+                console.log('Fetching filing history from:', filingHistoryUrl);
+                
+                const filingResponse = await fetchWithWorker(filingHistoryUrl, API_KEY);
+                
+                if (!filingResponse.ok) {
+                    const errorText = await filingResponse.text();
+                    console.error('Filing history error:', errorText);
+                    throw new Error(`Failed to fetch filing history: ${filingResponse.status}`);
+                }
+                
+                const filingData = await filingResponse.json();
+                console.log('Filing history data:', filingData);
+                
+                // Look for charge-related filings
+                let documentUrl = null;
+                let foundFiling = null;
+                
+                if (filingData.items && filingData.items.length > 0) {
+                    // Try to find a filing that matches this specific charge
+                    for (const filing of filingData.items) {
+                        // Check if this filing has a downloadable document
+                        if (!filing.links || !filing.links.document_metadata) {
+                            continue;
+                        }
+                        
+                        // Check if it's charge-related
+                        const isChargeRelated = 
+                            filing.category === 'mortgage' ||
+                            (filing.type && filing.type.toLowerCase().includes('charge')) ||
+                            (filing.description && (
+                                filing.description.toLowerCase().includes('charge') ||
+                                filing.description.toLowerCase().includes('mortgage') ||
+                                filing.description.toLowerCase().includes('debenture')
+                            ));
+                        
+                        if (isChargeRelated) {
+                            foundFiling = filing;
+                            let metadataUrl = filing.links.document_metadata;
+                            if (metadataUrl.startsWith('/')) {
+                                metadataUrl = `https://api.companieshouse.gov.uk${metadataUrl}`;
+                            }
+                            documentUrl = `${metadataUrl}/content`;
+                            console.log('Found charge filing:', filing.description, 'Date:', filing.date);
+                            
+                            // Don't break - keep looking for better matches
+                            // But if this filing mentions our charge number, use it
+                            if (filing.description && filing.description.includes(chargeNumber)) {
+                                console.log('Found exact match for charge number!');
+                                break;
+                            }
+                        }
+                    }
+                }
+                
+                if (!documentUrl) {
+                    throw new Error('No downloadable charge documents found. This charge may not have an associated PDF document.');
+                }
+                
+                // Download the document
+                console.log('Downloading document from:', documentUrl);
+                const response = await fetchWithWorker(documentUrl, API_KEY);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Download error:', errorText);
+                    throw new Error(`Failed to download document: ${response.status}`);
+                }
+                
+                // Get the blob
+                const blob = await response.blob();
+                console.log('Downloaded blob size:', blob.size);
+                
+                // Create filename
+                const safeDescription = description.replace(/[^a-z0-9\s\-\_]/gi, '').trim().replace(/\s+/g, '_');
+                const filename = `${companyNumber}_charge_${chargeNumber}_${safeDescription}.pdf`;
+                
+                // Download the file
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                
+                // Show success state
+                button.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="16" height="16">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    Downloaded
+                `;
+                button.style.color = '#10b981';
+                button.style.borderColor = 'rgba(16, 185, 129, 0.3)';
+                
+                // Reset button after 3 seconds
+                setTimeout(() => {
+                    button.innerHTML = originalHTML;
+                    button.disabled = false;
+                    button.style.color = '';
+                    button.style.borderColor = '';
+                }, 3000);
+                
+            } catch (error) {
+                console.error('Charge download error:', error);
+                
+                // Show error state
+                button.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="16" height="16">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    Error
+                `;
+                button.style.color = '#ef4444';
+                button.style.borderColor = 'rgba(239, 68, 68, 0.3)';
+                
+                // Show toast with more helpful error message
+                const errorMessage = error.message.includes('No downloadable') 
+                    ? 'No PDF document available for this charge' 
+                    : 'Failed to download charge document';
+                showToast('error', errorMessage);
+                
+                // Reset button after 3 seconds
+                setTimeout(() => {
+                    button.innerHTML = originalHTML;
+                    button.disabled = false;
+                    button.style.color = '';
+                    button.style.borderColor = '';
+                }, 3000);
+            }
+        }
+        
         // Initialize Stripe
         const stripe = Stripe(STRIPE_PUBLIC_KEY);
         
@@ -7689,7 +7854,18 @@
                         status: charge.status === 'fully-satisfied' ? 'satisfied' : (charge.status || 'outstanding'),
                         personsEntitled: charge.persons_entitled ? charge.persons_entitled.map(p => p.name).join(', ') : '',
                         amountSecured: charge.particulars?.amount_secured || '',
-                        type: charge.classification?.type || charge.charge_code || ''
+                        type: charge.classification?.type || charge.charge_code || '',
+                        chargeNumber: charge.charge_number,
+                        satisfiedOn: charge.satisfied_on,
+                        assetsCeasedReleased: charge.assets_ceased_released,
+                        documentLink: charge.links?.self || null,
+                        transactionId: charge.transaction_id,
+                        deliveredOn: charge.delivered_on,
+                        createdOn: charge.created_on,
+                        particulars: charge.particulars || {},
+                        securedDetails: charge.secured_details || {},
+                        scottishAlterations: charge.scottish_alterations || {},
+                        hasDocument: !!(charge.links?.filing || charge.transaction_id)
                     })) : [];
                     
                     populateChargesTab(charges);
@@ -7760,15 +7936,70 @@
                         : 'Date not available';
                     const statusColor = charge.status === 'outstanding' ? '#ef4444' : '#22c55e';
                     const statusText = charge.status === 'outstanding' ? 'OUTSTANDING' : 'SATISFIED';
+                    const satisfiedDate = charge.satisfiedOn ? new Date(charge.satisfiedOn).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : null;
                     
                     return `
-                        <div class="data-item">
-                            <div class="data-item-header">${charge.description}</div>
-                            <div class="data-item-detail">
-                                Created: ${dateText} - 
-                                <span style="color: ${statusColor}; font-weight: 600;">${statusText}</span>
-                                ${charge.personsEntitled ? `<br>Persons Entitled: ${charge.personsEntitled}` : ''}
-                                ${charge.amountSecured ? `<br>Amount Secured: ${charge.amountSecured}` : ''}
+                        <div class="data-item" style="border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 20px; margin-bottom: 16px; background: rgba(255, 255, 255, 0.02);">
+                            <div class="data-item-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                                <div>
+                                    <span style="font-size: 18px; font-weight: 600;">${charge.description}</span>
+                                    ${charge.chargeNumber ? `<span style="color: #94a3b8; font-size: 14px; margin-left: 12px;">Charge #${charge.chargeNumber}</span>` : ''}
+                                </div>
+                                <span style="color: ${statusColor}; font-weight: 600; padding: 6px 12px; background: ${statusColor}15; border: 1px solid ${statusColor}30; border-radius: 6px; font-size: 12px;">
+                                    ${statusText}
+                                </span>
+                            </div>
+                            <div class="data-item-detail" style="color: #cbd5e1; line-height: 1.8;">
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; margin-bottom: 16px;">
+                                    <div>
+                                        <strong style="color: #e2e8f0;">Created:</strong> ${dateText}
+                                        ${satisfiedDate ? `<br><strong style="color: #e2e8f0;">Satisfied:</strong> ${satisfiedDate}` : ''}
+                                        ${charge.deliveredOn && charge.deliveredOn !== charge.created ? `<br><strong style="color: #e2e8f0;">Delivered:</strong> ${new Date(charge.deliveredOn).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}` : ''}
+                                    </div>
+                                    ${charge.amountSecured || charge.particulars.description ? `
+                                    <div>
+                                        ${charge.amountSecured ? `<strong style="color: #e2e8f0;">Amount Secured:</strong> ${charge.amountSecured}<br>` : ''}
+                                        ${charge.particulars.description ? `<strong style="color: #e2e8f0;">Particulars:</strong> ${charge.particulars.description}` : ''}
+                                    </div>` : ''}
+                                </div>
+                                ${charge.personsEntitled ? `
+                                <div style="margin-bottom: 12px;">
+                                    <strong style="color: #e2e8f0;">Persons Entitled:</strong> ${charge.personsEntitled}
+                                </div>` : ''}
+                                ${charge.assetsCeasedReleased ? `
+                                <div style="margin-bottom: 12px;">
+                                    <strong style="color: #e2e8f0;">Assets Ceased/Released:</strong> ${charge.assetsCeasedReleased}
+                                </div>` : ''}
+                                ${charge.securedDetails.description ? `
+                                <div style="margin-bottom: 12px;">
+                                    <strong style="color: #e2e8f0;">Secured Details:</strong> ${charge.securedDetails.description}
+                                </div>` : ''}
+                                ${charge.documentLink ? `
+                                <div style="display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap;">
+                                    <button class="charge-download-btn" onclick="downloadChargeDocument('${charge.documentLink}', '${charge.description.replace(/'/g, "\\'")}', '${charge.chargeNumber || 'charge'}')" style="
+                                        background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+                                        border: 1px solid rgba(99, 102, 241, 0.3);
+                                        color: #a5b4fc;
+                                        padding: 8px 16px;
+                                        border-radius: 8px;
+                                        font-size: 14px;
+                                        font-weight: 500;
+                                        cursor: pointer;
+                                        transition: all 0.2s ease;
+                                        display: inline-flex;
+                                        align-items: center;
+                                        gap: 6px;
+                                    " onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 12px rgba(99, 102, 241, 0.2)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="16" height="16">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+                                        </svg>
+                                        Download Charge Document
+                                    </button>
+                                    ${charge.transactionId ? `
+                                    <span style="color: #64748b; font-size: 13px; padding: 8px 0;">
+                                        Transaction ID: ${charge.transactionId}
+                                    </span>` : ''}
+                                </div>` : ''}
                             </div>
                         </div>
                     `;
