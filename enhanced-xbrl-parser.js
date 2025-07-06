@@ -65,7 +65,9 @@ const EnhancedXBRLParser = {
                 const value = element.textContent.trim();
                 
                 // Parse numeric value
-                const numericValue = this.parseNumericValue(value, scale);
+                // Don't apply scale to employee counts - they are absolute numbers
+                const isEmployeeCount = name && name.toLowerCase().includes('employee');
+                const numericValue = this.parseNumericValue(value, isEmployeeCount ? '0' : scale);
                 
                 if (!data.raw[name]) {
                     data.raw[name] = {};
