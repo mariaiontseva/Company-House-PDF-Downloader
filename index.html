@@ -7094,6 +7094,18 @@
             const modal = document.getElementById('companyModal');
             console.log('🔸 Modal element found:', !!modal);
             if (modal) {
+                // Always start on Overview tab when opening modal for new company
+                switchModalTab('overview');
+                
+                // Clear any previous financial data to prevent showing old data
+                currentCompanyFinancialData = null;
+                const financeContent = document.getElementById('finance-content');
+                const financeLoading = document.getElementById('finance-loading');
+                const financeNoData = document.getElementById('finance-no-data');
+                if (financeContent) financeContent.style.display = 'none';
+                if (financeLoading) financeLoading.style.display = 'block';
+                if (financeNoData) financeNoData.style.display = 'none';
+                
                 // Show modal first
                 modal.style.display = 'flex';
                 document.body.style.overflow = 'hidden';
