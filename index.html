@@ -528,7 +528,7 @@
     <script src="https://js.stripe.com/v3/"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="enhanced-xbrl-parser.js?v=20250706-3"></script>
-    <script src="finance-parser.js?v=20250706-3"></script>
+    <script src="finance-parser.js?v=20250706-4"></script>
     
     <style>
         :root {
@@ -7275,12 +7275,17 @@
             // Update risk badge using comprehensive risk calculation
             const riskBadge = document.querySelector('#companyModal .risk-badge');
             if (riskBadge) {
-                // Use the same calculateRiskScore function used in Risk Insights tab
-                const riskScore = calculateRiskScore(company);
+                // Store the calculated risk for both badge and Risk Insights tab
+                window.currentCompanyRiskData = {
+                    score: calculateRiskScore(company),
+                    company: company
+                };
+                const riskScore = window.currentCompanyRiskData.score;
                 const riskLevel = riskScore > 80 ? 'low' : riskScore > 50 ? 'medium' : 'high';
                 const riskText = riskScore > 80 ? 'LOW RISK' : riskScore > 50 ? 'MEDIUM RISK' : 'HIGH RISK';
                 riskBadge.className = `risk-badge ${riskLevel}`;
                 riskBadge.innerHTML = `<div class="risk-dot"></div>${riskText} (${riskScore}/100)`;
+                console.log('🔸 Risk badge updated:', riskText, `(${riskScore}/100)`);
             }
             
             // Calculate company age
@@ -8666,9 +8671,17 @@
         
         // Update Risk Insights tab with comprehensive analysis
         function updateRiskInsightsTab(companyData) {
-            const riskScore = calculateRiskScore(companyData);
-            const riskLevel = riskScore > 80 ? 'LOW RISK' : riskScore > 50 ? 'MEDIUM RISK' : 'HIGH RISK';
-            const riskColor = riskScore > 80 ? '#22c55e' : riskScore > 50 ? '#fb923c' : '#ef4444';
+            // Use the same risk calculation as the badge for perfect consistency
+            let riskScore, riskLevel, riskColor;
+            if (window.currentCompanyRiskData) {
+                riskScore = window.currentCompanyRiskData.score;
+                console.log('🔸 Risk Insights tab using stored risk data:', riskScore);
+            } else {
+                riskScore = calculateRiskScore(companyData);
+                console.log('🔸 Risk Insights tab calculating new risk score:', riskScore);
+            }
+            riskLevel = riskScore > 80 ? 'LOW RISK' : riskScore > 50 ? 'MEDIUM RISK' : 'HIGH RISK';
+            riskColor = riskScore > 80 ? '#22c55e' : riskScore > 50 ? '#fb923c' : '#ef4444';
             
             const insightsTab = document.querySelector('#companyModal #insights');
             if (!insightsTab) return;
@@ -8769,6 +8782,7 @@
                     </div>
                 </div>
             `;
+            console.log('🔸 Risk Insights tab updated with score:', `${riskScore}/100 - ${riskLevel}`);
         }
         
         // Calculate risk score based on company data
