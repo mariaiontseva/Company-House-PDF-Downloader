@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Employee Data for 09051662</title>
+    <script src="finance-parser.js?v=20250706-2"></script>
+    <script src="enhanced-xbrl-parser.js?v=20250706-3"></script>
+</head>
+<body>
+    <h1>Debug Employee Data for Company 09051662</h1>
+    <button onclick="debugEmployees()">Debug Employee Numbers</button>
+    <div id="output"></div>
+    
+    <script>
+        async function debugEmployees() {
+            const output = document.getElementById('output');
+            output.innerHTML = '<p>Loading...</p>';
+            
+            try {
+                console.log('Starting employee debug...');
+                
+                // Get financial data
+                const data = await FinanceParser.extractFinancialData('09051662');
+                
+                if (!data || !data.historicalData) {
+                    output.innerHTML = '<p>No data extracted</p>';
+                    return;
+                }
+                
+                let html = '<h2>Employee Data Debug for 09051662</h2>';
+                html += `<p>Total filings with data: ${data.historicalData.length}</p>`;
+                
+                // Check each filing
+                data.historicalData.forEach((filing, index) => {
+                    html += `<div style="border: 1px solid #ccc; padding: 10px; margin: 10px 0;">`;
+                    html += `<h3>Filing ${index + 1}: ${filing.date} - ${filing.description}</h3>`;
+                    
+                    if (filing.metrics && filing.metrics.employees) {
+                        const emp = filing.metrics.employees;
+                        html += '<h4>Employee Data Found:</h4>';
+                        html += '<ul>';
+                        html += `<li><strong>Value:</strong> ${emp.value}</li>`;
+                        html += `<li><strong>Formatted:</strong> ${emp.formatted || 'N/A'}</li>`;
+                        html += `<li><strong>Scale:</strong> ${emp.scale || 'N/A'}</li>`;
+                        html += `<li><strong>Unit:</strong> ${emp.unit || 'N/A'}</li>`;
+                        html += `<li><strong>Source:</strong> ${emp.source || 'XBRL'}</li>`;
+                        html += '</ul>';
+                    } else {
+                        html += '<p>No employee data in this filing</p>';
+                    }
+                    
+                    html += '</div>';
+                });
+                
+                // Now let's fetch one filing directly and examine the raw XBRL
+                html += '<h2>Raw iXBRL Analysis</h2>';
+                
+                // Get the latest filing
+                const latestFiling = data.historicalData[0];
+                if (latestFiling) {
+                    console.log('Fetching raw iXBRL for latest filing...');
+                    
+                    // Try to get the raw document
+                    const companyNumber = '09051662';
+                    const transactionId = latestFiling.transactionId || latestFiling.links?.self?.split('/').pop();
+                    
+                    if (transactionId) {
+                        const targetUrl = `https://find-and-update.company-information.service.gov.uk/company/${companyNumber}/filing-history/${transactionId}/document?format=xhtml&download=0`;
+                        const params = new URLSearchParams({
+                            url: targetUrl,
+                            apiKey: '22aefa40-ee9e-47c0-b40a-2dd3c03165c6'
+                        });
+                        
+                        const response = await fetch(`https://blue-flower-d40f.mahin84.workers.dev?${params.toString()}`);
+                        
+                        if (response.ok) {
+                            const xbrlText = await response.text();
+                            
+                            // Search for employee patterns
+                            const patterns = [
+                                /AverageNumberEmployeesDuringPeriod[^>]*scale="(\d+)"[^>]*>([^<]+)</gi,
+                                /AverageNumberEmployeesDuringPeriod[^>]*>([^<]+)</gi,
+                                /name="[^"]*employee[^"]*"[^>]*>([^<]+)</gi,
+                                /Number of employees[^<]*<[^>]*>(\d+)/gi
+                            ];
+                            
+                            html += '<h3>Employee Data in Raw iXBRL:</h3>';
+                            let foundAny = false;
+                            
+                            patterns.forEach((pattern, i) => {
+                                const matches = [...xbrlText.matchAll(pattern)];
+                                if (matches.length > 0) {
+                                    html += `<h4>Pattern ${i + 1} matches:</h4><ul>`;
+                                    matches.forEach(match => {
+                                        html += '<li>';
+                                        if (match[2]) {
+                                            // Has scale
+                                            html += `Value: ${match[2]}, Scale: ${match[1]}`;
+                                            html += ` (If scale applied: ${parseInt(match[2]) * Math.pow(10, parseInt(match[1]))})</li>`;
+                                        } else {
+                                            html += `Value: ${match[1]}</li>`;
+                                        }
+                                        
+                                        // Show context
+                                        const start = Math.max(0, match.index - 100);
+                                        const end = Math.min(xbrlText.length, match.index + match[0].length + 100);
+                                        const context = xbrlText.substring(start, end);
+                                        html += `<pre style="background: #f0f0f0; padding: 5px; font-size: 11px;">${context.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>`;
+                                    });
+                                    html += '</ul>';
+                                    foundAny = true;
+                                }
+                            });
+                            
+                            if (!foundAny) {
+                                html += '<p>No employee data found in raw iXBRL</p>';
+                            }
+                        }
+                    }
+                }
+                
+                output.innerHTML = html;
+                
+            } catch (error) {
+                console.error('Error:', error);
+                output.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>
