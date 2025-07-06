@@ -877,8 +877,20 @@ const FinanceParser = {
                 metrics.netProfit = xbrlData[key].current || xbrlData[key].default || xbrlData[key][Object.keys(xbrlData[key])[0]];
             } else if (!metrics.totalAssets && lowerKey.includes('assets') && (lowerKey.includes('total') || lowerKey.includes('balance'))) {
                 metrics.totalAssets = xbrlData[key].current || xbrlData[key].default || xbrlData[key][Object.keys(xbrlData[key])[0]];
-            } else if (!metrics.employees && lowerKey.includes('employee')) {
-                metrics.employees = xbrlData[key].current || xbrlData[key].default || xbrlData[key][Object.keys(xbrlData[key])[0]];
+            } else if (!metrics.employees && (
+                lowerKey.includes('averagenumberemployees') || 
+                lowerKey.includes('numberofemployees') ||
+                lowerKey === 'employees' ||
+                key.includes('AverageNumberEmployeesDuringPeriod') ||
+                key.includes('NumberOfEmployees')
+            ) && !lowerKey.includes('benefit') && !lowerKey.includes('expense') && !lowerKey.includes('cost')) {
+                const value = xbrlData[key].current || xbrlData[key].default || xbrlData[key][Object.keys(xbrlData[key])[0]];
+                // Only accept numeric values for employee count, and ensure it's not descriptive text
+                if (value && typeof value.value === 'number' && value.value >= 0 && 
+                    (!value.formatted || !/benefit|expense|cost|short.?term|long.?term|remuneration|compensation/i.test(value.formatted))) {
+                    metrics.employees = value;
+                    console.log(`🔸 FinanceParser: Found employee count from key "${key}": ${value.value}`);
+                }
             } else if (!metrics.cashAndEquivalents && lowerKey.includes('cash') && (lowerKey.includes('bank') || lowerKey.includes('hand'))) {
                 metrics.cashAndEquivalents = xbrlData[key].current || xbrlData[key].default || xbrlData[key][Object.keys(xbrlData[key])[0]];
             } else if (!metrics.totalLiabilities && lowerKey.includes('liabilities') && !lowerKey.includes('current')) {
