@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Proxy Direct</title>
+</head>
+<body>
+    <h1>Direct Proxy Tests</h1>
+    <button onclick="runTests()">Run Tests</button>
+    <div id="output"></div>
+    
+    <script>
+        async function runTests() {
+            const output = document.getElementById('output');
+            let html = '<h2>Test Results:</h2>';
+            
+            const tests = [
+                {
+                    name: 'Proxy Health Check',
+                    url: 'https://docspace.uk/proxy/health'
+                },
+                {
+                    name: 'API Proxy Test',
+                    url: 'https://docspace.uk/proxy/api/proxy?url=' + encodeURIComponent('https://api.companieshouse.gov.uk/company/09051662')
+                },
+                {
+                    name: 'Direct API Call (will fail due to CORS)',
+                    url: 'https://api.companieshouse.gov.uk/company/09051662'
+                }
+            ];
+            
+            for (const test of tests) {
+                html += `<h3>${test.name}:</h3>`;
+                try {
+                    const response = await fetch(test.url);
+                    html += `<p>Status: ${response.status} ${response.statusText}</p>`;
+                    
+                    if (response.ok) {
+                        const contentType = response.headers.get('content-type');
+                        if (contentType && contentType.includes('json')) {
+                            const data = await response.json();
+                            html += `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                        } else {
+                            const text = await response.text();
+                            html += `<p>Response: ${text.substring(0, 200)}...</p>`;
+                        }
+                    }
+                } catch (error) {
+                    html += `<p style="color: red;">Error: ${error.message}</p>`;
+                }
+                html += '<hr>';
+            }
+            
+            output.innerHTML = html;
+        }
+    </script>
+</body>
+</html>
