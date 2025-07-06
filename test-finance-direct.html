@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Finance Direct</title>
+</head>
+<body>
+    <h1>Direct Finance Test (No Cache)</h1>
+    <button onclick="testDirect()">Test Cloudflare Worker Directly</button>
+    <div id="output"></div>
+    
+    <script>
+        const WORKER_URL = 'https://blue-flower-d40f.mahin84.workers.dev';
+        const API_KEY = '22aefa40-ee9e-47c0-b40a-2dd3c03165c6';
+        
+        async function testDirect() {
+            const output = document.getElementById('output');
+            let html = '<h2>Test Results:</h2>';
+            
+            try {
+                // Test 1: Company Info
+                html += '<h3>1. Test Company Info via Worker:</h3>';
+                const companyUrl = 'https://api.companieshouse.gov.uk/company/09051662';
+                const params1 = new URLSearchParams({
+                    url: companyUrl,
+                    apiKey: API_KEY
+                });
+                const workerUrl1 = `${WORKER_URL}?${params1.toString()}`;
+                html += `<p>URL: ${workerUrl1}</p>`;
+                
+                const response1 = await fetch(workerUrl1);
+                html += `<p>Status: ${response1.status}</p>`;
+                
+                if (response1.ok) {
+                    const data = await response1.json();
+                    html += `<p style="color: green;">✓ Company: ${data.company_name}</p>`;
+                } else {
+                    const text = await response1.text();
+                    html += `<p style="color: red;">✗ Error: ${text}</p>`;
+                }
+                
+                // Test 2: Filing History
+                html += '<h3>2. Test Filing History via Worker:</h3>';
+                const filingUrl = 'https://api.companieshouse.gov.uk/company/09051662/filing-history?category=accounts&items_per_page=5';
+                const params2 = new URLSearchParams({
+                    url: filingUrl,
+                    apiKey: API_KEY
+                });
+                const workerUrl2 = `${WORKER_URL}?${params2.toString()}`;
+                
+                const response2 = await fetch(workerUrl2);
+                html += `<p>Status: ${response2.status}</p>`;
+                
+                if (response2.ok) {
+                    const data = await response2.json();
+                    html += `<p style="color: green;">✓ Filings found: ${data.items.length}</p>`;
+                    
+                    // Show first filing
+                    if (data.items.length > 0) {
+                        const filing = data.items[0];
+                        html += `<p>Latest: ${filing.date} - ${filing.description}</p>`;
+                        
+                        // Test 3: Document Metadata
+                        if (filing.links && filing.links.document_metadata) {
+                            html += '<h3>3. Test Document Metadata:</h3>';
+                            let metadataUrl = filing.links.document_metadata;
+                            if (metadataUrl.startsWith('/')) {
+                                metadataUrl = 'https://api.companieshouse.gov.uk' + metadataUrl;
+                            }
+                            
+                            const params3 = new URLSearchParams({
+                                url: metadataUrl,
+                                apiKey: API_KEY
+                            });
+                            const workerUrl3 = `${WORKER_URL}?${params3.toString()}`;
+                            
+                            const response3 = await fetch(workerUrl3);
+                            html += `<p>Status: ${response3.status}</p>`;
+                            
+                            if (response3.ok) {
+                                const metadata = await response3.json();
+                                html += `<p style="color: green;">✓ Resources: ${Object.keys(metadata.resources || {}).join(', ')}</p>`;
+                            }
+                        }
+                    }
+                } else {
+                    const text = await response2.text();
+                    html += `<p style="color: red;">✗ Error: ${text}</p>`;
+                }
+                
+            } catch (error) {
+                html += `<h3 style="color: red;">Error:</h3>`;
+                html += `<pre>${error.message}</pre>`;
+                console.error(error);
+            }
+            
+            output.innerHTML = html;
+        }
+        
+        // Also try to load finance-parser.js with cache buster
+        const script = document.createElement('script');
+        script.src = 'finance-parser.js?v=' + Date.now();
+        script.onload = () => {
+            console.log('Finance Parser loaded, PROXY_URL:', window.FinanceParser?.PROXY_URL);
+        };
+        document.head.appendChild(script);
+    </script>
+</body>
+</html>
