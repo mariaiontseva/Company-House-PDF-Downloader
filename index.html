@@ -527,8 +527,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <script src="https://js.stripe.com/v3/"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="enhanced-xbrl-parser.js?v=20250706-2"></script>
-    <script src="finance-parser.js?v=20250706"></script>
+    <script src="enhanced-xbrl-parser.js?v=20250706-3"></script>
+    <script src="finance-parser.js?v=20250706-2"></script>
     
     <style>
         :root {
@@ -9894,10 +9894,11 @@
             
             // Draw net assets line
             ctx.strokeStyle = '#6366f1';
-            ctx.lineWidth = 2;
+            ctx.lineWidth = 3;
             ctx.globalAlpha = 1;
-            ctx.beginPath();
             
+            // First draw the line
+            ctx.beginPath();
             netAssets.forEach((value, index) => {
                 const x = padding + (index / (netAssets.length - 1)) * (width - 2 * padding);
                 const y = padding + ((maxValue - value) / range) * (height - padding - bottomPadding);
@@ -9907,15 +9908,19 @@
                 } else {
                     ctx.lineTo(x, y);
                 }
+            });
+            ctx.stroke();
+            
+            // Then draw points on top
+            ctx.fillStyle = '#6366f1';
+            netAssets.forEach((value, index) => {
+                const x = padding + (index / (netAssets.length - 1)) * (width - 2 * padding);
+                const y = padding + ((maxValue - value) / range) * (height - padding - bottomPadding);
                 
-                // Draw point
-                ctx.fillStyle = '#6366f1';
                 ctx.beginPath();
-                ctx.arc(x, y, 3, 0, 2 * Math.PI);
+                ctx.arc(x, y, 4, 0, 2 * Math.PI);
                 ctx.fill();
             });
-            
-            ctx.stroke();
             
             // Draw x-axis labels
             ctx.fillStyle = '#94a3b8';
@@ -9932,9 +9937,15 @@
         function formatAxisValue(value) {
             const absValue = Math.abs(value);
             if (absValue >= 1e9) {
-                return `${(value / 1e9).toFixed(0)}B`;
+                return `${(value / 1e9).toFixed(1)}B`;
             } else if (absValue >= 1e6) {
-                return `${(value / 1e6).toFixed(0)}M`;
+                // More precise formatting to avoid duplicate labels
+                const millions = value / 1e6;
+                if (Math.abs(millions) >= 10) {
+                    return `${millions.toFixed(0)}M`;
+                } else {
+                    return `${millions.toFixed(1)}M`;
+                }
             } else if (absValue >= 1e3) {
                 return `${(value / 1e3).toFixed(0)}K`;
             }
