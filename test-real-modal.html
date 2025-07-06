@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Real Modal</title>
+</head>
+<body>
+    <h1>Testing Real Modal in index.html</h1>
+    <button onclick="testRealModal()">Test Modal in index.html</button>
+    <pre id="output"></pre>
+    
+    <script>
+        function log(msg) {
+            document.getElementById('output').textContent += msg + '\n';
+            console.log(msg);
+        }
+        
+        function testRealModal() {
+            // Open index.html in iframe to test
+            const iframe = document.createElement('iframe');
+            iframe.src = 'index.html';
+            iframe.style.width = '100%';
+            iframe.style.height = '600px';
+            document.body.appendChild(iframe);
+            
+            iframe.onload = () => {
+                const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                const iframeWin = iframe.contentWindow;
+                
+                log('Iframe loaded, looking for company card...');
+                
+                setTimeout(() => {
+                    // Find and click first View Details button
+                    const viewButton = iframeDoc.querySelector('button.signup-btn[onclick*="viewCompanyDetails"]');
+                    if (viewButton) {
+                        log('Found View Details button, clicking...');
+                        viewButton.click();
+                        
+                        // Check modal after it opens
+                        setTimeout(() => {
+                            const modal = iframeDoc.getElementById('companyModal');
+                            const overviewTab = iframeDoc.querySelector('#companyModal #overview');
+                            
+                            log('Modal display: ' + (modal ? modal.style.display : 'not found'));
+                            log('Overview tab exists: ' + !!overviewTab);
+                            log('Overview tab content length: ' + (overviewTab ? overviewTab.innerHTML.length : 0));
+                            log('Overview tab HTML: ' + (overviewTab ? overviewTab.innerHTML.substring(0, 200) + '...' : 'none'));
+                            
+                            // Try to manually populate
+                            if (overviewTab) {
+                                log('\nManually setting content...');
+                                const testContent = '<h3>TEST ADDRESS</h3><div>123 Test Street, Test City</div>';
+                                overviewTab.innerHTML = testContent;
+                                log('Content set. New HTML: ' + overviewTab.innerHTML);
+                                
+                                // Check if it persists
+                                setTimeout(() => {
+                                    log('\nAfter 1 second:');
+                                    log('Content still there: ' + overviewTab.innerHTML.includes('TEST ADDRESS'));
+                                    log('Current HTML: ' + overviewTab.innerHTML.substring(0, 100));
+                                }, 1000);
+                            }
+                        }, 2000);
+                    } else {
+                        log('ERROR: No View Details button found!');
+                    }
+                }, 2000);
+            };
+        }
+    </script>
+</body>
+</html>

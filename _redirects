@@ -1,0 +1,19 @@
+# GitHub Pages redirects for DocSpace.uk SEO URLs
+
+# Test redirect
+/test-htaccess /#test-success 302
+
+# Company pages
+/company/* /index.html?company=:splat 200
+
+# Category pages  
+/oldest-companies /index.html?category=oldest 200
+/newest-companies /index.html?category=newest 200
+/royal-charter-companies /index.html?category=royal-charter 200
+/plc-companies /index.html?category=plc 200
+
+# Industry pages
+/industries/* /index.html?industry=:splat 200
+
+# Location pages
+/companies/* /index.html?location=:splat 200

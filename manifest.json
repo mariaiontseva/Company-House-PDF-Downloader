@@ -1,0 +1,12 @@
+{
+  "name": "DocSpace - Companies House Document Downloader",
+  "short_name": "DocSpace",
+  "description": "Download all Companies House documents for any UK company as a ZIP file for £5",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#1e40af",
+  "orientation": "portrait",
+  "categories": ["business", "finance", "productivity"],
+  "lang": "en-GB"
+}

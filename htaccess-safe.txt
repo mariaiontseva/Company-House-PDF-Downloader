@@ -1,0 +1,70 @@
+# DocSpace.uk Safe SEO URL Routing
+# This version includes fallbacks and can be deployed gradually
+
+RewriteEngine On
+
+# IMPORTANT: Test these rules one by one
+# Start with just RewriteEngine On, then add rules gradually
+
+# ===== PHASE 1: Basic Setup (Deploy First) =====
+# Prevent directory browsing
+Options -Indexes
+
+# ===== PHASE 2: Clean URLs without forcing (Deploy after testing) =====
+# Only rewrite if the file doesn't exist
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Company URLs - Pass to index.html but don't force
+RewriteRule ^company/([a-zA-Z0-9]+)/?$ index.html [L,QSA]
+
+# Category pages
+RewriteRule ^oldest-companies/?$ index.html [L,QSA]
+RewriteRule ^newest-companies/?$ index.html [L,QSA]
+RewriteRule ^royal-charter-companies/?$ index.html [L,QSA]
+RewriteRule ^plc-companies/?$ index.html [L,QSA]
+
+# ===== PHASE 3: Redirects (Deploy only after Phase 2 works) =====
+# Uncomment these lines only after testing Phase 2
+# RewriteCond %{THE_REQUEST} \s/\#company/([a-zA-Z0-9]+)[\s?] [NC]
+# RewriteRule ^ /company/%1? [R=301,L]
+
+# ===== Security Headers (Safe to deploy immediately) =====
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set X-XSS-Protection "1; mode=block"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# ===== Performance (Safe to deploy immediately) =====
+# Enable compression
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/json
+</IfModule>
+
+# Browser caching
+<IfModule mod_expires.c>
+    ExpiresActive On
+    # Images
+    ExpiresByType image/jpeg "access plus 1 month"
+    ExpiresByType image/png "access plus 1 month"
+    ExpiresByType image/gif "access plus 1 month"
+    ExpiresByType image/svg+xml "access plus 1 month"
+    
+    # CSS and JavaScript
+    ExpiresByType text/css "access plus 1 week"
+    ExpiresByType application/javascript "access plus 1 week"
+    
+    # HTML (shorter cache for updates)
+    ExpiresByType text/html "access plus 1 hour"
+</IfModule>
+
+# ===== Error Handling =====
+# Custom error pages (optional)
+# ErrorDocument 404 /404.html
+# ErrorDocument 500 /500.html
+
+# ===== Testing Rules =====
+# Add a test redirect to verify .htaccess is working
+# Redirect /test-htaccess https://docspace.uk/#test-success

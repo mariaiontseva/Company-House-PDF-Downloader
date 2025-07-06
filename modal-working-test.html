@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Working Modal Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #0f172a;
+            color: white;
+            margin: 0;
+        }
+        
+        .test-button {
+            padding: 20px 40px;
+            font-size: 18px;
+            background: #059669;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 20px;
+        }
+        
+        .test-button:hover {
+            background: #047857;
+        }
+        
+        /* EXACT COPY FROM TESCO-CARD.HTML - Company Modal Styles */
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+        
+        .close-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: rotate(90deg) scale(1.1);
+        }
+        
+        .close-btn svg {
+            width: 20px;
+            height: 20px;
+            color: #e7e9ea;
+        }
+        
+        .company-card {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            box-shadow: 0 25px 100px rgba(0, 0, 0, 0.5),
+                        0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+            max-width: 1200px;
+            width: 100%;
+            max-height: 90vh;
+            overflow: hidden;
+            position: relative;
+            animation: slideUp 0.4s ease;
+        }
+        
+        @keyframes slideUp {
+            from { 
+                opacity: 0;
+                transform: translateY(30px) scale(0.95);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        
+        .card-content {
+            height: 90vh;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(99, 102, 241, 0.3) transparent;
+        }
+        
+        .card-content::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .card-content::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        .card-content::-webkit-scrollbar-thumb {
+            background: rgba(99, 102, 241, 0.3);
+            border-radius: 4px;
+        }
+        
+        .card-content::-webkit-scrollbar-thumb:hover {
+            background: rgba(99, 102, 241, 0.5);
+        }
+        
+        .card-header {
+            background: #0f172a;
+            padding: 40px;
+            position: relative;
+            border-bottom: 1px solid #1e293b;
+        }
+        
+        .company-info {
+            position: relative;
+            z-index: 2;
+        }
+        
+        .company-title {
+            font-size: 42px;
+            font-weight: 900;
+            color: #ffffff;
+            margin-bottom: 12px;
+            letter-spacing: -0.5px;
+        }
+        
+        .company-subtitle {
+            color: #71767b;
+            font-size: 16px;
+            font-weight: 400;
+            margin-bottom: 24px;
+        }
+        
+        .badges-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 24px 0 32px 0;
+        }
+        
+        .company-badges {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        
+        .badge {
+            padding: 8px 16px;
+            border-radius: 100px;
+            font-size: 14px;
+            font-weight: 600;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.1);
+            color: #94a3b8;
+        }
+        
+        .active-badge {
+            background: rgba(34, 197, 94, 0.1);
+            border-color: rgba(34, 197, 94, 0.3);
+            color: #22c55e;
+        }
+        
+        .risk-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(251, 146, 60, 0.1);
+            border: 1px solid rgba(251, 146, 60, 0.3);
+            color: #fb923c;
+            padding: 8px 16px;
+            border-radius: 100px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .risk-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 20px;
+            margin-top: 32px;
+        }
+        
+        .stat-box {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stat-value {
+            font-size: 32px;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 8px;
+        }
+        
+        .stat-label {
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #71767b;
+            font-weight: 700;
+        }
+        
+        .stat-detail {
+            font-size: 12px;
+            color: #71767b;
+            margin-top: 6px;
+            font-weight: 400;
+        }
+        
+        .charges-number {
+            color: #ef4444 !important;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+            -webkit-background-clip: text !important;
+            -webkit-text-fill-color: transparent !important;
+            background-clip: text !important;
+        }
+        
+        /* Responsive */
+        @media (max-width: 1400px) {
+            .stats-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 16px;
+            }
+        }
+        
+        @media (max-width: 900px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+        }
+        
+        @media (max-width: 500px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Working Modal Test</h1>
+    <p>This modal uses the exact CSS from tesco-card.html:</p>
+    <button class="test-button" onclick="openModal()">Open Perfect Modal</button>
+    
+    <!-- Modal HTML -->
+    <div id="testModal" class="modal-backdrop">
+        <div class="company-card">
+            <button class="close-btn" onclick="closeModal()">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+            
+            <div class="card-content">
+                <div class="card-header">
+                    <div class="company-info">
+                        <div class="company-title">THE ABERDEEN-ANGUS CATTLE SOCIETY</div>
+                        <div class="company-subtitle">Company Number: SC000926</div>
+                        
+                        <div class="badges-row">
+                            <div class="company-badges">
+                                <span class="badge active-badge">● Active</span>
+                                <span class="badge">ltd</span>
+                            </div>
+                            <div class="risk-badge">
+                                <div class="risk-dot"></div>
+                                MEDIUM RISK
+                            </div>
+                        </div>
+                        
+                        <div class="stats-grid">
+                            <div class="stat-box">
+                                <div class="stat-value">146</div>
+                                <div class="stat-label">YEARS OLD</div>
+                                <div class="stat-detail">Inc 19 Nov 2008</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-value">4</div>
+                                <div class="stat-label">OFFICERS</div>
+                                <div class="stat-detail">4 active</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-value">131</div>
+                                <div class="stat-label">FILINGS</div>
+                                <div class="stat-detail">Download</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-value charges-number">2</div>
+                                <div class="stat-label">CHARGES</div>
+                                <div class="stat-detail">6 outstanding</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-value">✓</div>
+                                <div class="stat-label">ACCOUNTS</div>
+                                <div class="stat-detail">Next: 30 Sept 2025</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-value">✓</div>
+                                <div class="stat-label">CONFIRMATION STATEMENT</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function openModal() {
+            const modal = document.getElementById('testModal');
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeModal() {
+            const modal = document.getElementById('testModal');
+            modal.style.display = 'none';
+            document.body.style.overflow = '';
+        }
+        
+        // Close on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>

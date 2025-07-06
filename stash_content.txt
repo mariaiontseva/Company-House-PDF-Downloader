@@ -1,0 +1,72 @@
+diff --git a/dev-enhanced-cards.html b/dev-enhanced-cards.html
+index 58660b3..2e19786 100644
+--- a/dev-enhanced-cards.html
++++ b/dev-enhanced-cards.html
+@@ -820,15 +820,11 @@
+ 
+         // API helper function
+         async function fetchWithWorker(url, apiKey) {
+-            const params = new URLSearchParams({
+-                url: url,
+-                apiKey: apiKey
+-            });
+-            const proxyUrl = `${CONFIG.WORKER_URL}?${params.toString()}`;
+-            
+-            const response = await fetch(proxyUrl, {
++            // Direct API call with Basic Auth
++            const response = await fetch(url, {
+                 method: 'GET',
+                 headers: {
++                    'Authorization': 'Basic ' + btoa(apiKey + ':'),
+                     'Accept': 'application/json'
+                 }
+             });
+@@ -884,8 +880,7 @@
+         // Company search API call
+         async function searchCompanies(query) {
+             const searchUrl = `https://api.companieshouse.gov.uk/search/companies?q=${encodeURIComponent(query)}&items_per_page=5`;
+-            const response = await fetchWithWorker(searchUrl, CONFIG.API_KEY);
+-            const data = await response.json();
++            const data = await fetchWithWorker(searchUrl, CONFIG.API_KEY);
+             return data.items || [];
+         }
+ 
+@@ -896,8 +891,7 @@
+                 
+                 // Load basic company data
+                 const companyUrl = `https://api.companieshouse.gov.uk/company/${companyNumber}`;
+-                const response = await fetchWithWorker(companyUrl, CONFIG.API_KEY);
+-                const companyData = await response.json();
++                const companyData = await fetchWithWorker(companyUrl, CONFIG.API_KEY);
+                 
+                 currentCompanyData = companyData;
+                 
+@@ -1167,16 +1161,14 @@
+             try {
+                 // Load officers
+                 const officersUrl = `https://api.companieshouse.gov.uk/company/${companyNumber}/officers`;
+-                const officersResponse = await fetchWithWorker(officersUrl, CONFIG.API_KEY);
+-                const officersData = await officersResponse.json();
++                const officersData = await fetchWithWorker(officersUrl, CONFIG.API_KEY);
+                 
+                 updateOfficersList(officersData.items || []);
+                 
+                 // Load PSCs
+                 try {
+                     const pscUrl = `https://api.companieshouse.gov.uk/company/${companyNumber}/persons-with-significant-control`;
+-                    const pscResponse = await fetchWithWorker(pscUrl, CONFIG.API_KEY);
+-                    const pscData = await pscResponse.json();
++                    const pscData = await fetchWithWorker(pscUrl, CONFIG.API_KEY);
+                     
+                     updatePscList(pscData.items || []);
+                 } catch (pscError) {
+@@ -1194,8 +1186,7 @@
+         async function loadSecuritiesData(companyNumber) {
+             try {
+                 const chargesUrl = `https://api.companieshouse.gov.uk/company/${companyNumber}/charges`;
+-                const chargesResponse = await fetchWithWorker(chargesUrl, CONFIG.API_KEY);
+-                const chargesData = await chargesResponse.json();
++                const chargesData = await fetchWithWorker(chargesUrl, CONFIG.API_KEY);
+                 
+                 updateChargesList(chargesData.items || []);
+                 updateRiskAnalysis(chargesData.items || []);

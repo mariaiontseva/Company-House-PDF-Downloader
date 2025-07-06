@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Overview Tab Fix</title>
+    <style>
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .company-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 800px;
+        }
+        .tab-pane {
+            display: none;
+            padding: 20px;
+            border: 1px solid #ddd;
+            margin-top: 10px;
+        }
+        .tab-pane.active {
+            display: block;
+        }
+        .data-item {
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #eee;
+        }
+        .data-item-header {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        button {
+            margin: 5px;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test Overview Tab Fix</h1>
+    <button onclick="testPopulateOverview()">Test Populate Overview</button>
+    <button onclick="showModal()">Show Modal</button>
+    
+    <div id="companyModal" class="modal-backdrop" style="display: none;">
+        <div class="company-card">
+            <h2>Company Modal</h2>
+            <div class="tab-content">
+                <div class="tab-pane active" id="overview">
+                    <p style="color: #94a3b8; text-align: center; padding: 20px;">Loading company overview...</p>
+                </div>
+            </div>
+            <button onclick="closeModal()">Close</button>
+        </div>
+    </div>
+
+    <script>
+        function formatAddress(address) {
+            if (!address) return 'Address not available';
+            const parts = [];
+            if (address.premises) parts.push(address.premises);
+            if (address.address_line_1) parts.push(address.address_line_1);
+            if (address.address_line_2) parts.push(address.address_line_2);
+            if (address.locality) parts.push(address.locality);
+            if (address.region) parts.push(address.region);
+            if (address.postal_code) parts.push(address.postal_code);
+            if (address.country) parts.push(address.country);
+            return parts.join(', ');
+        }
+
+        function formatSicCodes(sicCodes) {
+            if (!sicCodes || sicCodes.length === 0) return 'No SIC codes available';
+            return sicCodes.join(', ');
+        }
+
+        function populateOverviewTab(companyData) {
+            console.log('🔸 populateOverviewTab called with:', companyData);
+            console.log('🔸 Address data:', companyData.registered_office_address);
+            
+            // Use a more specific selector and add a small delay to ensure DOM is ready
+            setTimeout(() => {
+                const overviewTab = document.querySelector('#companyModal .tab-pane#overview');
+                console.log('🔸 Overview tab element:', overviewTab);
+                if (!overviewTab) {
+                    console.error('🔸 Overview tab not found!');
+                    return;
+                }
+                
+                // Check if the tab is active
+                const isActive = overviewTab.classList.contains('active');
+                console.log('🔸 Overview tab is active:', isActive);
+                
+                const formattedAddress = formatAddress(companyData.registered_office_address);
+                console.log('🔸 Formatted address:', formattedAddress);
+                console.log('🔸 About to set innerHTML of:', overviewTab);
+                
+                const newContent = `
+                    <h3>Company Overview</h3>
+                    <div class="data-item">
+                        <div class="data-item-header">Registered Address</div>
+                        <div class="data-item-detail">${formatAddress(companyData.registered_office_address)}</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-item-header">Company Type</div>
+                        <div class="data-item-detail">${companyData.type || 'Private Limited Company'}</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-item-header">Company Status</div>
+                        <div class="data-item-detail">${companyData.company_status || 'Active'}</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-item-header">Nature of Business (SIC)</div>
+                        <div class="data-item-detail">${formatSicCodes(companyData.sic_codes)}</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-item-header">Incorporation Date</div>
+                        <div class="data-item-detail">${companyData.date_of_creation ? new Date(companyData.date_of_creation).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Unknown'}</div>
+                    </div>
+                    ${companyData.accounts ? `
+                    <div class="data-item">
+                        <div class="data-item-header">Accounting Reference Date</div>
+                        <div class="data-item-detail">${companyData.accounts.accounting_reference_date?.day || ''} ${companyData.accounts.accounting_reference_date?.month || ''}</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-item-header">Next Accounts Due</div>
+                        <div class="data-item-detail">${companyData.accounts.next_due ? new Date(companyData.accounts.next_due).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Unknown'}</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-item-header">Last Accounts Made Up To</div>
+                        <div class="data-item-detail">${companyData.accounts.last_accounts?.made_up_to ? new Date(companyData.accounts.last_accounts.made_up_to).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Not filed'}</div>
+                    </div>
+                    ${companyData.accounts.overdue ? `
+                    <div class="data-item" style="border-color: #ef4444;">
+                        <div class="data-item-header" style="color: #ef4444;">⚠️ Accounts Status</div>
+                        <div class="data-item-detail" style="color: #ef4444;">OVERDUE - Accounts are overdue for filing</div>
+                    </div>` : ''}` : ''}
+                    ${companyData.confirmation_statement ? `
+                    <div class="data-item">
+                        <div class="data-item-header">Next Confirmation Statement Due</div>
+                        <div class="data-item-detail">${companyData.confirmation_statement.next_due ? new Date(companyData.confirmation_statement.next_due).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Unknown'}</div>
+                    </div>` : ''}
+                `;
+                
+                console.log('🔸 Setting innerHTML with content length:', newContent.length);
+                overviewTab.innerHTML = newContent;
+                console.log('🔸 innerHTML set. Current content:', overviewTab.innerHTML.substring(0, 100) + '...');
+                
+                // Force the tab to remain active if it was active
+                if (isActive) {
+                    overviewTab.classList.add('active');
+                }
+                
+                // Force check after a delay to see if content persists
+                setTimeout(() => {
+                    const checkTab = document.querySelector('#companyModal #overview');
+                    console.log('🔸 DELAYED CHECK - Overview tab still exists?', !!checkTab);
+                    console.log('🔸 DELAYED CHECK - Overview tab content:', checkTab?.innerHTML.substring(0, 100) + '...');
+                }, 1000);
+            }, 100); // Small delay to ensure DOM is ready
+        }
+
+        function showModal() {
+            document.getElementById('companyModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('companyModal').style.display = 'none';
+        }
+
+        function testPopulateOverview() {
+            showModal();
+            
+            // Test data
+            const testData = {
+                company_name: "TEST COMPANY LTD",
+                company_number: "12345678",
+                company_status: "Active",
+                type: "Private Limited Company",
+                date_of_creation: "2020-01-15",
+                registered_office_address: {
+                    premises: "Unit 1",
+                    address_line_1: "123 Test Street",
+                    locality: "Test City",
+                    region: "Test County",
+                    postal_code: "TE1 1ST",
+                    country: "United Kingdom"
+                },
+                sic_codes: ["62020", "62090"],
+                accounts: {
+                    accounting_reference_date: {
+                        day: "31",
+                        month: "December"
+                    },
+                    next_due: "2024-09-30",
+                    last_accounts: {
+                        made_up_to: "2023-12-31"
+                    }
+                },
+                confirmation_statement: {
+                    next_due: "2024-01-15"
+                }
+            };
+            
+            // Call the function
+            populateOverviewTab(testData);
+        }
+    </script>
+</body>
+</html>

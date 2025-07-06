@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{PAGE_TITLE}} | DocSpace</title>
+    
+    <!-- Primary Meta Tags -->
+    <meta name="title" content="{{META_TITLE}} | DocSpace">
+    <meta name="description" content="{{META_DESCRIPTION}}">
+    <meta name="keywords" content="{{META_KEYWORDS}}">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://docspace.uk/{{PAGE_SLUG}}">
+    
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-RR9SEE0SQF"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-RR9SEE0SQF');
+    </script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
+        
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #818cf8;
+            --secondary: #8b5cf6;
+            --accent: #6366f1;
+            --dark: #0f172a;
+            --dark-light: #1e293b;
+            --dark-lighter: #334155;
+            --gray: #64748b;
+            --gray-light: #94a3b8;
+            --gray-lighter: #cbd5e1;
+            --white: #ffffff;
+            --success: #10b981;
+            --gradient-subtle: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+            --gradient-primary: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-md: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+            --radius: 12px;
+            --radius-lg: 16px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            line-height: 1.7;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(59, 130, 246, 0.05) 0%, transparent 50%);
+            z-index: -1;
+        }
+        
+        /* Top bar */
+        .top-bar {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            max-width: 1200px;
+            margin: 0 auto;
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 40px);
+        }
+
+        .top-bar-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-small {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 100px;
+            padding: 8px 16px 8px 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .logo-small:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: scale(1.02);
+        }
+        
+        .logo-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            background: var(--gradient-primary);
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+        }
+        
+        .logo-text {
+            font-size: 15px;
+            font-weight: 600;
+            color: white;
+            letter-spacing: -0.3px;
+        }
+
+        .logo-small:hover .logo-icon {
+            transform: rotate(15deg);
+        }
+
+        .logo-icon svg {
+            width: 18px;
+            height: 18px;
+            color: white;
+        }
+
+        /* Create Account button */
+        .create-account-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--gradient-primary);
+            border: none;
+            border-radius: 100px;
+            padding: 10px 20px;
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-md);
+        }
+
+        .create-account-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -5px rgba(99, 102, 241, 0.4);
+        }
+
+        .create-account-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* Profile mode - matching logo style exactly */
+        .create-account-btn.profile-mode {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 100px;
+            padding: 8px 16px 8px 8px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: none;
+        }
+
+        .create-account-btn.profile-mode:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: scale(1.02);
+        }
+
+        .profile-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            background: var(--gradient-primary);
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .create-account-btn.profile-mode:hover .profile-icon {
+            transform: rotate(15deg);
+        }
+
+        .profile-text {
+            font-size: 15px;
+            font-weight: 600;
+            color: white;
+            letter-spacing: -0.3px;
+        }
+
+        /* Circle style for logged-in users */
+        #userBtn.profile-mode {
+            width: 48px;
+            height: 48px;
+            padding: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .create-account-btn.profile-mode:hover svg {
+            color: white;
+            transform: scale(1.1);
+        }
+        
+        /* Hero Section */
+        .hero {
+            padding: 8rem 2rem 1.5rem;
+            text-align: center;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        .hero h1 {
+            font-size: 3.75rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            color: white;
+            line-height: 1.1;
+            letter-spacing: -0.03em;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.375rem;
+            color: #a5b4fc;
+            font-weight: 500;
+            margin-bottom: 2.5rem;
+            letter-spacing: -0.01em;
+        }
+        
+        .hero-description {
+            font-size: 1.1875rem;
+            color: #cbd5e1;
+            line-height: 1.75;
+            max-width: 720px;
+            margin: 0 auto;
+            font-weight: 400;
+            text-align: center;
+        }
+        
+        /* Feature Image Section (optional) */
+        .feature-image-section {
+            max-width: 900px;
+            margin: 0 auto 2rem;
+            padding: 0 2rem;
+            text-align: center;
+        }
+        
+        .feature-image {
+            max-width: 280px;
+            margin: 2rem auto;
+            position: relative;
+        }
+        
+        .feature-image img {
+            width: 100%;
+            height: auto;
+            border-radius: var(--radius-lg);
+            filter: grayscale(100%) contrast(1.2);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* Highlight Box Section (optional) */
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.05));
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            padding: 2rem;
+            margin: 1.5rem auto 0;
+            text-align: center;
+            max-width: 800px;
+            border-radius: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .highlight-box::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.05) 0%, transparent 70%);
+            animation: pulse 20s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+        
+        .highlight-box-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .highlight-box h2 {
+            font-size: 2rem;
+            color: white;
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .highlight-box p {
+            font-size: 1.125rem;
+            color: #cbd5e1;
+            line-height: 1.7;
+            font-weight: 400;
+        }
+        
+        .highlight-box strong {
+            color: #a5b4fc;
+            font-weight: 600;
+        }
+        
+        /* Main Content Container */
+        .content-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+        
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: white;
+            margin: 3rem 0 2rem;
+            letter-spacing: -0.02em;
+            position: relative;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 2px;
+            background: #6366f1;
+        }
+        
+        /* Article Content */
+        .article-content {
+            margin-bottom: 2rem;
+            max-width: 650px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .content-text {
+            font-size: 1.0625rem;
+            line-height: 1.8;
+            color: #cbd5e1;
+            margin-bottom: 1rem;
+            font-weight: 400;
+            text-align: justify;
+            hyphens: auto;
+            -webkit-hyphens: auto;
+            -moz-hyphens: auto;
+        }
+        
+        .content-text + .content-text {
+            margin-top: 1rem;
+            text-indent: 1.5em;
+        }
+        
+        /* Pull Quote / Fun Fact */
+        .pull-quote {
+            background: transparent;
+            border-left: 3px solid #6366f1;
+            padding: 0.75rem 0 0.75rem 1.25rem;
+            margin-top: 1.25rem;
+            font-size: 1.125rem;
+            color: #e2e8f0;
+            line-height: 1.6;
+            position: relative;
+            font-style: normal;
+            letter-spacing: -0.01em;
+        }
+        
+        .pull-quote::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            top: 0.75rem;
+            color: #6366f1;
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+        
+        /* Conclusion Section */
+        .conclusion {
+            background: var(--dark-light);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-lg);
+            padding: 3rem;
+            max-width: 800px;
+            margin: 6rem auto 4rem;
+            text-align: center;
+        }
+        
+        .conclusion h2 {
+            font-size: 2rem;
+            color: white;
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+        
+        .conclusion p {
+            font-size: 1.0625rem;
+            color: #94a3b8;
+            line-height: 1.7;
+            margin-bottom: 1.25rem;
+            font-weight: 400;
+        }
+        
+        .conclusion p:last-child {
+            margin-bottom: 0;
+        }
+        
+        .conclusion strong {
+            color: #a5b4fc;
+            font-weight: 600;
+        }
+        
+        /* Footer */
+        .footer {
+            background: #0f172a;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 3rem 0 2rem;
+            margin-top: 6rem;
+        }
+        
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            text-align: center;
+        }
+        
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .footer-links a {
+            color: #94a3b8;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .footer-links a:hover {
+            color: white;
+        }
+        
+        .footer-copyright {
+            color: #64748b;
+            font-size: 0.875rem;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) and (min-width: 481px) {
+            .top-bar {
+                width: calc(100% - 32px);
+            }
+
+            .create-account-btn span {
+                display: none;
+            }
+
+            .create-account-btn {
+                padding: 10px;
+                width: 48px;
+                height: 48px;
+                justify-content: center;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .top-bar {
+                top: 10px;
+                left: 10px;
+                right: 10px;
+                width: calc(100% - 20px);
+            }
+            
+            .logo-text {
+                display: none;
+            }
+            
+            .logo-small {
+                padding: 8px;
+            }
+            
+            .hero {
+                padding: 6rem 1rem 2rem;
+            }
+            
+            .hero h1 {
+                font-size: 2.25rem;
+                line-height: 1.1;
+            }
+            
+            .hero-subtitle {
+                font-size: 1.125rem;
+            }
+            
+            .hero-description {
+                font-size: 1rem;
+            }
+            
+            .highlight-box {
+                padding: 1.5rem 1rem;
+                margin: 1rem auto 0;
+            }
+            
+            .highlight-box h2 {
+                font-size: 1.5rem;
+            }
+            
+            .highlight-box p {
+                font-size: 1rem;
+            }
+            
+            .section-title {
+                font-size: 1.875rem;
+                margin: 2rem 0 1.5rem;
+            }
+            
+            .content-text {
+                font-size: 1rem;
+                text-align: left;
+            }
+            
+            .pull-quote {
+                padding: 0.625rem 0 0.625rem 1rem;
+                font-size: 1rem;
+            }
+            
+            .conclusion {
+                padding: 2rem 1rem;
+                margin: 3rem 1rem 2rem;
+            }
+            
+            .conclusion h2 {
+                font-size: 1.75rem;
+            }
+            
+            .conclusion p {
+                font-size: 1rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .create-account-btn.profile-mode {
+                padding: 6px 12px 6px 6px;
+                white-space: nowrap;
+                min-height: 44px;
+            }
+            
+            .profile-icon {
+                width: 32px;
+                height: 32px;
+                margin: 0;
+            }
+            
+            .profile-text {
+                font-size: 14px;
+            }
+            
+            .hero {
+                padding: 5rem 0.75rem 1.5rem;
+            }
+            
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .hero-subtitle {
+                font-size: 1rem;
+            }
+            
+            .hero-description {
+                font-size: 0.9375rem;
+            }
+            
+            .highlight-box {
+                padding: 1.25rem 0.75rem;
+            }
+            
+            .section-title {
+                font-size: 1.75rem;
+            }
+            
+            .content-text {
+                font-size: 0.875rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <div class="logo-small" onclick="window.location.href='/'">
+            <div class="logo-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+            </div>
+            <span class="logo-text">DocSpace</span>
+        </div>
+        <div class="top-bar-actions">
+            <!-- Auth button container with dropdown -->
+            <div style="position: relative;">
+                <!-- Guest button (shown when not logged in) -->
+                <button class="create-account-btn profile-mode" id="guestBtn" aria-label="Account" style="display: flex;">
+                    <div class="profile-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                    </div>
+                    <span class="profile-text">Create Account</span>
+                </button>
+                
+                <!-- User button (shown when logged in) -->
+                <button class="create-account-btn profile-mode" id="userBtn" aria-label="Account" style="display: none;">
+                    <div class="profile-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Hero Section -->
+    <section class="hero">
+        <h1>{{HERO_TITLE}}</h1>
+        <p class="hero-subtitle">{{HERO_SUBTITLE}}</p>
+        <p class="hero-description">
+            {{HERO_DESCRIPTION}}
+        </p>
+    </section>
+    
+    <!-- Feature Image Section (optional) -->
+    {{#if FEATURE_IMAGE}}
+    <section class="feature-image-section">
+        <div class="feature-image">
+            <img src="{{FEATURE_IMAGE_URL}}" alt="{{FEATURE_IMAGE_ALT}}">
+        </div>
+    </section>
+    {{/if}}
+    
+    <!-- Highlight Box Section (optional) -->
+    {{#if HIGHLIGHT_BOX}}
+    <section class="highlight-box">
+        <div class="highlight-box-container">
+            <h2>{{HIGHLIGHT_TITLE}}</h2>
+            <p>{{HIGHLIGHT_CONTENT}}</p>
+        </div>
+    </section>
+    {{/if}}
+    
+    <!-- Main Content -->
+    <section class="content-container">
+        {{#if SECTION_TITLE}}
+        <h2 class="section-title">{{SECTION_TITLE}}</h2>
+        {{/if}}
+        
+        <div class="article-content">
+            {{#each CONTENT_PARAGRAPHS}}
+            <p class="content-text">
+                {{this}}
+            </p>
+            {{/each}}
+            
+            {{#if PULL_QUOTE}}
+            <div class="pull-quote">
+                {{PULL_QUOTE}}
+            </div>
+            {{/if}}
+        </div>
+    </section>
+    
+    <!-- Conclusion Section (optional) -->
+    {{#if CONCLUSION}}
+    <section class="conclusion">
+        <h2>{{CONCLUSION_TITLE}}</h2>
+        {{#each CONCLUSION_PARAGRAPHS}}
+        <p>
+            {{this}}
+        </p>
+        {{/each}}
+    </section>
+    {{/if}}
+    
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-links">
+                <a href="/">Home</a>
+                <a href="/oldest-plc-companies.html">Oldest PLCs</a>
+                <a href="/faq">FAQ</a>
+                <a href="/terms">Terms of Service</a>
+                <a href="/privacy">Privacy Policy</a>
+                <a href="/contact">Contact</a>
+                <a href="/api">API Access</a>
+            </div>
+            <p class="footer-copyright">
+                © 2025 DocSpace UK. All rights reserved. Companies House data is Crown copyright.
+            </p>
+        </div>
+    </footer>
+</body>
+</html>

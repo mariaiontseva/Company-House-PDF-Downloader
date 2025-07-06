@@ -1,4 +1,4 @@
-# Companies House PDF Downloader
+# Companies House PDF Downloader - PDF Branch
 
 A web-based tool to download all PDF documents filed by UK companies from Companies House.
 

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modal Debug Test</title>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #0f172a;
+            color: white;
+        }
+        .test-container {
+            background: #1e293b;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background: #3b82f6;
+            color: white;
+            margin: 5px;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #2563eb;
+        }
+        .test-modal {
+            background: #059669;
+        }
+        .test-signup {
+            background: #dc2626;
+        }
+        
+        /* Test if our button updates work */
+        .test-company-card {
+            background: #374151;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        
+        .signup-btn {
+            background: #3b82f6;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>🐛 Modal Debug Test</h1>
+    
+    <div class="test-container">
+        <h3>Auth Status</h3>
+        <button onclick="checkAuth()">Check Auth</button>
+        <button onclick="signOut()">Sign Out</button>
+        <div id="authStatus">Loading...</div>
+    </div>
+    
+    <div class="test-container">
+        <h3>Direct Function Tests</h3>
+        <button class="test-modal" onclick="testModal()">Test Modal Function</button>
+        <button class="test-signup" onclick="testSignup()">Test Signup Function</button>
+        <div id="functionStatus">Click buttons to test functions</div>
+    </div>
+    
+    <div class="test-container">
+        <h3>Button Text Update Test</h3>
+        <div class="test-company-card">
+            <h4>TEST COMPANY</h4>
+            <button class="signup-btn">
+                <span class="btn-text">Sign Up for Full Access</span>
+            </button>
+        </div>
+        <button onclick="updateButtonText()">Update Button Text</button>
+        <div id="buttonStatus">Button should change based on auth state</div>
+    </div>
+
+    <script>
+        // Initialize Supabase
+        const supabaseUrl = 'https://iotwhyiisbazeqmowljv.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlvdHdoeWlpc2JhemVxbW93bGp2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgzMDUwMzUsImV4cCI6MjA2Mzg4MTAzNX0.HYAZLeIjR9b9C9k0p3wgf73GvpVH4-Ag9wQbACLcsLc';
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+        let currentUser = null;
+        
+        async function checkAuth() {
+            try {
+                const { data: { user } } = await supabaseClient.auth.getUser();
+                currentUser = user;
+                const status = user ? `✅ Signed in: ${user.email}` : '❌ Not signed in';
+                document.getElementById('authStatus').textContent = status;
+                updateButtonText();
+            } catch (error) {
+                document.getElementById('authStatus').textContent = `❌ Error: ${error.message}`;
+            }
+        }
+        
+        async function signOut() {
+            await supabaseClient.auth.signOut();
+            setTimeout(checkAuth, 100);
+        }
+        
+        function testModal() {
+            try {
+                const testCompany = {
+                    name: "TEST COMPANY LIMITED",
+                    number: "12345678",
+                    totalCharges: 2,
+                    incorporationDate: "2020-01-01"
+                };
+                
+                if (typeof showCompanyModal === 'function') {
+                    showCompanyModal(testCompany);
+                    document.getElementById('functionStatus').textContent = '✅ showCompanyModal() called';
+                } else {
+                    document.getElementById('functionStatus').textContent = '❌ showCompanyModal() not found';
+                }
+            } catch (error) {
+                document.getElementById('functionStatus').textContent = `❌ Error: ${error.message}`;
+            }
+        }
+        
+        function testSignup() {
+            try {
+                if (typeof showSignupModal === 'function') {
+                    showSignupModal();
+                    document.getElementById('functionStatus').textContent = '✅ showSignupModal() called';
+                } else {
+                    document.getElementById('functionStatus').textContent = '❌ showSignupModal() not found';
+                }
+            } catch (error) {
+                document.getElementById('functionStatus').textContent = `❌ Error: ${error.message}`;
+            }
+        }
+        
+        function updateButtonText() {
+            const buttonTexts = document.querySelectorAll('.signup-btn .btn-text');
+            const buttonText = currentUser ? 'View Details' : 'Sign Up for Full Access';
+            
+            buttonTexts.forEach(textElement => {
+                textElement.textContent = buttonText;
+            });
+            
+            document.getElementById('buttonStatus').textContent = `Button text set to: "${buttonText}"`;
+        }
+        
+        // Mock functions for testing
+        function showCompanyModal(companyData) {
+            alert(`✅ MODAL: Would show modal for ${companyData.name}`);
+        }
+        
+        function showSignupModal() {
+            alert('❌ SIGNUP: Would redirect to auth page');
+        }
+        
+        // Initialize
+        window.addEventListener('load', checkAuth);
+        
+        // Listen for auth changes
+        supabaseClient.auth.onAuthStateChange(() => {
+            setTimeout(checkAuth, 100);
+        });
+    </script>
+</body>
+</html>

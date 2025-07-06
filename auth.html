@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account - DocSpace</title>
+    
+    <!-- Same meta tags and fonts as main page -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Copy relevant styles from main page */
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #818cf8;
+            --gradient-2: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            --shadow-md: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+            --radius: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+            background: #0f172a;
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        /* Animated background */
+        .bg-animation {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(at 50% 100%, #3b82f620 0%, transparent 80%),
+                        radial-gradient(at 0% 0%, #8b5cf610 0%, transparent 50%),
+                        radial-gradient(at 100% 0%, #6366f110 0%, transparent 50%);
+            z-index: -1;
+        }
+
+        .bg-animation::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(45deg, #6366f105, #8b5cf605);
+            animation: gradient 20s ease infinite;
+            background-size: 400% 400%;
+        }
+
+        @keyframes gradient {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        /* Auth container */
+        .auth-container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 48px;
+            width: 100%;
+            max-width: 440px;
+            box-shadow: var(--shadow-xl);
+            animation: fadeInUp 0.8s ease;
+            position: relative;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Logo */
+        .auth-logo {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .auth-logo svg {
+            width: 48px;
+            height: 48px;
+            color: var(--primary-light);
+            margin-bottom: 16px;
+        }
+
+        .auth-logo h2 {
+            font-size: 28px;
+            font-weight: 800;
+            background: var(--gradient-2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .auth-subtitle {
+            text-align: center;
+            color: #94a3b8;
+            margin-bottom: 32px;
+            font-size: 16px;
+        }
+
+        /* Social buttons */
+        .social-auth {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 32px;
+        }
+
+        .social-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            width: 100%;
+            padding: 14px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius);
+            color: white;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .coming-soon-badge {
+            position: absolute;
+            top: 0;
+            right: -35px;
+            background: linear-gradient(135deg, #f59e0b, #f97316);
+            color: white;
+            font-size: 9px;
+            font-weight: 700;
+            padding: 2px 40px;
+            transform: rotate(45deg);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 10px rgba(245, 158, 11, 0.3);
+        }
+
+        .social-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .social-btn svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .social-btn.google {
+            background: rgba(219, 68, 55, 0.1);
+            border-color: rgba(219, 68, 55, 0.2);
+        }
+
+        .social-btn.google:hover {
+            background: rgba(219, 68, 55, 0.2);
+        }
+
+        .social-btn.facebook {
+            background: rgba(59, 89, 152, 0.1);
+            border-color: rgba(59, 89, 152, 0.2);
+        }
+
+        .social-btn.facebook:hover {
+            background: rgba(59, 89, 152, 0.2);
+        }
+
+        /* Divider */
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .divider-line {
+            flex: 1;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .divider-text {
+            color: #64748b;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Form */
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-label {
+            font-size: 14px;
+            font-weight: 500;
+            color: #cbd5e1;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 14px 18px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius);
+            font-size: 16px;
+            color: white;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .form-input::placeholder {
+            color: #64748b;
+        }
+
+        /* Submit button */
+        .submit-btn {
+            width: 100%;
+            padding: 16px 32px;
+            background: var(--gradient-2);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 8px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 40px -10px rgba(99, 102, 241, 0.5);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Footer links */
+        .auth-footer {
+            text-align: center;
+            margin-top: 32px;
+            padding-top: 32px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .auth-footer p {
+            color: #94a3b8;
+            font-size: 14px;
+        }
+
+        .auth-footer a {
+            color: var(--primary-light);
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        .auth-footer a:hover {
+            color: white;
+            background: rgba(99, 102, 241, 0.2);
+        }
+
+        /* Back button - hidden since we have close button */
+        .back-btn {
+            display: none;
+        }
+
+        /* Success state */
+        .success-message {
+            display: none;
+            text-align: center;
+            padding: 16px;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: var(--radius);
+            color: #10b981;
+            margin-bottom: 20px;
+        }
+
+        /* Error state */
+        .error-message {
+            display: none;
+            text-align: center;
+            padding: 16px;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: var(--radius);
+            color: #ef4444;
+            margin-bottom: 20px;
+        }
+
+        /* Close button inside modal */
+        .close-btn {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            display: flex; /* Always visible */
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .close-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: rotate(90deg);
+        }
+
+        .close-btn svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 640px) {
+            .auth-container {
+                margin: 8px;
+                padding: 24px 16px;
+                max-width: calc(100% - 16px);
+                width: calc(100% - 16px);
+                position: relative;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation"></div>
+    
+    <!-- Keep back button for desktop, hidden on mobile -->
+    <a href="/" class="back-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        <span>Back to DocSpace</span>
+    </a>
+    
+    <div class="auth-container">
+        <!-- Close button for mobile -->
+        <a href="/" class="close-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </a>
+        
+        <!-- Logo -->
+        <div class="auth-logo">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+            </svg>
+            <h2>DocSpace</h2>
+        </div>
+        
+        <p class="auth-subtitle" id="authSubtitle">Create your account to start monitoring companies</p>
+        
+        <!-- Mode toggle button -->
+        <div style="text-align: center; margin-bottom: 24px;">
+            <button type="button" onclick="toggleMode()" style="
+                background: rgba(99, 102, 241, 0.1);
+                border: 1px solid rgba(99, 102, 241, 0.3);
+                color: #a5b4fc;
+                padding: 8px 20px;
+                border-radius: 100px;
+                font-size: 14px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            " onmouseover="this.style.background='rgba(99, 102, 241, 0.2)'" 
+               onmouseout="this.style.background='rgba(99, 102, 241, 0.1)'"
+               id="toggleModeBtn">
+                Already have an account? Sign in
+            </button>
+        </div>
+        
+        <!-- Success/Error messages -->
+        <div class="success-message" id="successMessage">
+            Account created successfully! Redirecting...
+        </div>
+        <div class="error-message" id="errorMessage">
+            An error occurred. Please try again.
+        </div>
+        
+        <!-- Social auth buttons -->
+        <div class="social-auth">
+            <button class="social-btn google" onclick="authWithGoogle()">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                </svg>
+                Continue with Google
+            </button>
+            
+            <button class="social-btn facebook" disabled>
+                <svg fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                </svg>
+                Continue with Facebook
+                <span class="coming-soon-badge">Coming Soon</span>
+            </button>
+        </div>
+        
+        <!-- Divider -->
+        <div class="divider">
+            <div class="divider-line"></div>
+            <div class="divider-text">or</div>
+            <div class="divider-line"></div>
+        </div>
+        
+        <!-- Email form -->
+        <form class="auth-form" id="authForm" onsubmit="handleSubmit(event)">
+            <div class="form-group">
+                <label class="form-label" for="email">Email address</label>
+                <input 
+                    type="email" 
+                    id="email" 
+                    name="email" 
+                    class="form-input" 
+                    placeholder="john@example.com"
+                    required
+                >
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="password">Password</label>
+                <input 
+                    type="password" 
+                    id="password" 
+                    name="password" 
+                    class="form-input" 
+                    placeholder="••••••••"
+                    minlength="8"
+                    required
+                >
+            </div>
+            
+            <button type="submit" class="submit-btn" id="submitBtn">
+                Create Account
+            </button>
+        </form>
+        
+        <!-- Footer -->
+        <div class="auth-footer" style="display: none;">
+            <!-- Footer removed to avoid duplication with toggle chip -->
+        </div>
+    </div>
+    
+    <!-- Add Supabase CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <script>
+        // Initialize Supabase
+        const SUPABASE_URL = 'https://iotwhyiisbazeqmowljv.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlvdHdoeWlpc2JhemVxbW93bGp2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgzMDUwMzUsImV4cCI6MjA2Mzg4MTAzNX0.HYAZLeIjR9b9C9k0p3wgf73GvpVH4-Ag9wQbACLcsLc';
+        const { createClient } = supabase;
+        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+            auth: {
+                persistSession: true,
+                storageKey: 'docspace-auth',
+                storage: window.localStorage,
+                detectSessionInUrl: true,
+                autoRefreshToken: true
+            }
+        });
+        
+        // Toggle between sign up and sign in
+        let isSignUp = true;
+        
+        function toggleMode() {
+            isSignUp = !isSignUp;
+            const subtitle = document.getElementById('authSubtitle');
+            const submitBtn = document.getElementById('submitBtn');
+            const toggleBtn = document.getElementById('toggleModeBtn');
+            
+            if (isSignUp) {
+                subtitle.textContent = 'Create your account to start monitoring companies';
+                submitBtn.textContent = 'Create Account';
+                toggleBtn.textContent = 'Already have an account? Sign in';
+            } else {
+                subtitle.textContent = 'Welcome back! Sign in to your account';
+                submitBtn.textContent = 'Sign In';
+                toggleBtn.textContent = 'Don\'t have an account? Sign up';
+            }
+        }
+        
+        // Form submission
+        async function handleSubmit(event) {
+            event.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const errorMsg = document.getElementById('errorMessage');
+            const successMsg = document.getElementById('successMessage');
+            
+            // Reset messages
+            errorMsg.style.display = 'none';
+            successMsg.style.display = 'none';
+            
+            // Disable button
+            submitBtn.disabled = true;
+            submitBtn.textContent = isSignUp ? 'Creating Account...' : 'Signing In...';
+            
+            // Get form data
+            const formData = new FormData(event.target);
+            const email = formData.get('email');
+            const password = formData.get('password');
+            
+            try {
+                let result;
+                
+                if (isSignUp) {
+                    // Sign up
+                    result = await supabaseClient.auth.signUp({
+                        email,
+                        password,
+                        options: {
+                            data: {
+                                credits: 1 // Give 1 free credit on signup
+                            }
+                        }
+                    });
+                } else {
+                    // Sign in
+                    result = await supabaseClient.auth.signInWithPassword({
+                        email,
+                        password
+                    });
+                }
+                
+                if (result.error) throw result.error;
+                
+                console.log('Auth result:', result);
+                
+                // Show success
+                successMsg.style.display = 'block';
+                
+                if (isSignUp) {
+                    // Check if email confirmation is required
+                    if (result.data?.user && !result.data?.session) {
+                        // Email confirmation required by Supabase, but let's try to sign them in automatically
+                        successMsg.textContent = 'Account created! Signing you in...';
+                        
+                        // Attempt to sign in immediately
+                        const signInResult = await supabaseClient.auth.signInWithPassword({
+                            email: email,
+                            password: password
+                        });
+                        
+                        if (signInResult.data?.session) {
+                            successMsg.textContent = 'Account created and signed in! Redirecting...';
+                            localStorage.setItem('docspace-auth-debug', JSON.stringify(signInResult.data));
+                            setTimeout(() => {
+                                window.location.href = window.location.origin;
+                            }, 1500);
+                        } else {
+                            // If auto sign-in fails, show the email confirmation message
+                            successMsg.textContent = 'Account created! You can now sign in.';
+                            submitBtn.disabled = false;
+                            submitBtn.textContent = 'Create Account';
+                            
+                            // Switch to sign in mode
+                            setTimeout(() => {
+                                toggleMode();
+                            }, 2000);
+                        }
+                    } else if (result.data?.session) {
+                        // Session created, user can sign in
+                        successMsg.textContent = 'Account created and signed in! Redirecting...';
+                        localStorage.setItem('docspace-auth-debug', JSON.stringify(result.data));
+                        setTimeout(() => {
+                            window.location.href = window.location.origin;
+                        }, 1500);
+                    }
+                } else {
+                    // Sign in
+                    if (result.data?.session) {
+                        successMsg.textContent = 'Signed in successfully! Redirecting...';
+                        localStorage.setItem('docspace-auth-debug', JSON.stringify(result.data));
+                        setTimeout(() => {
+                            window.location.href = window.location.origin;
+                        }, 1500);
+                    } else {
+                        throw new Error('Sign in failed - no session created');
+                    }
+                }
+                
+            } catch (error) {
+                // Show error
+                errorMsg.style.display = 'block';
+                errorMsg.textContent = error.message || 'An error occurred. Please try again.';
+                
+                // Re-enable button
+                submitBtn.disabled = false;
+                submitBtn.textContent = isSignUp ? 'Create Account' : 'Sign In';
+            }
+        }
+        
+        // Social auth handlers
+        async function authWithGoogle() {
+            try {
+                const errorMsg = document.getElementById('errorMessage');
+                errorMsg.style.display = 'none';
+                
+                const { data, error } = await supabaseClient.auth.signInWithOAuth({
+                    provider: 'google',
+                    options: {
+                        redirectTo: window.location.origin,
+                        queryParams: {
+                            access_type: 'offline',
+                            prompt: 'consent',
+                        }
+                    }
+                });
+                
+                if (error) throw error;
+                
+                // If no error, the user will be redirected to Google
+            } catch (error) {
+                console.error('Google auth error:', error);
+                const errorMsg = document.getElementById('errorMessage');
+                errorMsg.style.display = 'block';
+                errorMsg.textContent = error.message || 'Failed to sign in with Google. Please try again.';
+            }
+        }
+        
+        async function authWithFacebook() {
+            try {
+                const { data, error } = await supabaseClient.auth.signInWithOAuth({
+                    provider: 'facebook',
+                    options: {
+                        redirectTo: `${window.location.origin}/`
+                    }
+                });
+                
+                if (error) throw error;
+                
+                // If no error, the user will be redirected to Facebook
+            } catch (error) {
+                console.error('Facebook auth error:', error);
+                document.getElementById('errorMessage').style.display = 'block';
+                document.getElementById('errorMessage').textContent = 'Facebook login is not configured yet. Please use email/password for now.';
+            }
+        }
+        
+        // Check if user is already logged in
+        supabaseClient.auth.getSession().then(({ data: { session } }) => {
+            if (session) {
+                // User is already logged in, redirect to home
+                window.location.href = window.location.origin;
+            }
+        });
+        
+        // Check URL parameter for mode
+        const urlParams = new URLSearchParams(window.location.search);
+        const mode = urlParams.get('mode');
+        if (mode === 'signin' && !isSignUp) {
+            // Already in sign-in mode, no need to toggle
+        } else if (mode === 'signin' && isSignUp) {
+            // Switch to sign-in mode
+            toggleMode();
+        }
+    </script>
+</body>
+</html>
