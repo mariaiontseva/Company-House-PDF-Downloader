@@ -3997,7 +3997,7 @@
             <!-- Tagline badge -->
             <div style="text-align: center; margin-top: 20px;">
                 <div style="display: inline-block; padding: 12px 24px; background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%); border: 1px solid rgba(99, 102, 241, 0.3); border-radius: 50px; color: #a5b4fc; font-size: 16px; font-weight: 600;">
-                    Get insights, automate the boring!!!
+                    Get insights, automate the boring
                 </div>
             </div>
         </div>
@@ -5201,8 +5201,8 @@
         // Render autocomplete suggestions
         function renderSuggestions() {
             autocompleteDropdown.innerHTML = suggestions.map((company, index) => {
-                const statusClass = company.company_status === 'active' ? 'active' : 'dissolved';
-                const statusIcon = company.company_status === 'active' 
+                const statusClass = company.company_status && company.company_status.toLowerCase() === 'active' ? 'active' : company.company_status.toLowerCase();
+                const statusIcon = company.company_status && company.company_status.toLowerCase() === 'active' 
                     ? '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>'
                     : '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>';
                 
@@ -6715,6 +6715,12 @@
                             date_of_creation: 'Loading...'
                         };
                         await showCompanyModal(fallbackCompany);
+                        
+                        // Fetch the actual company details from Companies House API
+                        console.log('🔸 Fetching company details from Companies House API...');
+                        setTimeout(() => {
+                            fetchCompanyDetails(companyNumber);
+                        }, 100);
                     }
                 }
             }
@@ -6772,7 +6778,12 @@
             const statusBadge = document.querySelector('#companyModal .active-badge');
             if (statusBadge && company.status) {
                 const status = company.status.toLowerCase();
-                if (status === 'active') {
+                if (status === 'loading...') {
+                    statusBadge.textContent = 'Loading...';
+                    statusBadge.style.background = 'rgba(148, 163, 184, 0.1)';
+                    statusBadge.style.borderColor = 'rgba(148, 163, 184, 0.3)';
+                    statusBadge.style.color = '#94a3b8';
+                } else if (status === 'active') {
                     statusBadge.textContent = '● Active';
                     statusBadge.style.background = 'rgba(34, 197, 94, 0.1)';
                     statusBadge.style.borderColor = 'rgba(34, 197, 94, 0.3)';
@@ -6782,13 +6793,16 @@
                     statusBadge.style.background = 'rgba(239, 68, 68, 0.1)';
                     statusBadge.style.borderColor = 'rgba(239, 68, 68, 0.3)';
                     statusBadge.style.color = '#ef4444';
-                } else if (status === 'liquidation') {
+                } else if (status === 'liquidation' || status.includes('liquidation')) {
                     statusBadge.textContent = '⚠️ In Liquidation';
                     statusBadge.style.background = 'rgba(251, 146, 60, 0.1)';
                     statusBadge.style.borderColor = 'rgba(251, 146, 60, 0.3)';
                     statusBadge.style.color = '#fb923c';
                 } else {
                     statusBadge.textContent = `● ${status.charAt(0).toUpperCase() + status.slice(1)}`;
+                    statusBadge.style.background = 'rgba(148, 163, 184, 0.1)';
+                    statusBadge.style.borderColor = 'rgba(148, 163, 184, 0.3)';
+                    statusBadge.style.color = '#94a3b8';
                 }
             }
             
@@ -6806,13 +6820,15 @@
                 }
             }
             
-            // Update risk badge
+            // Update risk badge using comprehensive risk calculation
             const riskBadge = document.querySelector('#companyModal .risk-badge');
-            if (riskBadge && company.totalCharges !== undefined) {
-                const riskLevel = company.totalCharges > 5 ? 'high' : company.totalCharges > 2 ? 'medium' : 'low';
-                const riskText = company.totalCharges > 5 ? 'HIGH RISK' : company.totalCharges > 2 ? 'MEDIUM RISK' : 'LOW RISK';
+            if (riskBadge) {
+                // Use the same calculateRiskScore function used in Risk Insights tab
+                const riskScore = calculateRiskScore(company);
+                const riskLevel = riskScore > 80 ? 'low' : riskScore > 50 ? 'medium' : 'high';
+                const riskText = riskScore > 80 ? 'LOW RISK' : riskScore > 50 ? 'MEDIUM RISK' : 'HIGH RISK';
                 riskBadge.className = `risk-badge ${riskLevel}`;
-                riskBadge.innerHTML = `<div class="risk-dot"></div>${riskText} (${Math.min(100, (company.totalCharges || 0) * 10)}/100)`;
+                riskBadge.innerHTML = `<div class="risk-dot"></div>${riskText} (${riskScore}/100)`;
             }
             
             // Calculate company age
@@ -7288,21 +7304,37 @@
             if (statusBadge) {
                 if (companyData.company_status) {
                     const status = companyData.company_status.toLowerCase();
+                    statusBadge.className = 'badge active-badge'; // Reset classes
+                    
                     if (status === 'active') {
                         statusBadge.textContent = '● Active';
-                        statusBadge.className = 'badge active-badge';
+                        statusBadge.style.background = 'rgba(34, 197, 94, 0.1)';
+                        statusBadge.style.borderColor = 'rgba(34, 197, 94, 0.3)';
+                        statusBadge.style.color = '#22c55e';
                     } else if (status === 'dissolved') {
                         statusBadge.textContent = '✕ Dissolved';
-                        statusBadge.className = 'badge';
                         statusBadge.style.background = 'rgba(239, 68, 68, 0.1)';
                         statusBadge.style.borderColor = 'rgba(239, 68, 68, 0.3)';
                         statusBadge.style.color = '#ef4444';
+                    } else if (status === 'liquidation' || status.includes('liquidation')) {
+                        statusBadge.textContent = '⚠️ In Liquidation';
+                        statusBadge.style.background = 'rgba(251, 146, 60, 0.1)';
+                        statusBadge.style.borderColor = 'rgba(251, 146, 60, 0.3)';
+                        statusBadge.style.color = '#fb923c';
+                    } else {
+                        // Handle other statuses (administration, receivership, etc.)
+                        statusBadge.textContent = `● ${status.charAt(0).toUpperCase() + status.slice(1)}`;
+                        statusBadge.style.background = 'rgba(148, 163, 184, 0.1)';
+                        statusBadge.style.borderColor = 'rgba(148, 163, 184, 0.3)';
+                        statusBadge.style.color = '#94a3b8';
                     }
                     console.log('🔸 Updated company status to:', companyData.company_status, '(from CH API)');
                 } else if (companyData.company_number?.startsWith('RC') || companyData.type?.toLowerCase().includes('royal charter')) {
                     // Royal Charter companies are presumed active if they appear in CH API
                     statusBadge.textContent = '● Active';
-                    statusBadge.className = 'badge active-badge';
+                    statusBadge.style.background = 'rgba(34, 197, 94, 0.1)';
+                    statusBadge.style.borderColor = 'rgba(34, 197, 94, 0.3)';
+                    statusBadge.style.color = '#22c55e';
                     console.log('🔸 Updated Royal Charter company status to: Active (presumed)');
                 }
             }
@@ -8232,14 +8264,16 @@
             score -= (outstandingCharges * 10); // Additional 10 points per outstanding charge
             
             // Deduct points for company age (newer companies are riskier)
-            const age = company.incorporationDate ? 
-                Math.floor((new Date() - new Date(company.incorporationDate)) / (365.25 * 24 * 60 * 60 * 1000)) : 0;
+            const incorporationDate = company.incorporationDate || company.date_of_creation;
+            const age = incorporationDate ? 
+                Math.floor((new Date() - new Date(incorporationDate)) / (365.25 * 24 * 60 * 60 * 1000)) : 0;
             if (age < 1) score -= 20;
             else if (age < 3) score -= 10;
             else if (age < 5) score -= 5;
             
-            // Adjust for company status
-            if (company.status && company.status.toLowerCase() !== 'active') {
+            // Adjust for company status - handle both field names
+            const status = company.status || company.company_status;
+            if (status && status.toLowerCase() !== 'active') {
                 score -= 30;
             }
             
@@ -8576,7 +8610,7 @@
                             return {
                                 name: company.title,
                                 number: company.company_number,
-                                status: company.company_status === 'active' ? 'Active' : 'Dissolved',
+                                status: company.company_status ? company.company_status.charAt(0).toUpperCase() + company.company_status.slice(1) : 'Active',
                                 year: year,
                                 location: location,
                                 industry: industry,
