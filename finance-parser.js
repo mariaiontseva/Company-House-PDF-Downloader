@@ -7,7 +7,7 @@ const FinanceParser = {
     // Proxy server URL - automatically detect environment
     PROXY_URL: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
         ? 'http://localhost:3002' 
-        : 'https://docspace.uk/proxy',
+        : 'https://blue-flower-d40f.mahin84.workers.dev',
     
     // Common XBRL tags used in UK financial reports
     xbrlTags: {
