@@ -3634,16 +3634,11 @@
             
             /* Fix tab content visibility on mobile */
             #companyModal .tabs-container {
-                flex: 1;
-                display: flex;
-                flex-direction: column;
-                min-height: 0;
-                overflow: hidden;
+                display: block;
                 background: #0f172a;
             }
             
             #companyModal .tabs {
-                flex-shrink: 0;
                 overflow-x: auto;
                 -webkit-overflow-scrolling: touch;
                 padding: 0 16px;
@@ -3660,12 +3655,11 @@
             }
             
             #companyModal .tab-content {
-                flex: 1;
-                overflow-y: auto;
-                -webkit-overflow-scrolling: touch;
-                height: 100%;
+                height: auto;
+                min-height: 400px;
                 padding: 16px;
                 background: #0f172a;
+                overflow: visible;
             }
             
             #companyModal .tab-content.active {
@@ -3730,21 +3724,21 @@
             }
             
             #companyModal .company-card {
-                max-height: 100vh;
+                max-height: none;
                 height: auto;
                 min-height: 100vh;
                 border-radius: 0;
                 width: 100vw;
-                display: flex;
-                flex-direction: column;
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
             }
             
             #companyModal .card-content {
-                height: 100vh;
+                height: auto;
+                min-height: 100vh;
                 padding-bottom: env(safe-area-inset-bottom);
-                display: flex;
-                flex-direction: column;
-                overflow: hidden;
+                display: block;
+                overflow: visible;
             }
             
             #companyModal .close-btn {
