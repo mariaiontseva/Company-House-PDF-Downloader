@@ -8046,18 +8046,31 @@
         async function fetchOfficers(companyNumber, incorporationDate) {
             try {
                 const API_KEY = '22aefa40-ee9e-47c0-b40a-2dd3c03165c6';
-                const response = await fetchWithWorker(`https://api.companieshouse.gov.uk/company/${companyNumber}/officers?items_per_page=200`, API_KEY);
                 
-                if (response.ok) {
-                    const data = await response.json();
-                    const officers = data.items.map(officer => ({
+                // Fetch officers and PSCs in parallel
+                const [officersResponse, pscResponse] = await Promise.all([
+                    fetchWithWorker(`https://api.companieshouse.gov.uk/company/${companyNumber}/officers?items_per_page=200`, API_KEY),
+                    fetchWithWorker(`https://api.companieshouse.gov.uk/company/${companyNumber}/persons-with-significant-control`, API_KEY)
+                ]);
+                
+                let officers = [];
+                let pscs = [];
+                
+                if (officersResponse.ok) {
+                    const data = await officersResponse.json();
+                    officers = data.items.map(officer => ({
                         name: officer.name,
                         role: formatOfficerRole(officer.officer_role),
                         appointed: officer.appointed_on,
                         resigned: officer.resigned_on,
                         address: formatAddress(officer.address),
                         nationality: officer.nationality,
-                        dateOfBirth: officer.date_of_birth ? `${officer.date_of_birth.month}/${officer.date_of_birth.year}` : null
+                        dateOfBirth: officer.date_of_birth ? `${officer.date_of_birth.month}/${officer.date_of_birth.year}` : null,
+                        occupation: officer.occupation,
+                        countryOfResidence: officer.country_of_residence,
+                        formerNames: officer.former_names,
+                        identification: officer.identification,
+                        type: 'officer'
                     }));
                     
                     // Update officers count in stat box (2nd box) - show total like Companies House
@@ -8073,28 +8086,42 @@
                         
                         console.log(`🔸 Updated officers count: ${totalOfficers} total (${activeOfficers.length} active)`);
                     }
-                    
-                    populateOfficersTab(officers, companyNumber, incorporationDate);
-                    
-                    // Also enhance immediately if People tab is visible
-                    setTimeout(() => {
-                        const peopleTab = document.querySelector('#companyModal #people');
-                        if (peopleTab && peopleTab.classList.contains('active')) {
-                            console.log('🔸 People tab is active, enhancing officer names immediately...');
-                            enhanceOfficerNames();
-                        }
-                    }, 500);
-                } else {
-                    // Fallback to basic data
-                    const fallbackOfficers = [
-                        { name: 'Officer data unavailable', role: 'Director', appointed: new Date().toISOString().split('T')[0] }
-                    ];
-                    populateOfficersTab(fallbackOfficers, companyNumber, incorporationDate);
                 }
+                
+                if (pscResponse.ok) {
+                    const pscData = await pscResponse.json();
+                    pscs = pscData.items ? pscData.items.map(psc => ({
+                        name: psc.name || psc.name_elements?.title + ' ' + psc.name_elements?.forename + ' ' + psc.name_elements?.surname,
+                        role: 'Person with Significant Control',
+                        appointed: psc.notified_on,
+                        resigned: psc.ceased_on,
+                        address: formatAddress(psc.address),
+                        nationality: psc.nationality,
+                        dateOfBirth: psc.date_of_birth ? `${psc.date_of_birth.month}/${psc.date_of_birth.year}` : null,
+                        naturesOfControl: psc.natures_of_control || [],
+                        countryOfResidence: psc.country_of_residence,
+                        type: 'psc',
+                        kind: psc.kind,
+                        identification: psc.identification
+                    })) : [];
+                    console.log(`🔸 Found ${pscs.length} PSCs`);
+                }
+                
+                populateOfficersTab(officers, pscs, companyNumber, incorporationDate);
+                
+                // Also enhance immediately if People tab is visible
+                setTimeout(() => {
+                    const peopleTab = document.querySelector('#companyModal #people');
+                    if (peopleTab && peopleTab.classList.contains('active')) {
+                        console.log('🔸 People tab is active, enhancing officer names immediately...');
+                        enhanceOfficerNames();
+                    }
+                }, 500);
+                
             } catch (error) {
                 console.log('Error fetching officers:', error);
                 // Use basic fallback
-                populateOfficersTab([], companyNumber, incorporationDate);
+                populateOfficersTab([], [], companyNumber, incorporationDate);
             }
         }
         
@@ -8112,9 +8139,9 @@
             return roleMap[role] || role.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
         }
         
-        // Populate Officers tab
-        function populateOfficersTab(officers, companyNumber, incorporationDate) {
-            console.log('🔸 populateOfficersTab called with', officers.length, 'officers');
+        // Populate Officers tab with enhanced information
+        function populateOfficersTab(officers, pscs, companyNumber, incorporationDate) {
+            console.log('🔸 populateOfficersTab called with', officers.length, 'officers and', pscs.length, 'PSCs');
             const peopleTab = document.querySelector('#companyModal #people');
             if (!peopleTab) {
                 console.log('🔸 People tab element not found!');
@@ -8122,22 +8149,90 @@
             }
             console.log('🔸 People tab found, populating...');
             
-            // Sort officers - active first, then by appointment date
-            const sortedOfficers = officers.sort((a, b) => {
+            // Combine officers and PSCs, sort active first, then by appointment date
+            const allPeople = [...officers, ...pscs].sort((a, b) => {
                 if (!a.resigned && b.resigned) return -1;
                 if (a.resigned && !b.resigned) return 1;
-                return new Date(b.appointed) - new Date(a.appointed);
+                return new Date(b.appointed || b.notified) - new Date(a.appointed || a.notified);
             });
             
-            const officerHTML = sortedOfficers.length > 0 ? sortedOfficers.map(officer => {
-                const appointedDate = officer.appointed ? new Date(officer.appointed).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Unknown';
-                const resignedText = officer.resigned ? ` - Resigned: ${new Date(officer.resigned).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}` : '';
-                const statusStyle = officer.resigned ? 'style="opacity: 0.6;"' : '';
+            const peopleHTML = allPeople.length > 0 ? allPeople.map(person => {
+                const appointedDate = person.appointed ? new Date(person.appointed).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Unknown';
+                const resignedText = person.resigned ? ` - ${person.type === 'psc' ? 'Ceased' : 'Resigned'}: ${new Date(person.resigned).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}` : '';
+                const statusStyle = person.resigned ? 'style="opacity: 0.6;"' : '';
+                
+                // Calculate age if date of birth is available
+                const ageText = person.dateOfBirth ? (() => {
+                    const [month, year] = person.dateOfBirth.split('/');
+                    const birthDate = new Date(year, month - 1);
+                    const age = Math.floor((new Date() - birthDate) / (365.25 * 24 * 60 * 60 * 1000));
+                    return `, Age: ${age}`;
+                })() : '';
+                
+                // Build additional info lines
+                const additionalInfo = [];
+                if (person.nationality && person.nationality !== 'British') {
+                    additionalInfo.push(`Nationality: ${person.nationality}`);
+                }
+                if (person.countryOfResidence && person.countryOfResidence !== person.nationality) {
+                    additionalInfo.push(`Residence: ${person.countryOfResidence}`);
+                }
+                if (person.occupation) {
+                    additionalInfo.push(`Occupation: ${person.occupation}`);
+                }
+                if (person.address) {
+                    additionalInfo.push(`Address: ${person.address}`);
+                }
+                if (person.naturesOfControl && person.naturesOfControl.length > 0) {
+                    const controlText = person.naturesOfControl.map(nature => {
+                        if (nature.includes('ownership-of-shares-25-to-50-percent')) return 'Owns 25-50% shares';
+                        if (nature.includes('ownership-of-shares-50-to-75-percent')) return 'Owns 50-75% shares';
+                        if (nature.includes('ownership-of-shares-75-to-100-percent')) return 'Owns 75-100% shares';
+                        if (nature.includes('voting-rights-25-to-50-percent')) return '25-50% voting rights';
+                        if (nature.includes('voting-rights-50-to-75-percent')) return '50-75% voting rights';
+                        if (nature.includes('voting-rights-75-to-100-percent')) return '75-100% voting rights';
+                        if (nature.includes('right-to-appoint-and-remove-directors')) return 'Can appoint/remove directors';
+                        if (nature.includes('significant-influence-or-control')) return 'Significant influence';
+                        return nature.replace(/-/g, ' ');
+                    }).join(', ');
+                    additionalInfo.push(`Control: ${controlText}`);
+                }
+                
+                const roleColor = person.type === 'psc' ? '#10b981' : '#6366f1';
+                const roleIcon = person.type === 'psc' ? '👑' : '👤';
                 
                 return `
-                    <div class="data-item" ${statusStyle}>
-                        <div class="data-item-header">${officer.name.toUpperCase()}</div>
-                        <div class="data-item-detail">${officer.role} - Appointed: ${appointedDate}${resignedText}</div>
+                    <div class="enhanced-person-card" ${statusStyle} style="background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 20px; margin-bottom: 16px;">
+                        <div class="person-header" style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                            <span style="font-size: 20px;">${roleIcon}</span>
+                            <div style="flex: 1;">
+                                <div class="data-item-header" style="font-size: 16px; font-weight: 600; color: #e2e8f0; margin-bottom: 4px;">
+                                    ${person.name.toUpperCase()}
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span style="background: ${roleColor}20; color: ${roleColor}; padding: 3px 8px; border-radius: 6px; font-size: 12px; font-weight: 600;">
+                                        ${person.role}
+                                    </span>
+                                    ${person.dateOfBirth ? `<span style="color: #94a3b8; font-size: 13px;">Born: ${person.dateOfBirth}${ageText}</span>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="person-details" style="color: #cbd5e1; font-size: 14px; line-height: 1.6;">
+                            <div style="margin-bottom: 8px;">
+                                <strong>Appointed:</strong> ${appointedDate}${resignedText}
+                            </div>
+                            ${additionalInfo.length > 0 ? additionalInfo.map(info => `<div style="margin-bottom: 4px;">${info}</div>`).join('') : ''}
+                        </div>
+                        
+                        ${person.formerNames && person.formerNames.length > 0 ? `
+                            <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+                                <div style="color: #94a3b8; font-size: 13px; margin-bottom: 4px;"><strong>Former Names:</strong></div>
+                                <div style="color: #cbd5e1; font-size: 13px;">
+                                    ${person.formerNames.map(fn => fn.forenames + ' ' + fn.surname).join(', ')}
+                                </div>
+                            </div>
+                        ` : ''}
                     </div>
                 `;
             }).join('') : (() => {
@@ -8170,12 +8265,26 @@
                 }
             })();
             
-            peopleTab.innerHTML = `
-                <h3>People & Control</h3>
-                ${officerHTML}
-            `;
+            // Create summary header
+            const activePeople = allPeople.filter(person => !person.resigned);
+            const activeOfficers = officers.filter(officer => !officer.resigned);
+            const activePSCs = pscs.filter(psc => !psc.resigned);
             
-            console.log('🔸 Officers HTML populated, officers count:', sortedOfficers.length);
+            const summaryHeader = allPeople.length > 0 ? `
+                <div style="background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.3); border-radius: 12px; padding: 16px; margin-bottom: 20px;">
+                    <h3 style="margin: 0 0 12px 0; color: #e2e8f0; font-size: 18px;">People & Control Summary</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; color: #cbd5e1; font-size: 14px;">
+                        <div><strong>${activeOfficers.length}</strong> Active Officers</div>
+                        <div><strong>${activePSCs.length}</strong> People with Significant Control</div>
+                        <div><strong>${allPeople.length - activePeople.length}</strong> Former/Resigned</div>
+                        <div><strong>${allPeople.length}</strong> Total Records</div>
+                    </div>
+                </div>
+            ` : '';
+            
+            peopleTab.innerHTML = summaryHeader + peopleHTML;
+            
+            console.log(`🔸 People & Control populated: ${officers.length} officers, ${pscs.length} PSCs`);
             
             // Enhance officer names with director lookup badges
             console.log('Calling enhanceOfficerNames...');
@@ -8688,7 +8797,7 @@
             
             // Populate officers with available data or generate mock officers
             const officers = companyData.officers || generateMockOfficers(companyData);
-            populateOfficersTab(officers, companyData.number || companyData.company_number, companyData.incorporationDate || companyData.date_of_creation);
+            populateOfficersTab(officers, [], companyData.number || companyData.company_number, companyData.incorporationDate || companyData.date_of_creation);
             
             // Populate charges with actual data
             const charges = [];
