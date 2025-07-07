@@ -2421,12 +2421,12 @@
                 min-height: 48px; /* Touch target size */
             }
 
-            /* Search container - full width on mobile */
+            /* Search container - proper mobile padding */
             .search-container {
                 padding: 20px 16px;
-                margin: 0 0 32px 0;
-                max-width: 100%;
-                width: 100%;
+                margin: 0 16px 24px 16px;
+                max-width: calc(100% - 32px);
+                width: calc(100% - 32px);
                 -webkit-box-sizing: border-box;
                 box-sizing: border-box;
                 border-radius: 12px;
@@ -2488,29 +2488,31 @@
                 display: none !important;
             }
 
-            /* Tab content - consistent padding on mobile */
+            /* Tab content - remove padding, let children handle it */
             .tab-content {
-                padding: 0 16px !important;
+                padding: 0 !important;
                 box-sizing: border-box !important;
             }
             
-            /* Filter controls - optimize for mobile */
+            /* Filter controls - proper mobile layout */
             #exploreTab > div:nth-child(2) {
-                margin: 16px 0 !important;
-                width: 100% !important;
+                margin: 0 16px 16px 16px !important;
+                width: calc(100% - 32px) !important;
             }
             
-            /* Search input on explore tab */
+            /* Search input on explore tab - clean mobile design */
             #exploreSearchForm {
-                margin: 0 0 20px 0 !important;
-                width: 100% !important;
+                margin: 0 16px 16px 16px !important;
+                width: calc(100% - 32px) !important;
             }
             
             #exploreCompanyName {
                 font-size: 16px !important;
-                padding: 14px 45px 14px 16px !important;
-                height: 48px !important;
+                padding: 12px 40px 12px 16px !important;
+                height: 44px !important;
                 border-radius: 8px !important;
+                background: rgba(15, 23, 42, 0.5) !important;
+                border: 1px solid rgba(71, 85, 105, 0.3) !important;
             }
             
             #clearExploreSearch {
@@ -2518,37 +2520,48 @@
                 padding: 6px !important;
             }
             
-            /* Fix filter controls line wrapping */
+            /* Filter controls - clean mobile layout */
             #exploreTab > div:nth-child(2) > div:first-child {
-                flex-wrap: wrap !important;
+                display: grid !important;
+                grid-template-columns: 1fr 1fr !important;
                 gap: 8px !important;
             }
             
-            /* Ensure charges toggle stays visible */
-            #exploreTab > div:nth-child(2) > div:first-child > div:last-child {
-                margin-left: 0 !important;
+            /* Toggle buttons container */
+            #exploreTab > div:nth-child(2) > div:first-child > button {
                 width: 100% !important;
+            }
+            
+            /* Switches container - full width below buttons */
+            #exploreTab > div:nth-child(2) > div:first-child > div:last-child {
+                grid-column: 1 / -1 !important;
+                display: flex !important;
                 justify-content: space-between !important;
-                margin-top: 8px !important;
+                gap: 16px !important;
+                margin: 0 !important;
+                padding: 8px 0 0 0 !important;
             }
 
-            /* Toggle buttons - optimize for mobile */
+            /* Toggle buttons - clean mobile design */
             .toggle-btn {
-                padding: 10px 16px;
+                padding: 10px 12px;
                 font-size: 13px;
-                min-height: 40px;
-                flex: 1;
-                border-radius: 8px;
+                min-height: 38px;
+                border-radius: 6px;
+                background: rgba(30, 41, 59, 0.4);
+                border: 1px solid rgba(71, 85, 105, 0.3);
             }
 
-            /* Industry filter - better mobile sizing */
+            /* Industry filter - clean mobile design */
             #industryFilter {
-                min-height: 40px;
-                padding: 8px 36px 8px 12px;
+                min-height: 38px;
+                padding: 8px 32px 8px 12px;
                 font-size: 13px;
-                border-radius: 8px;
+                border-radius: 6px;
                 width: 100%;
                 margin-top: 8px;
+                background: rgba(30, 41, 59, 0.4) !important;
+                border: 1px solid rgba(71, 85, 105, 0.3) !important;
             }
 
             /* Filter block - no padding on mobile */
@@ -2556,20 +2569,22 @@
                 margin: 24px 0 !important;
             }
             
-            /* Company cards - consistent with tab padding */
+            /* Company cards - proper mobile spacing */
             .company-card, .explore-company-card {
                 padding: 16px;
-                margin: 0 0 16px 0;
-                width: 100%;
-                max-width: 100%;
+                margin: 0 16px 12px 16px;
+                width: calc(100% - 32px);
+                max-width: calc(100% - 32px);
                 box-sizing: border-box;
             }
             
-            /* Company list container - full width on mobile */
+            /* Company list container - proper bounds */
             #companyListExplore {
                 max-width: 100%;
                 width: 100%;
                 box-sizing: border-box;
+                padding: 0;
+                margin: 0;
             }
 
             /* Company card content */
@@ -2594,7 +2609,8 @@
             
             /* Center the button container */
             #exploreTab > div:last-child {
-                padding: 0 0 24px 0;
+                padding: 0 16px 24px 16px;
+                text-align: center;
             }
             
             /* Expandable card content - mobile optimization */
@@ -2685,8 +2701,8 @@
 
             /* Active switch mobile improvements */
             .switch {
-                width: 40px !important;
-                height: 22px !important;
+                width: 36px !important;
+                height: 20px !important;
                 -webkit-appearance: none;
                 appearance: none;
                 background: rgba(255,255,255,0.1);
@@ -2698,15 +2714,15 @@
             }
             
             .switch::after {
-                width: 16px !important;
-                height: 16px !important;
+                width: 14px !important;
+                height: 14px !important;
                 top: 3px !important;
                 left: 3px !important;
             }
             
             .switch.active::after {
-                -webkit-transform: translateX(18px);
-                transform: translateX(18px);
+                -webkit-transform: translateX(16px);
+                transform: translateX(16px);
             }
 
             /* Pricing info mobile */
