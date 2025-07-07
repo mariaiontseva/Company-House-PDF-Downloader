@@ -8149,14 +8149,8 @@
             }
             console.log('🔸 People tab found, populating...');
             
-            // Combine officers and PSCs, sort active first, then by appointment date
-            const allPeople = [...officers, ...pscs].sort((a, b) => {
-                if (!a.resigned && b.resigned) return -1;
-                if (a.resigned && !b.resigned) return 1;
-                return new Date(b.appointed || b.notified) - new Date(a.appointed || a.notified);
-            });
-            
-            const peopleHTML = allPeople.length > 0 ? allPeople.map(person => {
+            // Function to create person card HTML
+            function createPersonCard(person) {
                 const appointedDate = person.appointed ? new Date(person.appointed).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Unknown';
                 const resignedText = person.resigned ? ` - ${person.type === 'psc' ? 'Ceased' : 'Resigned'}: ${new Date(person.resigned).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}` : '';
                 const statusStyle = person.resigned ? 'style="opacity: 0.6;"' : '';
@@ -8235,12 +8229,44 @@
                         ` : ''}
                     </div>
                 `;
-            }).join('') : (() => {
+            }
+            
+            // Sort officers and PSCs separately - active first, then by appointment date
+            const sortedOfficers = officers.sort((a, b) => {
+                if (!a.resigned && b.resigned) return -1;
+                if (a.resigned && !b.resigned) return 1;
+                return new Date(b.appointed) - new Date(a.appointed);
+            });
+            
+            const sortedPSCs = pscs.sort((a, b) => {
+                if (!a.resigned && b.resigned) return -1;
+                if (a.resigned && !b.resigned) return 1;
+                return new Date(b.appointed) - new Date(a.appointed);
+            });
+            
+            // Generate HTML for directors
+            const directorsHTML = sortedOfficers.length > 0 ? sortedOfficers.map(createPersonCard).join('') : `
+                <div style="text-align: center; padding: 40px; color: #94a3b8;">
+                    <div style="font-size: 24px; margin-bottom: 12px;">👤</div>
+                    <div>No director information available</div>
+                </div>
+            `;
+            
+            // Generate HTML for PSCs
+            const pscsHTML = sortedPSCs.length > 0 ? sortedPSCs.map(createPersonCard).join('') : `
+                <div style="text-align: center; padding: 40px; color: #94a3b8;">
+                    <div style="font-size: 24px; margin-bottom: 12px;">👑</div>
+                    <div>No PSC information available</div>
+                </div>
+            `;
+            
+            // Handle historical companies
+            if (officers.length === 0 && pscs.length === 0) {
                 const isHistorical = isHistoricalCompany(companyNumber || '', incorporationDate);
                 const historicalType = getHistoricalCompanyType(companyNumber || '');
                 
                 if (isHistorical) {
-                    return `
+                    const historicalHTML = `
                         <div style="text-align: center; padding: 40px;">
                             <div style="margin-bottom: 16px;">
                                 <span style="background: rgba(251, 191, 36, 0.1); color: #fbbf24; padding: 6px 16px; border-radius: 8px; font-size: 13px; font-weight: 600;">
@@ -8255,34 +8281,35 @@
                             </div>
                         </div>
                     `;
-                } else {
-                    return `
-                        <div class="data-item">
-                            <div class="data-item-header">No officer information available</div>
-                            <div class="data-item-detail">Officer data could not be retrieved</div>
-                        </div>
+                    
+                    peopleTab.innerHTML = `
+                        <h3>People & Control</h3>
+                        ${historicalHTML}
                     `;
+                    return;
                 }
-            })();
+            }
             
-            // Create summary header
-            const activePeople = allPeople.filter(person => !person.resigned);
-            const activeOfficers = officers.filter(officer => !officer.resigned);
-            const activePSCs = pscs.filter(psc => !psc.resigned);
-            
-            const summaryHeader = allPeople.length > 0 ? `
-                <div style="background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.3); border-radius: 12px; padding: 16px; margin-bottom: 20px;">
-                    <h3 style="margin: 0 0 12px 0; color: #e2e8f0; font-size: 18px;">People & Control Summary</h3>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; color: #cbd5e1; font-size: 14px;">
-                        <div><strong>${activeOfficers.length}</strong> Active Officers</div>
-                        <div><strong>${activePSCs.length}</strong> People with Significant Control</div>
-                        <div><strong>${allPeople.length - activePeople.length}</strong> Former/Resigned</div>
-                        <div><strong>${allPeople.length}</strong> Total Records</div>
+            // Create two-column layout
+            peopleTab.innerHTML = `
+                <h3>People & Control</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start;">
+                    <div>
+                        <h4 style="color: #6366f1; margin: 0 0 16px 0; font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                            <span>👤</span> Directors & Officers
+                            ${sortedOfficers.length > 0 ? `<span style="background: rgba(99, 102, 241, 0.2); color: #6366f1; padding: 2px 8px; border-radius: 12px; font-size: 12px;">${sortedOfficers.length}</span>` : ''}
+                        </h4>
+                        ${directorsHTML}
+                    </div>
+                    <div>
+                        <h4 style="color: #10b981; margin: 0 0 16px 0; font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                            <span>👑</span> People with Significant Control
+                            ${sortedPSCs.length > 0 ? `<span style="background: rgba(16, 185, 129, 0.2); color: #10b981; padding: 2px 8px; border-radius: 12px; font-size: 12px;">${sortedPSCs.length}</span>` : ''}
+                        </h4>
+                        ${pscsHTML}
                     </div>
                 </div>
-            ` : '';
-            
-            peopleTab.innerHTML = summaryHeader + peopleHTML;
+            `;
             
             console.log(`🔸 People & Control populated: ${officers.length} officers, ${pscs.length} PSCs`);
             
