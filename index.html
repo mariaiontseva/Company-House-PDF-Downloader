@@ -3657,7 +3657,7 @@
             #companyModal .tab-content {
                 height: auto;
                 min-height: 400px;
-                padding: 16px;
+                padding: 16px 24px;
                 background: #0f172a;
                 overflow: visible;
             }
@@ -3668,7 +3668,7 @@
             
             /* People & Control tab mobile layout */
             #companyModal #people {
-                padding: 16px;
+                padding: 16px 24px;
             }
             
             #companyModal #people h3 {
@@ -3694,22 +3694,22 @@
             
             /* Finance tab mobile */
             #companyModal #finance {
-                padding: 16px;
+                padding: 16px 24px;
             }
             
             /* Risk tab mobile */
             #companyModal #risk {
-                padding: 16px;
+                padding: 16px 24px;
             }
             
             /* Charges tab mobile */
             #companyModal #charges {
-                padding: 16px;
+                padding: 16px 24px;
             }
             
             /* Filing history tab mobile */
             #companyModal #filings {
-                padding: 16px;
+                padding: 16px 24px;
             }
         }
         
@@ -3759,7 +3759,7 @@
             }
             
             #companyModal .card-header {
-                padding: calc(env(safe-area-inset-top) + 20px) 16px 20px 16px;
+                padding: calc(env(safe-area-inset-top) + 20px) 24px 20px 24px;
                 border-bottom: 1px solid rgba(30, 41, 59, 0.3);
             }
             
@@ -5269,6 +5269,29 @@
                     }
                 });
                 addDebug(`Response status: ${response.status}`);
+                
+                // Check for rate limit headers
+                if (response.headers.get('X-RateLimit-Remain')) {
+                    const remaining = response.headers.get('X-RateLimit-Remain');
+                    const limit = response.headers.get('X-RateLimit-Limit');
+                    const reset = response.headers.get('X-RateLimit-Reset');
+                    
+                    console.log(`API Rate Limit: ${remaining}/${limit} remaining`);
+                    if (reset) {
+                        const resetDate = new Date(parseInt(reset) * 1000);
+                        console.log(`Rate limit resets at: ${resetDate.toLocaleTimeString()}`);
+                    }
+                    
+                    if (parseInt(remaining) < 10) {
+                        console.warn('⚠️ API rate limit nearly exhausted!');
+                    }
+                }
+                
+                if (response.status === 429) {
+                    const resetTime = response.headers.get('X-RateLimit-Reset');
+                    const waitTime = resetTime ? Math.ceil((parseInt(resetTime) * 1000 - Date.now()) / 1000) : 60;
+                    throw new Error(`Rate limit exceeded. Please wait ${waitTime} seconds before trying again.`);
+                }
                 
                 if (!response.ok) {
                     try {
