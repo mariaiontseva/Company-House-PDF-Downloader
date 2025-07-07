@@ -2664,15 +2664,22 @@
             }
             
             .info-container {
-                padding: 40px 24px;
+                padding: 40px 16px;
+                margin-left: 0;
+                margin-right: 0;
             }
             
             .search-container {
-                padding: 24px;
+                padding: 24px 16px;
+                margin-left: 16px;
+                margin-right: 16px;
+                width: calc(100% - 32px);
+                max-width: calc(100% - 32px);
+                border-radius: 16px;
             }
             
             .hero {
-                padding: 100px 20px 60px;
+                padding: 100px 16px 60px;
                 margin-bottom: 40px;
                 margin-top: -72px;
             }
@@ -2739,6 +2746,33 @@
             
             .main-container {
                 padding-top: 60px !important;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+            }
+            
+            /* Fix explore tab content centering */
+            #exploreTab,
+            #searchTab {
+                padding: 0;
+            }
+            
+            .tab-navigation {
+                margin: 0 0 24px 0;
+                width: 100%;
+            }
+            
+            .toggle-btn {
+                padding: 8px 12px;
+            }
+            
+            #industryFilter {
+                width: 100%;
+            }
+            
+            .explore-company-card {
+                margin-left: 0;
+                margin-right: 0;
+                width: 100%;
             }
         }
 
