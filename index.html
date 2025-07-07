@@ -106,11 +106,12 @@
             background: rgba(0, 0, 0, 0.85);
             z-index: 10000;
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             justify-content: center;
             backdrop-filter: blur(12px);
             animation: fadeInModal 0.3s ease;
             padding: 20px;
+            overflow-y: auto;
         }
         
         @keyframes fadeInModal {
@@ -123,7 +124,8 @@
             border-radius: 16px;
             max-width: 900px;
             width: 100%;
-            max-height: 85vh;
+            max-height: 90vh;
+            margin: 40px auto;
             overflow: hidden;
             box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
             border: 1px solid rgba(71, 85, 105, 0.3);
@@ -5171,7 +5173,7 @@
                             <option value="RETAIL">🛍️ Retail</option>
                             <option value="MANUFACTURING">🏭 Manufacturing</option>
                             <option value="REAL_ESTATE">🏢 Real Estate</option>
-                            <option value="ENERGY">⚡ Energy</option>
+                            <option value="ENERGY">Energy</option>
                             <option value="HEALTHCARE">🏥 Healthcare</option>
                             <option value="TRANSPORT">🚚 Transport</option>
                             <option value="CONSTRUCTION">🏗️ Construction</option>
@@ -7391,7 +7393,7 @@
                 if (list && document.getElementById('exploreTab').classList.contains('active')) {
                     list.innerHTML = `
                         <div style="text-align: center; color: #ef4444; padding: 40px; border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 12px; background: rgba(239, 68, 68, 0.05);">
-                            <h3 style="margin-bottom: 16px;">⚠️ Database Connection Lost</h3>
+                            <h3 style="margin-bottom: 16px;">Database Connection Lost</h3>
                             <p style="margin-bottom: 16px;">Cannot connect to the 5.6M company database on Railway.</p>
                             <p style="color: #94a3b8; font-size: 14px; margin-bottom: 16px;">The Railway backend service needs to restart its database connection.</p>
                             <button onclick="connectionRetryCount = 0; checkRailwayConnection();" style="margin-top: 16px; padding: 8px 16px; background: #6366f1; color: white; border: none; border-radius: 6px; cursor: pointer;">
@@ -8967,19 +8969,19 @@
                 const infoItems = [];
                 
                 if (person.nationality && person.nationality !== 'British') {
-                    infoItems.push({ label: 'Nationality', value: person.nationality, icon: '🌍' });
+                    infoItems.push({ label: 'Nationality', value: person.nationality });
                 }
                 if (person.countryOfResidence && person.countryOfResidence !== person.nationality) {
-                    infoItems.push({ label: 'Residence', value: person.countryOfResidence, icon: '🏠' });
+                    infoItems.push({ label: 'Residence', value: person.countryOfResidence });
                 }
                 if (person.occupation) {
-                    infoItems.push({ label: 'Occupation', value: person.occupation, icon: '💼' });
+                    infoItems.push({ label: 'Occupation', value: person.occupation });
                 }
                 if (ageText) {
-                    infoItems.push({ label: 'Age', value: `${ageText} years`, icon: '📅' });
+                    infoItems.push({ label: 'Age', value: `${ageText} years` });
                 }
                 if (person.address) {
-                    infoItems.push({ label: 'Address', value: person.address, icon: '📍' });
+                    infoItems.push({ label: 'Address', value: person.address });
                 }
                 
                 // PSC control information
@@ -8999,7 +9001,6 @@
                     infoItems.push({ 
                         label: 'Control', 
                         value: controlItems, 
-                        icon: '⚡',
                         isControl: true 
                     });
                 }
@@ -12237,9 +12238,8 @@
         
         // Helper function to search company from within modal
         function searchCompanyForModal(companyNumber) {
-            document.getElementById('officerCompaniesModal')?.remove();
-            document.getElementById('searchInput').value = companyNumber;
-            document.getElementById('searchBtn').click();
+            // Open in new tab
+            window.open(`${window.location.origin}${window.location.pathname}?company=${companyNumber}`, '_blank');
         }
         
     </script>
