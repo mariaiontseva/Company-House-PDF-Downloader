@@ -8072,7 +8072,8 @@
                         countryOfResidence: officer.country_of_residence,
                         formerNames: officer.former_names,
                         identification: officer.identification,
-                        type: 'officer'
+                        type: 'officer',
+                        officerId: officer.links?.officer?.appointments ? officer.links.officer.appointments.split('/')[2] : null
                     }));
                     
                     // Update officers count in stat box (2nd box) - show total like Companies House
@@ -8245,8 +8246,34 @@
                             padding: 20px;
                             margin-bottom: 18px;
                             opacity: ${isResigned ? '0.6' : '1'};
-                         "
->
+                         ">
+                        
+                        ${person.officerId && person.type === 'officer' ? `
+                            <button onclick="viewOfficerCompanies('${person.officerId}', '${person.name.replace(/'/g, "\\'")}')" style="
+                                position: absolute;
+                                top: 14px;
+                                right: 14px;
+                                background: rgba(99, 102, 241, 0.08);
+                                border: 1px solid rgba(99, 102, 241, 0.2);
+                                color: #6366f1;
+                                width: 32px;
+                                height: 32px;
+                                border-radius: 6px;
+                                cursor: pointer;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                transition: all 0.2s ease;
+                                z-index: 10;
+                            " onmouseover="this.style.background='rgba(99, 102, 241, 0.15)'; this.style.borderColor='rgba(99, 102, 241, 0.3)'" 
+                              onmouseout="this.style.background='rgba(99, 102, 241, 0.08)'; this.style.borderColor='rgba(99, 102, 241, 0.2)'"
+                              title="View other companies">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="11" cy="11" r="8"></circle>
+                                    <path d="m21 21-4.35-4.35"></path>
+                                </svg>
+                            </button>
+                        ` : ''}
                         
                         <!-- Header section -->
                         <div style="margin-bottom: 16px;">
@@ -8553,9 +8580,17 @@
             
             // Generate HTML for PSCs and statements
             const pscCardsHTML = sortedPSCs.map(createPersonCard).join('');
-            const statementCardsHTML = sortedStatements.map(createStatementCard).join('');
             
-            const pscsHTML = (sortedPSCs.length > 0 || sortedStatements.length > 0) ? (statementCardsHTML + pscCardsHTML) : `
+            // Separate active and ceased statements
+            const activeStatements = sortedStatements.filter(s => !s.ceased_on);
+            const ceasedStatements = sortedStatements.filter(s => s.ceased_on);
+            
+            const activeStatementCardsHTML = activeStatements.map(createStatementCard).join('');
+            const ceasedStatementCardsHTML = ceasedStatements.map(createStatementCard).join('');
+            
+            // Order: Active statements first, then PSCs, then ceased statements
+            const pscsHTML = (sortedPSCs.length > 0 || sortedStatements.length > 0) ? 
+                (activeStatementCardsHTML + pscCardsHTML + ceasedStatementCardsHTML) : `
                 <div style="
                     text-align: center; 
                     padding: 40px 20px; 
@@ -8747,6 +8782,30 @@
             // Enhance officer names with director lookup badges
             console.log('Calling enhanceOfficerNames...');
             enhanceOfficerNames();
+        }
+        
+        // Fetch other appointments for an officer
+        async function fetchOfficerAppointments(officerId) {
+            try {
+                const API_KEY = '22aefa40-ee9e-47c0-b40a-2dd3c03165c6';
+                const response = await fetchWithWorker(`https://api.companieshouse.gov.uk/officers/${officerId}/appointments`, API_KEY);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    return data.items ? data.items.map(appointment => ({
+                        companyName: appointment.appointed_to?.company_name,
+                        companyNumber: appointment.appointed_to?.company_number,
+                        companyStatus: appointment.appointed_to?.company_status,
+                        role: appointment.officer_role,
+                        appointed: appointment.appointed_on,
+                        resigned: appointment.resigned_on
+                    })) : [];
+                }
+                return [];
+            } catch (error) {
+                console.error('🔸 Error fetching officer appointments:', error);
+                return [];
+            }
         }
         
         // Fetch and populate charges data
@@ -11223,6 +11282,178 @@
                     }
                 });
             }, 100);
+        }
+        
+        // Function to view officer's other companies
+        async function viewOfficerCompanies(officerId, officerName) {
+            // Create modal for showing other companies
+            const modalHtml = `
+                <div id="officerCompaniesModal" style="
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(0, 0, 0, 0.8);
+                    z-index: 10000;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    backdrop-filter: blur(10px);
+                ">
+                    <div style="
+                        background: #1e293b;
+                        border-radius: 12px;
+                        padding: 24px;
+                        max-width: 800px;
+                        width: 90%;
+                        max-height: 80vh;
+                        overflow-y: auto;
+                        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+                        border: 1px solid rgba(99, 102, 241, 0.3);
+                    ">
+                        <div style="
+                            display: flex;
+                            justify-content: space-between;
+                            align-items: center;
+                            margin-bottom: 20px;
+                        ">
+                            <h3 style="margin: 0; color: #f8fafc; font-size: 20px;">Other Companies - ${officerName}</h3>
+                            <button onclick="document.getElementById('officerCompaniesModal').remove()" style="
+                                background: none;
+                                border: none;
+                                color: #94a3b8;
+                                font-size: 24px;
+                                cursor: pointer;
+                                padding: 0;
+                                width: 32px;
+                                height: 32px;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                border-radius: 6px;
+                                transition: background 0.2s ease;
+                            " onmouseover="this.style.background='rgba(71, 85, 105, 0.3)'" onmouseout="this.style.background='none'">×</button>
+                        </div>
+                        <div id="officerCompaniesContent" style="
+                            color: #94a3b8;
+                            text-align: center;
+                            padding: 40px;
+                        ">
+                            <div>Loading appointments...</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            
+            // Fetch appointments
+            const appointments = await fetchOfficerAppointments(officerId);
+            const contentDiv = document.getElementById('officerCompaniesContent');
+            
+            if (appointments.length === 0) {
+                contentDiv.innerHTML = '<div>No other company appointments found</div>';
+                return;
+            }
+            
+            // Group by active/resigned
+            const activeAppointments = appointments.filter(a => !a.resigned);
+            const resignedAppointments = appointments.filter(a => a.resigned);
+            
+            contentDiv.innerHTML = `
+                ${activeAppointments.length > 0 ? `
+                    <div style="margin-bottom: 24px;">
+                        <h4 style="color: #10b981; margin-bottom: 16px; text-align: left;">Active Appointments (${activeAppointments.length})</h4>
+                        <div style="display: flex; flex-direction: column; gap: 12px;">
+                            ${activeAppointments.map(app => `
+                                <div style="
+                                    background: rgba(16, 185, 129, 0.1);
+                                    border: 1px solid rgba(16, 185, 129, 0.3);
+                                    border-radius: 8px;
+                                    padding: 16px;
+                                    text-align: left;
+                                ">
+                                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                        <div>
+                                            <div style="color: #f8fafc; font-weight: 600; font-size: 16px; margin-bottom: 4px;">
+                                                ${app.companyName || 'Company Name Not Available'}
+                                            </div>
+                                            <div style="color: #cbd5e1; font-size: 14px;">
+                                                ${app.companyNumber} • ${app.role}
+                                            </div>
+                                        </div>
+                                        <button onclick="searchCompanyForModal('${app.companyNumber}')" style="
+                                            background: #6366f1;
+                                            color: white;
+                                            border: none;
+                                            padding: 6px 12px;
+                                            border-radius: 4px;
+                                            font-size: 13px;
+                                            cursor: pointer;
+                                            white-space: nowrap;
+                                        ">View Company</button>
+                                    </div>
+                                    <div style="color: #94a3b8; font-size: 13px;">
+                                        Appointed: ${new Date(app.appointed).toLocaleDateString('en-GB')}
+                                        ${app.companyStatus ? ` • ${app.companyStatus}` : ''}
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+                
+                ${resignedAppointments.length > 0 ? `
+                    <div>
+                        <h4 style="color: #94a3b8; margin-bottom: 16px; text-align: left;">Previous Appointments (${resignedAppointments.length})</h4>
+                        <div style="display: flex; flex-direction: column; gap: 12px;">
+                            ${resignedAppointments.map(app => `
+                                <div style="
+                                    background: rgba(71, 85, 105, 0.1);
+                                    border: 1px solid rgba(71, 85, 105, 0.3);
+                                    border-radius: 8px;
+                                    padding: 16px;
+                                    text-align: left;
+                                    opacity: 0.7;
+                                ">
+                                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                        <div>
+                                            <div style="color: #e2e8f0; font-weight: 600; font-size: 16px; margin-bottom: 4px;">
+                                                ${app.companyName || 'Company Name Not Available'}
+                                            </div>
+                                            <div style="color: #94a3b8; font-size: 14px;">
+                                                ${app.companyNumber} • ${app.role}
+                                            </div>
+                                        </div>
+                                        <button onclick="searchCompanyForModal('${app.companyNumber}')" style="
+                                            background: #475569;
+                                            color: white;
+                                            border: none;
+                                            padding: 6px 12px;
+                                            border-radius: 4px;
+                                            font-size: 13px;
+                                            cursor: pointer;
+                                            white-space: nowrap;
+                                        ">View Company</button>
+                                    </div>
+                                    <div style="color: #64748b; font-size: 13px;">
+                                        ${new Date(app.appointed).toLocaleDateString('en-GB')} - ${new Date(app.resigned).toLocaleDateString('en-GB')}
+                                        ${app.companyStatus ? ` • ${app.companyStatus}` : ''}
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+            `;
+        }
+        
+        // Helper function to search company from within modal
+        function searchCompanyForModal(companyNumber) {
+            document.getElementById('officerCompaniesModal')?.remove();
+            document.getElementById('searchInput').value = companyNumber;
+            document.getElementById('searchBtn').click();
         }
         
     </script>
