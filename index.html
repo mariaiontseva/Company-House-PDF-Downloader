@@ -3533,6 +3533,13 @@
             padding: 0 40px;
         }
         
+        /* Mobile override for tabs-nav padding */
+        @media (max-width: 900px) {
+            #companyModal .tabs-nav {
+                padding: 0 !important;
+            }
+        }
+        
         #companyModal .tabs-nav::-webkit-scrollbar {
             display: none;
         }
@@ -3574,6 +3581,13 @@
             flex: 1;
             overflow-y: auto;
             display: block;
+        }
+        
+        /* Mobile override for tab content padding */
+        @media (max-width: 900px) {
+            #companyModal .tab-content {
+                padding: 24px !important;
+            }
         }
         
         #companyModal .tab-pane {
@@ -3650,6 +3664,7 @@
             
             #companyModal .tabs-nav {
                 padding: 0 !important; /* Remove desktop padding */
+                margin: 0 !important;
             }
             
             #companyModal .tab {
@@ -3792,6 +3807,30 @@
         
         /* Enhanced Mobile UX for modal */
         @media (max-width: 768px) {
+            /* Global padding override for all modal content */
+            #companyModal .card-header,
+            #companyModal .stats-section,
+            #companyModal .tab-content,
+            #companyModal .tab-pane {
+                padding-left: 24px !important;
+                padding-right: 24px !important;
+            }
+            
+            /* Ensure stats grid doesn't add extra padding */
+            #companyModal .stats-grid {
+                margin-left: 0 !important;
+                margin-right: 0 !important;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+            }
+            
+            /* Ensure company-info doesn't add padding */
+            #companyModal .company-info {
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+                margin-left: 0 !important;
+                margin-right: 0 !important;
+            }
             #companyModal.modal-backdrop {
                 padding: 0;
             }
@@ -3832,7 +3871,7 @@
             }
             
             #companyModal .card-header {
-                padding: calc(env(safe-area-inset-top) + 20px) 24px 20px 24px;
+                padding: calc(env(safe-area-inset-top) + 20px) 24px 20px 24px !important;
                 border-bottom: 1px solid rgba(30, 41, 59, 0.3);
             }
             
