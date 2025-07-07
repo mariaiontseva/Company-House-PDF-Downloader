@@ -2924,7 +2924,12 @@
 
             .company-card, .explore-company-card {
                 padding: 24px;
-                margin: 0 24px 20px 24px;
+                margin: 0 0 20px 0;
+            }
+            
+            /* Tab content should handle the horizontal margins */
+            .tab-content {
+                padding: 0 24px;
             }
 
             .document-stats {
@@ -2938,9 +2943,13 @@
             }
 
             /* Filter controls - better spacing on tablet */
-            .tab-content > div:first-child {
-                flex-wrap: wrap;
-                gap: 12px;
+            #exploreTab > div {
+                margin-bottom: 20px;
+            }
+            
+            /* Search form on explore tab */
+            #exploreSearchForm {
+                margin: 0 0 20px 0;
             }
 
             #industryFilter {
