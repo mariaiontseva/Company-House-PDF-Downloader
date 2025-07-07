@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tab Display Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #0f172a;
+            color: white;
+        }
+        
+        /* Copy exact CSS from index.html */
+        #company-page-content .tab-pane {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        #company-page-content .tab-pane.active {
+            display: block;
+        }
+        
+        .tab-content {
+            min-height: 500px;
+            background: #1a1a2e;
+            padding: 20px;
+            border: 2px solid #fff;
+        }
+        
+        .tab-pane {
+            padding: 20px;
+            background: #2d3748;
+            margin: 10px;
+            border-radius: 8px;
+        }
+        
+        .test-controls {
+            margin-bottom: 20px;
+        }
+        
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            background: #4a5568;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background: #2d3748;
+        }
+        
+        .status {
+            background: #1a202c;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Tab Display Test</h1>
+    
+    <div class="test-controls">
+        <button onclick="testTabVisibility()">Test Tab Visibility</button>
+        <button onclick="showTab('overview')">Show Overview</button>
+        <button onclick="showTab('people')">Show People</button>
+        <button onclick="showTab('finance')">Show Finance</button>
+    </div>
+    
+    <div class="status" id="status">Click a button to test</div>
+    
+    <div id="company-page-content">
+        <div class="tab-content" id="company-tab-content">
+            <!-- Overview Tab -->
+            <div class="tab-pane active" id="page-overview">
+                <h2>Overview Tab Content</h2>
+                <p>This is the overview tab. If you can see this text, the tab is displaying correctly!</p>
+                <div style="background: red; padding: 20px; color: yellow;">
+                    <h3>BRIGHT RED BOX - VERY VISIBLE</h3>
+                </div>
+            </div>
+            
+            <!-- People Tab -->
+            <div class="tab-pane" id="page-people">
+                <h2>People Tab Content</h2>
+                <p>This is the people tab.</p>
+            </div>
+            
+            <!-- Finance Tab -->
+            <div class="tab-pane" id="page-finance">
+                <h2>Finance Tab Content</h2>
+                <p>This is the finance tab.</p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function testTabVisibility() {
+            const statusDiv = document.getElementById('status');
+            let status = 'Tab Visibility Test Results:\n';
+            
+            // Test each tab
+            const tabs = document.querySelectorAll('.tab-pane');
+            tabs.forEach(tab => {
+                const computed = window.getComputedStyle(tab);
+                const isActive = tab.classList.contains('active');
+                const display = computed.display;
+                const visibility = computed.visibility;
+                const opacity = computed.opacity;
+                
+                status += `\n${tab.id}:`;
+                status += `\n  - Has .active class: ${isActive}`;
+                status += `\n  - Display: ${display}`;
+                status += `\n  - Visibility: ${visibility}`;
+                status += `\n  - Opacity: ${opacity}`;
+                status += `\n  - Should be visible: ${isActive ? 'YES' : 'NO'}`;
+                status += `\n  - Actually visible: ${display !== 'none' ? 'YES' : 'NO'}`;
+            });
+            
+            statusDiv.textContent = status;
+            statusDiv.style.whiteSpace = 'pre-wrap';
+        }
+        
+        function showTab(tabName) {
+            // Remove active from all tabs
+            document.querySelectorAll('.tab-pane').forEach(pane => {
+                pane.classList.remove('active');
+            });
+            
+            // Add active to selected tab
+            const selectedTab = document.getElementById(`page-${tabName}`);
+            if (selectedTab) {
+                selectedTab.classList.add('active');
+            }
+            
+            // Test visibility
+            testTabVisibility();
+        }
+        
+        // Test on load
+        window.addEventListener('load', () => {
+            testTabVisibility();
+        });
+    </script>
+</body>
+</html>
