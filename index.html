@@ -3924,15 +3924,17 @@
             }
             
             #companyModal .close-btn {
-                top: 16px;
-                right: 16px;
-                width: 36px;
-                height: 36px;
+                top: 12px;
+                right: 12px;
+                width: 32px;
+                height: 32px;
+                background: rgba(255, 255, 255, 0.05);
+                border: 1px solid rgba(255, 255, 255, 0.1);
             }
             
             #companyModal .close-btn svg {
-                width: 16px;
-                height: 16px;
+                width: 14px;
+                height: 14px;
             }
             
             #companyModal .card-header {
@@ -3941,97 +3943,124 @@
             }
             
             #companyModal .company-title {
-                font-size: 24px;
-                line-height: 1.3;
-                margin-bottom: 6px;
+                font-size: 20px;
+                line-height: 1.2;
+                margin-bottom: 4px;
                 word-break: break-word;
                 display: block;
-                padding-right: 40px; /* Space for close button */
+                padding-right: 36px; /* Space for close button */
+                font-weight: 800;
             }
             
             #companyModal .company-subtitle {
-                font-size: 13px;
-                margin-bottom: 16px;
-                line-height: 1.4;
+                font-size: 12px;
+                margin-bottom: 12px;
+                line-height: 1.3;
+                color: #94a3b8;
             }
             
             #companyModal .company-meta {
-                font-size: 12px;
-                margin-bottom: 16px;
-                line-height: 1.5;
+                font-size: 11px;
+                margin-bottom: 12px;
+                line-height: 1.4;
                 display: flex;
                 flex-wrap: wrap;
-                gap: 8px;
+                gap: 6px;
+                color: #64748b;
             }
             
             #companyModal .badges-row {
-                flex-direction: column;
-                gap: 12px;
-                align-items: stretch;
-                margin: 16px 0 20px 0;
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+                align-items: center;
+                margin: 0 0 16px 0;
                 width: 100%;
             }
             
             #companyModal .company-badges {
+                display: flex;
                 flex-wrap: wrap;
-                gap: 8px;
-                width: 100%;
-                justify-content: flex-start;
+                gap: 6px;
+                flex: 1;
+                align-items: center;
             }
             
             #companyModal .badge {
-                padding: 6px 10px !important;
-                font-size: 11px;
+                padding: 4px 8px !important;
+                font-size: 10px;
                 white-space: nowrap;
+                border-radius: 4px;
+                font-weight: 600;
+                letter-spacing: 0.3px;
+            }
+            
+            /* Hide dropdown badge on mobile to save space */
+            #companyModal .dropdown-badge {
+                display: none !important;
             }
             
             #companyModal .risk-badge {
-                padding: 8px 14px;
-                font-size: 12px;
-                width: fit-content;
-                margin: 0;
+                padding: 6px 10px !important;
+                font-size: 11px;
+                flex-shrink: 0;
+                margin-left: auto;
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+            }
+            
+            #companyModal .risk-dot {
+                width: 8px !important;
+                height: 8px !important;
             }
             
             #companyModal .stats-section {
-                padding: 16px 0 !important; /* Remove horizontal padding - it's inherited from parent */
+                padding: 12px 0 !important;
                 background: rgba(15, 23, 42, 0.5);
                 border-bottom: 1px solid rgba(30, 41, 59, 0.3);
-                max-height: 200px;
+                max-height: 180px;
                 overflow-y: auto;
                 -webkit-overflow-scrolling: touch;
             }
             
             #companyModal .stats-grid {
                 grid-template-columns: repeat(2, 1fr);
-                gap: 10px;
+                gap: 8px;
             }
             
             #companyModal .stat-box {
-                padding: 12px 10px !important;
-                min-height: 70px;
+                padding: 10px 8px !important;
+                min-height: 60px;
                 display: flex;
                 flex-direction: column;
                 justify-content: center;
                 background: rgba(30, 41, 59, 0.4);
                 border: 1px solid rgba(71, 85, 105, 0.3);
+                border-radius: 8px;
             }
             
             #companyModal .stat-value {
-                font-size: 20px;
-                margin-bottom: 4px;
-                line-height: 1.2;
+                font-size: 18px;
+                margin-bottom: 2px;
+                line-height: 1;
+                font-weight: 700;
             }
             
             #companyModal .stat-label {
-                font-size: 10px;
+                font-size: 9px;
                 letter-spacing: 0.3px;
-                line-height: 1.3;
+                line-height: 1.2;
+                font-weight: 600;
+                text-transform: uppercase;
+                color: #94a3b8;
             }
             
             #companyModal .stat-detail {
-                font-size: 10px;
-                margin-top: 4px;
-                line-height: 1.3;
+                font-size: 9px;
+                margin-top: 3px;
+                line-height: 1.2;
+                color: #64748b;
             }
             
             #companyModal .tabs-nav {
