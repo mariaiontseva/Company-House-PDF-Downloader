@@ -3747,21 +3747,6 @@
                 overflow: hidden;
             }
             
-            /* Make header and stats scrollable together */
-            #companyModal .card-header,
-            #companyModal .stats-section {
-                flex-shrink: 0;
-            }
-            
-            /* Scrollable top section wrapper */
-            #companyModal .top-section-wrapper {
-                overflow-y: auto;
-                -webkit-overflow-scrolling: touch;
-                flex-shrink: 0;
-                max-height: 45vh;
-                border-bottom: 1px solid rgba(30, 41, 59, 0.5);
-            }
-            
             #companyModal .close-btn {
                 top: 16px;
                 right: 16px;
@@ -3832,9 +3817,12 @@
             }
             
             #companyModal .stats-section {
-                padding: 16px 24px;
+                padding: 16px;
                 background: rgba(15, 23, 42, 0.5);
                 border-bottom: 1px solid rgba(30, 41, 59, 0.3);
+                max-height: 200px;
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
             }
             
             #companyModal .stats-grid {
@@ -11601,10 +11589,8 @@
             </button>
             
             <div class="card-content">
-                <!-- Scrollable top section -->
-                <div class="top-section-wrapper">
-                    <!-- Header -->
-                    <div class="card-header">
+                <!-- Header -->
+                <div class="card-header">
                     <div class="company-info">
                         <div class="company-title">Loading Company...</div>
                         <div class="company-subtitle" id="modal-subtitle" style="display: none;"></div>
@@ -11666,8 +11652,6 @@
                         </div>
                     </div>
                 </div>
-                </div>
-                <!-- End of scrollable top section -->
                 
                 <!-- Tabs -->
                 <div class="tabs-container">
