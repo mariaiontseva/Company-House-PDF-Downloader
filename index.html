@@ -3813,15 +3813,7 @@
         
         /* Enhanced Mobile UX for modal */
         @media (max-width: 768px) {
-            /* Reset ALL padding and margins first */
-            #companyModal * {
-                padding-left: 0 !important;
-                padding-right: 0 !important;
-                margin-left: 0 !important;
-                margin-right: 0 !important;
-            }
-            
-            /* Then apply consistent 24px padding only to main containers */
+            /* Fix container padding without breaking element styling */
             #companyModal .card-header {
                 padding: calc(env(safe-area-inset-top) + 20px) 24px 20px 24px !important;
             }
@@ -3830,39 +3822,24 @@
                 padding: 24px !important;
             }
             
-            /* Stats section already inside card-header, no extra padding needed */
-            #companyModal .stats-grid,
-            #companyModal .company-info,
-            #companyModal .company-title,
-            #companyModal .company-subtitle,
-            #companyModal .company-meta,
-            #companyModal .badges-row,
-            #companyModal .tab-pane {
-                padding-left: 0 !important;
-                padding-right: 0 !important;
-                margin-left: 0 !important;
-                margin-right: 0 !important;
-            }
-            
-            /* Restore padding for elements that need it */
-            #companyModal .badge,
-            #companyModal .stat-box,
-            #companyModal .tab-btn,
-            #companyModal button,
-            #companyModal .data-item {
-                padding-left: revert !important;
-                padding-right: revert !important;
-            }
-            
-            /* Ensure the modal containers themselves have correct padding */
-            #companyModal .company-card {
-                padding: 0 !important;
-                margin: 0 !important;
-            }
-            
+            /* Remove extra margins from structural elements */
+            #companyModal .company-card,
             #companyModal .card-content {
-                padding: 0 !important;
-                margin: 0 !important;
+                padding: 0;
+                margin: 0;
+            }
+            
+            /* Stats grid and company info should not add extra padding */
+            #companyModal .stats-grid,
+            #companyModal .company-info {
+                margin-left: 0;
+                margin-right: 0;
+            }
+            
+            /* Tab pane doesn't need extra padding - inherits from tab-content */
+            #companyModal .tab-pane {
+                padding: 0;
+                margin: 0;
             }
             #companyModal.modal-backdrop {
                 padding: 0;
@@ -3948,7 +3925,7 @@
             }
             
             #companyModal .badge {
-                padding: 6px 10px;
+                padding: 6px 10px !important;
                 font-size: 11px;
                 white-space: nowrap;
             }
@@ -3975,7 +3952,7 @@
             }
             
             #companyModal .stat-box {
-                padding: 12px 10px;
+                padding: 12px 10px !important;
                 min-height: 70px;
                 display: flex;
                 flex-direction: column;
@@ -4010,7 +3987,7 @@
             }
             
             #companyModal .tab-btn {
-                padding: 16px 20px;
+                padding: 16px 20px !important;
                 font-size: 12px;
                 min-width: 120px;
                 text-align: center;
@@ -4027,7 +4004,7 @@
             }
             
             #companyModal .data-item {
-                padding: 16px;
+                padding: 16px !important;
                 margin-bottom: 12px;
             }
             
