@@ -8153,80 +8153,288 @@
             function createPersonCard(person) {
                 const appointedDate = person.appointed ? new Date(person.appointed).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Unknown';
                 const resignedText = person.resigned ? ` - ${person.type === 'psc' ? 'Ceased' : 'Resigned'}: ${new Date(person.resigned).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}` : '';
-                const statusStyle = person.resigned ? 'style="opacity: 0.6;"' : '';
+                const isResigned = person.resigned;
                 
                 // Calculate age if date of birth is available
                 const ageText = person.dateOfBirth ? (() => {
                     const [month, year] = person.dateOfBirth.split('/');
                     const birthDate = new Date(year, month - 1);
                     const age = Math.floor((new Date() - birthDate) / (365.25 * 24 * 60 * 60 * 1000));
-                    return `, Age: ${age}`;
-                })() : '';
+                    return age;
+                })() : null;
                 
-                // Build additional info lines
-                const additionalInfo = [];
+                // Theme colors
+                const isPSC = person.type === 'psc';
+                const themeColors = isPSC ? {
+                    primary: '#10b981',
+                    primaryRGB: '16, 185, 129',
+                    gradient: 'linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(6, 182, 212, 0.05) 100%)',
+                    border: 'rgba(16, 185, 129, 0.3)',
+                    iconBg: 'rgba(16, 185, 129, 0.2)',
+                    icon: 'control-crown'
+                } : {
+                    primary: '#6366f1',
+                    primaryRGB: '99, 102, 241',
+                    gradient: 'linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(139, 92, 246, 0.05) 100%)',
+                    border: 'rgba(99, 102, 241, 0.3)',
+                    iconBg: 'rgba(99, 102, 241, 0.2)',
+                    icon: 'director-badge'
+                };
+                
+                // Build info grid items
+                const infoItems = [];
+                
                 if (person.nationality && person.nationality !== 'British') {
-                    additionalInfo.push(`Nationality: ${person.nationality}`);
+                    infoItems.push({ label: 'Nationality', value: person.nationality, icon: '🌍' });
                 }
                 if (person.countryOfResidence && person.countryOfResidence !== person.nationality) {
-                    additionalInfo.push(`Residence: ${person.countryOfResidence}`);
+                    infoItems.push({ label: 'Residence', value: person.countryOfResidence, icon: '🏠' });
                 }
                 if (person.occupation) {
-                    additionalInfo.push(`Occupation: ${person.occupation}`);
+                    infoItems.push({ label: 'Occupation', value: person.occupation, icon: '💼' });
+                }
+                if (ageText) {
+                    infoItems.push({ label: 'Age', value: `${ageText} years`, icon: '📅' });
                 }
                 if (person.address) {
-                    additionalInfo.push(`Address: ${person.address}`);
-                }
-                if (person.naturesOfControl && person.naturesOfControl.length > 0) {
-                    const controlText = person.naturesOfControl.map(nature => {
-                        if (nature.includes('ownership-of-shares-25-to-50-percent')) return 'Owns 25-50% shares';
-                        if (nature.includes('ownership-of-shares-50-to-75-percent')) return 'Owns 50-75% shares';
-                        if (nature.includes('ownership-of-shares-75-to-100-percent')) return 'Owns 75-100% shares';
-                        if (nature.includes('voting-rights-25-to-50-percent')) return '25-50% voting rights';
-                        if (nature.includes('voting-rights-50-to-75-percent')) return '50-75% voting rights';
-                        if (nature.includes('voting-rights-75-to-100-percent')) return '75-100% voting rights';
-                        if (nature.includes('right-to-appoint-and-remove-directors')) return 'Can appoint/remove directors';
-                        if (nature.includes('significant-influence-or-control')) return 'Significant influence';
-                        return nature.replace(/-/g, ' ');
-                    }).join(', ');
-                    additionalInfo.push(`Control: ${controlText}`);
+                    infoItems.push({ label: 'Address', value: person.address, icon: '📍' });
                 }
                 
-                const roleColor = person.type === 'psc' ? '#10b981' : '#6366f1';
-                const roleIcon = person.type === 'psc' ? '👑' : '👤';
+                // PSC control information
+                if (person.naturesOfControl && person.naturesOfControl.length > 0) {
+                    const controlItems = person.naturesOfControl.map(nature => {
+                        if (nature.includes('ownership-of-shares-25-to-50-percent')) return { text: '25-50% shares', level: 'medium' };
+                        if (nature.includes('ownership-of-shares-50-to-75-percent')) return { text: '50-75% shares', level: 'high' };
+                        if (nature.includes('ownership-of-shares-75-to-100-percent')) return { text: '75-100% shares', level: 'critical' };
+                        if (nature.includes('voting-rights-25-to-50-percent')) return { text: '25-50% voting', level: 'medium' };
+                        if (nature.includes('voting-rights-50-to-75-percent')) return { text: '50-75% voting', level: 'high' };
+                        if (nature.includes('voting-rights-75-to-100-percent')) return { text: '75-100% voting', level: 'critical' };
+                        if (nature.includes('right-to-appoint-and-remove-directors')) return { text: 'Director control', level: 'high' };
+                        if (nature.includes('significant-influence-or-control')) return { text: 'Significant influence', level: 'medium' };
+                        return { text: nature.replace(/-/g, ' '), level: 'low' };
+                    });
+                    
+                    infoItems.push({ 
+                        label: 'Control', 
+                        value: controlItems, 
+                        icon: '⚡',
+                        isControl: true 
+                    });
+                }
                 
                 return `
-                    <div class="enhanced-person-card" ${statusStyle} style="background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 20px; margin-bottom: 16px;">
-                        <div class="person-header" style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
-                            <span style="font-size: 20px;">${roleIcon}</span>
-                            <div style="flex: 1;">
-                                <div class="data-item-header" style="font-size: 16px; font-weight: 600; color: #e2e8f0; margin-bottom: 4px;">
-                                    ${person.name.toUpperCase()}
-                                </div>
-                                <div style="display: flex; align-items: center; gap: 8px;">
-                                    <span style="background: ${roleColor}20; color: ${roleColor}; padding: 3px 8px; border-radius: 6px; font-size: 12px; font-weight: 600;">
-                                        ${person.role}
-                                    </span>
-                                    ${person.dateOfBirth ? `<span style="color: #94a3b8; font-size: 13px;">Born: ${person.dateOfBirth}${ageText}</span>` : ''}
-                                </div>
-                            </div>
-                        </div>
+                    <div class="person-card ${isPSC ? 'psc-card' : 'director-card'} ${isResigned ? 'resigned' : ''}" 
+                         style="
+                            position: relative;
+                            background: ${themeColors.gradient};
+                            backdrop-filter: blur(20px);
+                            border: 1px solid ${themeColors.border};
+                            border-radius: 16px;
+                            padding: 0;
+                            margin-bottom: 20px;
+                            overflow: hidden;
+                            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                            opacity: ${isResigned ? '0.7' : '1'};
+                            transform: translateZ(0);
+                         "
+                         onmouseover="this.style.transform='translateY(-2px) scale(1.02)'; this.style.boxShadow='0 20px 40px rgba(${themeColors.primaryRGB}, 0.15)'"
+                         onmouseout="this.style.transform='translateY(0) scale(1)'; this.style.boxShadow='none'">
                         
-                        <div class="person-details" style="color: #cbd5e1; font-size: 14px; line-height: 1.6;">
-                            <div style="margin-bottom: 8px;">
-                                <strong>Appointed:</strong> ${appointedDate}${resignedText}
-                            </div>
-                            ${additionalInfo.length > 0 ? additionalInfo.map(info => `<div style="margin-bottom: 4px;">${info}</div>`).join('') : ''}
-                        </div>
+                        <!-- Status indicator bar -->
+                        <div style="
+                            position: absolute;
+                            top: 0;
+                            left: 0;
+                            right: 0;
+                            height: 3px;
+                            background: ${isResigned ? 'linear-gradient(90deg, #ef4444 0%, #dc2626 100%)' : `linear-gradient(90deg, ${themeColors.primary} 0%, rgba(${themeColors.primaryRGB}, 0.8) 100%)`};
+                        "></div>
                         
-                        ${person.formerNames && person.formerNames.length > 0 ? `
-                            <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
-                                <div style="color: #94a3b8; font-size: 13px; margin-bottom: 4px;"><strong>Former Names:</strong></div>
-                                <div style="color: #cbd5e1; font-size: 13px;">
-                                    ${person.formerNames.map(fn => fn.forenames + ' ' + fn.surname).join(', ')}
+                        <!-- Card content -->
+                        <div style="padding: 24px;">
+                            <!-- Header section -->
+                            <div style="display: flex; align-items: flex-start; gap: 16px; margin-bottom: 20px;">
+                                <!-- Role icon -->
+                                <div style="
+                                    width: 48px;
+                                    height: 48px;
+                                    background: ${themeColors.iconBg};
+                                    border-radius: 12px;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    flex-shrink: 0;
+                                    position: relative;
+                                    overflow: hidden;
+                                ">
+                                    <div style="
+                                        width: 24px;
+                                        height: 24px;
+                                        background: ${themeColors.primary};
+                                        border-radius: ${isPSC ? '6px' : '50%'};
+                                        position: relative;
+                                    ">
+                                        ${isPSC ? 
+                                            `<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 12px; height: 8px; background: white; clip-path: polygon(50% 0%, 0% 100%, 100% 100%);"></div>` :
+                                            `<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 8px; height: 8px; background: white; border-radius: 50%;"></div>`
+                                        }
+                                    </div>
+                                </div>
+                                
+                                <!-- Name and role -->
+                                <div style="flex: 1; min-width: 0;">
+                                    <h4 style="
+                                        margin: 0 0 8px 0;
+                                        font-size: 18px;
+                                        font-weight: 700;
+                                        color: #f1f5f9;
+                                        line-height: 1.3;
+                                        word-break: break-word;
+                                    ">${person.name}</h4>
+                                    
+                                    <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                                        <span style="
+                                            background: rgba(${themeColors.primaryRGB}, 0.2);
+                                            color: ${themeColors.primary};
+                                            padding: 4px 12px;
+                                            border-radius: 20px;
+                                            font-size: 12px;
+                                            font-weight: 600;
+                                            text-transform: uppercase;
+                                            letter-spacing: 0.5px;
+                                        ">${person.role}</span>
+                                        
+                                        ${isResigned ? `
+                                            <span style="
+                                                background: rgba(239, 68, 68, 0.2);
+                                                color: #ef4444;
+                                                padding: 4px 12px;
+                                                border-radius: 20px;
+                                                font-size: 12px;
+                                                font-weight: 600;
+                                                text-transform: uppercase;
+                                                letter-spacing: 0.5px;
+                                            ">${isPSC ? 'CEASED' : 'RESIGNED'}</span>
+                                        ` : ''}
+                                    </div>
                                 </div>
                             </div>
-                        ` : ''}
+                            
+                            <!-- Appointment info -->
+                            <div style="
+                                background: rgba(15, 23, 42, 0.6);
+                                border-radius: 12px;
+                                padding: 16px;
+                                margin-bottom: ${infoItems.length > 0 ? '20px' : '0'};
+                                border: 1px solid rgba(255, 255, 255, 0.05);
+                            ">
+                                <div style="
+                                    color: #94a3b8;
+                                    font-size: 12px;
+                                    font-weight: 600;
+                                    text-transform: uppercase;
+                                    letter-spacing: 1px;
+                                    margin-bottom: 4px;
+                                ">Appointed</div>
+                                <div style="
+                                    color: #e2e8f0;
+                                    font-size: 14px;
+                                    font-weight: 500;
+                                ">${appointedDate}${resignedText}</div>
+                            </div>
+                            
+                            <!-- Info grid -->
+                            ${infoItems.length > 0 ? `
+                                <div style="
+                                    display: grid;
+                                    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+                                    gap: 12px;
+                                    margin-bottom: 16px;
+                                ">
+                                    ${infoItems.filter(item => !item.isControl).map(item => `
+                                        <div style="
+                                            background: rgba(15, 23, 42, 0.4);
+                                            border-radius: 8px;
+                                            padding: 12px;
+                                            border: 1px solid rgba(255, 255, 255, 0.05);
+                                        ">
+                                            <div style="
+                                                color: #64748b;
+                                                font-size: 11px;
+                                                font-weight: 600;
+                                                text-transform: uppercase;
+                                                letter-spacing: 0.5px;
+                                                margin-bottom: 4px;
+                                            ">${item.label}</div>
+                                            <div style="
+                                                color: #cbd5e1;
+                                                font-size: 13px;
+                                                font-weight: 500;
+                                                word-break: break-word;
+                                            ">${item.value}</div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            ` : ''}
+                            
+                            <!-- PSC Control badges -->
+                            ${infoItems.find(item => item.isControl) ? `
+                                <div style="margin-bottom: 16px;">
+                                    <div style="
+                                        color: #64748b;
+                                        font-size: 11px;
+                                        font-weight: 600;
+                                        text-transform: uppercase;
+                                        letter-spacing: 0.5px;
+                                        margin-bottom: 8px;
+                                    ">Control & Influence</div>
+                                    <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                                        ${infoItems.find(item => item.isControl).value.map(control => {
+                                            const levelColors = {
+                                                critical: { bg: 'rgba(239, 68, 68, 0.2)', color: '#ef4444', border: 'rgba(239, 68, 68, 0.3)' },
+                                                high: { bg: 'rgba(251, 146, 60, 0.2)', color: '#f59e0b', border: 'rgba(251, 146, 60, 0.3)' },
+                                                medium: { bg: 'rgba(34, 197, 94, 0.2)', color: '#22c55e', border: 'rgba(34, 197, 94, 0.3)' },
+                                                low: { bg: 'rgba(148, 163, 184, 0.2)', color: '#94a3b8', border: 'rgba(148, 163, 184, 0.3)' }
+                                            };
+                                            const colors = levelColors[control.level] || levelColors.low;
+                                            return `
+                                                <span style="
+                                                    background: ${colors.bg};
+                                                    color: ${colors.color};
+                                                    border: 1px solid ${colors.border};
+                                                    padding: 6px 12px;
+                                                    border-radius: 16px;
+                                                    font-size: 12px;
+                                                    font-weight: 600;
+                                                ">${control.text}</span>
+                                            `;
+                                        }).join('')}
+                                    </div>
+                                </div>
+                            ` : ''}
+                            
+                            <!-- Former names -->
+                            ${person.formerNames && person.formerNames.length > 0 ? `
+                                <div style="
+                                    border-top: 1px solid rgba(255, 255, 255, 0.08);
+                                    padding-top: 16px;
+                                ">
+                                    <div style="
+                                        color: #64748b;
+                                        font-size: 11px;
+                                        font-weight: 600;
+                                        text-transform: uppercase;
+                                        letter-spacing: 0.5px;
+                                        margin-bottom: 6px;
+                                    ">Former Names</div>
+                                    <div style="
+                                        color: #94a3b8;
+                                        font-size: 13px;
+                                        line-height: 1.5;
+                                    ">${person.formerNames.map(fn => `${fn.forenames} ${fn.surname}`).join(', ')}</div>
+                                </div>
+                            ` : ''}
+                        </div>
                     </div>
                 `;
             }
@@ -8246,17 +8454,89 @@
             
             // Generate HTML for directors
             const directorsHTML = sortedOfficers.length > 0 ? sortedOfficers.map(createPersonCard).join('') : `
-                <div style="text-align: center; padding: 40px; color: #94a3b8;">
-                    <div style="font-size: 24px; margin-bottom: 12px;">👤</div>
-                    <div>No director information available</div>
+                <div style="
+                    text-align: center; 
+                    padding: 40px 20px; 
+                    background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.02) 100%);
+                    border: 1px solid rgba(99, 102, 241, 0.1);
+                    border-radius: 16px;
+                    backdrop-filter: blur(10px);
+                ">
+                    <div style="
+                        width: 64px;
+                        height: 64px;
+                        background: rgba(99, 102, 241, 0.1);
+                        border-radius: 16px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        margin: 0 auto 16px auto;
+                    ">
+                        <div style="
+                            width: 32px;
+                            height: 32px;
+                            background: #6366f1;
+                            border-radius: 50%;
+                            position: relative;
+                        ">
+                            <div style="
+                                position: absolute;
+                                top: 50%;
+                                left: 50%;
+                                transform: translate(-50%, -50%);
+                                width: 12px;
+                                height: 12px;
+                                background: white;
+                                border-radius: 50%;
+                            "></div>
+                        </div>
+                    </div>
+                    <div style="color: #94a3b8; font-size: 15px; font-weight: 500;">No director information available</div>
+                    <div style="color: #64748b; font-size: 13px; margin-top: 4px;">Officer data could not be retrieved</div>
                 </div>
             `;
             
             // Generate HTML for PSCs
             const pscsHTML = sortedPSCs.length > 0 ? sortedPSCs.map(createPersonCard).join('') : `
-                <div style="text-align: center; padding: 40px; color: #94a3b8;">
-                    <div style="font-size: 24px; margin-bottom: 12px;">👑</div>
-                    <div>No PSC information available</div>
+                <div style="
+                    text-align: center; 
+                    padding: 40px 20px; 
+                    background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(6, 182, 212, 0.02) 100%);
+                    border: 1px solid rgba(16, 185, 129, 0.1);
+                    border-radius: 16px;
+                    backdrop-filter: blur(10px);
+                ">
+                    <div style="
+                        width: 64px;
+                        height: 64px;
+                        background: rgba(16, 185, 129, 0.1);
+                        border-radius: 16px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        margin: 0 auto 16px auto;
+                    ">
+                        <div style="
+                            width: 32px;
+                            height: 32px;
+                            background: #10b981;
+                            border-radius: 8px;
+                            position: relative;
+                        ">
+                            <div style="
+                                position: absolute;
+                                top: 50%;
+                                left: 50%;
+                                transform: translate(-50%, -50%);
+                                width: 16px;
+                                height: 12px;
+                                background: white;
+                                clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+                            "></div>
+                        </div>
+                    </div>
+                    <div style="color: #94a3b8; font-size: 15px; font-weight: 500;">No PSC information available</div>
+                    <div style="color: #64748b; font-size: 13px; margin-top: 4px;">People with Significant Control not found</div>
                 </div>
             `;
             
@@ -8290,22 +8570,230 @@
                 }
             }
             
-            // Create two-column layout
+            // Create responsive two-column layout
             peopleTab.innerHTML = `
+                <style>
+                    .people-control-grid {
+                        display: grid;
+                        grid-template-columns: 1fr 1fr;
+                        gap: 32px;
+                        align-items: start;
+                    }
+                    
+                    .people-section-header {
+                        display: flex;
+                        align-items: center;
+                        gap: 12px;
+                        margin: 0 0 20px 0;
+                        padding: 16px 20px;
+                        border-radius: 12px;
+                        font-size: 16px;
+                        font-weight: 700;
+                        backdrop-filter: blur(10px);
+                    }
+                    
+                    .people-section-header.directors {
+                        background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.05) 100%);
+                        border: 1px solid rgba(99, 102, 241, 0.2);
+                        color: #6366f1;
+                    }
+                    
+                    .people-section-header.pscs {
+                        background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(6, 182, 212, 0.05) 100%);
+                        border: 1px solid rgba(16, 185, 129, 0.2);
+                        color: #10b981;
+                    }
+                    
+                    .people-section-icon {
+                        width: 40px;
+                        height: 40px;
+                        border-radius: 10px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        flex-shrink: 0;
+                    }
+                    
+                    .people-section-icon.directors {
+                        background: rgba(99, 102, 241, 0.15);
+                    }
+                    
+                    .people-section-icon.pscs {
+                        background: rgba(16, 185, 129, 0.15);
+                    }
+                    
+                    .people-count-badge {
+                        margin-left: auto;
+                        padding: 6px 12px;
+                        border-radius: 20px;
+                        font-size: 12px;
+                        font-weight: 600;
+                        text-transform: uppercase;
+                        letter-spacing: 0.5px;
+                    }
+                    
+                    .people-count-badge.directors {
+                        background: rgba(99, 102, 241, 0.2);
+                        color: #6366f1;
+                    }
+                    
+                    .people-count-badge.pscs {
+                        background: rgba(16, 185, 129, 0.2);
+                        color: #10b981;
+                    }
+                    
+                    /* Mobile responsive */
+                    @media (max-width: 768px) {
+                        .people-control-grid {
+                            grid-template-columns: 1fr;
+                            gap: 24px;
+                        }
+                        
+                        .people-section-header {
+                            font-size: 15px;
+                            padding: 14px 18px;
+                            margin-bottom: 16px;
+                        }
+                        
+                        .people-section-icon {
+                            width: 36px;
+                            height: 36px;
+                        }
+                    }
+                    
+                    @media (max-width: 480px) {
+                        .people-control-grid {
+                            gap: 20px;
+                        }
+                        
+                        .people-section-header {
+                            font-size: 14px;
+                            padding: 12px 16px;
+                            gap: 10px;
+                        }
+                        
+                        .people-section-icon {
+                            width: 32px;
+                            height: 32px;
+                        }
+                        
+                        .people-count-badge {
+                            padding: 4px 8px;
+                            font-size: 11px;
+                        }
+                    }
+                    
+                    /* Person card responsive styles */
+                    @media (max-width: 768px) {
+                        .person-card {
+                            padding: 0 !important;
+                        }
+                        
+                        .person-card > div {
+                            padding: 20px !important;
+                        }
+                        
+                        .person-card .person-header {
+                            flex-direction: column !important;
+                            align-items: center !important;
+                            text-align: center !important;
+                            gap: 12px !important;
+                        }
+                        
+                        .person-card h4 {
+                            font-size: 16px !important;
+                            text-align: center !important;
+                        }
+                        
+                        .person-card .info-grid {
+                            grid-template-columns: 1fr !important;
+                            gap: 8px !important;
+                        }
+                    }
+                    
+                    @media (max-width: 480px) {
+                        .person-card > div {
+                            padding: 16px !important;
+                        }
+                        
+                        .person-card h4 {
+                            font-size: 15px !important;
+                        }
+                        
+                        .person-card .role-badge {
+                            font-size: 10px !important;
+                            padding: 3px 8px !important;
+                        }
+                        
+                        .person-card .control-badge {
+                            font-size: 10px !important;
+                            padding: 4px 8px !important;
+                        }
+                        
+                        .person-card .info-item {
+                            padding: 8px !important;
+                        }
+                        
+                        .person-card .appointment-info {
+                            padding: 12px !important;
+                        }
+                    }
+                </style>
+                
                 <h3>People & Control</h3>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start;">
+                <div class="people-control-grid">
                     <div>
-                        <h4 style="color: #6366f1; margin: 0 0 16px 0; font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 8px;">
-                            <span>👤</span> Directors & Officers
-                            ${sortedOfficers.length > 0 ? `<span style="background: rgba(99, 102, 241, 0.2); color: #6366f1; padding: 2px 8px; border-radius: 12px; font-size: 12px;">${sortedOfficers.length}</span>` : ''}
-                        </h4>
+                        <div class="people-section-header directors">
+                            <div class="people-section-icon directors">
+                                <div style="
+                                    width: 20px;
+                                    height: 20px;
+                                    background: #6366f1;
+                                    border-radius: 50%;
+                                    position: relative;
+                                ">
+                                    <div style="
+                                        position: absolute;
+                                        top: 50%;
+                                        left: 50%;
+                                        transform: translate(-50%, -50%);
+                                        width: 6px;
+                                        height: 6px;
+                                        background: white;
+                                        border-radius: 50%;
+                                    "></div>
+                                </div>
+                            </div>
+                            <span>Directors & Officers</span>
+                            ${sortedOfficers.length > 0 ? `<span class="people-count-badge directors">${sortedOfficers.length}</span>` : ''}
+                        </div>
                         ${directorsHTML}
                     </div>
                     <div>
-                        <h4 style="color: #10b981; margin: 0 0 16px 0; font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 8px;">
-                            <span>👑</span> People with Significant Control
-                            ${sortedPSCs.length > 0 ? `<span style="background: rgba(16, 185, 129, 0.2); color: #10b981; padding: 2px 8px; border-radius: 12px; font-size: 12px;">${sortedPSCs.length}</span>` : ''}
-                        </h4>
+                        <div class="people-section-header pscs">
+                            <div class="people-section-icon pscs">
+                                <div style="
+                                    width: 20px;
+                                    height: 20px;
+                                    background: #10b981;
+                                    border-radius: 5px;
+                                    position: relative;
+                                ">
+                                    <div style="
+                                        position: absolute;
+                                        top: 50%;
+                                        left: 50%;
+                                        transform: translate(-50%, -50%);
+                                        width: 10px;
+                                        height: 8px;
+                                        background: white;
+                                        clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+                                    "></div>
+                                </div>
+                            </div>
+                            <span>People with Significant Control</span>
+                            ${sortedPSCs.length > 0 ? `<span class="people-count-badge pscs">${sortedPSCs.length}</span>` : ''}
+                        </div>
                         ${pscsHTML}
                     </div>
                 </div>
