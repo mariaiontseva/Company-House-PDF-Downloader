@@ -2421,7 +2421,7 @@
                 min-height: 48px; /* Touch target size */
             }
 
-            /* Search container - proper mobile padding */
+            /* Search container - 16px margins from screen edges */
             .search-container {
                 padding: 20px 16px;
                 margin: 0 16px 24px 16px;
@@ -2488,22 +2488,22 @@
                 display: none !important;
             }
 
-            /* Tab content - remove padding, let children handle it */
+            /* Tab content - no extra padding */
             .tab-content {
                 padding: 0 !important;
                 box-sizing: border-box !important;
             }
             
-            /* Filter controls - proper mobile layout */
+            /* Filter controls - no extra margins */
             #exploreTab > div:nth-child(2) {
-                margin: 0 16px 16px 16px !important;
-                width: calc(100% - 32px) !important;
+                margin: 0 0 16px 0 !important;
+                width: 100% !important;
             }
             
-            /* Search input on explore tab - clean mobile design */
+            /* Search input on explore tab - no extra margins */
             #exploreSearchForm {
-                margin: 0 16px 16px 16px !important;
-                width: calc(100% - 32px) !important;
+                margin: 0 0 16px 0 !important;
+                width: 100% !important;
             }
             
             #exploreCompanyName {
@@ -2569,12 +2569,12 @@
                 margin: 24px 0 !important;
             }
             
-            /* Company cards - proper mobile spacing */
+            /* Company cards - no extra side margins */
             .company-card, .explore-company-card {
                 padding: 16px;
-                margin: 0 16px 12px 16px;
-                width: calc(100% - 32px);
-                max-width: calc(100% - 32px);
+                margin: 0 0 12px 0;
+                width: 100%;
+                max-width: 100%;
                 box-sizing: border-box;
             }
             
@@ -2609,7 +2609,7 @@
             
             /* Center the button container */
             #exploreTab > div:last-child {
-                padding: 0 16px 24px 16px;
+                padding: 0 0 24px 0;
                 text-align: center;
             }
             
@@ -2690,11 +2690,11 @@
                 text-align: center;
             }
             
-            /* Marketing block - consistent padding */
+            /* Marketing block - 16px margins like search container */
             .info-container {
-                margin: 0 !important;
-                width: 100% !important;
-                max-width: 100% !important;
+                margin: 0 16px !important;
+                width: calc(100% - 32px) !important;
+                max-width: calc(100% - 32px) !important;
                 padding: 32px 16px !important;
                 box-sizing: border-box !important;
             }
