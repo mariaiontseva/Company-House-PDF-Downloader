@@ -8226,215 +8226,199 @@
                     <div class="person-card ${isPSC ? 'psc-card' : 'director-card'} ${isResigned ? 'resigned' : ''}" 
                          style="
                             position: relative;
-                            background: ${themeColors.gradient};
-                            backdrop-filter: blur(20px);
-                            border: 1px solid ${themeColors.border};
-                            border-radius: 16px;
-                            padding: 0;
-                            margin-bottom: 20px;
-                            overflow: hidden;
-                            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                            background: rgba(15, 23, 42, 0.95);
+                            border: 1px solid rgba(255, 255, 255, 0.1);
+                            border-radius: 12px;
+                            padding: 18px;
+                            margin-bottom: 16px;
+                            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
                             opacity: ${isResigned ? '0.7' : '1'};
-                            transform: translateZ(0);
                          "
-                         onmouseover="this.style.transform='translateY(-2px) scale(1.02)'; this.style.boxShadow='0 20px 40px rgba(${themeColors.primaryRGB}, 0.15)'"
-                         onmouseout="this.style.transform='translateY(0) scale(1)'; this.style.boxShadow='none'">
+                         onmouseover="this.style.transform='translateY(-1px)'; this.style.borderColor='${themeColors.border}'; this.style.boxShadow='0 8px 24px rgba(0, 0, 0, 0.2)'"
+                         onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='rgba(255, 255, 255, 0.1)'; this.style.boxShadow='none'">
                         
-                        <!-- Status indicator bar -->
-                        <div style="
-                            position: absolute;
-                            top: 0;
-                            left: 0;
-                            right: 0;
-                            height: 3px;
-                            background: ${isResigned ? 'linear-gradient(90deg, #ef4444 0%, #dc2626 100%)' : `linear-gradient(90deg, ${themeColors.primary} 0%, rgba(${themeColors.primaryRGB}, 0.8) 100%)`};
-                        "></div>
-                        
-                        <!-- Card content -->
-                        <div style="padding: 24px;">
-                            <!-- Header section -->
-                            <div style="display: flex; align-items: flex-start; gap: 16px; margin-bottom: 20px;">
-                                <!-- Role icon -->
+                        <!-- Header section -->
+                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+                            <!-- Role icon -->
+                            <div style="
+                                width: 40px;
+                                height: 40px;
+                                background: ${themeColors.iconBg};
+                                border-radius: 8px;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                flex-shrink: 0;
+                            ">
                                 <div style="
-                                    width: 48px;
-                                    height: 48px;
-                                    background: ${themeColors.iconBg};
-                                    border-radius: 12px;
-                                    display: flex;
-                                    align-items: center;
-                                    justify-content: center;
-                                    flex-shrink: 0;
+                                    width: 20px;
+                                    height: 20px;
+                                    background: ${themeColors.primary};
+                                    border-radius: ${isPSC ? '4px' : '50%'};
                                     position: relative;
-                                    overflow: hidden;
                                 ">
-                                    <div style="
-                                        width: 24px;
-                                        height: 24px;
-                                        background: ${themeColors.primary};
-                                        border-radius: ${isPSC ? '6px' : '50%'};
-                                        position: relative;
-                                    ">
-                                        ${isPSC ? 
-                                            `<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 12px; height: 8px; background: white; clip-path: polygon(50% 0%, 0% 100%, 100% 100%);"></div>` :
-                                            `<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 8px; height: 8px; background: white; border-radius: 50%;"></div>`
-                                        }
-                                    </div>
-                                </div>
-                                
-                                <!-- Name and role -->
-                                <div style="flex: 1; min-width: 0;">
-                                    <h4 style="
-                                        margin: 0 0 8px 0;
-                                        font-size: 18px;
-                                        font-weight: 700;
-                                        color: #f1f5f9;
-                                        line-height: 1.3;
-                                        word-break: break-word;
-                                    ">${person.name}</h4>
-                                    
-                                    <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-                                        <span style="
-                                            background: rgba(${themeColors.primaryRGB}, 0.2);
-                                            color: ${themeColors.primary};
-                                            padding: 4px 12px;
-                                            border-radius: 20px;
-                                            font-size: 12px;
-                                            font-weight: 600;
-                                            text-transform: uppercase;
-                                            letter-spacing: 0.5px;
-                                        ">${person.role}</span>
-                                        
-                                        ${isResigned ? `
-                                            <span style="
-                                                background: rgba(239, 68, 68, 0.2);
-                                                color: #ef4444;
-                                                padding: 4px 12px;
-                                                border-radius: 20px;
-                                                font-size: 12px;
-                                                font-weight: 600;
-                                                text-transform: uppercase;
-                                                letter-spacing: 0.5px;
-                                            ">${isPSC ? 'CEASED' : 'RESIGNED'}</span>
-                                        ` : ''}
-                                    </div>
+                                    ${isPSC ? 
+                                        `<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 10px; height: 6px; background: white; clip-path: polygon(50% 0%, 0% 100%, 100% 100%);"></div>` :
+                                        `<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 6px; height: 6px; background: white; border-radius: 50%;"></div>`
+                                    }
                                 </div>
                             </div>
                             
-                            <!-- Appointment info -->
+                            <!-- Name and role -->
+                            <div style="flex: 1; min-width: 0;">
+                                <h4 style="
+                                    margin: 0 0 4px 0;
+                                    font-size: 16px;
+                                    font-weight: 600;
+                                    color: #f1f5f9;
+                                    line-height: 1.3;
+                                    word-break: break-word;
+                                ">${person.name}</h4>
+                                
+                                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                    <span style="
+                                        background: rgba(${themeColors.primaryRGB}, 0.15);
+                                        color: ${themeColors.primary};
+                                        padding: 2px 8px;
+                                        border-radius: 12px;
+                                        font-size: 11px;
+                                        font-weight: 500;
+                                        text-transform: uppercase;
+                                        letter-spacing: 0.3px;
+                                    ">${person.role}</span>
+                                    
+                                    ${isResigned ? `
+                                        <span style="
+                                            background: rgba(239, 68, 68, 0.15);
+                                            color: #ef4444;
+                                            padding: 2px 8px;
+                                            border-radius: 12px;
+                                            font-size: 11px;
+                                            font-weight: 500;
+                                            text-transform: uppercase;
+                                            letter-spacing: 0.3px;
+                                        ">${isPSC ? 'CEASED' : 'RESIGNED'}</span>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Appointment info -->
+                        <div style="
+                            background: rgba(0, 0, 0, 0.2);
+                            border-radius: 8px;
+                            padding: 12px;
+                            margin-bottom: ${infoItems.length > 0 ? '14px' : '0'};
+                            border: 1px solid rgba(255, 255, 255, 0.04);
+                        ">
                             <div style="
-                                background: rgba(15, 23, 42, 0.6);
-                                border-radius: 12px;
-                                padding: 16px;
-                                margin-bottom: ${infoItems.length > 0 ? '20px' : '0'};
-                                border: 1px solid rgba(255, 255, 255, 0.05);
+                                color: #94a3b8;
+                                font-size: 10px;
+                                font-weight: 600;
+                                text-transform: uppercase;
+                                letter-spacing: 0.8px;
+                                margin-bottom: 2px;
+                            ">Appointed</div>
+                            <div style="
+                                color: #e2e8f0;
+                                font-size: 13px;
+                                font-weight: 500;
+                            ">${appointedDate}${resignedText}</div>
+                        </div>
+                        
+                        <!-- Info grid -->
+                        ${infoItems.length > 0 ? `
+                            <div style="
+                                display: grid;
+                                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+                                gap: 8px;
+                                margin-bottom: ${infoItems.find(item => item.isControl) ? '14px' : '0'};
                             ">
+                                ${infoItems.filter(item => !item.isControl).map(item => `
+                                    <div style="
+                                        background: rgba(0, 0, 0, 0.15);
+                                        border-radius: 6px;
+                                        padding: 8px;
+                                        border: 1px solid rgba(255, 255, 255, 0.04);
+                                    ">
+                                        <div style="
+                                            color: #64748b;
+                                            font-size: 9px;
+                                            font-weight: 600;
+                                            text-transform: uppercase;
+                                            letter-spacing: 0.4px;
+                                            margin-bottom: 2px;
+                                        ">${item.label}</div>
+                                        <div style="
+                                            color: #cbd5e1;
+                                            font-size: 12px;
+                                            font-weight: 500;
+                                            word-break: break-word;
+                                            line-height: 1.3;
+                                        ">${item.value}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+                        
+                        <!-- PSC Control badges -->
+                        ${infoItems.find(item => item.isControl) ? `
+                            <div style="margin-bottom: ${person.formerNames && person.formerNames.length > 0 ? '14px' : '0'};">
+                                <div style="
+                                    color: #64748b;
+                                    font-size: 9px;
+                                    font-weight: 600;
+                                    text-transform: uppercase;
+                                    letter-spacing: 0.4px;
+                                    margin-bottom: 6px;
+                                ">Control & Influence</div>
+                                <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                                    ${infoItems.find(item => item.isControl).value.map(control => {
+                                        const levelColors = {
+                                            critical: { bg: 'rgba(239, 68, 68, 0.15)', color: '#ef4444', border: 'rgba(239, 68, 68, 0.2)' },
+                                            high: { bg: 'rgba(251, 146, 60, 0.15)', color: '#f59e0b', border: 'rgba(251, 146, 60, 0.2)' },
+                                            medium: { bg: 'rgba(34, 197, 94, 0.15)', color: '#22c55e', border: 'rgba(34, 197, 94, 0.2)' },
+                                            low: { bg: 'rgba(148, 163, 184, 0.15)', color: '#94a3b8', border: 'rgba(148, 163, 184, 0.2)' }
+                                        };
+                                        const colors = levelColors[control.level] || levelColors.low;
+                                        return `
+                                            <span style="
+                                                background: ${colors.bg};
+                                                color: ${colors.color};
+                                                border: 1px solid ${colors.border};
+                                                padding: 4px 8px;
+                                                border-radius: 12px;
+                                                font-size: 10px;
+                                                font-weight: 500;
+                                                letter-spacing: 0.2px;
+                                            ">${control.text}</span>
+                                        `;
+                                    }).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+                        
+                        <!-- Former names -->
+                        ${person.formerNames && person.formerNames.length > 0 ? `
+                            <div style="
+                                border-top: 1px solid rgba(255, 255, 255, 0.06);
+                                padding-top: 12px;
+                            ">
+                                <div style="
+                                    color: #64748b;
+                                    font-size: 9px;
+                                    font-weight: 600;
+                                    text-transform: uppercase;
+                                    letter-spacing: 0.4px;
+                                    margin-bottom: 4px;
+                                ">Former Names</div>
                                 <div style="
                                     color: #94a3b8;
                                     font-size: 12px;
-                                    font-weight: 600;
-                                    text-transform: uppercase;
-                                    letter-spacing: 1px;
-                                    margin-bottom: 4px;
-                                ">Appointed</div>
-                                <div style="
-                                    color: #e2e8f0;
-                                    font-size: 14px;
-                                    font-weight: 500;
-                                ">${appointedDate}${resignedText}</div>
+                                    line-height: 1.4;
+                                ">${person.formerNames.map(fn => `${fn.forenames} ${fn.surname}`).join(', ')}</div>
                             </div>
-                            
-                            <!-- Info grid -->
-                            ${infoItems.length > 0 ? `
-                                <div style="
-                                    display: grid;
-                                    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-                                    gap: 12px;
-                                    margin-bottom: 16px;
-                                ">
-                                    ${infoItems.filter(item => !item.isControl).map(item => `
-                                        <div style="
-                                            background: rgba(15, 23, 42, 0.4);
-                                            border-radius: 8px;
-                                            padding: 12px;
-                                            border: 1px solid rgba(255, 255, 255, 0.05);
-                                        ">
-                                            <div style="
-                                                color: #64748b;
-                                                font-size: 11px;
-                                                font-weight: 600;
-                                                text-transform: uppercase;
-                                                letter-spacing: 0.5px;
-                                                margin-bottom: 4px;
-                                            ">${item.label}</div>
-                                            <div style="
-                                                color: #cbd5e1;
-                                                font-size: 13px;
-                                                font-weight: 500;
-                                                word-break: break-word;
-                                            ">${item.value}</div>
-                                        </div>
-                                    `).join('')}
-                                </div>
-                            ` : ''}
-                            
-                            <!-- PSC Control badges -->
-                            ${infoItems.find(item => item.isControl) ? `
-                                <div style="margin-bottom: 16px;">
-                                    <div style="
-                                        color: #64748b;
-                                        font-size: 11px;
-                                        font-weight: 600;
-                                        text-transform: uppercase;
-                                        letter-spacing: 0.5px;
-                                        margin-bottom: 8px;
-                                    ">Control & Influence</div>
-                                    <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-                                        ${infoItems.find(item => item.isControl).value.map(control => {
-                                            const levelColors = {
-                                                critical: { bg: 'rgba(239, 68, 68, 0.2)', color: '#ef4444', border: 'rgba(239, 68, 68, 0.3)' },
-                                                high: { bg: 'rgba(251, 146, 60, 0.2)', color: '#f59e0b', border: 'rgba(251, 146, 60, 0.3)' },
-                                                medium: { bg: 'rgba(34, 197, 94, 0.2)', color: '#22c55e', border: 'rgba(34, 197, 94, 0.3)' },
-                                                low: { bg: 'rgba(148, 163, 184, 0.2)', color: '#94a3b8', border: 'rgba(148, 163, 184, 0.3)' }
-                                            };
-                                            const colors = levelColors[control.level] || levelColors.low;
-                                            return `
-                                                <span style="
-                                                    background: ${colors.bg};
-                                                    color: ${colors.color};
-                                                    border: 1px solid ${colors.border};
-                                                    padding: 6px 12px;
-                                                    border-radius: 16px;
-                                                    font-size: 12px;
-                                                    font-weight: 600;
-                                                ">${control.text}</span>
-                                            `;
-                                        }).join('')}
-                                    </div>
-                                </div>
-                            ` : ''}
-                            
-                            <!-- Former names -->
-                            ${person.formerNames && person.formerNames.length > 0 ? `
-                                <div style="
-                                    border-top: 1px solid rgba(255, 255, 255, 0.08);
-                                    padding-top: 16px;
-                                ">
-                                    <div style="
-                                        color: #64748b;
-                                        font-size: 11px;
-                                        font-weight: 600;
-                                        text-transform: uppercase;
-                                        letter-spacing: 0.5px;
-                                        margin-bottom: 6px;
-                                    ">Former Names</div>
-                                    <div style="
-                                        color: #94a3b8;
-                                        font-size: 13px;
-                                        line-height: 1.5;
-                                    ">${person.formerNames.map(fn => `${fn.forenames} ${fn.surname}`).join(', ')}</div>
-                                </div>
-                            ` : ''}
-                        </div>
+                        ` : ''}
                     </div>
                 `;
             }
@@ -8456,25 +8440,24 @@
             const directorsHTML = sortedOfficers.length > 0 ? sortedOfficers.map(createPersonCard).join('') : `
                 <div style="
                     text-align: center; 
-                    padding: 40px 20px; 
-                    background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.02) 100%);
-                    border: 1px solid rgba(99, 102, 241, 0.1);
-                    border-radius: 16px;
-                    backdrop-filter: blur(10px);
+                    padding: 32px 20px; 
+                    background: rgba(15, 23, 42, 0.6);
+                    border: 1px solid rgba(99, 102, 241, 0.15);
+                    border-radius: 12px;
                 ">
                     <div style="
-                        width: 64px;
-                        height: 64px;
-                        background: rgba(99, 102, 241, 0.1);
-                        border-radius: 16px;
+                        width: 48px;
+                        height: 48px;
+                        background: rgba(99, 102, 241, 0.15);
+                        border-radius: 12px;
                         display: flex;
                         align-items: center;
                         justify-content: center;
-                        margin: 0 auto 16px auto;
+                        margin: 0 auto 12px auto;
                     ">
                         <div style="
-                            width: 32px;
-                            height: 32px;
+                            width: 24px;
+                            height: 24px;
                             background: #6366f1;
                             border-radius: 50%;
                             position: relative;
@@ -8484,15 +8467,15 @@
                                 top: 50%;
                                 left: 50%;
                                 transform: translate(-50%, -50%);
-                                width: 12px;
-                                height: 12px;
+                                width: 8px;
+                                height: 8px;
                                 background: white;
                                 border-radius: 50%;
                             "></div>
                         </div>
                     </div>
-                    <div style="color: #94a3b8; font-size: 15px; font-weight: 500;">No director information available</div>
-                    <div style="color: #64748b; font-size: 13px; margin-top: 4px;">Officer data could not be retrieved</div>
+                    <div style="color: #94a3b8; font-size: 14px; font-weight: 500;">No director information available</div>
+                    <div style="color: #64748b; font-size: 12px; margin-top: 2px;">Officer data could not be retrieved</div>
                 </div>
             `;
             
@@ -8500,27 +8483,26 @@
             const pscsHTML = sortedPSCs.length > 0 ? sortedPSCs.map(createPersonCard).join('') : `
                 <div style="
                     text-align: center; 
-                    padding: 40px 20px; 
-                    background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(6, 182, 212, 0.02) 100%);
-                    border: 1px solid rgba(16, 185, 129, 0.1);
-                    border-radius: 16px;
-                    backdrop-filter: blur(10px);
+                    padding: 32px 20px; 
+                    background: rgba(15, 23, 42, 0.6);
+                    border: 1px solid rgba(16, 185, 129, 0.15);
+                    border-radius: 12px;
                 ">
                     <div style="
-                        width: 64px;
-                        height: 64px;
-                        background: rgba(16, 185, 129, 0.1);
-                        border-radius: 16px;
+                        width: 48px;
+                        height: 48px;
+                        background: rgba(16, 185, 129, 0.15);
+                        border-radius: 12px;
                         display: flex;
                         align-items: center;
                         justify-content: center;
-                        margin: 0 auto 16px auto;
+                        margin: 0 auto 12px auto;
                     ">
                         <div style="
-                            width: 32px;
-                            height: 32px;
+                            width: 24px;
+                            height: 24px;
                             background: #10b981;
-                            border-radius: 8px;
+                            border-radius: 6px;
                             position: relative;
                         ">
                             <div style="
@@ -8528,15 +8510,15 @@
                                 top: 50%;
                                 left: 50%;
                                 transform: translate(-50%, -50%);
-                                width: 16px;
-                                height: 12px;
+                                width: 12px;
+                                height: 8px;
                                 background: white;
                                 clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
                             "></div>
                         </div>
                     </div>
-                    <div style="color: #94a3b8; font-size: 15px; font-weight: 500;">No PSC information available</div>
-                    <div style="color: #64748b; font-size: 13px; margin-top: 4px;">People with Significant Control not found</div>
+                    <div style="color: #94a3b8; font-size: 14px; font-weight: 500;">No PSC information available</div>
+                    <div style="color: #64748b; font-size: 12px; margin-top: 2px;">People with Significant Control not found</div>
                 </div>
             `;
             
@@ -8593,13 +8575,13 @@
                     }
                     
                     .people-section-header.directors {
-                        background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.05) 100%);
+                        background: rgba(99, 102, 241, 0.08);
                         border: 1px solid rgba(99, 102, 241, 0.2);
                         color: #6366f1;
                     }
                     
                     .people-section-header.pscs {
-                        background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(6, 182, 212, 0.05) 100%);
+                        background: rgba(16, 185, 129, 0.08);
                         border: 1px solid rgba(16, 185, 129, 0.2);
                         color: #10b981;
                     }
@@ -8686,56 +8668,51 @@
                     /* Person card responsive styles */
                     @media (max-width: 768px) {
                         .person-card {
-                            padding: 0 !important;
-                        }
-                        
-                        .person-card > div {
-                            padding: 20px !important;
-                        }
-                        
-                        .person-card .person-header {
-                            flex-direction: column !important;
-                            align-items: center !important;
-                            text-align: center !important;
-                            gap: 12px !important;
-                        }
-                        
-                        .person-card h4 {
-                            font-size: 16px !important;
-                            text-align: center !important;
-                        }
-                        
-                        .person-card .info-grid {
-                            grid-template-columns: 1fr !important;
-                            gap: 8px !important;
-                        }
-                    }
-                    
-                    @media (max-width: 480px) {
-                        .person-card > div {
                             padding: 16px !important;
+                            margin-bottom: 14px !important;
                         }
                         
                         .person-card h4 {
                             font-size: 15px !important;
                         }
                         
+                        .person-card .info-grid {
+                            grid-template-columns: 1fr !important;
+                            gap: 6px !important;
+                        }
+                    }
+                    
+                    @media (max-width: 480px) {
+                        .person-card {
+                            padding: 14px !important;
+                            margin-bottom: 12px !important;
+                        }
+                        
+                        .person-card h4 {
+                            font-size: 14px !important;
+                        }
+                        
+                        .person-card .role-icon {
+                            width: 32px !important;
+                            height: 32px !important;
+                        }
+                        
                         .person-card .role-badge {
                             font-size: 10px !important;
-                            padding: 3px 8px !important;
+                            padding: 2px 6px !important;
                         }
                         
                         .person-card .control-badge {
-                            font-size: 10px !important;
-                            padding: 4px 8px !important;
+                            font-size: 9px !important;
+                            padding: 3px 6px !important;
+                        }
+                        
+                        .person-card .appointment-section {
+                            padding: 10px !important;
                         }
                         
                         .person-card .info-item {
-                            padding: 8px !important;
-                        }
-                        
-                        .person-card .appointment-info {
-                            padding: 12px !important;
+                            padding: 6px !important;
                         }
                     }
                 </style>
