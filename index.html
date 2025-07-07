@@ -3837,22 +3837,28 @@
             
             /* Finance tab mobile */
             #companyModal #finance {
-                padding: 16px 24px;
+                padding: 0 !important; /* Content inherits padding from tab-content */
             }
             
-            /* Risk tab mobile */
-            #companyModal #risk {
-                padding: 16px 24px;
+            /* Finance grid mobile */
+            #companyModal #finance-summary {
+                margin-left: 0 !important;
+                margin-right: 0 !important;
+                grid-template-columns: 1fr !important;
             }
             
-            /* Charges tab mobile */
-            #companyModal #charges {
-                padding: 16px 24px;
+            #companyModal #finance-content {
+                padding: 0 !important;
+                margin: 0 !important;
             }
             
-            /* Filing history tab mobile */
-            #companyModal #filings {
-                padding: 16px 24px;
+            /* All tabs inherit padding from tab-content (24px) */
+            #companyModal #risk,
+            #companyModal #charges,
+            #companyModal #filings,
+            #companyModal #insights,
+            #companyModal #overview {
+                padding: 0 !important;
             }
         }
         
@@ -3887,8 +3893,8 @@
             
             /* Tab pane doesn't need extra padding - inherits from tab-content */
             #companyModal .tab-pane {
-                padding: 0;
-                margin: 0;
+                padding: 0 !important;
+                margin: 0 !important;
             }
             #companyModal.modal-backdrop {
                 padding: 0;
