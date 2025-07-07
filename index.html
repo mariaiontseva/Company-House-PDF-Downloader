@@ -8239,16 +8239,16 @@
                         
                         <!-- Header section -->
                         <div style="margin-bottom: 16px;">
-                            <h4 style="
-                                margin: 0 0 6px 0;
-                                font-size: 18px;
-                                font-weight: 600;
-                                color: #f8fafc;
-                                line-height: 1.2;
-                                word-break: break-word;
-                            ">${person.name}</h4>
-                            
-                            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 12px;">
+                            <div class="name-badges-row" style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 12px;">
+                                <h4 style="
+                                    margin: 0;
+                                    font-size: 18px;
+                                    font-weight: 600;
+                                    color: #f8fafc;
+                                    line-height: 1.2;
+                                    word-break: break-word;
+                                ">${person.name}</h4>
+                                
                                 <span style="
                                     background: ${themeColors.primary};
                                     color: white;
@@ -8283,14 +8283,14 @@
                         
                         <!-- Information section -->
                         ${infoItems.length > 0 ? `
-                            <div style="
+                            <div class="info-section" style="
                                 display: flex;
                                 flex-wrap: wrap;
                                 gap: 16px;
                                 margin-bottom: ${infoItems.find(item => item.isControl) ? '16px' : '0'};
                             ">
                                 ${infoItems.filter(item => !item.isControl).map(item => `
-                                    <div style="
+                                    <div class="info-item" style="
                                         min-width: 120px;
                                         flex: 1;
                                     ">
@@ -8517,6 +8517,12 @@
                         
                         .person-card h4 {
                             font-size: 16px !important;
+                        }
+                        
+                        .person-card .name-badges-row {
+                            flex-direction: column !important;
+                            align-items: flex-start !important;
+                            gap: 8px !important;
                         }
                         
                         .person-card .info-section {
