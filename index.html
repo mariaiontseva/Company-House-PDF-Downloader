@@ -8047,14 +8047,16 @@
             try {
                 const API_KEY = '22aefa40-ee9e-47c0-b40a-2dd3c03165c6';
                 
-                // Fetch officers and PSCs in parallel
-                const [officersResponse, pscResponse] = await Promise.all([
+                // Fetch officers, PSCs, and statements in parallel
+                const [officersResponse, pscResponse, statementsResponse] = await Promise.all([
                     fetchWithWorker(`https://api.companieshouse.gov.uk/company/${companyNumber}/officers?items_per_page=200`, API_KEY),
-                    fetchWithWorker(`https://api.companieshouse.gov.uk/company/${companyNumber}/persons-with-significant-control`, API_KEY)
+                    fetchWithWorker(`https://api.companieshouse.gov.uk/company/${companyNumber}/persons-with-significant-control`, API_KEY),
+                    fetchWithWorker(`https://api.companieshouse.gov.uk/company/${companyNumber}/persons-with-significant-control-statements`, API_KEY)
                 ]);
                 
                 let officers = [];
                 let pscs = [];
+                let statements = [];
                 
                 if (officersResponse.ok) {
                     const data = await officersResponse.json();
@@ -8107,7 +8109,18 @@
                     console.log(`🔸 Found ${pscs.length} PSCs`);
                 }
                 
-                populateOfficersTab(officers, pscs, companyNumber, incorporationDate);
+                if (statementsResponse.ok) {
+                    const statementsData = await statementsResponse.json();
+                    statements = statementsData.items ? statementsData.items.map(statement => ({
+                        statement: statement.statement,
+                        ceased_on: statement.ceased_on,
+                        notified_on: statement.notified_on,
+                        type: 'statement'
+                    })) : [];
+                    console.log(`🔸 Found ${statements.length} PSC statements`);
+                }
+                
+                populateOfficersTab(officers, pscs, statements, companyNumber, incorporationDate);
                 
                 // Also enhance immediately if People tab is visible
                 setTimeout(() => {
@@ -8121,7 +8134,7 @@
             } catch (error) {
                 console.log('Error fetching officers:', error);
                 // Use basic fallback
-                populateOfficersTab([], [], companyNumber, incorporationDate);
+                populateOfficersTab([], [], [], companyNumber, incorporationDate);
             }
         }
         
@@ -8140,8 +8153,8 @@
         }
         
         // Populate Officers tab with enhanced information
-        function populateOfficersTab(officers, pscs, companyNumber, incorporationDate) {
-            console.log('🔸 populateOfficersTab called with', officers.length, 'officers and', pscs.length, 'PSCs');
+        function populateOfficersTab(officers, pscs, statements, companyNumber, incorporationDate) {
+            console.log('🔸 populateOfficersTab called with', officers.length, 'officers,', pscs.length, 'PSCs, and', statements.length, 'statements');
             const peopleTab = document.querySelector('#companyModal #people');
             if (!peopleTab) {
                 console.log('🔸 People tab element not found!');
@@ -8231,11 +8244,9 @@
                             border-radius: 8px;
                             padding: 20px;
                             margin-bottom: 18px;
-                            transition: all 0.2s ease;
                             opacity: ${isResigned ? '0.6' : '1'};
                          "
-                         onmouseover="this.style.transform='translateY(-2px)'; this.style.borderColor='${themeColors.primary}'; this.style.boxShadow='0 8px 24px rgba(0, 0, 0, 0.3)'"
-                         onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='${isPSC ? 'rgba(16, 185, 129, 0.2)' : 'rgba(99, 102, 241, 0.2)'}'; this.style.boxShadow='none'">
+>
                         
                         <!-- Header section -->
                         <div style="margin-bottom: 16px;">
@@ -8285,31 +8296,81 @@
                         ${infoItems.length > 0 ? `
                             <div class="info-section" style="
                                 display: flex;
-                                flex-wrap: wrap;
-                                gap: 16px;
-                                margin-bottom: ${infoItems.find(item => item.isControl) ? '16px' : '0'};
+                                flex-direction: column;
+                                gap: 8px;
+                                margin-bottom: ${infoItems.find(item => item.isControl) ? '12px' : '0'};
                             ">
-                                ${infoItems.filter(item => !item.isControl).map(item => `
-                                    <div class="info-item" style="
-                                        min-width: 120px;
-                                        flex: 1;
-                                    ">
-                                        <div style="
-                                            color: #94a3b8;
-                                            font-size: 12px;
-                                            font-weight: 600;
-                                            text-transform: uppercase;
-                                            letter-spacing: 0.5px;
-                                            margin-bottom: 4px;
-                                        ">${item.label}</div>
-                                        <div style="
-                                            color: #e2e8f0;
-                                            font-size: 14px;
-                                            font-weight: 500;
-                                            line-height: 1.4;
-                                        ">${item.value}</div>
-                                    </div>
-                                `).join('')}
+                                ${(() => {
+                                    const regularItems = infoItems.filter(item => !item.isControl);
+                                    const rows = [];
+                                    
+                                    // Group nationality and residence
+                                    const nationality = regularItems.find(item => item.label === 'Nationality');
+                                    const residence = regularItems.find(item => item.label === 'Residence');
+                                    if (nationality && residence) {
+                                        rows.push([nationality, residence]);
+                                    } else if (nationality) {
+                                        rows.push([nationality]);
+                                    } else if (residence) {
+                                        rows.push([residence]);
+                                    }
+                                    
+                                    // Group occupation and age
+                                    const occupation = regularItems.find(item => item.label === 'Occupation');
+                                    const age = regularItems.find(item => item.label === 'Age');
+                                    if (occupation && age) {
+                                        rows.push([occupation, age]);
+                                    } else if (occupation) {
+                                        rows.push([occupation]);
+                                    } else if (age) {
+                                        rows.push([age]);
+                                    }
+                                    
+                                    // Add remaining items individually
+                                    const usedLabels = ['Nationality', 'Residence', 'Occupation', 'Age'];
+                                    regularItems.filter(item => !usedLabels.includes(item.label)).forEach(item => {
+                                        rows.push([item]);
+                                    });
+                                    
+                                    return rows.map(row => `
+                                        <div class="info-row" style="
+                                            display: flex;
+                                            justify-content: space-between;
+                                            align-items: center;
+                                            padding: 6px 0;
+                                            border-bottom: 1px solid rgba(71, 85, 105, 0.2);
+                                        ">
+                                            ${row.map(item => `
+                                                <div style="
+                                                    display: flex;
+                                                    flex: 1;
+                                                    justify-content: space-between;
+                                                    align-items: center;
+                                                ">
+                                                    <span style="
+                                                        color: #94a3b8;
+                                                        font-size: 12px;
+                                                        font-weight: 600;
+                                                        text-transform: uppercase;
+                                                        letter-spacing: 0.5px;
+                                                    ">${item.label}</span>
+                                                    <span style="
+                                                        color: #e2e8f0;
+                                                        font-size: 14px;
+                                                        font-weight: 500;
+                                                        margin-left: 16px;
+                                                    ">${item.value}</span>
+                                                </div>
+                                            `).join('<div style="width: 40px;"></div>')}
+                                        </div>
+                                    `).map((row, index, array) => {
+                                        // Remove border-bottom from last row
+                                        if (index === array.length - 1) {
+                                            return row.replace('border-bottom: 1px solid rgba(71, 85, 105, 0.2);', '');
+                                        }
+                                        return row;
+                                    }).join('');
+                                })()}
                             </div>
                         ` : ''}
                         
@@ -8374,6 +8435,87 @@
                 `;
             }
             
+            // Function to create statement card HTML
+            function createStatementCard(statement) {
+                const isActive = !statement.ceased_on;
+                const notifiedDate = statement.notified_on ? new Date(statement.notified_on).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Unknown';
+                const ceasedText = statement.ceased_on ? ` - Ceased: ${new Date(statement.ceased_on).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}` : '';
+                
+                // Convert statement type to readable text
+                let statementText = statement.statement;
+                if (statement.statement === 'no-individual-or-entity-with-significant-control' || 
+                    statement.statement === 'no-individual-or-entity-with-signficant-control') {
+                    statementText = 'No individual or entity with significant control';
+                }
+                
+                return `
+                    <div class="statement-card" 
+                         style="
+                            position: relative;
+                            background: rgba(15, 23, 42, 0.8);
+                            border: 1px solid rgba(16, 185, 129, 0.2);
+                            border-radius: 8px;
+                            padding: 20px;
+                            margin-bottom: 18px;
+                            opacity: ${isActive ? '1' : '0.6'};
+                         ">
+                        
+                        <!-- Header section -->
+                        <div style="margin-bottom: 16px;">
+                            <div class="name-badges-row" style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 12px;">
+                                <h4 style="
+                                    margin: 0;
+                                    font-size: 18px;
+                                    font-weight: 600;
+                                    color: #f8fafc;
+                                    line-height: 1.2;
+                                ">${isActive ? 'Active Statement' : 'Former Statement'}</h4>
+                                
+                                <span style="
+                                    background: ${isActive ? '#10b981' : '#64748b'};
+                                    color: white;
+                                    padding: 4px 10px;
+                                    border-radius: 4px;
+                                    font-size: 12px;
+                                    font-weight: 600;
+                                    text-transform: uppercase;
+                                    letter-spacing: 0.5px;
+                                ">${isActive ? 'ACTIVE' : 'CEASED'}</span>
+                            </div>
+                            
+                            <div style="
+                                color: #cbd5e1;
+                                font-size: 14px;
+                                font-weight: 500;
+                            ">Notified: ${notifiedDate}${ceasedText}</div>
+                        </div>
+                        
+                        <!-- Statement text -->
+                        <div style="
+                            background: rgba(0, 0, 0, 0.2);
+                            border-radius: 6px;
+                            padding: 16px;
+                            border: 1px solid rgba(255, 255, 255, 0.05);
+                        ">
+                            <div style="
+                                color: #94a3b8;
+                                font-size: 12px;
+                                font-weight: 600;
+                                text-transform: uppercase;
+                                letter-spacing: 0.5px;
+                                margin-bottom: 8px;
+                            ">Statement</div>
+                            <div style="
+                                color: #e2e8f0;
+                                font-size: 14px;
+                                font-weight: 500;
+                                line-height: 1.5;
+                            ">${statementText}</div>
+                        </div>
+                    </div>
+                `;
+            }
+            
             // Sort officers and PSCs separately - active first, then by appointment date
             const sortedOfficers = officers.sort((a, b) => {
                 if (!a.resigned && b.resigned) return -1;
@@ -8385,6 +8527,13 @@
                 if (!a.resigned && b.resigned) return -1;
                 if (a.resigned && !b.resigned) return 1;
                 return new Date(b.appointed) - new Date(a.appointed);
+            });
+            
+            // Sort statements - active first, then by notification date
+            const sortedStatements = statements.sort((a, b) => {
+                if (!a.ceased_on && b.ceased_on) return -1;
+                if (a.ceased_on && !b.ceased_on) return 1;
+                return new Date(b.notified_on) - new Date(a.notified_on);
             });
             
             // Generate HTML for directors
@@ -8402,8 +8551,11 @@
                 </div>
             `;
             
-            // Generate HTML for PSCs
-            const pscsHTML = sortedPSCs.length > 0 ? sortedPSCs.map(createPersonCard).join('') : `
+            // Generate HTML for PSCs and statements
+            const pscCardsHTML = sortedPSCs.map(createPersonCard).join('');
+            const statementCardsHTML = sortedStatements.map(createStatementCard).join('');
+            
+            const pscsHTML = (sortedPSCs.length > 0 || sortedStatements.length > 0) ? (statementCardsHTML + pscCardsHTML) : `
                 <div style="
                     text-align: center; 
                     padding: 40px 20px; 
@@ -8418,7 +8570,7 @@
             `;
             
             // Handle historical companies
-            if (officers.length === 0 && pscs.length === 0) {
+            if (officers.length === 0 && pscs.length === 0 && statements.length === 0) {
                 const isHistorical = isHistoricalCompany(companyNumber || '', incorporationDate);
                 const historicalType = getHistoricalCompanyType(companyNumber || '');
                 
@@ -8583,14 +8735,14 @@
                     <div>
                         <div class="people-section-header pscs">
                             <span>People with Significant Control</span>
-                            ${sortedPSCs.length > 0 ? `<span class="people-count-badge pscs">${sortedPSCs.length}</span>` : ''}
+                            ${(sortedPSCs.length > 0 || sortedStatements.length > 0) ? `<span class="people-count-badge pscs">${sortedPSCs.length + sortedStatements.length}</span>` : ''}
                         </div>
                         ${pscsHTML}
                     </div>
                 </div>
             `;
             
-            console.log(`🔸 People & Control populated: ${officers.length} officers, ${pscs.length} PSCs`);
+            console.log(`🔸 People & Control populated: ${officers.length} officers, ${pscs.length} PSCs, ${statements.length} statements`);
             
             // Enhance officer names with director lookup badges
             console.log('Calling enhanceOfficerNames...');
@@ -9103,7 +9255,7 @@
             
             // Populate officers with available data or generate mock officers
             const officers = companyData.officers || generateMockOfficers(companyData);
-            populateOfficersTab(officers, [], companyData.number || companyData.company_number, companyData.incorporationDate || companyData.date_of_creation);
+            populateOfficersTab(officers, [], [], companyData.number || companyData.company_number, companyData.incorporationDate || companyData.date_of_creation);
             
             // Populate charges with actual data
             const charges = [];
