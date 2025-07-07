@@ -81,10 +81,15 @@
             align-items: center;
             gap: 10px;
             flex-shrink: 0;
-            background: none;
-            border: none;
-            padding: 0;
-            margin: 0;
+            background: transparent !important;
+            background-color: transparent !important;
+            border: none !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            cursor: pointer;
+            text-decoration: none;
+            box-shadow: none !important;
+            outline: none !important;
         }
         
         
@@ -121,6 +126,18 @@
             border: none !important;
             border-radius: 0 !important;
             box-shadow: none !important;
+            outline: none !important;
+        }
+        
+        /* Absolutely ensure no background anywhere on logo */
+        .sticky-nav .logo-small,
+        .sticky-nav .logo-small *,
+        .logo-small::before,
+        .logo-small::after {
+            background: none !important;
+            background-color: transparent !important;
+            box-shadow: none !important;
+            border: none !important;
             outline: none !important;
         }
         
@@ -4922,6 +4939,15 @@
         
         /* Enhanced Mobile UX for modal */
         @media (max-width: 768px) {
+            /* Fix padding to account for nav bar */
+            #companyModal {
+                padding-top: 0 !important;
+            }
+            
+            #companyModal.modal-backdrop {
+                top: 0;
+                padding-top: 60px;
+            }
             /* Fix container padding without breaking element styling */
             #companyModal .card-header {
                 padding: calc(env(safe-area-inset-top) + 20px) 24px 20px 24px !important;
@@ -5614,7 +5640,7 @@
     <!-- Sticky Navigation Bar (always visible) -->
     <div class="sticky-nav" id="stickyNav">
         <!-- Logo -->
-        <div class="logo-small">
+        <div class="logo-small" onclick="if(document.getElementById('companyModal') && document.getElementById('companyModal').style.display !== 'none') { closeCompanyPage(); } else { window.location.hash = ''; window.scrollTo(0, 0); }">
             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="32" height="32">
                 <rect x="3" y="6" width="6" height="12" fill="#a5b4fc" rx="0.5"/>
                 <rect x="10.5" y="3" width="6" height="15" fill="#c7d2fe" rx="0.5"/>
