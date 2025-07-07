@@ -149,6 +149,21 @@
             min-width: 280px;
         }
         
+        /* Mobile menu button */
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            padding: 8px;
+            color: #e2e8f0;
+            cursor: pointer;
+        }
+        
+        .mobile-menu-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+        }
+        
         .nav-search-container input {
             width: 100%;
             padding: 12px 24px 12px 48px;
@@ -351,13 +366,12 @@
                 height: 18px;
             }
             
-            #navAuthContainer button {
-                padding: 8px 16px !important;
-                font-size: 13px !important;
+            #navAuthContainer {
+                display: none !important;
             }
             
-            #navAuthContainer .profile-email {
-                display: none;
+            .mobile-menu-btn {
+                display: block !important;
             }
         }
         
@@ -2671,21 +2685,21 @@
             
             .search-container {
                 padding: 24px 16px;
-                margin-left: 16px;
-                margin-right: 16px;
+                margin: -30px auto 40px;
                 width: calc(100% - 32px);
                 max-width: calc(100% - 32px);
                 border-radius: 16px;
             }
             
             .hero {
-                padding: 100px 16px 60px;
-                margin-bottom: 40px;
+                padding: 100px 16px 40px;
+                margin-bottom: 20px;
                 margin-top: -72px;
             }
             
             .hero-features {
                 height: 50px;
+                margin-bottom: 0;
             }
             
             .feature-ribbon {
@@ -5708,10 +5722,24 @@
         <div id="navAuthContainer" style="display: flex; align-items: center;">
             <!-- Will be populated dynamically based on auth state -->
         </div>
+        
+        <!-- Mobile Menu Button -->
+        <button class="mobile-menu-btn" onclick="toggleMobileMenu()" style="display: none;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 12h18M3 6h18M3 18h18"/>
+            </svg>
+        </button>
     </div>
     
     <!-- Animated background -->
     <div class="bg-animation"></div>
+    
+    <!-- Mobile Menu Overlay -->
+    <div id="mobileMenu" style="display: none; position: fixed; top: 60px; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.98); z-index: 999; padding: 20px;">
+        <div id="mobileMenuContent" style="display: flex; flex-direction: column; gap: 16px;">
+            <!-- Content will be populated dynamically based on auth state -->
+        </div>
+    </div>
     
     
     <!-- Main container -->
@@ -8655,6 +8683,18 @@
         }
         
         // Function to show company modal for all users
+        // Mobile menu toggle
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            if (menu.style.display === 'none' || menu.style.display === '') {
+                menu.style.display = 'block';
+                document.body.style.overflow = 'hidden';
+            } else {
+                menu.style.display = 'none';
+                document.body.style.overflow = '';
+            }
+        }
+
         async function showCompanyPage(companyData) {
             console.log('🔸 showCompanyPage called with:', companyData);
             const companyPageContainer = document.getElementById('companyModal');
@@ -8735,6 +8775,7 @@
         // Update nav auth button
         async function updateNavAuthButton() {
             const container = document.getElementById('navAuthContainer');
+            const mobileMenuContent = document.getElementById('mobileMenuContent');
             if (!container) return;
             
             try {
@@ -8819,6 +8860,36 @@
                         <span style="position: relative; z-index: 1;">Create Account</span>
                     </button>
                 `;
+            }
+            
+            // Update mobile menu content
+            if (mobileMenuContent) {
+                if (user) {
+                    mobileMenuContent.innerHTML = `
+                        <div style="padding: 16px; background: rgba(30, 41, 59, 0.6); border-radius: 12px; margin-bottom: 16px;">
+                            <p style="color: #94a3b8; font-size: 14px; margin: 0;">Signed in as</p>
+                            <p style="color: #e2e8f0; font-size: 16px; font-weight: 600; margin: 4px 0 0 0;">${user.email}</p>
+                        </div>
+                        <button onclick="signOut()" style="width: 100%; padding: 16px; background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 12px; font-size: 16px; font-weight: 600;">
+                            Sign Out
+                        </button>
+                        <button onclick="toggleMobileMenu()" style="width: 100%; padding: 16px; background: rgba(255, 255, 255, 0.1); color: white; border: none; border-radius: 12px; font-size: 16px;">
+                            Close
+                        </button>
+                    `;
+                } else {
+                    mobileMenuContent.innerHTML = `
+                        <button onclick="window.location.href='auth.html'" style="width: 100%; padding: 16px; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 600;">
+                            Create Account
+                        </button>
+                        <button onclick="window.location.href='auth.html?mode=signin'" style="width: 100%; padding: 16px; background: rgba(99, 102, 241, 0.15); color: #a5b4fc; border: 2px solid rgba(99, 102, 241, 0.3); border-radius: 12px; font-size: 16px; font-weight: 600;">
+                            Sign In
+                        </button>
+                        <button onclick="toggleMobileMenu()" style="width: 100%; padding: 16px; background: rgba(255, 255, 255, 0.1); color: white; border: none; border-radius: 12px; font-size: 16px;">
+                            Close
+                        </button>
+                    `;
+                }
             }
         }
         
