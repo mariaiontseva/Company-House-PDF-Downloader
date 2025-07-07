@@ -2525,48 +2525,80 @@
                 padding: 6px !important;
             }
             
-            /* Filter controls - clean mobile layout */
+            /* Filter controls - redesigned mobile layout */
+            #exploreTab > div:nth-child(2) {
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 12px !important;
+                margin: 0 0 20px 0 !important;
+            }
+            
+            /* First row - toggle buttons */
             #exploreTab > div:nth-child(2) > div:first-child {
                 display: grid !important;
                 grid-template-columns: 1fr 1fr !important;
                 gap: 8px !important;
+                margin-bottom: 12px !important;
             }
             
-            /* Toggle buttons container */
+            /* Toggle buttons - equal width */
             #exploreTab > div:nth-child(2) > div:first-child > button {
                 width: 100% !important;
+                margin: 0 !important;
             }
             
-            /* Switches container - full width below buttons */
+            /* Switches container - stack vertically */
             #exploreTab > div:nth-child(2) > div:first-child > div:last-child {
                 grid-column: 1 / -1 !important;
                 display: flex !important;
-                justify-content: space-between !important;
-                gap: 16px !important;
+                flex-direction: column !important;
+                gap: 8px !important;
                 margin: 0 !important;
-                padding: 8px 0 0 0 !important;
+                padding: 0 !important;
+            }
+            
+            /* Each switch row - full width with better styling */
+            #exploreTab > div:nth-child(2) > div:first-child > div:last-child > div {
+                display: flex !important;
+                justify-content: space-between !important;
+                align-items: center !important;
+                background: rgba(30, 41, 59, 0.4) !important;
+                padding: 10px 14px !important;
+                border-radius: 8px !important;
+                border: 1px solid rgba(71, 85, 105, 0.3) !important;
+                width: 100% !important;
             }
 
             /* Toggle buttons - clean mobile design */
             .toggle-btn {
-                padding: 10px 12px;
-                font-size: 13px;
-                min-height: 38px;
-                border-radius: 6px;
-                background: rgba(30, 41, 59, 0.4);
+                padding: 12px 16px;
+                font-size: 14px;
+                font-weight: 600;
+                min-height: 44px;
+                border-radius: 8px;
+                background: rgba(30, 41, 59, 0.5);
                 border: 1px solid rgba(71, 85, 105, 0.3);
+                transition: all 0.2s ease;
+            }
+            
+            .toggle-btn.active {
+                background: var(--primary);
+                border-color: var(--primary);
+                color: white;
             }
 
             /* Industry filter - clean mobile design */
             #industryFilter {
-                min-height: 38px;
-                padding: 8px 32px 8px 12px;
-                font-size: 13px;
-                border-radius: 6px;
+                min-height: 44px;
+                padding: 10px 36px 10px 14px;
+                font-size: 14px;
+                font-weight: 500;
+                border-radius: 8px;
                 width: 100%;
-                margin-top: 8px;
-                background: rgba(30, 41, 59, 0.4) !important;
+                margin-top: 0;
+                background: rgba(30, 41, 59, 0.5) !important;
                 border: 1px solid rgba(71, 85, 105, 0.3) !important;
+                color: #e2e8f0 !important;
             }
 
             /* Filter block - no padding on mobile */
@@ -2706,12 +2738,15 @@
 
             /* Active switch mobile improvements */
             .switch {
-                width: 36px !important;
-                height: 20px !important;
+                width: 42px !important;
+                height: 24px !important;
                 -webkit-appearance: none;
                 appearance: none;
-                background: rgba(255,255,255,0.1);
+                background: rgba(71, 85, 105, 0.5);
                 flex-shrink: 0;
+                border-radius: 12px;
+                border: 1px solid rgba(71, 85, 105, 0.3);
+                transition: all 0.2s ease;
             }
             
             .switch.active {
@@ -2719,15 +2754,24 @@
             }
             
             .switch::after {
-                width: 14px !important;
-                height: 14px !important;
-                top: 3px !important;
-                left: 3px !important;
+                width: 18px !important;
+                height: 18px !important;
+                top: 2px !important;
+                left: 2px !important;
+                background: white;
+                border-radius: 50%;
             }
             
             .switch.active::after {
-                -webkit-transform: translateX(16px);
-                transform: translateX(16px);
+                -webkit-transform: translateX(18px);
+                transform: translateX(18px);
+            }
+            
+            /* Switch labels - better styling */
+            #exploreTab > div:nth-child(2) > div:first-child > div:last-child span {
+                font-size: 14px !important;
+                font-weight: 500 !important;
+                color: #e2e8f0 !important;
             }
 
             /* Pricing info mobile */
