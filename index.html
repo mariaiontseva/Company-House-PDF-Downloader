@@ -3664,6 +3664,7 @@
                 padding: 24px !important; /* Consistent padding */
                 background: #0f172a;
                 overflow: visible;
+                box-sizing: border-box; /* Ensure padding is included in width */
             }
             
             #companyModal .tab-content.active {
@@ -3673,6 +3674,8 @@
             /* People & Control tab mobile layout */
             #companyModal #people {
                 padding: 0 !important; /* Remove any extra padding */
+                margin: 0 !important; /* Remove any margins */
+                box-sizing: border-box;
             }
             
             #companyModal #people h3 {
@@ -3681,17 +3684,31 @@
                 padding: 0 0 0 0; /* No horizontal padding on h3 */
             }
             
-            #companyModal #people .people-columns {
+            #companyModal #people .people-columns,
+            #companyModal #people .people-control-grid {
                 flex-direction: column;
                 gap: 20px;
-                margin: 0;
-                padding: 0; /* No extra padding on columns */
+                margin: 0 !important;
+                padding: 0 !important; /* No extra padding on columns */
+                box-sizing: border-box;
             }
             
             #companyModal #people .people-column {
                 width: 100%;
                 max-width: 100%;
-                padding: 0;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            
+            /* Ensure no extra left padding on any element */
+            #companyModal #people > * {
+                margin-left: 0 !important;
+                padding-left: 0 !important;
+            }
+            
+            #companyModal #people .people-control-grid > div {
+                padding-left: 0 !important;
+                margin-left: 0 !important;
             }
             
             #companyModal #people .column-header {
@@ -3929,6 +3946,7 @@
             
             #companyModal .tab-content {
                 padding: 24px !important; /* Consistent padding on all sides */
+                box-sizing: border-box;
             }
             
             #companyModal .tab-pane h3 {
@@ -8827,7 +8845,7 @@
                     `;
                     
                     peopleTab.innerHTML = `
-                        <h3>People & Control</h3>
+                        <h3 style="margin: 0 0 20px 0;">People & Control</h3>
                         ${historicalHTML}
                     `;
                     return;
@@ -8958,7 +8976,7 @@
                     }
                 </style>
                 
-                <h3>People & Control</h3>
+                <h3 style="margin: 0 0 20px 0;">People & Control</h3>
                 <div class="people-control-grid">
                     <div>
                         <div class="people-section-header directors">
