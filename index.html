@@ -2421,12 +2421,12 @@
                 min-height: 48px; /* Touch target size */
             }
 
-            /* Search container - no extra margins */
+            /* Search container - proper mobile padding */
             .search-container {
                 padding: 20px 16px;
-                margin: 0 0 24px 0;
-                max-width: 100%;
-                width: 100%;
+                margin: 0 16px 24px 16px;
+                max-width: calc(100% - 32px);
+                width: calc(100% - 32px);
                 -webkit-box-sizing: border-box;
                 box-sizing: border-box;
                 border-radius: 12px;
@@ -2452,20 +2452,15 @@
                 gap: 12px;
             }
             
-            /* Search wrapper - fix layout on mobile */
             .search-wrapper {
                 gap: 8px !important;
-                width: 100% !important;
-                display: flex !important;
-                align-items: center !important;
             }
             
-            /* Autocomplete wrapper - prevent overflow */
             .autocomplete-wrapper {
                 flex: 1 !important;
                 min-width: 0 !important;
+                width: calc(100% - 88px) !important;
                 max-width: calc(100% - 88px) !important;
-                width: auto !important;
             }
 
             #companySearch {
@@ -2493,22 +2488,22 @@
                 display: none !important;
             }
 
-            /* Tab content - 16px padding for all content */
+            /* Tab content - remove padding, let children handle it */
             .tab-content {
-                padding: 0 16px !important;
+                padding: 0 !important;
                 box-sizing: border-box !important;
             }
             
-            /* Filter controls - no extra margins */
+            /* Filter controls - proper mobile layout */
             #exploreTab > div:nth-child(2) {
-                margin: 0 0 16px 0 !important;
-                width: 100% !important;
+                margin: 0 16px 16px 16px !important;
+                width: calc(100% - 32px) !important;
             }
             
-            /* Search input on explore tab - no extra margins */
+            /* Search input on explore tab - clean mobile design */
             #exploreSearchForm {
-                margin: 0 0 16px 0 !important;
-                width: 100% !important;
+                margin: 0 16px 16px 16px !important;
+                width: calc(100% - 32px) !important;
             }
             
             #exploreCompanyName {
@@ -2518,8 +2513,6 @@
                 border-radius: 8px !important;
                 background: rgba(15, 23, 42, 0.5) !important;
                 border: 1px solid rgba(71, 85, 105, 0.3) !important;
-                width: 100% !important;
-                box-sizing: border-box !important;
             }
             
             #clearExploreSearch {
@@ -2576,12 +2569,12 @@
                 margin: 24px 0 !important;
             }
             
-            /* Company cards - no extra margins */
+            /* Company cards - proper mobile spacing */
             .company-card, .explore-company-card {
                 padding: 16px;
-                margin: 0 0 12px 0;
-                width: 100%;
-                max-width: 100%;
+                margin: 0 16px 12px 16px;
+                width: calc(100% - 32px);
+                max-width: calc(100% - 32px);
                 box-sizing: border-box;
             }
             
@@ -2616,7 +2609,7 @@
             
             /* Center the button container */
             #exploreTab > div:last-child {
-                padding: 0 0 24px 0;
+                padding: 0 16px 24px 16px;
                 text-align: center;
             }
             
@@ -2829,8 +2822,8 @@
                 .search-container,
                 .info-container {
                     max-width: 100% !important;
-                    margin: 0 0 32px 0 !important;
-                    width: 100% !important;
+                    margin: 0 16px 32px 16px !important;
+                    width: calc(100% - 32px) !important;
                 }
                 
                 .results-container,
