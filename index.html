@@ -12234,8 +12234,8 @@
         
         // Helper function to search company from within modal
         function searchCompanyForModal(companyNumber) {
-            // Open in new tab
-            window.open(`${window.location.origin}${window.location.pathname}?company=${companyNumber}`, '_blank');
+            // Open in new tab with clean URL
+            window.open(`${window.location.origin}${window.location.pathname}#company/${companyNumber}`, '_blank');
         }
         
     </script>
