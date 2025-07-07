@@ -3697,6 +3697,20 @@
             #companyModal .person-card[style] {
                 margin-left: 0 !important;
                 margin-right: 0 !important;
+                position: relative !important;
+            }
+            
+            /* Override inline flex styles on mobile */
+            #companyModal .person-card .info-row > div {
+                display: block !important;
+                width: 100% !important;
+                margin-left: 0 !important;
+            }
+            
+            #companyModal .person-card .info-row > div > span:last-child {
+                display: block !important;
+                margin-left: 0 !important;
+                margin-top: 4px !important;
             }
             
             #companyModal #people h3 {
@@ -3740,50 +3754,85 @@
             
             /* Person cards mobile */
             #companyModal .person-card {
-                margin: 0 0 12px 0 !important; /* Remove any left margin */
+                margin: 0 0 12px 0 !important;
                 padding: 16px !important;
-                overflow-x: auto;
-                -webkit-overflow-scrolling: touch;
+                width: 100%;
+                box-sizing: border-box;
+                overflow: hidden;
             }
             
             #companyModal .person-card .name-badges-row {
-                min-width: fit-content;
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+                margin-bottom: 12px;
             }
             
             #companyModal .person-card h4 {
                 font-size: 16px !important;
-                margin-right: 8px;
+                margin: 0;
+                line-height: 1.3;
+                word-break: break-word;
             }
             
             #companyModal .person-card .badge {
                 font-size: 11px !important;
                 padding: 4px 8px !important;
+                display: inline-block;
             }
             
             #companyModal .person-card .info-row {
                 padding: 6px 0;
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
             }
             
             #companyModal .person-card .info-row span:first-child {
-                min-width: 80px;
                 font-size: 11px !important;
+                color: #94a3b8;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
             }
             
             #companyModal .person-card .info-row span:last-child {
                 font-size: 13px !important;
+                color: #e2e8f0;
+                word-break: break-word;
             }
             
             /* Search icon button mobile */
             #companyModal .person-card button[onclick*="viewOfficerCompanies"] {
-                top: 10px !important;
-                right: 10px !important;
+                position: absolute;
+                top: 12px !important;
+                right: 12px !important;
                 width: 28px !important;
                 height: 28px !important;
+                padding: 0 !important;
+                display: flex;
+                align-items: center;
+                justify-content: center;
             }
             
             #companyModal .person-card button[onclick*="viewOfficerCompanies"] svg {
                 width: 14px !important;
                 height: 14px !important;
+            }
+            
+            /* Ensure info section displays properly */
+            #companyModal .person-card .info-section {
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+                width: 100%;
+            }
+            
+            #companyModal .person-card .info-item {
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+                width: 100%;
             }
             
             /* Finance tab mobile */
@@ -8977,15 +9026,19 @@
                             flex-direction: column !important;
                             align-items: flex-start !important;
                             gap: 8px !important;
+                            width: 100% !important;
+                            padding-right: 40px !important; /* Space for search button */
                         }
                         
                         .person-card .info-section {
                             flex-direction: column !important;
-                            gap: 12px !important;
+                            gap: 8px !important;
+                            width: 100% !important;
                         }
                         
-                        .person-card .info-item {
-                            min-width: auto !important;
+                        .person-card .info-row {
+                            flex-direction: column !important;
+                            width: 100% !important;
                         }
                     }
                     
@@ -9021,6 +9074,11 @@
                         .person-card .control-badge {
                             font-size: 11px !important;
                             padding: 5px 10px !important;
+                        }
+                        
+                        .person-card .info-row {
+                            flex-direction: column !important;
+                            width: 100% !important;
                         }
                     }
                 </style>
