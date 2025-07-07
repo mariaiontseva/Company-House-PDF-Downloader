@@ -3631,10 +3631,6 @@
         }
         
         @media (max-width: 900px) {
-            #companyModal .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 12px;
-            }
             
             /* Fix tab content visibility on mobile */
             #companyModal .tabs-container {
@@ -3642,7 +3638,8 @@
                 display: flex;
                 flex-direction: column;
                 min-height: 0;
-                overflow: visible;
+                overflow: hidden;
+                background: #0f172a;
             }
             
             #companyModal .tabs {
@@ -3650,16 +3647,25 @@
                 overflow-x: auto;
                 -webkit-overflow-scrolling: touch;
                 padding: 0 16px;
-                margin: 0 -16px;
+                margin: 0;
+                background: rgba(15, 23, 42, 0.8);
+                border-bottom: 1px solid rgba(30, 41, 59, 0.5);
+                white-space: nowrap;
+            }
+            
+            #companyModal .tab {
+                padding: 12px 16px;
+                font-size: 13px;
+                min-width: auto;
             }
             
             #companyModal .tab-content {
                 flex: 1;
                 overflow-y: auto;
                 -webkit-overflow-scrolling: touch;
-                height: auto;
-                min-height: 300px;
-                padding-bottom: 20px;
+                height: 100%;
+                padding: 16px;
+                background: #0f172a;
             }
             
             #companyModal .tab-content.active {
@@ -3667,23 +3673,54 @@
             }
             
             /* People & Control tab mobile layout */
+            #companyModal #people {
+                padding: 16px;
+            }
+            
+            #companyModal #people h3 {
+                font-size: 20px;
+                margin-bottom: 16px;
+            }
+            
             #companyModal #people .people-columns {
                 flex-direction: column;
-                gap: 24px;
+                gap: 20px;
             }
             
             #companyModal #people .people-column {
                 width: 100%;
                 max-width: 100%;
             }
+            
+            #companyModal #people .column-header {
+                font-size: 16px;
+                padding: 12px 0;
+                margin-bottom: 12px;
+            }
+            
+            /* Finance tab mobile */
+            #companyModal #finance {
+                padding: 16px;
+            }
+            
+            /* Risk tab mobile */
+            #companyModal #risk {
+                padding: 16px;
+            }
+            
+            /* Charges tab mobile */
+            #companyModal #charges {
+                padding: 16px;
+            }
+            
+            /* Filing history tab mobile */
+            #companyModal #filings {
+                padding: 16px;
+            }
         }
         
         @media (max-width: 500px) {
-            #companyModal .stats-grid {
-                grid-template-columns: 1fr;
-                gap: 12px;
-                margin-top: 24px;
-            }
+            /* Keep 2 column layout even on very small screens */
         }
         
         /* Enhanced Mobile UX for modal */
@@ -3703,11 +3740,11 @@
             }
             
             #companyModal .card-content {
-                min-height: 100vh;
-                height: auto;
+                height: 100vh;
                 padding-bottom: env(safe-area-inset-bottom);
                 display: flex;
                 flex-direction: column;
+                overflow: hidden;
             }
             
             #companyModal .close-btn {
@@ -3783,15 +3820,19 @@
                 padding: 16px;
                 background: rgba(15, 23, 42, 0.5);
                 border-bottom: 1px solid rgba(30, 41, 59, 0.3);
+                max-height: 200px;
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
             }
             
             #companyModal .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
                 gap: 10px;
             }
             
             #companyModal .stat-box {
                 padding: 12px 10px;
-                min-height: 80px;
+                min-height: 70px;
                 display: flex;
                 flex-direction: column;
                 justify-content: center;
