@@ -3648,6 +3648,10 @@
                 white-space: nowrap;
             }
             
+            #companyModal .tabs-nav {
+                padding: 0 !important; /* Remove desktop padding */
+            }
+            
             #companyModal .tab {
                 padding: 12px 16px;
                 font-size: 13px;
@@ -3657,7 +3661,7 @@
             #companyModal .tab-content {
                 height: auto;
                 min-height: 400px;
-                padding: 16px 24px;
+                padding: 24px !important; /* Consistent padding */
                 background: #0f172a;
                 overflow: visible;
             }
@@ -3668,28 +3672,80 @@
             
             /* People & Control tab mobile layout */
             #companyModal #people {
-                padding: 16px 24px;
+                padding: 0 !important; /* Remove any extra padding */
             }
             
             #companyModal #people h3 {
                 font-size: 20px;
                 margin-bottom: 16px;
+                padding: 0 0 0 0; /* No horizontal padding on h3 */
             }
             
             #companyModal #people .people-columns {
                 flex-direction: column;
                 gap: 20px;
+                margin: 0;
+                padding: 0; /* No extra padding on columns */
             }
             
             #companyModal #people .people-column {
                 width: 100%;
                 max-width: 100%;
+                padding: 0;
             }
             
             #companyModal #people .column-header {
                 font-size: 16px;
                 padding: 12px 0;
                 margin-bottom: 12px;
+            }
+            
+            /* Person cards mobile */
+            #companyModal .person-card {
+                margin: 0 0 12px 0 !important; /* Remove any left margin */
+                padding: 16px !important;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            #companyModal .person-card .name-badges-row {
+                min-width: fit-content;
+            }
+            
+            #companyModal .person-card h4 {
+                font-size: 16px !important;
+                margin-right: 8px;
+            }
+            
+            #companyModal .person-card .badge {
+                font-size: 11px !important;
+                padding: 4px 8px !important;
+            }
+            
+            #companyModal .person-card .info-row {
+                padding: 6px 0;
+            }
+            
+            #companyModal .person-card .info-row span:first-child {
+                min-width: 80px;
+                font-size: 11px !important;
+            }
+            
+            #companyModal .person-card .info-row span:last-child {
+                font-size: 13px !important;
+            }
+            
+            /* Search icon button mobile */
+            #companyModal .person-card button[onclick*="viewOfficerCompanies"] {
+                top: 10px !important;
+                right: 10px !important;
+                width: 28px !important;
+                height: 28px !important;
+            }
+            
+            #companyModal .person-card button[onclick*="viewOfficerCompanies"] svg {
+                width: 14px !important;
+                height: 14px !important;
             }
             
             /* Finance tab mobile */
@@ -3816,7 +3872,7 @@
             }
             
             #companyModal .stats-section {
-                padding: 16px;
+                padding: 16px 24px; /* Consistent 24px horizontal padding */
                 background: rgba(15, 23, 42, 0.5);
                 border-bottom: 1px solid rgba(30, 41, 59, 0.3);
                 max-height: 200px;
@@ -3872,7 +3928,7 @@
             }
             
             #companyModal .tab-content {
-                padding: 20px;
+                padding: 24px !important; /* Consistent padding on all sides */
             }
             
             #companyModal .tab-pane h3 {
@@ -8387,6 +8443,8 @@
                             border-radius: 8px;
                             padding: 20px;
                             margin-bottom: 18px;
+                            margin-left: 0;
+                            margin-right: 0;
                             opacity: ${isResigned ? '0.6' : '1'};
                          ">
                         
@@ -8841,7 +8899,7 @@
                         
                         .person-card {
                             padding: 18px !important;
-                            margin-bottom: 16px !important;
+                            margin: 0 0 16px 0 !important; /* Force zero left/right margins */
                         }
                         
                         .person-card h4 {
@@ -8881,7 +8939,7 @@
                         
                         .person-card {
                             padding: 16px !important;
-                            margin-bottom: 14px !important;
+                            margin: 0 0 14px 0 !important; /* Force zero left/right margins */
                         }
                         
                         .person-card h4 {
