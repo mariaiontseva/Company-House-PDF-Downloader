@@ -4016,51 +4016,91 @@
             }
             
             #companyModal .stats-section {
-                padding: 12px 0 !important;
+                padding: 16px 0 !important;
                 background: rgba(15, 23, 42, 0.5);
                 border-bottom: 1px solid rgba(30, 41, 59, 0.3);
-                max-height: 180px;
+                max-height: 200px;
                 overflow-y: auto;
                 -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+            }
+            
+            #companyModal .stats-section::-webkit-scrollbar {
+                display: none;
             }
             
             #companyModal .stats-grid {
                 grid-template-columns: repeat(2, 1fr);
-                gap: 8px;
+                gap: 10px;
             }
             
             #companyModal .stat-box {
-                padding: 10px 8px !important;
-                min-height: 60px;
+                padding: 14px 12px !important;
+                min-height: 75px;
                 display: flex;
                 flex-direction: column;
                 justify-content: center;
-                background: rgba(30, 41, 59, 0.4);
-                border: 1px solid rgba(71, 85, 105, 0.3);
-                border-radius: 8px;
+                align-items: center;
+                text-align: center;
+                background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(30, 41, 59, 0.6) 100%);
+                border: 1px solid rgba(71, 85, 105, 0.4);
+                border-radius: 12px;
+                transition: all 0.2s ease;
+                position: relative;
+                overflow: hidden;
+            }
+            
+            #companyModal .stat-box::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 2px;
+                background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.5), transparent);
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            }
+            
+            #companyModal .stat-box:active {
+                transform: scale(0.98);
+                background: rgba(30, 41, 59, 0.8);
             }
             
             #companyModal .stat-value {
-                font-size: 18px;
-                margin-bottom: 2px;
+                font-size: 22px;
+                margin-bottom: 4px;
                 line-height: 1;
-                font-weight: 700;
+                font-weight: 800;
+                color: #ffffff;
             }
             
             #companyModal .stat-label {
-                font-size: 9px;
-                letter-spacing: 0.3px;
+                font-size: 10px;
+                letter-spacing: 0.5px;
                 line-height: 1.2;
-                font-weight: 600;
+                font-weight: 700;
                 text-transform: uppercase;
                 color: #94a3b8;
             }
             
             #companyModal .stat-detail {
-                font-size: 9px;
-                margin-top: 3px;
+                font-size: 11px;
+                margin-top: 4px;
                 line-height: 1.2;
                 color: #64748b;
+                font-weight: 500;
+            }
+            
+            /* Special styling for clickable stats */
+            #companyModal .stat-detail.download-link {
+                color: #3b82f6;
+                font-weight: 600;
+            }
+            
+            /* Charges box special styling */
+            #companyModal .stat-box.charges-box .stat-value {
+                color: #ef4444 !important;
             }
             
             #companyModal .tabs-nav {
