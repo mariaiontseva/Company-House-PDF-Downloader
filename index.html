@@ -2028,8 +2028,8 @@
             margin: 0 auto;
             height: 60px;
             overflow: hidden;
-            mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
             -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+            mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
         }
         
         .feature-ribbon {
@@ -2038,14 +2038,18 @@
             position: absolute;
             left: 0;
             animation: scrollRibbon 40s linear infinite;
+            -webkit-animation: scrollRibbon 40s linear infinite;
+            will-change: transform;
         }
         
         @keyframes scrollRibbon {
             0% {
                 transform: translateX(0);
+                -webkit-transform: translateX(0);
             }
             100% {
                 transform: translateX(-50%);
+                -webkit-transform: translateX(-50%);
             }
         }
         
@@ -2700,6 +2704,9 @@
             .hero-features {
                 height: 50px;
                 margin-bottom: 0;
+                width: 100vw;
+                margin-left: -16px;
+                padding: 0 16px;
             }
             
             .feature-ribbon {
@@ -2714,9 +2721,22 @@
             @keyframes scrollRibbon {
                 0% {
                     transform: translateX(0);
+                    -webkit-transform: translateX(0);
                 }
                 100% {
                     transform: translateX(-50%);
+                    -webkit-transform: translateX(-50%);
+                }
+            }
+            
+            /* Safari specific fixes */
+            @supports (-webkit-touch-callout: none) {
+                .feature-ribbon {
+                    -webkit-animation: scrollRibbon 40s linear infinite;
+                }
+                
+                .hero-features {
+                    -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
                 }
             }
             
@@ -5004,7 +5024,16 @@
             
             #companyModal.modal-backdrop {
                 top: 0;
-                padding-top: 60px;
+                padding-top: 72px;
+            }
+            
+            #companyModal .card-header {
+                padding: 20px 16px !important;
+                margin-top: 0;
+            }
+            
+            #companyModal .company-card {
+                padding-top: 0;
             }
             /* Fix container padding without breaking element styling */
             #companyModal .card-header {
