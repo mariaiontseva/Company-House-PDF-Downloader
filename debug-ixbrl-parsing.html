@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug iXBRL Parsing</title>
+    <script src="enhanced-xbrl-parser.js"></script>
+</head>
+<body>
+    <h1>Debug iXBRL Parsing</h1>
+    <button onclick="testParsing()">Test Sample iXBRL</button>
+    <div id="output"></div>
+    
+    <script>
+        function testParsing() {
+            // Sample iXBRL content that might have issues
+            const sampleXBRL = `
+                <html xmlns:ix="http://www.xbrl.org/2013/inlineXBRL">
+                <body>
+                    <table>
+                        <tr>
+                            <td>Turnover</td>
+                            <td><ix:nonFraction name="uk-gaap:TurnoverRevenue" contextRef="CurrentYear" unitRef="GBP" decimals="0" scale="0" format="ixt:numdotdecimal">1,234,567</ix:nonFraction></td>
+                            <td><ix:nonFraction name="uk-gaap:TurnoverRevenue" contextRef="PreviousYear" unitRef="GBP" decimals="0" scale="0" format="ixt:numdotdecimal">987,654</ix:nonFraction></td>
+                        </tr>
+                        <tr>
+                            <td>Number of employees</td>
+                            <td><ix:nonFraction name="uk-gaap:AverageNumberEmployeesDuringPeriod" contextRef="CurrentYear" decimals="0">25</ix:nonFraction></td>
+                            <td><ix:nonFraction name="uk-gaap:AverageNumberEmployeesDuringPeriod" contextRef="PreviousYear" decimals="0">20</ix:nonFraction></td>
+                        </tr>
+                    </table>
+                </body>
+                </html>
+            `;
+            
+            const result = EnhancedXBRLParser.parse(sampleXBRL);
+            
+            const output = document.getElementById('output');
+            output.innerHTML = '<h2>Parsed Result:</h2>';
+            output.innerHTML += '<pre>' + JSON.stringify(result, null, 2) + '</pre>';
+            
+            console.log('Parsed result:', result);
+        }
+    </script>
+</body>
+</html>

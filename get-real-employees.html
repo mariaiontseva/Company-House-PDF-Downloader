@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Get Real Employee Count</title>
+</head>
+<body>
+    <h1>Fetching Real Employee Data for 09051662</h1>
+    <button onclick="getRealData()">Get Employee Data</button>
+    <div id="output"></div>
+    
+    <script>
+        async function getRealData() {
+            const output = document.getElementById('output');
+            output.innerHTML = '<p>Loading...</p>';
+            
+            try {
+                // Step 1: Get filing history
+                const filingUrl = 'https://api.companieshouse.gov.uk/company/09051662/filing-history?category=accounts&items_per_page=10';
+                const proxyUrl = `http://localhost:3002/api/proxy?url=${encodeURIComponent(filingUrl)}`;
+                
+                const filingResponse = await fetch(proxyUrl);
+                const filingData = await filingResponse.json();
+                
+                // Find latest accounts
+                const accountsFiling = filingData.items.find(f => f.category === 'accounts');
+                
+                if (!accountsFiling) {
+                    output.innerHTML = '<p>No accounts filing found</p>';
+                    return;
+                }
+                
+                let html = `<h2>Latest Filing: ${accountsFiling.date} - ${accountsFiling.description}</h2>`;
+                html += `<p>Transaction ID: ${accountsFiling.transaction_id}</p>`;
+                
+                // Step 2: Get the iXBRL document
+                const xbrlUrl = `http://localhost:3002/api/proxy/ixbrl/09051662/${accountsFiling.transaction_id}?format=xhtml`;
+                const xbrlResponse = await fetch(xbrlUrl);
+                const xbrlText = await xbrlResponse.text();
+                
+                html += '<h3>Searching for Employee Data:</h3>';
+                
+                // Search for all employee-related data
+                const patterns = [
+                    {
+                        name: 'iXBRL with scale',
+                        regex: /name="[^"]*AverageNumberEmployeesDuringPeriod[^"]*"[^>]*scale="(\d+)"[^>]*>([^<]+)</gi
+                    },
+                    {
+                        name: 'iXBRL without scale',
+                        regex: /name="[^"]*AverageNumberEmployeesDuringPeriod[^"]*"[^>]*>([^<]+)</gi
+                    },
+                    {
+                        name: 'Text pattern',
+                        regex: /Average number of employees[^<]*<[^>]*>(\d+)</gi
+                    },
+                    {
+                        name: 'Simple number pattern',
+                        regex: /Number of employees[:\s]+(\d+)/gi
+                    }
+                ];
+                
+                let foundAny = false;
+                patterns.forEach(({name, regex}) => {
+                    const matches = [...xbrlText.matchAll(regex)];
+                    if (matches.length > 0) {
+                        html += `<h4>${name}:</h4><ul>`;
+                        matches.forEach(match => {
+                            if (match[2] !== undefined) {
+                                // Has scale
+                                const scale = match[1];
+                                const value = match[2].trim();
+                                html += `<li>Value: ${value}, Scale: ${scale} `;
+                                html += `(Incorrectly would be: ${parseInt(value) * Math.pow(10, parseInt(scale))})</li>`;
+                            } else {
+                                // No scale
+                                const value = match[1].trim();
+                                html += `<li>Value: ${value}</li>`;
+                            }
+                        });
+                        html += '</ul>';
+                        foundAny = true;
+                    }
+                });
+                
+                if (!foundAny) {
+                    // Try broader search
+                    const broadMatch = xbrlText.match(/employee[^>]*>(\d+)/i);
+                    if (broadMatch) {
+                        html += `<p>Broad search found: ${broadMatch[1]}</p>`;
+                    } else {
+                        html += '<p>No employee data found in iXBRL</p>';
+                    }
+                }
+                
+                // Show a sample of the iXBRL around employee mentions
+                const employeeIndex = xbrlText.toLowerCase().indexOf('employee');
+                if (employeeIndex > -1) {
+                    const start = Math.max(0, employeeIndex - 500);
+                    const end = Math.min(xbrlText.length, employeeIndex + 500);
+                    const sample = xbrlText.substring(start, end);
+                    html += '<h4>Sample around "employee" mention:</h4>';
+                    html += `<pre style="background: #f0f0f0; padding: 10px; overflow: auto;">${sample.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>`;
+                }
+                
+                output.innerHTML = html;
+                
+            } catch (error) {
+                output.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+                console.error(error);
+            }
+        }
+    </script>
+</body>
+</html>

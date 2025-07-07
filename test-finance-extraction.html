@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Finance Extraction</title>
+    <script src="enhanced-xbrl-parser.js"></script>
+    <script src="finance-parser.js"></script>
+</head>
+<body>
+    <h1>Testing Finance Extraction for Company 09051662</h1>
+    <div id="output"></div>
+    
+    <script>
+        async function testExtraction() {
+            const output = document.getElementById('output');
+            output.innerHTML = '<p>Loading...</p>';
+            
+            try {
+                console.log('Starting extraction test...');
+                const data = await FinanceParser.extractFinancialData('09051662');
+                
+                if (!data) {
+                    output.innerHTML = '<p>No data extracted</p>';
+                    return;
+                }
+                
+                let html = '<h2>Extracted Financial Data</h2>';
+                html += '<h3>Historical Data Points: ' + (data.historicalData ? data.historicalData.length : 0) + '</h3>';
+                
+                if (data.historicalData) {
+                    data.historicalData.forEach((filing, index) => {
+                        html += `<div style="border: 1px solid #ccc; padding: 10px; margin: 10px 0;">`;
+                        html += `<h4>Filing ${index + 1}: ${filing.date} - ${filing.description}</h4>`;
+                        html += `<p>Type: ${filing.type}, Dormant: ${filing.isDormant}</p>`;
+                        
+                        if (filing.metrics) {
+                            html += '<h5>Metrics:</h5><ul>';
+                            Object.entries(filing.metrics).forEach(([key, value]) => {
+                                if (value && value.value !== undefined) {
+                                    html += `<li><strong>${key}:</strong> ${value.value} (${value.formatted || value.value})</li>`;
+                                }
+                            });
+                            html += '</ul>';
+                        }
+                        
+                        html += '</div>';
+                    });
+                }
+                
+                if (data.latestMetrics) {
+                    html += '<h3>Latest Metrics Summary:</h3><ul>';
+                    Object.entries(data.latestMetrics).forEach(([key, metric]) => {
+                        if (metric && metric.value !== undefined) {
+                            html += `<li><strong>${key}:</strong> ${metric.value} (${metric.period || 'current'})</li>`;
+                        }
+                    });
+                    html += '</ul>';
+                }
+                
+                output.innerHTML = html;
+                
+                // Also log to console for debugging
+                console.log('Full extracted data:', data);
+                
+            } catch (error) {
+                console.error('Extraction error:', error);
+                output.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+            }
+        }
+        
+        // Run test
+        testExtraction();
+    </script>
+</body>
+</html>

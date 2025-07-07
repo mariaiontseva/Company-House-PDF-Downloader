@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finance Tab Debug Test</title>
+</head>
+<body style="font-family: system-ui; padding: 20px; background: #1a1a1a; color: #fff;">
+    <h1>Finance Tab Debug Instructions</h1>
+    
+    <div style="background: #2a2a2a; padding: 20px; border-radius: 8px; margin: 20px 0;">
+        <h2>🔧 Steps to Test Finance Tab:</h2>
+        <ol style="line-height: 2;">
+            <li>Open browser console (F12 or right-click → Inspect → Console)</li>
+            <li>Go to <a href="http://localhost:8082" style="color: #6366f1;">http://localhost:8082</a></li>
+            <li>Search for any company (e.g., "Tesco" or "Apple")</li>
+            <li>Click on the company card to open modal</li>
+            <li>Click on the "Finance" tab</li>
+            <li>Check console for debug messages starting with 🔸</li>
+        </ol>
+    </div>
+    
+    <div style="background: #2a2a2a; padding: 20px; border-radius: 8px; margin: 20px 0;">
+        <h2>📊 What You Should See:</h2>
+        <ul style="line-height: 2;">
+            <li>Loading spinner briefly</li>
+            <li>Financial data with:
+                <ul>
+                    <li>Revenue: £5.3M (or specific data for Tesco)</li>
+                    <li>Net Profit: £425K</li>
+                    <li>Total Assets: £3.2M</li>
+                    <li>Employees: 42</li>
+                </ul>
+            </li>
+            <li>Year-over-year changes with arrows</li>
+            <li>Financial ratios section</li>
+        </ul>
+    </div>
+    
+    <div style="background: #2a2a2a; padding: 20px; border-radius: 8px; margin: 20px 0;">
+        <h2>🐛 Console Debug Messages:</h2>
+        <p>You should see these messages in console:</p>
+        <ul style="font-family: monospace; background: #1a1a1a; padding: 10px; border-radius: 4px;">
+            <li>🔸 Switched to Finance tab, loading financial data...</li>
+            <li>🔸 loadFinancialData called</li>
+            <li>🔸 Company number: [company number]</li>
+            <li>🔸 Finance elements: {loading: true, noData: true, content: true}</li>
+        </ul>
+    </div>
+    
+    <div style="background: #d32f2f; padding: 20px; border-radius: 8px; margin: 20px 0;">
+        <h2>❌ If Finance Tab is Empty:</h2>
+        <ol>
+            <li>Check if the tab content has class "active" when clicked</li>
+            <li>Look for any JavaScript errors in console</li>
+            <li>Verify elements exist by running in console:
+                <pre style="background: #1a1a1a; padding: 10px; margin: 10px 0; border-radius: 4px;">
+document.getElementById('finance-loading')
+document.getElementById('finance-no-data')
+document.getElementById('finance-content')</pre>
+            </li>
+            <li>Try manually triggering: <code>loadFinancialData()</code> in console</li>
+        </ol>
+    </div>
+    
+    <div style="background: #388e3c; padding: 20px; border-radius: 8px; margin: 20px 0;">
+        <h2>✅ Quick Fix Test:</h2>
+        <p>Run this in browser console while modal is open:</p>
+        <pre style="background: #1a1a1a; padding: 15px; border-radius: 4px; overflow-x: auto;">
+// Force show sample data
+document.getElementById('finance-loading').style.display = 'none';
+document.getElementById('finance-no-data').style.display = 'none';
+document.getElementById('finance-content').style.display = 'block';
+document.getElementById('finance-revenue').textContent = '£5.3M';
+document.getElementById('finance-profit').textContent = '£425K';
+document.getElementById('finance-assets').textContent = '£3.2M';
+document.getElementById('finance-employees').textContent = '42';</pre>
+    </div>
+</body>
+</html>

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Check Employee Data for 09051662</title>
+    <script src="enhanced-xbrl-parser.js"></script>
+    <script src="finance-parser.js"></script>
+</head>
+<body>
+    <h1>Checking Employee Data for Company 09051662</h1>
+    <button onclick="checkEmployees()">Check Employee Numbers</button>
+    <div id="output"></div>
+    
+    <script>
+        async function checkEmployees() {
+            const output = document.getElementById('output');
+            output.innerHTML = '<p>Loading...</p>';
+            
+            try {
+                // Get the filing history first
+                const filingUrl = 'https://api.companieshouse.gov.uk/company/09051662/filing-history?category=accounts&items_per_page=10';
+                const response = await fetch(`http://localhost:3002/api/proxy?url=${encodeURIComponent(filingUrl)}`);
+                const filingData = await response.json();
+                
+                let html = '<h2>Recent Accounts Filings:</h2>';
+                
+                // Check each filing for employee data
+                for (const filing of filingData.items.slice(0, 5)) {
+                    if (filing.category === 'accounts' && filing.links && filing.links.document_metadata) {
+                        html += `<div style="border: 1px solid #ccc; padding: 10px; margin: 10px 0;">`;
+                        html += `<h3>${filing.date} - ${filing.description}</h3>`;
+                        
+                        try {
+                            // Get metadata
+                            const metadataResponse = await fetch(`http://localhost:3002/api/proxy?url=${encodeURIComponent(filing.links.document_metadata)}`);
+                            const metadata = await metadataResponse.json();
+                            
+                            if (metadata.resources && metadata.resources.xbrl) {
+                                const xbrlUrl = metadata.resources.xbrl;
+                                html += `<p>Fetching iXBRL document...</p>`;
+                                
+                                // Get the actual iXBRL document
+                                const xbrlResponse = await fetch(`http://localhost:3002/api/proxy/ixbrl/09051662/${filing.transaction_id}?format=xhtml`);
+                                const xbrlText = await xbrlResponse.text();
+                                
+                                // Look for employee data in the raw text
+                                const employeePatterns = [
+                                    /AverageNumberEmployeesDuringPeriod[^>]*>([^<]+)</gi,
+                                    /name="[^"]*employee[^"]*"[^>]*>([^<]+)</gi,
+                                    /Average number of employees[^<]*<[^>]*>([^<]+)</gi,
+                                    /Number of employees[^<]*<[^>]*>([^<]+)</gi
+                                ];
+                                
+                                let foundEmployees = false;
+                                employeePatterns.forEach(pattern => {
+                                    const matches = [...xbrlText.matchAll(pattern)];
+                                    matches.forEach(match => {
+                                        const value = match[1].trim();
+                                        html += `<p><strong>Found employee data:</strong> "${value}"</p>`;
+                                        
+                                        // Check if there's a scale attribute nearby
+                                        const contextStart = Math.max(0, match.index - 200);
+                                        const contextEnd = Math.min(xbrlText.length, match.index + 200);
+                                        const context = xbrlText.substring(contextStart, contextEnd);
+                                        
+                                        const scaleMatch = context.match(/scale="(\d+)"/);
+                                        if (scaleMatch) {
+                                            html += `<p style="color: red;">⚠️ Scale attribute found: scale="${scaleMatch[1]}"</p>`;
+                                        }
+                                        
+                                        foundEmployees = true;
+                                    });
+                                });
+                                
+                                // Also try parsing with our parser
+                                const parsed = EnhancedXBRLParser.parse(xbrlText);
+                                if (parsed.employees) {
+                                    html += `<p><strong>Parser extracted:</strong> ${parsed.employees.value} employees</p>`;
+                                }
+                                
+                                if (!foundEmployees) {
+                                    html += `<p>No employee data found in this filing</p>`;
+                                }
+                            }
+                        } catch (error) {
+                            html += `<p style="color: red;">Error processing filing: ${error.message}</p>`;
+                        }
+                        
+                        html += '</div>';
+                    }
+                }
+                
+                output.innerHTML = html;
+                
+            } catch (error) {
+                console.error('Error:', error);
+                output.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>

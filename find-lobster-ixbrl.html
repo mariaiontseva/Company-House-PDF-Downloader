@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find Lobster IT Limited iXBRL Files</title>
+</head>
+<body>
+    <h1>Finding ALL Lobster IT Limited iXBRL Documents</h1>
+    <div id="results"></div>
+    
+    <script>
+    const API_KEY = 'ee8f2dc2-17d8-4fc9-98bc-ad5c554a11f1';
+    const WORKER_URL = 'https://blue-flower-d40f.mahin84.workers.dev';
+    
+    async function fetchWithWorker(url, apiKey) {
+        console.log(`Fetching: ${url}`);
+        const response = await fetch(`${WORKER_URL}/?url=${encodeURIComponent(url)}&apiKey=${encodeURIComponent(apiKey)}`);
+        console.log(`Response status: ${response.status}`);
+        return response;
+    }
+    
+    async function findAllIxbrlFilings() {
+        const results = document.getElementById('results');
+        
+        try {
+            // Get ALL filing history, not filtered by category
+            results.innerHTML += '<h2>Fetching ALL filings for Lobster IT Limited...</h2>';
+            const filingUrl = 'https://api.companieshouse.gov.uk/company/08510890/filing-history?items_per_page=100';
+            const filingResponse = await fetchWithWorker(filingUrl, API_KEY);
+            
+            if (!filingResponse.ok) {
+                results.innerHTML += `<p style="color: red;">Error fetching filings: ${filingResponse.status}</p>`;
+                return;
+            }
+            
+            let filingData;
+            try {
+                filingData = await filingResponse.json();
+            } catch (e) {
+                results.innerHTML += `<p style="color: red;">Error parsing response: ${e.message}</p>`;
+                const text = await filingResponse.text();
+                results.innerHTML += '<pre>' + text.substring(0, 1000) + '</pre>';
+                return;
+            }
+            
+            console.log('Filing data:', filingData);
+            
+            if (!filingData || !filingData.items) {
+                results.innerHTML += '<p style="color: red;">Error: No filing data received</p>';
+                results.innerHTML += '<pre>' + JSON.stringify(filingData, null, 2) + '</pre>';
+                return;
+            }
+            
+            results.innerHTML += `<p><strong>Total filings found: ${filingData.total_count || filingData.items.length}</strong></p>`;
+            
+            // Filter for accounts that might have iXBRL
+            const accountsFilings = filingData.items.filter(item => {
+                const isAccounts = item.category === 'accounts' || 
+                                 item.description.toLowerCase().includes('accounts') ||
+                                 item.description.toLowerCase().includes('annual return');
+                const hasMetadata = item.links && item.links.document_metadata;
+                return isAccounts && hasMetadata;
+            });
+            
+            results.innerHTML += `<p><strong>Accounts filings with metadata: ${accountsFilings.length}</strong></p>`;
+            
+            // Check each filing for iXBRL format
+            results.innerHTML += '<h2>Checking each filing for iXBRL format:</h2>';
+            
+            for (let i = 0; i < accountsFilings.length; i++) {
+                const filing = accountsFilings[i];
+                results.innerHTML += `<div style="border: 1px solid #ccc; padding: 10px; margin: 10px 0;">`;
+                results.innerHTML += `<h3>Filing ${i + 1}: ${filing.date}</h3>`;
+                results.innerHTML += `<p>Type: ${filing.type}</p>`;
+                results.innerHTML += `<p>Description: ${filing.description}</p>`;
+                
+                try {
+                    // Get metadata for this filing
+                    let metadataUrl = filing.links.document_metadata;
+                    if (metadataUrl.startsWith('/')) {
+                        metadataUrl = `https://api.companieshouse.gov.uk${metadataUrl}`;
+                    }
+                    
+                    const metadataResponse = await fetchWithWorker(metadataUrl, API_KEY);
+                    const metadata = await metadataResponse.json();
+                    
+                    // Check available formats
+                    const formats = Object.keys(metadata.resources || {});
+                    results.innerHTML += `<p><strong>Available formats:</strong> ${formats.join(', ')}</p>`;
+                    
+                    // Check if iXBRL is available
+                    const hasIxbrl = formats.includes('application/xhtml+xml') || 
+                                   formats.includes('text/html') ||
+                                   formats.includes('application/xml');
+                    
+                    if (hasIxbrl) {
+                        results.innerHTML += '<p style="color: green;"><strong>✓ iXBRL format available!</strong></p>';
+                        
+                        // Try to fetch a sample of the iXBRL content
+                        if (metadata.links && metadata.links.document) {
+                            const docUrl = metadata.links.document.startsWith('/') 
+                                ? `https://api.companieshouse.gov.uk${metadata.links.document}`
+                                : metadata.links.document;
+                            
+                            const xhtmlUrl = docUrl + '?format=xhtml&download=0';
+                            
+                            try {
+                                const xhtmlResponse = await fetchWithWorker(xhtmlUrl, API_KEY);
+                                if (xhtmlResponse.ok) {
+                                    const text = await xhtmlResponse.text();
+                                    
+                                    // Check if it's actually iXBRL (not PDF)
+                                    if (!text.startsWith('%PDF')) {
+                                        results.innerHTML += '<p style="color: green;"><strong>✓ Successfully fetched iXBRL content!</strong></p>';
+                                        
+                                        // Look for financial data in the content
+                                        const hasFinancialData = text.includes('TurnoverRevenue') || 
+                                                               text.includes('ProfitLoss') ||
+                                                               text.includes('TotalAssets') ||
+                                                               text.includes('uk-gaap:') ||
+                                                               text.includes('ix:nonFraction');
+                                        
+                                        if (hasFinancialData) {
+                                            results.innerHTML += '<p style="color: green;"><strong>✓ Contains financial data tags!</strong></p>';
+                                        }
+                                        
+                                        // Show sample of content
+                                        const sample = text.substring(0, 500).replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                                        results.innerHTML += '<details><summary>View sample content</summary><pre>' + sample + '...</pre></details>';
+                                    } else {
+                                        results.innerHTML += '<p style="color: orange;">⚠ PDF format returned</p>';
+                                    }
+                                }
+                            } catch (e) {
+                                results.innerHTML += '<p style="color: red;">✗ Error fetching content: ' + e.message + '</p>';
+                            }
+                        }
+                    } else {
+                        results.innerHTML += '<p style="color: red;">✗ No iXBRL format available (PDF only)</p>';
+                    }
+                    
+                } catch (error) {
+                    results.innerHTML += '<p style="color: red;">Error checking filing: ' + error.message + '</p>';
+                }
+                
+                results.innerHTML += '</div>';
+            }
+            
+        } catch (error) {
+            results.innerHTML += `<h2 style="color: red;">Error: ${error.message}</h2>`;
+            console.error(error);
+        }
+    }
+    
+    // Run the search
+    findAllIxbrlFilings();
+    </script>
+</body>
+</html>
