@@ -1912,7 +1912,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 40px 20px;
+            padding: 0 20px 40px;
             position: relative;
             overflow-x: hidden;
             box-sizing: border-box;
@@ -1923,8 +1923,8 @@
         /* Hero section */
         .hero {
             text-align: center;
-            margin: -100px calc(-50vw + 50%) 0;
-            padding: 180px 20px 120px;
+            margin: 0 calc(-50vw + 50%) 0;
+            padding: 60px 20px 120px;
             background: linear-gradient(180deg, rgba(99, 102, 241, 0.05) 0%, transparent 50%);
             position: relative;
             overflow: hidden;
@@ -2707,9 +2707,10 @@
             }
             
             .hero {
-                padding: 0 16px 40px;
+                padding: 20px 16px 40px;
                 margin-bottom: 20px;
                 margin-top: 0;
+                min-height: auto;
             }
             
             .hero-features {
@@ -2734,6 +2735,8 @@
             .hero-badge {
                 padding: 10px 16px;
                 font-size: 13px;
+                background: rgba(15, 23, 42, 0.8);
+                border: 1px solid rgba(99, 102, 241, 0.5);
             }
             
             @keyframes scrollRibbon {
