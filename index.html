@@ -1924,7 +1924,7 @@
         .hero {
             text-align: center;
             margin: 0 calc(-50vw + 50%) 0;
-            padding: 96px 20px 0;
+            padding: 96px 20px 50px;
             background: linear-gradient(180deg, rgba(99, 102, 241, 0.05) 0%, transparent 50%);
             position: relative;
             overflow: visible;
@@ -2025,7 +2025,7 @@
             position: relative;
             width: 100%;
             max-width: 1200px;
-            margin: 0 auto 50px;
+            margin: 0 auto;
             height: 60px;
             overflow: visible;
             -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
@@ -2710,7 +2710,7 @@
             }
             
             .hero {
-                padding: 76px 16px 30px;
+                padding: 76px 16px 50px;
                 margin-bottom: 0px;
                 margin-top: 0;
                 min-height: auto;
@@ -2723,7 +2723,7 @@
             
             .hero-features {
                 height: 140px;
-                margin: 0px auto 20px;
+                margin: 0px auto 0;
                 width: 100vw;
                 margin-left: -16px;
                 padding: 0 16px;
@@ -2883,26 +2883,6 @@
             }
         }
 
-        /* Desktop spacing fix above 800px */
-        @media (min-width: 801px) {
-            .hero {
-                padding-bottom: 30px;
-            }
-            .hero-features {
-                margin-bottom: 20px;
-            }
-        }
-        
-        /* Tablet range 768-800px - this is perfect */
-        @media (min-width: 768px) and (max-width: 800px) {
-            .hero {
-                padding-bottom: 50px;
-            }
-            .hero-features {
-                margin-bottom: 0;
-            }
-        }
-        
         /* Old info card styles for compatibility */
         .info-section {
             display: none;
