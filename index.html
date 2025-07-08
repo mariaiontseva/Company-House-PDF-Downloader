@@ -2025,9 +2025,11 @@
             position: relative;
             width: 100%;
             max-width: 1200px;
-            margin: 40px auto 40px;
-            height: 80px;
-            overflow: hidden;
+            margin: 0 auto 20px;
+            height: 60px;
+            overflow: visible;
+            -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+            mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
             z-index: 100;
         }
         
@@ -2716,13 +2718,13 @@
             
             .hero-features {
                 height: 60px;
-                margin: 30px auto 30px;
+                margin: 20px auto 20px;
                 width: 100vw;
                 margin-left: -16px;
                 padding: 0 16px;
                 display: block;
                 position: relative;
-                overflow: hidden;
+                overflow: visible;
                 z-index: 100;
             }
             
