@@ -2053,6 +2053,17 @@
             }
         }
         
+        @-webkit-keyframes scrollRibbon {
+            0% {
+                transform: translateX(0);
+                -webkit-transform: translateX(0);
+            }
+            100% {
+                transform: translateX(-50%);
+                -webkit-transform: translateX(-50%);
+            }
+        }
+        
         .hero-badge {
             display: inline-flex;
             align-items: center;
@@ -2696,9 +2707,9 @@
             }
             
             .hero {
-                padding: 100px 16px 40px;
+                padding: 20px 16px 40px;
                 margin-bottom: 20px;
-                margin-top: -72px;
+                margin-top: 0;
             }
             
             .hero-features {
@@ -2719,6 +2730,17 @@
             }
             
             @keyframes scrollRibbon {
+                0% {
+                    transform: translateX(0);
+                    -webkit-transform: translateX(0);
+                }
+                100% {
+                    transform: translateX(-50%);
+                    -webkit-transform: translateX(-50%);
+                }
+            }
+            
+            @-webkit-keyframes scrollRibbon {
                 0% {
                     transform: translateX(0);
                     -webkit-transform: translateX(0);
