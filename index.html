@@ -2718,14 +2718,14 @@
             }
             
             .hero-features {
-                height: 80px;
+                height: 60px;
                 margin: 30px auto 30px;
                 width: 100vw;
                 margin-left: -16px;
-                padding: 0 16px;
+                padding: 0;
                 display: block;
                 position: relative;
-                overflow: visible;
+                overflow: hidden;
                 z-index: 1000;
                 background: transparent;
                 -webkit-mask-image: none;
@@ -2737,8 +2737,12 @@
                 display: flex !important;
                 position: absolute;
                 left: 0;
-                top: 10px;
+                top: 50%;
+                transform: translateY(-50%);
                 width: 200%;
+                animation: scrollRibbon 20s linear infinite;
+                -webkit-animation: scrollRibbon 20s linear infinite;
+                align-items: center;
             }
             
             .hero-badge {
