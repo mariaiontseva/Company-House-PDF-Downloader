@@ -2707,7 +2707,7 @@
             }
             
             .hero {
-                padding: 20px 16px 40px;
+                padding: 0 16px 40px;
                 margin-bottom: 20px;
                 margin-top: 0;
             }
@@ -2718,10 +2718,17 @@
                 width: 100vw;
                 margin-left: -16px;
                 padding: 0 16px;
+                display: block;
+                position: relative;
+                overflow: hidden;
             }
             
             .feature-ribbon {
                 gap: 16px;
+                display: flex !important;
+                position: absolute;
+                left: 0;
+                top: 0;
             }
             
             .hero-badge {
@@ -2755,6 +2762,7 @@
             @supports (-webkit-touch-callout: none) {
                 .feature-ribbon {
                     -webkit-animation: scrollRibbon 40s linear infinite;
+                    animation: scrollRibbon 40s linear infinite;
                 }
                 
                 .hero-features {
