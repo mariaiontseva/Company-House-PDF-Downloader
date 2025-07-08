@@ -2727,9 +2727,10 @@
                 position: relative;
                 overflow: visible;
                 z-index: 1000;
-                background: transparent;
+                background: rgba(255,0,0,0.2);
                 -webkit-mask-image: none;
                 mask-image: none;
+                border: 2px solid red;
             }
             
             .feature-ribbon {
@@ -2737,12 +2738,13 @@
                 display: flex !important;
                 position: absolute;
                 left: 0;
-                top: 50%;
-                transform: translateY(-50%);
+                top: 0;
                 width: 200%;
                 animation: scrollRibbon 20s linear infinite;
                 -webkit-animation: scrollRibbon 20s linear infinite;
                 align-items: center;
+                background: rgba(0,255,0,0.3);
+                height: 100%;
             }
             
             .hero-badge {
