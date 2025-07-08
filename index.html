@@ -1924,10 +1924,10 @@
         .hero {
             text-align: center;
             margin: 0 calc(-50vw + 50%) 0;
-            padding: 60px 20px 120px;
+            padding: 120px 20px 120px;
             background: linear-gradient(180deg, rgba(99, 102, 241, 0.05) 0%, transparent 50%);
             position: relative;
-            overflow: hidden;
+            overflow: visible;
             animation: fadeInUp 0.8s ease;
             width: 100vw;
             min-height: calc(100vh - 80px);
@@ -2025,12 +2025,12 @@
             position: relative;
             width: 100%;
             max-width: 1200px;
-            margin: 0 auto 20px;
-            height: 60px;
+            margin: 40px auto 40px;
+            height: 80px;
             overflow: hidden;
             -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
             mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
-            z-index: 10;
+            z-index: 100;
         }
         
         .feature-ribbon {
@@ -2070,9 +2070,9 @@
             align-items: center;
             gap: 8px;
             padding: 12px 24px;
-            background: rgba(15, 23, 42, 0.6);
+            background: rgba(15, 23, 42, 0.8);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(99, 102, 241, 0.3);
+            border: 1px solid rgba(99, 102, 241, 0.5);
             border-radius: 100px;
             color: #e2e8f0;
             font-size: 14px;
@@ -2080,6 +2080,7 @@
             white-space: nowrap;
             flex-shrink: 0;
             transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
         }
         
         .hero-badge:hover {
@@ -2708,22 +2709,23 @@
             }
             
             .hero {
-                padding: 20px 16px 40px;
+                padding: 100px 16px 40px;
                 margin-bottom: 20px;
                 margin-top: 0;
                 min-height: auto;
+                overflow: visible;
             }
             
             .hero-features {
-                height: 50px;
-                margin-bottom: 20px;
+                height: 60px;
+                margin: 30px auto 30px;
                 width: 100vw;
                 margin-left: -16px;
                 padding: 0 16px;
                 display: block;
                 position: relative;
                 overflow: hidden;
-                z-index: 15;
+                z-index: 100;
             }
             
             .feature-ribbon {
@@ -2735,10 +2737,11 @@
             }
             
             .hero-badge {
-                padding: 10px 16px;
+                padding: 12px 18px;
                 font-size: 13px;
-                background: rgba(15, 23, 42, 0.8);
-                border: 1px solid rgba(99, 102, 241, 0.5);
+                background: rgba(15, 23, 42, 0.9);
+                border: 1px solid rgba(99, 102, 241, 0.7);
+                box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
             }
             
             @keyframes scrollRibbon {
