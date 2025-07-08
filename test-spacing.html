@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spacing Test</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background: #1a1a1a;
+            color: white;
+        }
+        .ruler {
+            position: fixed;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255,255,255,0.1);
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .measure {
+            background: red;
+            height: 50px;
+            width: 30px;
+            margin: 10px 0;
+            position: relative;
+        }
+        .measure::after {
+            content: '50px';
+            position: absolute;
+            right: -50px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 50px 20px;
+        }
+        
+        .description {
+            background: #2a2a2a;
+            padding: 20px;
+            margin-bottom: 50px;
+            border-radius: 5px;
+        }
+        
+        .feature-ribbon {
+            background: #4a4a4a;
+            padding: 20px;
+            text-align: center;
+            border-radius: 5px;
+        }
+        
+        .spacer-above,
+        .spacer-below {
+            background: rgba(255,0,0,0.2);
+            text-align: center;
+            line-height: 50px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        
+        .content-below {
+            background: #2a2a2a;
+            padding: 20px;
+            margin-top: 50px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="ruler">
+        <div>50px reference:</div>
+        <div class="measure"></div>
+    </div>
+    
+    <div class="test-container">
+        <div class="description">
+            <h2>Hero Description</h2>
+            <p>This is the hero description text with margin-bottom: 50px</p>
+        </div>
+        
+        <div class="spacer-above" style="height: 50px;">50px space above</div>
+        
+        <div class="feature-ribbon">
+            <h3>Feature Ribbon (Moving Stripe)</h3>
+            <p>The badges would animate here</p>
+        </div>
+        
+        <div class="spacer-below" style="height: 50px;">50px space below</div>
+        
+        <div class="content-below">
+            <h2>Content Below (Tabs)</h2>
+            <p>This is where the Explore / Bulk PDF Download tabs would be</p>
+        </div>
+    </div>
+    
+    <script>
+        // Measure actual distances
+        window.addEventListener('load', () => {
+            const description = document.querySelector('.description');
+            const ribbon = document.querySelector('.feature-ribbon');
+            const content = document.querySelector('.content-below');
+            
+            const descBottom = description.getBoundingClientRect().bottom;
+            const ribbonTop = ribbon.getBoundingClientRect().top;
+            const ribbonBottom = ribbon.getBoundingClientRect().bottom;
+            const contentTop = content.getBoundingClientRect().top;
+            
+            console.log('Space above ribbon:', ribbonTop - descBottom, 'px');
+            console.log('Space below ribbon:', contentTop - ribbonBottom, 'px');
+        });
+    </script>
+</body>
+</html>
