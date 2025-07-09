@@ -149,6 +149,39 @@
             min-width: 280px;
         }
         
+        /* Clear/close button styling */
+        .nav-search-container .close-search {
+            display: none;
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #64748b;
+            font-size: 18px;
+            padding: 4px;
+            cursor: pointer;
+            z-index: 2;
+            line-height: 1;
+            width: 24px;
+            height: 24px;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+        
+        .nav-search-container .close-search:hover {
+            color: #94a3b8;
+            background: rgba(71, 85, 105, 0.2);
+        }
+        
+        /* Show close button when input has value */
+        .nav-search-container input:not(:placeholder-shown) ~ .close-search {
+            display: flex;
+        }
+        
         /* Mobile menu button */
         .mobile-menu-btn {
             display: none;
@@ -355,15 +388,15 @@
             }
             
             .nav-search-container input {
-                padding: 10px 16px 10px 40px;
-                height: 40px;
-                font-size: 14px;
+                padding: 12px 16px 12px 48px;
+                height: 48px;
+                font-size: 16px;
             }
             
             .nav-search-container::before {
-                left: 14px;
-                width: 18px;
-                height: 18px;
+                left: 16px;
+                width: 20px;
+                height: 20px;
             }
             
             #navAuthContainer {
@@ -377,8 +410,8 @@
         
         @media (max-width: 480px) {
             .sticky-nav {
-                padding: 10px 12px;
-                height: 60px;
+                padding: 16px 12px;
+                height: 72px;
                 gap: 12px;
             }
             
@@ -389,6 +422,88 @@
             
             .nav-search-container {
                 max-width: none;
+                width: 100%;
+                flex: 1;
+                transition: transform 0.35s ease;
+            }
+            
+            /* Prevent zoom on iOS */
+            .nav-search-container input {
+                font-size: 16px !important;
+                -webkit-text-size-adjust: 100%;
+                transform: scale(1);
+                -webkit-transform: scale(1);
+                transition: padding 0.35s ease, border-color 0.35s ease;
+            }
+            
+            /* Expanded search state */
+            .nav-search-container.search-expanded {
+                position: absolute;
+                left: 0;
+                right: 0;
+                max-width: 100%;
+                z-index: 1002;
+                padding: 0 12px;
+            }
+            
+            .nav-search-container.search-expanded input {
+                background: rgba(30, 41, 59, 0.8);
+                border-color: rgba(99, 102, 241, 0.6);
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+                padding-left: 16px !important;
+                padding-right: 64px !important;
+            }
+            
+            /* Adjust clear button position when expanded */
+            .nav-search-container.search-expanded .close-search {
+                right: 24px;
+            }
+            
+            /* Hide search icon when expanded */
+            .nav-search-container.search-expanded::before {
+                opacity: 0;
+                transform: translateY(-50%) scale(0.8);
+                transition: opacity 0.2s ease;
+            }
+            
+            /* Hide other nav elements when search is expanded */
+            .sticky-nav.search-active .logo-small,
+            .sticky-nav.search-active .mobile-menu-btn {
+                opacity: 0;
+                visibility: hidden;
+                pointer-events: none;
+                transition: opacity 0.25s ease, visibility 0.25s ease;
+            }
+            
+            /* Ensure close button works on mobile */
+            .nav-search-container input:not(:placeholder-shown) ~ .close-search {
+                display: flex !important;
+            }
+            
+            /* Mobile-optimized autocomplete */
+            .nav-search-container:not(.search-expanded) .autocomplete-dropdown {
+                display: none !important;
+            }
+            
+            .nav-search-container.search-expanded .autocomplete-dropdown {
+                position: fixed;
+                top: 72px;
+                left: 12px;
+                right: 12px;
+                max-height: calc(100vh - 72px);
+                border-radius: 12px;
+                border: 1px solid rgba(71, 85, 105, 0.3);
+                background: rgba(30, 41, 59, 0.98);
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            }
+            
+            .autocomplete-item {
+                padding: 16px;
+                border-bottom: 1px solid rgba(71, 85, 105, 0.2);
+            }
+            
+            .autocomplete-item:active {
+                background: rgba(99, 102, 241, 0.2);
             }
         }
         /* Director Info Badge */
@@ -1923,14 +2038,14 @@
         /* Hero section */
         .hero {
             text-align: center;
-            margin: 0 calc(-50vw + 50%) 0;
-            padding: 96px 20px 50px;
+            margin: 0 calc(-50vw + 50%) 0 calc(-50vw + 50%);
+            padding: 96px 20px 80px;
             background: linear-gradient(180deg, rgba(99, 102, 241, 0.05) 0%, transparent 50%);
             position: relative;
             overflow: visible;
             animation: fadeInUp 0.8s ease;
             width: 100vw;
-            min-height: calc(100vh - 80px);
+            height: auto;
         }
         
         .hero::before {
@@ -2025,7 +2140,8 @@
             position: relative;
             width: 100%;
             max-width: 1200px;
-            margin: 0 auto;
+            margin: 80px auto 0;
+            padding-bottom: 80px;
             height: 60px;
             overflow: visible;
             -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
@@ -2038,6 +2154,7 @@
             gap: 24px;
             position: absolute;
             left: 0;
+            top: 0;
             animation: scrollRibbon 40s linear infinite;
             -webkit-animation: scrollRibbon 40s linear infinite;
             will-change: transform;
@@ -2083,11 +2200,6 @@
             box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
         }
         
-        .hero-badge:hover {
-            background: rgba(99, 102, 241, 0.1);
-            transform: scale(1.05);
-            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
-        }
         
         .hero-badge svg {
             color: #a5b4fc;
@@ -2130,7 +2242,7 @@
             padding: 40px;
             width: 100%;
             max-width: 800px;
-            margin: 0 auto 60px;
+            margin: 0 auto 0;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(99, 102, 241, 0.2);
             animation: fadeInUp 0.8s ease 0.2s both;
             position: relative;
@@ -2568,7 +2680,7 @@
         .info-section-single {
             width: 100%;
             max-width: 1200px;
-            margin: 0 auto 40px;
+            margin: 60px auto 40px;
         }
 
         .info-container {
@@ -2702,7 +2814,7 @@
             
             .search-container {
                 padding: 24px 16px;
-                margin: 20px auto 40px;
+                margin: 0 auto 0;
                 width: calc(100% - 32px);
                 max-width: calc(100% - 32px);
                 border-radius: 16px;
@@ -2710,7 +2822,7 @@
             }
             
             .hero {
-                padding: 76px 16px 50px;
+                padding: 96px 16px 60px;
                 margin-bottom: 0px;
                 margin-top: 0;
                 min-height: auto;
@@ -2718,20 +2830,24 @@
             }
             
             .hero-description {
-                margin-bottom: 45px !important;
+                margin-bottom: 0 !important;
             }
             
             .hero-features {
-                height: 140px;
-                margin: 0px auto 0;
-                width: 100vw;
-                margin-left: -16px;
-                padding: 0 16px;
+                height: 60px;
+                margin: 60px auto 0;
+                padding-bottom: 60px;
+                width: 100%;
+                margin-left: 0;
+                padding-left: 0;
+                padding-right: 0;
                 display: block;
                 position: relative;
                 overflow: visible;
                 z-index: 1000;
                 background: transparent;
+                -webkit-mask-image: none;
+                mask-image: none;
             }
             
             .feature-ribbon {
@@ -2739,40 +2855,34 @@
                 display: flex !important;
                 position: absolute;
                 left: 0;
-                top: 5px;
+                top: 50%;
+                transform: translateY(-50%);
                 width: 200%;
-                animation: scrollRibbon 20s linear infinite;
-                -webkit-animation: scrollRibbon 20s linear infinite;
+                animation: scrollRibbon 15s linear infinite;
+                -webkit-animation: scrollRibbon 15s linear infinite;
                 align-items: center;
             }
             
-            .hero-badge {
-                padding: 8px 16px;
-                font-size: 13px;
-                background: rgba(15, 23, 42, 0.9);
-                border: 1px solid rgba(99, 102, 241, 0.7);
-                box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
-            }
             
             @keyframes scrollRibbon {
                 0% {
-                    transform: translateX(0);
-                    -webkit-transform: translateX(0);
+                    transform: translateX(0) translateY(-50%);
+                    -webkit-transform: translateX(0) translateY(-50%);
                 }
                 100% {
-                    transform: translateX(-50%);
-                    -webkit-transform: translateX(-50%);
+                    transform: translateX(-50%) translateY(-50%);
+                    -webkit-transform: translateX(-50%) translateY(-50%);
                 }
             }
             
             @-webkit-keyframes scrollRibbon {
                 0% {
-                    transform: translateX(0);
-                    -webkit-transform: translateX(0);
+                    transform: translateX(0) translateY(-50%);
+                    -webkit-transform: translateX(0) translateY(-50%);
                 }
                 100% {
-                    transform: translateX(-50%);
-                    -webkit-transform: translateX(-50%);
+                    transform: translateX(-50%) translateY(-50%);
+                    -webkit-transform: translateX(-50%) translateY(-50%);
                 }
             }
             
@@ -2793,28 +2903,6 @@
             }
         }
         
-        /* Chrome responsive mode fix - for desktop screens made smaller */
-        @media (min-width: 600px) and (max-width: 768px) and (min-height: 700px) {
-            .hero {
-                padding-top: 100px;
-            }
-            
-            .hero-description {
-                margin-bottom: 50px !important;
-            }
-            
-            .hero-features {
-                margin: 0 auto 50px;
-            }
-            
-            .feature-ribbon {
-                top: 0;
-            }
-            
-            .info-section-single {
-                margin-top: 0;
-            }
-        }
         
         @media (max-width: 768px) {
             .search-btn {
@@ -2852,7 +2940,7 @@
             }
             
             .main-container {
-                padding-top: 20px !important;
+                padding-top: 0px !important;
                 padding-left: 0 !important;
                 padding-right: 0 !important;
             }
@@ -3046,6 +3134,23 @@
                 font-size: 2rem;
                 line-height: 1.2;
             }
+            
+            .hero {
+                padding: 80px 16px 66px;
+            }
+            
+            .hero-features {
+                margin: 66px auto 0;
+                padding-bottom: 66px;
+                width: 100%;
+                margin-left: 0;
+                padding-left: 0;
+                padding-right: 0;
+                overflow: visible;
+                -webkit-mask-image: none;
+                mask-image: none;
+                height: 60px;
+            }
 
             .hero-subtitle {
                 font-size: 1rem;
@@ -3074,7 +3179,7 @@
             /* Search container - 16px margins from screen edges */
             .search-container {
                 padding: 20px 16px;
-                margin: 0 16px 24px 16px;
+                margin: 0 16px 0 16px;
                 max-width: calc(100% - 32px);
                 width: calc(100% - 32px);
                 -webkit-box-sizing: border-box;
@@ -3565,10 +3670,27 @@
             .hero-subtitle {
                 font-size: 1.1rem;
             }
+            
+            .hero {
+                padding: 120px 16px 70px;
+            }
+            
+            .hero-features {
+                margin: 70px auto 0;
+                padding-bottom: 70px;
+                width: 100%;
+                margin-left: 0;
+                padding-left: 0;
+                padding-right: 0;
+                overflow: visible;
+                -webkit-mask-image: none;
+                mask-image: none;
+                height: 60px;
+            }
 
             .search-container {
                 padding: 28px 24px;
-                margin: 0 24px 40px 24px;
+                margin: 0 24px 0 24px;
                 max-width: none;
             }
 
@@ -5812,7 +5934,13 @@
                 id="nav-search"
                 placeholder="Search companies..."
                 onkeyup="handleNavSearch(this.value)"
+                onfocus="expandMobileSearch()"
+                autocomplete="off"
+                autocorrect="off"
+                autocapitalize="off"
+                spellcheck="false"
             />
+            <button class="close-search" onclick="collapseMobileSearch()">✕</button>
             <div id="nav-autocomplete" class="autocomplete-dropdown"></div>
         </div>
         
@@ -8991,14 +9119,59 @@
             }
         }
         
+        // Mobile search expand/collapse
+        function expandMobileSearch() {
+            if (window.innerWidth <= 480) {
+                const searchContainer = document.querySelector('.nav-search-container');
+                const nav = document.querySelector('.sticky-nav');
+                searchContainer.classList.add('search-expanded');
+                nav.classList.add('search-active');
+            }
+        }
+        
+        function collapseMobileSearch() {
+            const searchContainer = document.querySelector('.nav-search-container');
+            const nav = document.querySelector('.sticky-nav');
+            const searchInput = document.getElementById('nav-search');
+            
+            // If on mobile and expanded, just collapse
+            if (window.innerWidth <= 480 && searchContainer.classList.contains('search-expanded')) {
+                searchContainer.classList.remove('search-expanded');
+                nav.classList.remove('search-active');
+                searchInput.blur();
+            } else {
+                // Otherwise, clear the search
+                searchInput.value = '';
+                searchInput.blur();
+            }
+        }
+        
+        // Handle clicking outside search
+        document.addEventListener('click', function(e) {
+            if (window.innerWidth <= 480) {
+                const searchContainer = document.querySelector('.nav-search-container');
+                const isClickInside = searchContainer.contains(e.target);
+                
+                if (!isClickInside && searchContainer.classList.contains('search-expanded')) {
+                    collapseMobileSearch();
+                }
+            }
+        });
+        
         // Handle nav search
         let navSearchTimeout;
         async function handleNavSearch(query) {
             clearTimeout(navSearchTimeout);
             const dropdown = document.getElementById('nav-autocomplete');
+            const searchContainer = document.querySelector('.nav-search-container');
             
             if (!query || query.length < 2) {
                 dropdown.classList.remove('show');
+                return;
+            }
+            
+            // On mobile, only show dropdown if search is expanded
+            if (window.innerWidth <= 480 && !searchContainer.classList.contains('search-expanded')) {
                 return;
             }
             
