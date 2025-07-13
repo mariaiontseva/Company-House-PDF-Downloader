@@ -7,8 +7,8 @@ const CONFIG = {
     GOOGLE_MAPS_API_KEY: 'AIzaSyBWvrPY7tpqqz-0IyYaYodNtIJd9Ao4UR4',
     
     // API URLs
-    WORKER_URL: process.env.WORKER_URL || 'https://blue-flower-d40f.mahin84.workers.dev',
-    RAILWAY_API_URL: process.env.RAILWAY_API_URL || 'https://companies-api-production-68c2.up.railway.app',
+    WORKER_URL: 'https://blue-flower-d40f.mahin84.workers.dev',
+    RAILWAY_API_URL: 'https://companies-api-production-68c2.up.railway.app',
     
     // Feature Flags
     ENABLE_MAPS: true,

@@ -56,10 +56,13 @@
       gtag('config', 'G-RR9SEE0SQF');
     </script>
     
+    <!-- Configuration script - load first -->
+    <script src="config.js"></script>
+    
     <!-- Google Maps JavaScript API -->
     <script>
         // Define the callback function before loading the API
-        function initGoogleMaps() {
+        window.initGoogleMaps = function() {
             console.log('Google Maps API loaded');
             // Re-initialize map if we're on a company page
             const mapContainer = document.getElementById('company-address-map');
@@ -74,19 +77,16 @@
                 }
             }
         }
-    </script>
-    <!-- Configuration script - load before other scripts -->
-    <script src="config.js"></script>
-    
-    <!-- Google Maps API -->
-    <script>
-        // Dynamically load Google Maps with API key from config
+        
+        // Load Google Maps with API key from config
         if (window.APP_CONFIG && window.APP_CONFIG.GOOGLE_MAPS_API_KEY && window.APP_CONFIG.ENABLE_MAPS) {
             const script = document.createElement('script');
             script.src = `https://maps.googleapis.com/maps/api/js?key=${window.APP_CONFIG.GOOGLE_MAPS_API_KEY}&libraries=places,geometry&callback=initGoogleMaps`;
             script.async = true;
             script.defer = true;
             document.head.appendChild(script);
+        } else {
+            console.error('Google Maps configuration not found or maps disabled');
         }
     </script>
     
