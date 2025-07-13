@@ -1,0 +1,21 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "index.html",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ],
+  "env": {
+    "COMPANIES_HOUSE_API_KEY": "@companies_house_api_key",
+    "GOOGLE_MAPS_API_KEY": "@google_maps_api_key",
+    "WORKER_URL": "@worker_url",
+    "RAILWAY_API_URL": "@railway_api_url"
+  }
+}
