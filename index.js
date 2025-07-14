@@ -18,6 +18,10 @@ app.get('/', (req, res) => {
     endpoints: {
       companies: '/api/oldest, /api/newest, /api/search/:query',
       openai: '/api/openai/completions'
+    },
+    config: {
+      hasOpenAIKey: !!process.env.OPENAI_API_KEY,
+      keyPrefix: process.env.OPENAI_API_KEY ? process.env.OPENAI_API_KEY.substring(0, 8) + '...' : 'not set'
     }
   });
 });
