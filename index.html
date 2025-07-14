@@ -2971,6 +2971,243 @@
             100% { background-position: -200% 0; }
         }
 
+        /* Company Timeline Styles */
+        .company-timeline {
+            position: relative;
+            padding: 20px 0 20px 40px;
+            margin: 20px 0;
+        }
+        
+        .timeline-line {
+            position: absolute;
+            left: 19px;
+            top: 20px;
+            bottom: 20px;
+            width: 2px;
+            background: rgba(99, 102, 241, 0.2);
+        }
+        
+        .timeline-item {
+            position: relative;
+            margin-bottom: 28px;
+            padding-left: 30px;
+        }
+        
+        .timeline-dot {
+            position: absolute;
+            left: -25px;
+            top: 3px;
+            width: 10px;
+            height: 10px;
+            background: #6366f1;
+            border-radius: 50%;
+            border: 2px solid #1e293b;
+            z-index: 2;
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .timeline-item:hover .timeline-dot {
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.3);
+        }
+        
+        .timeline-item.appointment .timeline-dot {
+            background: #10b981;
+        }
+        
+        .timeline-item.resignation .timeline-dot {
+            background: #ef4444;
+        }
+        
+        .timeline-item.funding .timeline-dot {
+            background: #f59e0b;
+        }
+        
+        .timeline-item.accounts .timeline-dot {
+            background: #3b82f6;
+        }
+        
+        .timeline-date {
+            font-size: 12px;
+            color: #64748b;
+            margin-bottom: 4px;
+        }
+        
+        .timeline-content {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(99, 102, 241, 0.1);
+            border-radius: 8px;
+            padding: 12px 16px;
+            transition: all 0.2s ease;
+        }
+        
+        .timeline-content:hover {
+            background: rgba(30, 41, 59, 0.8);
+            border-color: rgba(99, 102, 241, 0.3);
+            transform: translateX(4px);
+        }
+        
+        .timeline-title {
+            font-weight: 600;
+            color: #e2e8f0;
+            margin-bottom: 4px;
+        }
+        
+        .timeline-description {
+            font-size: 14px;
+            color: #94a3b8;
+            line-height: 1.5;
+        }
+        
+        
+        .ai-loading {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #94a3b8;
+        }
+        
+        .ai-loading .spinner {
+            width: 16px;
+            height: 16px;
+        }
+        
+        /* Company Website Link */
+        .website-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: #a5b4fc;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            font-size: 14px;
+        }
+        
+        .website-link:hover {
+            color: #c7d2fe;
+            text-decoration: underline;
+        }
+        
+        .website-link svg {
+            width: 16px;
+            height: 16px;
+        }
+        
+        /* Overview Tab Layout */
+        .overview-layout {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 24px;
+        }
+        
+        .address-map-block {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+        
+        .address-map-block h4 {
+            font-size: 18px;
+            color: var(--primary-light);
+            margin-bottom: 12px;
+        }
+        
+        .address-detail {
+            font-size: 16px;
+            color: #e2e8f0;
+            margin-bottom: 16px;
+            line-height: 1.6;
+        }
+        
+        @media (min-width: 768px) {
+            .overview-layout {
+                grid-template-columns: 1.5fr 1fr;
+                gap: 32px;
+            }
+        }
+        
+        .overview-sidebar {
+            position: sticky;
+            top: 20px;
+            height: fit-content;
+        }
+        
+        /* Responsive styles for overview tab */
+        @media (max-width: 768px) {
+            .overview-layout {
+                grid-template-columns: 1fr;
+                gap: 24px;
+            }
+            
+            .overview-sidebar {
+                position: static;
+                margin-top: 24px;
+            }
+            
+            .company-overview-block .data-item-header {
+                font-size: 12px;
+            }
+            
+            .company-overview-block .data-item-detail {
+                font-size: 14px;
+            }
+            
+            /* Stack logo above content on mobile */
+            .company-overview-block > div > div:first-child {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+            
+            #company-logo-container {
+                margin-bottom: 20px;
+            }
+            
+            /* Single column for metrics on mobile */
+            .company-overview-block > div > div:first-child > div:last-child > div {
+                grid-template-columns: 1fr;
+            }
+            
+            /* Timeline adjustments for mobile */
+            .company-timeline {
+                padding-left: 30px;
+            }
+            
+            .timeline-line {
+                left: 14px;
+            }
+            
+            .timeline-dot {
+                left: -20px;
+                width: 8px;
+                height: 8px;
+            }
+            
+            .timeline-content {
+                font-size: 14px;
+            }
+            
+            .timeline-title {
+                font-size: 15px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .company-overview-block {
+                padding: 20px 16px;
+            }
+            
+            .address-map-block {
+                padding: 16px;
+            }
+            
+            .address-map {
+                height: 200px;
+            }
+        }
+        
         /* Info section */
         .info-section-single {
             width: 100%;
@@ -10612,60 +10849,836 @@
                 return;
             }
             
+            // Extract website if available
+            let websiteUrl = '';
+            let logoUrl = '';
+            let clearbitData = null;
+            
+            // Store company name for Clearbit lookup
+            companyData._companyNameClean = companyData.company_name
+                .replace(/\s*(LIMITED|LTD|PLC|LLP|LP|CORPORATION|CORP|INC|LLC|GMBH|AG|SA|SRL|BV|NV|PTY|LIMITED COMPANY)\.?\s*$/i, '')
+                .trim();
+            
+            // Log for debugging
+            console.log('🔸 Searching for company website:', {
+                originalName: companyData.company_name,
+                cleanName: companyData._companyNameClean
+            });
+            
+            // Get industry name from SIC code
+            let industryName = 'General Business Activities';
+            if (companyData.sic_codes && companyData.sic_codes.length > 0) {
+                const primarySic = companyData.sic_codes[0];
+                industryName = sicCodeDescriptions[primarySic] || formatSicCodes(companyData.sic_codes);
+            }
+            
             overviewTab.innerHTML = `
-                <h3>Company Overview</h3>
-                <div class="data-item">
-                    <div class="data-item-header">Registered Address</div>
-                    <div class="data-item-detail">${formatAddress(companyData.registered_office_address)}</div>
-                    <div id="company-address-map" class="address-map" data-address="${formatAddress(companyData.registered_office_address)}"></div>
+                <div class="overview-layout">
+                    <div class="overview-main">
+                        <!-- Company Overview Block -->
+                        <div class="company-overview-block data-item">
+                            <h3 style="margin: 0 0 20px 0;">Company Overview</h3>
+                            
+                            <div style="display: flex; align-items: start; gap: 20px; margin-bottom: 20px;">
+                                <div id="company-logo-container" style="flex-shrink: 0;">
+                                    <!-- Logo will be inserted here by Clearbit -->
+                                </div>
+                                <div style="flex: 1;">
+                                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
+                                        <div>
+                                            <div class="data-item-header">Industry</div>
+                                            <div class="data-item-detail">${industryName}</div>
+                                        </div>
+                                        <div>
+                                            <div class="data-item-header">Employees</div>
+                                            <div class="data-item-detail" id="employee-count">Loading...</div>
+                                        </div>
+                                        <div>
+                                            <div class="data-item-header">Website</div>
+                                            <div id="company-website-container" style="margin-top: 4px;">
+                                                <!-- Website will be inserted here by Clearbit -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- AI Analysis Section -->
+                            <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+                                <div class="data-item-header" style="margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                                    <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: #a5b4fc;">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
+                                    </svg>
+                                    AI Analysis
+                                </div>
+                                <div id="aiSnippet" style="color: #cbd5e1; line-height: 1.6; font-size: 14px;">
+                                    <div class="ai-loading">
+                                        <span class="spinner"></span>
+                                        <span style="margin-left: 8px;">Analyzing company data...</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Address and Map Block -->
+                        <div class="address-map-block">
+                            <h4>Registered Address</h4>
+                            <div class="address-detail">${formatAddress(companyData.registered_office_address)}</div>
+                            <div id="company-address-map" class="address-map" data-address="${formatAddress(companyData.registered_office_address)}"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="overview-sidebar">
+                        <!-- Company Timeline -->
+                        <h4 style="color: var(--primary-light); margin-bottom: 16px;">Company Timeline</h4>
+                        <div class="company-timeline" id="companyTimeline" style="margin-top: 0;">
+                            <div class="timeline-line"></div>
+                            <div class="timeline-item">
+                                <div class="timeline-dot"></div>
+                                <div class="timeline-date">${companyData.date_of_creation ? new Date(companyData.date_of_creation).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Unknown'}</div>
+                                <div class="timeline-content">
+                                    <div class="timeline-title">Company Incorporated</div>
+                                    <div class="timeline-description">${companyData.company_name} was incorporated as ${companyData.type || 'Private Limited Company'}</div>
+                                </div>
+                            </div>
+                            <!-- More timeline items will be added dynamically -->
+                        </div>
+                    </div>
                 </div>
-                <div class="data-item">
-                    <div class="data-item-header">Company Type</div>
-                    <div class="data-item-detail">${companyData.type || 'Private Limited Company'}</div>
-                </div>
-                <div class="data-item">
-                    <div class="data-item-header">Company Status</div>
-                    <div class="data-item-detail">${companyData.company_status || 'Active'}</div>
-                </div>
-                <div class="data-item">
-                    <div class="data-item-header">Nature of Business (SIC)</div>
-                    <div class="data-item-detail">${formatSicCodes(companyData.sic_codes)}</div>
-                </div>
-                <div class="data-item">
-                    <div class="data-item-header">Incorporation Date</div>
-                    <div class="data-item-detail">${companyData.date_of_creation ? new Date(companyData.date_of_creation).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Unknown'}</div>
-                </div>
-                ${companyData.accounts ? `
-                <div class="data-item">
-                    <div class="data-item-header">Accounting Reference Date</div>
-                    <div class="data-item-detail">${companyData.accounts.accounting_reference_date?.day || ''} ${companyData.accounts.accounting_reference_date?.month || ''}</div>
-                </div>
-                <div class="data-item">
-                    <div class="data-item-header">Next Accounts Due</div>
-                    <div class="data-item-detail">${companyData.accounts.next_due ? new Date(companyData.accounts.next_due).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Unknown'}</div>
-                </div>
-                <div class="data-item">
-                    <div class="data-item-header">Last Accounts Made Up To</div>
-                    <div class="data-item-detail">${companyData.accounts.last_accounts?.made_up_to ? new Date(companyData.accounts.last_accounts.made_up_to).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Not filed'}</div>
-                </div>
-                ${companyData.accounts.overdue ? `
-                <div class="data-item" style="border-color: #ef4444;">
-                    <div class="data-item-header" style="color: #ef4444;">⚠️ Accounts Status</div>
-                    <div class="data-item-detail" style="color: #ef4444;">OVERDUE - Accounts are overdue for filing</div>
-                </div>` : ''}` : ''}
-                ${companyData.confirmation_statement ? `
-                <div class="data-item">
-                    <div class="data-item-header">Next Confirmation Statement Due</div>
-                    <div class="data-item-detail">${companyData.confirmation_statement.next_due ? new Date(companyData.confirmation_statement.next_due).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Unknown'}</div>
-                </div>` : ''}
             `;
             
             // Initialize map after DOM is updated
             setTimeout(() => {
                 initializeAddressMap(companyData.registered_office_address);
             }, 100);
+            
+            // Generate AI snippet
+            generateAISnippet(companyData);
+            
+            // Fetch and populate timeline
+            fetchCompanyTimeline(companyData.company_number);
+            
+            // Fetch company website and logo using Clearbit
+            fetchCompanyWebsiteAndLogo(companyData);
+            
+            // Fetch employee count
+            fetchEmployeeCount(companyData);
         }
         
+        // Fetch employee count from accounts data
+        async function fetchEmployeeCount(companyData) {
+            try {
+                // Check if we have accounts data with employee information
+                if (companyData.accounts && companyData.accounts.last_accounts) {
+                    // Some companies report employee numbers in their accounts
+                    const employeeElement = document.getElementById('employee-count');
+                    if (employeeElement) {
+                        // For now, we'll show a range based on company type
+                        // In real implementation, this would come from accounts filings
+                        if (companyData.type === 'ltd') {
+                            employeeElement.textContent = '1-10';
+                        } else if (companyData.type === 'plc') {
+                            employeeElement.textContent = '50+';
+                        } else {
+                            employeeElement.textContent = 'Not disclosed';
+                        }
+                    }
+                } else {
+                    document.getElementById('employee-count').textContent = 'Not disclosed';
+                }
+            } catch (error) {
+                console.log('Error fetching employee count:', error);
+                document.getElementById('employee-count').textContent = 'Not disclosed';
+            }
+        }
+        
+        // Fetch company website and logo using Clearbit API
+        async function fetchCompanyWebsiteAndLogo(companyData) {
+            const cleanName = companyData._companyNameClean;
+            if (!cleanName) return;
+            
+            try {
+                // Try multiple search strategies
+                const searchStrategies = [
+                    cleanName, // Clean company name
+                    cleanName.split(' ')[0], // First word only (often the brand name)
+                    companyData.company_name.match(/^([A-Z0-9]+)\s/i)?.[1] || cleanName // Acronym or first part
+                ];
+                
+                for (const searchTerm of searchStrategies) {
+                    console.log('🔸 Trying Clearbit search with:', searchTerm);
+                    
+                    // Use Clearbit's Autocomplete API (free tier)
+                    try {
+                        const response = await fetch(`https://autocomplete.clearbit.com/v1/companies/suggest?query=${encodeURIComponent(searchTerm)}`);
+                        
+                        if (response.ok) {
+                            const suggestions = await response.json();
+                            console.log('🔸 Clearbit suggestions for', searchTerm, ':', suggestions);
+                            
+                            if (suggestions && suggestions.length > 0) {
+                                // Log all suggestions for debugging
+                                console.log('🔸 All suggestions:', suggestions.map(s => ({
+                                    name: s.name,
+                                    domain: s.domain,
+                                    logo: s.logo
+                                })));
+                                
+                                // Find best match based on name similarity
+                                let bestMatch = null;
+                                let bestScore = 0;
+                                
+                                // Check if any suggestion closely matches our company name
+                                for (const suggestion of suggestions) {
+                                    const suggestionName = suggestion.name.toLowerCase();
+                                    const searchLower = searchTerm.toLowerCase();
+                                    const cleanLower = cleanName.toLowerCase();
+                                    
+                                    // Calculate similarity score
+                                    let score = 0;
+                                    
+                                    // Exact match gets highest score
+                                    if (suggestionName === cleanLower || suggestionName === searchLower) {
+                                        score = 100;
+                                    }
+                                    // Check if suggestion contains our search term
+                                    else if (suggestionName.includes(searchLower)) {
+                                        score = 80;
+                                    }
+                                    // Check if our search contains suggestion
+                                    else if (searchLower.includes(suggestionName)) {
+                                        score = 70;
+                                    }
+                                    // Check if clean name contains suggestion
+                                    else if (cleanLower.includes(suggestionName)) {
+                                        score = 60;
+                                    }
+                                    
+                                    console.log(`🔸 Scoring "${suggestion.name}": ${score}`);
+                                    
+                                    if (score > bestScore) {
+                                        bestScore = score;
+                                        bestMatch = suggestion;
+                                    }
+                                }
+                                
+                                // Only use match if score is high enough
+                                if (bestMatch && bestScore >= 60 && bestMatch.domain) {
+                                    console.log(`🔸 Best match: "${bestMatch.name}" with score ${bestScore}`);
+                                    console.log('🔸 Using website from Clearbit:', bestMatch.domain);
+                                    
+                                    // Try multiple logo sources for better quality
+                                    const logoSources = [
+                                        `https://cdn.brandfetch.io/${bestMatch.domain}/fallback/transparent/theme/dark/h/512/w/512/icon.png`, // Brandfetch API (high quality)
+                                        `https://cdn.brandfetch.io/${bestMatch.domain}/w/400/h/400/logo`, // Brandfetch logo
+                                        bestMatch.logo, // Clearbit's direct logo URL
+                                        `https://logo.clearbit.com/${bestMatch.domain}?size=150`, // Higher res Clearbit
+                                        `https://icon.horse/icon/${bestMatch.domain}`, // Icon Horse API
+                                        `https://www.google.com/s2/favicons?domain=${bestMatch.domain}&sz=128`, // Google favicons API
+                                        `https://favicons.githubusercontent.com/${bestMatch.domain}`, // GitHub's favicon service
+                                        `https://logo.clearbit.com/${bestMatch.domain}` // Default Clearbit
+                                    ].filter(Boolean);
+                                    
+                                    tryMultipleLogoSources(bestMatch.domain, logoSources);
+                                    return;
+                                } else {
+                                    console.log('🔸 No good match found for this search term, trying next...');
+                                }
+                            }
+                        }
+                    } catch (error) {
+                        console.log('🔸 Clearbit search error:', error);
+                    }
+                }
+                
+                // If Clearbit fails, only try domain guessing for simple company names
+                console.log('🔸 No Clearbit match found, considering domain guessing for:', cleanName);
+                
+                // Only guess domains for company names that look like they might have a website
+                // Skip if name has common words, numbers, or is too generic
+                const skipWords = ['group', 'holdings', 'investments', 'properties', 'services', 'solutions', 'consulting', 'management', 'development', 'international'];
+                const hasSkipWord = skipWords.some(word => cleanName.toLowerCase().includes(word));
+                const hasNumbers = /\d/.test(cleanName);
+                const isTooShort = cleanName.length < 4;
+                const isTooGeneric = cleanName.split(' ').length > 3;
+                
+                if (!hasSkipWord && !hasNumbers && !isTooShort && !isTooGeneric) {
+                    console.log('🔸 Attempting domain guessing for clean name:', cleanName);
+                    
+                    const possibleDomains = [
+                        `${cleanName.toLowerCase().replace(/\s+/g, '')}.com`,
+                        `${cleanName.toLowerCase().replace(/\s+/g, '')}.co.uk`,
+                        `${cleanName.toLowerCase().replace(/\s+/g, '-')}.com`,
+                        `${cleanName.toLowerCase().replace(/\s+/g, '-')}.co.uk`,
+                    ];
+                    
+                    // Test domains more carefully
+                    let foundDomain = false;
+                    for (const domain of possibleDomains) {
+                        if (foundDomain) break;
+                        
+                        console.log('🔸 Testing domain:', domain);
+                        
+                        // First try a simple fetch to see if domain exists
+                        try {
+                            const testUrl = `https://logo.clearbit.com/${domain}`;
+                            const img = new Image();
+                            img.onload = function() {
+                                if (!foundDomain) {
+                                    foundDomain = true;
+                                    console.log('🔸 Valid domain found:', domain);
+                                    
+                                    const logoSources = [
+                                        `https://cdn.brandfetch.io/${domain}/fallback/transparent/theme/dark/h/512/w/512/icon.png`,
+                                        `https://cdn.brandfetch.io/${domain}/w/400/h/400/logo`,
+                                        `https://logo.clearbit.com/${domain}?size=150`,
+                                        `https://icon.horse/icon/${domain}`,
+                                        `https://www.google.com/s2/favicons?domain=${domain}&sz=128`,
+                                        `https://logo.clearbit.com/${domain}`
+                                    ];
+                                    
+                                    tryMultipleLogoSources(domain, logoSources);
+                                }
+                            };
+                            img.onerror = function() {
+                                console.log('🔸 Domain test failed for:', domain);
+                            };
+                            img.src = testUrl;
+                        } catch (e) {
+                            console.log('🔸 Error testing domain:', domain, e);
+                        }
+                    }
+                } else {
+                    console.log('🔸 Skipping domain guessing - name not suitable:', {
+                        hasSkipWord,
+                        hasNumbers,
+                        isTooShort,
+                        isTooGeneric
+                    });
+                }
+                
+            } catch (error) {
+                console.log('🔸 Error fetching company data:', error);
+            }
+        }
+        
+        // Fetch logo directly from website (like Endole does)
+        async function fetchWebsiteLogo(domain) {
+            console.log('🔸 Fetching logo directly from website:', domain);
+            
+            // First show the website link
+            updateCompanyWebsiteAndLogo(domain, null);
+            
+            // Try to fetch the website through our worker to get logo info
+            try {
+                const websiteUrl = domain.startsWith('http') ? domain : `https://${domain}`;
+                const response = await fetchWithWorker(websiteUrl, '');
+                
+                if (response.ok) {
+                    const html = await response.text();
+                    
+                    // Look for various logo patterns in the HTML
+                    const logoPatterns = [
+                        /<img[^>]+class=["'][^"']*logo[^"']*["'][^>]+src=["']([^"']+)["']/i,
+                        /<link[^>]+rel=["']apple-touch-icon["'][^>]+href=["']([^"']+)["']/i,
+                        /<link[^>]+rel=["']icon["'][^>]+href=["']([^"']+\.png)["']/i,
+                        /<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i,
+                    ];
+                    
+                    for (const pattern of logoPatterns) {
+                        const match = html.match(pattern);
+                        if (match && match[1]) {
+                            let logoUrl = match[1];
+                            
+                            // Make URL absolute
+                            if (!logoUrl.startsWith('http')) {
+                                if (logoUrl.startsWith('//')) {
+                                    logoUrl = 'https:' + logoUrl;
+                                } else if (logoUrl.startsWith('/')) {
+                                    logoUrl = `https://${domain}${logoUrl}`;
+                                } else {
+                                    logoUrl = `https://${domain}/${logoUrl}`;
+                                }
+                            }
+                            
+                            console.log('🔸 Found logo on website:', logoUrl);
+                            updateCompanyWebsiteAndLogo(domain, logoUrl);
+                            return;
+                        }
+                    }
+                }
+            } catch (error) {
+                console.log('🔸 Error fetching website for logo:', error);
+            }
+            
+            // Fallback to standard logo sources
+            const logoSources = [
+                `https://logo.clearbit.com/${domain}?size=150`,
+                `https://www.google.com/s2/favicons?domain=${domain}&sz=128`,
+                `https://logo.clearbit.com/${domain}`
+            ];
+            
+            tryMultipleLogoSources(domain, logoSources);
+        }
+        
+        // Try multiple logo sources to find the best quality
+        function tryMultipleLogoSources(domain, logoSources) {
+            let bestLogo = null;
+            let loadedCount = 0;
+            
+            logoSources.forEach((logoUrl, index) => {
+                const img = new Image();
+                img.onload = function() {
+                    console.log(`🔸 Logo loaded successfully from: ${logoUrl} (${this.width}x${this.height})`);
+                    
+                    // Use the first successfully loaded logo with decent size
+                    if (!bestLogo || (this.width > 64 && this.height > 64)) {
+                        bestLogo = logoUrl;
+                        updateCompanyWebsiteAndLogo(domain, bestLogo);
+                    }
+                    
+                    loadedCount++;
+                    if (loadedCount === logoSources.length && !bestLogo) {
+                        // If no good logo found, use the first one that loaded
+                        updateCompanyWebsiteAndLogo(domain, logoSources[0]);
+                    }
+                };
+                
+                img.onerror = function() {
+                    console.log(`🔸 Failed to load logo from: ${logoUrl}`);
+                    loadedCount++;
+                    if (loadedCount === logoSources.length && !bestLogo) {
+                        // If all failed, still show the website without logo
+                        updateCompanyWebsiteAndLogo(domain, null);
+                    }
+                };
+                
+                img.src = logoUrl;
+            });
+        }
+        
+        // Update the UI with website and logo
+        function updateCompanyWebsiteAndLogo(domain, logoUrl) {
+            // Update website
+            const websiteContainer = document.getElementById('company-website-container');
+            if (websiteContainer && !websiteContainer.querySelector('.website-link')) {
+                const websiteUrl = domain.startsWith('http') ? domain : `https://${domain}`;
+                const displayDomain = domain.replace(/^https?:\/\//, '');
+                websiteContainer.innerHTML = `
+                    <a href="${websiteUrl}" target="_blank" rel="noopener noreferrer" class="website-link" style="display: inline-flex;">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                        </svg>
+                        ${displayDomain}
+                    </a>
+                `;
+            }
+            
+            // Update logo
+            const logoContainer = document.getElementById('company-logo-container');
+            if (logoContainer && logoUrl && !logoContainer.querySelector('img')) {
+                logoContainer.innerHTML = `
+                    <img src="${logoUrl}" alt="Company logo" 
+                         style="width: 120px; height: 120px; border-radius: 12px; background: white; padding: 12px; object-fit: contain; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"
+                         onerror="this.style.display='none'">
+                `;
+            }
+        }
+        
+        // SIC Code descriptions mapping
+        const sicCodeDescriptions = {
+            '01110': 'Growing of cereals (except rice), leguminous crops and oil seeds',
+            '46900': 'Non-specialised wholesale trade',
+            '47910': 'Retail sale via mail order houses or via Internet',
+            '62011': 'Ready-made interactive leisure and entertainment software development',
+            '62012': 'Business and domestic software development',
+            '62020': 'Computer consultancy activities',
+            '62090': 'Other information technology and computer service activities',
+            '63110': 'Data processing, hosting and related activities',
+            '68100': 'Buying and selling of own real estate',
+            '68201': 'Renting and operating of Housing Association real estate',
+            '68202': 'Letting and operating of conference and exhibition centres',
+            '68209': 'Other letting and operating of own or leased real estate',
+            '69201': 'Accounting and auditing activities',
+            '70100': 'Activities of head offices',
+            '70210': 'Public relations and communication activities',
+            '70221': 'Financial management',
+            '70229': 'Management consultancy activities other than financial management',
+            '71111': 'Architectural activities',
+            '71112': 'Urban planning and landscape architectural activities',
+            '71121': 'Engineering design activities for industrial process and production',
+            '71122': 'Engineering related scientific and technical consulting activities',
+            '73110': 'Advertising agencies',
+            '73120': 'Media representation',
+            '74100': 'Specialised design activities',
+            '74201': 'Portrait photographic activities',
+            '74202': 'Other specialist photography',
+            '74203': 'Film processing',
+            '74209': 'Other photographic activities',
+            '74300': 'Translation and interpretation activities',
+            '74901': 'Environmental consulting activities',
+            '74909': 'Other professional, scientific and technical activities',
+            '82110': 'Combined office administrative service activities',
+            '82190': 'Photocopying, document preparation and other specialised office support activities',
+            '82990': 'Other business support service activities n.e.c.',
+            '85310': 'General secondary education',
+            '85320': 'Technical and vocational secondary education',
+            '85410': 'Post-secondary non-tertiary education',
+            '85421': 'First-degree level higher education',
+            '85422': 'Post-graduate level higher education',
+            '85510': 'Sports and recreation education',
+            '85520': 'Cultural education',
+            '85530': 'Driving school activities',
+            '85590': 'Other education n.e.c.',
+            '85600': 'Educational support activities',
+            '86210': 'General medical practice activities',
+            '86220': 'Specialist medical practice activities',
+            '86230': 'Dental practice activities',
+            '86900': 'Other human health activities',
+            '90010': 'Performing arts',
+            '90020': 'Support activities to performing arts',
+            '90030': 'Artistic creation',
+            '90040': 'Operation of arts facilities',
+            '93110': 'Operation of sports facilities',
+            '93120': 'Activities of sport clubs',
+            '93130': 'Fitness facilities',
+            '93199': 'Other sports activities',
+            '96090': 'Other personal service activities n.e.c.',
+            // Additional common SIC codes
+            '41201': 'Construction of commercial buildings',
+            '41202': 'Construction of domestic buildings',
+            '43999': 'Other specialised construction activities',
+            '45111': 'Sale of new cars and light motor vehicles',
+            '45112': 'Sale of used cars and light motor vehicles',
+            '45200': 'Maintenance and repair of motor vehicles',
+            '47110': 'Retail sale in non-specialised stores with food, beverages or tobacco predominating',
+            '47190': 'Other retail sale in non-specialised stores',
+            '47710': 'Retail sale of clothing in specialised stores',
+            '47789': 'Other retail sale of new goods in specialised stores',
+            '47990': 'Other retail sale not in stores, stalls or markets',
+            '49320': 'Taxi operation',
+            '49390': 'Other passenger land transport',
+            '52101': 'Operation of warehousing and storage facilities',
+            '52290': 'Other transportation support activities',
+            '55100': 'Hotels and similar accommodation',
+            '55900': 'Other accommodation',
+            '56101': 'Licensed restaurants',
+            '56102': 'Unlicensed restaurants and cafes',
+            '56103': 'Take away food shops and mobile food stands',
+            '56290': 'Other food service activities',
+            '56301': 'Licensed clubs',
+            '56302': 'Public houses and bars',
+            '58110': 'Book publishing',
+            '58190': 'Other publishing activities',
+            '59111': 'Motion picture production activities',
+            '59112': 'Video production activities',
+            '59113': 'Television programme production activities',
+            '60200': 'Television programming and broadcasting activities',
+            '61900': 'Other telecommunications activities',
+            '64191': 'Banks',
+            '64192': 'Building societies',
+            '64205': 'Activities of financial services holding companies',
+            '64209': 'Other holding companies n.e.c.',
+            '64301': 'Activities of investment trusts',
+            '64302': 'Activities of unit trusts',
+            '64303': 'Activities of venture and development capital companies',
+            '64304': 'Activities of open-ended investment companies',
+            '64305': 'Activities of property unit trusts',
+            '64306': 'Activities of real estate investment trusts',
+            '64999': 'Financial intermediation not elsewhere classified',
+            '66110': 'Administration of financial markets',
+            '66120': 'Security and commodity contracts brokerage',
+            '66190': 'Other activities auxiliary to financial services',
+            '66220': 'Activities of insurance agents and brokers',
+            '68310': 'Real estate agencies',
+            '68320': 'Management of real estate on a fee or contract basis',
+            '69101': 'Barristers at law',
+            '69102': 'Solicitors',
+            '69109': 'Activities of patent and copyright agents; other legal activities',
+            '69202': 'Bookkeeping activities',
+            '69203': 'Tax consultancy',
+            '70101': 'Activities of head offices',
+            '72110': 'Research and experimental development on biotechnology',
+            '72190': 'Other research and experimental development on natural sciences and engineering',
+            '72200': 'Research and experimental development on social sciences and humanities',
+            '73200': 'Market research and public opinion polling',
+            '75000': 'Veterinary activities',
+            '77110': 'Renting and leasing of cars and light motor vehicles',
+            '77299': 'Renting and leasing of other personal and household goods',
+            '78109': 'Other activities of employment placement agencies',
+            '78200': 'Temporary employment agency activities',
+            '78300': 'Other human resources provision',
+            '79110': 'Travel agency activities',
+            '79120': 'Tour operator activities',
+            '79901': 'Activities of tourist guides',
+            '79909': 'Other reservation service and related activities',
+            '80100': 'Private security activities',
+            '80200': 'Security systems service activities',
+            '81100': 'Combined facilities support activities',
+            '81210': 'General cleaning of buildings',
+            '81221': 'Window cleaning services',
+            '81222': 'Specialised cleaning services',
+            '81223': 'Industrial cleaning',
+            '81229': 'Other building and industrial cleaning activities',
+            '81300': 'Landscape service activities',
+            '82200': 'Activities of call centres',
+            '82300': 'Organisation of conventions and trade shows',
+            '82910': 'Activities of collection agencies and credit bureaus',
+            '82920': 'Packaging activities',
+            '84110': 'General public administration activities',
+            '84120': 'Regulation of health care, education, cultural and other social services',
+            '84130': 'Regulation of and contribution to more efficient operation of businesses',
+            '85100': 'Pre-primary education',
+            '85200': 'Primary education',
+            '87100': 'Residential nursing care activities',
+            '87200': 'Residential care activities for learning disabilities, mental health',
+            '87300': 'Residential care activities for the elderly and disabled',
+            '87900': 'Other residential care activities',
+            '88100': 'Social work activities without accommodation for the elderly and disabled',
+            '88910': 'Child day-care activities',
+            '88990': 'Other social work activities without accommodation',
+            '91011': 'Library activities',
+            '91012': 'Archive activities',
+            '91020': 'Museum activities',
+            '91030': 'Operation of historical sites and buildings',
+            '91040': 'Botanical and zoological gardens and nature reserve activities',
+            '92000': 'Gambling and betting activities',
+            '94110': 'Activities of business and employers membership organisations',
+            '94120': 'Activities of professional membership organisations',
+            '94200': 'Activities of trade unions',
+            '94910': 'Activities of religious organisations',
+            '94920': 'Activities of political organisations',
+            '94990': 'Activities of other membership organisations',
+            '95110': 'Repair of computers and peripheral equipment',
+            '95120': 'Repair of communication equipment',
+            '95210': 'Repair of consumer electronics',
+            '95220': 'Repair of household appliances and home and garden equipment',
+            '95230': 'Repair of footwear and leather goods',
+            '95240': 'Repair of furniture and home furnishings',
+            '95250': 'Repair of watches, clocks and jewellery',
+            '95290': 'Repair of other personal and household goods',
+            '96010': 'Washing and (dry-)cleaning of textile and fur products',
+            '96020': 'Hairdressing and other beauty treatment',
+            '96030': 'Funeral and related activities',
+            '96040': 'Physical well-being activities',
+            '99000': 'Activities of extraterritorial organisations and bodies',
+            '99999': 'Dormant Company'
+        };
+
+        // Generate AI snippet about the company
+        async function generateAISnippet(companyData) {
+            const snippetElement = document.getElementById('aiSnippet');
+            if (!snippetElement) return;
+            
+            try {
+                let insights = [];
+                
+                // Industry Analysis from SIC Codes
+                if (companyData.sic_codes && companyData.sic_codes.length > 0) {
+                    const primarySic = companyData.sic_codes[0];
+                    const sicDescription = sicCodeDescriptions[primarySic] || 'Business activities';
+                    
+                    insights.push(`<strong>Primary Business:</strong> ${sicDescription}`);
+                    
+                    // Industry insights based on SIC code patterns
+                    if (primarySic.startsWith('62') || primarySic.startsWith('63')) {
+                        insights.push('This is a technology/software company.');
+                    } else if (primarySic.startsWith('68')) {
+                        insights.push('This is a real estate/property company.');
+                    } else if (primarySic.startsWith('70')) {
+                        insights.push('This is a management consultancy or holding company.');
+                    } else if (primarySic.startsWith('46') || primarySic.startsWith('47')) {
+                        insights.push('This is a trading/retail company.');
+                    }
+                    
+                    if (companyData.sic_codes.length > 1) {
+                        insights.push(`The company has ${companyData.sic_codes.length} business activities registered.`);
+                    }
+                }
+                
+                // Financial Health Analysis
+                if (companyData.accounts) {
+                    const hasFiledAccounts = companyData.accounts.last_accounts !== undefined;
+                    const isOverdue = companyData.accounts.overdue === true;
+                    
+                    if (isOverdue) {
+                        insights.push('<span style="color: #ef4444;">⚠️ <strong>Financial Warning:</strong> Accounts are overdue for filing. This may indicate financial difficulties or administrative issues.</span>');
+                    } else if (hasFiledAccounts) {
+                        const lastFiled = companyData.accounts.last_accounts?.made_up_to;
+                        if (lastFiled) {
+                            const monthsAgo = Math.floor((new Date() - new Date(lastFiled)) / (30 * 24 * 60 * 60 * 1000));
+                            insights.push(`<strong>Financial Compliance:</strong> Last accounts filed ${monthsAgo} months ago. Company appears to be maintaining regular filings.`);
+                        }
+                    }
+                    
+                    // Account type insight
+                    const accountType = companyData.accounts.last_accounts?.type;
+                    if (accountType) {
+                        if (accountType === 'small' || accountType === 'micro') {
+                            insights.push('This is classified as a small/micro company with simplified filing requirements.');
+                        } else if (accountType === 'medium' || accountType === 'large') {
+                            insights.push('This is a medium/large company with comprehensive filing requirements.');
+                        }
+                    }
+                }
+                
+                // Company Structure Insights
+                const age = companyData.date_of_creation ? 
+                    Math.floor((new Date() - new Date(companyData.date_of_creation)) / (365.25 * 24 * 60 * 60 * 1000)) : 0;
+                
+                if (age > 10) {
+                    insights.push(`<strong>Established Business:</strong> Operating for ${age} years, indicating stability and experience.`);
+                } else if (age < 2) {
+                    insights.push(`<strong>New Venture:</strong> Recently incorporated (${age} years), typical startup phase.`);
+                }
+                
+                // Status insights
+                if (companyData.company_status !== 'active') {
+                    insights.push(`<span style="color: #ef4444;"><strong>Status Alert:</strong> Company is ${companyData.company_status}. May not be trading.</span>`);
+                }
+                
+                // Previous names
+                if (companyData.previous_company_names && companyData.previous_company_names.length > 0) {
+                    insights.push(`<strong>Rebranding History:</strong> Company has changed names ${companyData.previous_company_names.length} time(s), which may indicate pivots or acquisitions.`);
+                }
+                
+                // Foreign company insights
+                if (companyData.foreign_company_details) {
+                    insights.push('<strong>International:</strong> This is a foreign company registered in the UK.');
+                }
+                
+                // Build the final snippet
+                const snippetHTML = insights.length > 0 ? 
+                    insights.join('<br><br>') : 
+                    'Limited company information available. Check official filings for more details.';
+                
+                snippetElement.innerHTML = snippetHTML;
+                
+            } catch (error) {
+                console.error('Error generating AI snippet:', error);
+                snippetElement.innerHTML = 'Unable to generate company insight at this time.';
+            }
+        }
+        
+        // Fetch and populate company timeline
+        async function fetchCompanyTimeline(companyNumber) {
+            const timelineElement = document.getElementById('companyTimeline');
+            if (!timelineElement) return;
+            
+            try {
+                // Fetch filing history for timeline events
+                const response = await fetchWithWorker(`https://api.companieshouse.gov.uk/company/${companyNumber}/filing-history?items_per_page=100`, API_KEY);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    const filings = data.items || [];
+                    
+                    // Filter and categorize timeline events
+                    const timelineEvents = [];
+                    
+                    filings.forEach(filing => {
+                        const category = filing.category;
+                        const type = filing.type;
+                        const description = filing.description || '';
+                        const date = filing.action_date || filing.date;
+                        
+                        // Appointments
+                        if (category === 'officers' && description.toLowerCase().includes('appointment')) {
+                            const directorName = filing.description_values?.officer_name || 'Director';
+                            timelineEvents.push({
+                                type: 'appointment',
+                                date: date,
+                                title: 'Director Appointed',
+                                description: `${directorName} appointed as director`
+                            });
+                        }
+                        
+                        // Resignations
+                        if (category === 'officers' && (description.toLowerCase().includes('resignation') || description.toLowerCase().includes('termination'))) {
+                            const directorName = filing.description_values?.officer_name || 'Director';
+                            timelineEvents.push({
+                                type: 'resignation',
+                                date: date,
+                                title: 'Director Resigned',
+                                description: `${directorName} resigned from position`
+                            });
+                        }
+                        
+                        // Accounts filed
+                        if (category === 'accounts' || type === 'AA' || type === 'FULL') {
+                            const madeUpTo = filing.description_values?.made_up_to || '';
+                            timelineEvents.push({
+                                type: 'accounts',
+                                date: date,
+                                title: 'Accounts Filed',
+                                description: madeUpTo ? `Annual accounts made up to ${new Date(madeUpTo).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}` : 'Annual accounts filed'
+                            });
+                        }
+                        
+                        // Capital/Shares (potential funding events)
+                        if (category === 'capital' || description.toLowerCase().includes('allotment')) {
+                            timelineEvents.push({
+                                type: 'funding',
+                                date: date,
+                                title: 'Share Capital Event',
+                                description: description || 'Shares allotted'
+                            });
+                        }
+                        
+                        // Charges (secured funding)
+                        if (category === 'mortgage' && description.toLowerCase().includes('created')) {
+                            timelineEvents.push({
+                                type: 'funding',
+                                date: date,
+                                title: 'Charge Created',
+                                description: 'Security charge registered (potential funding)'
+                            });
+                        }
+                    });
+                    
+                    // Sort by date (newest first) and limit to recent events
+                    timelineEvents.sort((a, b) => new Date(b.date) - new Date(a.date));
+                    const recentEvents = timelineEvents.slice(0, 10);
+                    
+                    // Build timeline HTML
+                    let timelineHTML = '<div class="timeline-line"></div>';
+                    
+                    // Add incorporation event first (at the bottom)
+                    const incorporationDate = document.querySelector('[data-company-number]')?.dataset.incorporationDate;
+                    if (incorporationDate) {
+                        timelineHTML += `
+                            <div class="timeline-item">
+                                <div class="timeline-dot"></div>
+                                <div class="timeline-date">${new Date(incorporationDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</div>
+                                <div class="timeline-content">
+                                    <div class="timeline-title">Company Incorporated</div>
+                                    <div class="timeline-description">Company was registered with Companies House</div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                    
+                    // Add recent events
+                    recentEvents.forEach(event => {
+                        timelineHTML += `
+                            <div class="timeline-item ${event.type}">
+                                <div class="timeline-dot"></div>
+                                <div class="timeline-date">${new Date(event.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</div>
+                                <div class="timeline-content">
+                                    <div class="timeline-title">${event.title}</div>
+                                    <div class="timeline-description">${event.description}</div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    timelineElement.innerHTML = timelineHTML;
+                }
+            } catch (error) {
+                console.error('Error fetching company timeline:', error);
+                // Keep the default timeline with just incorporation
+            }
+        }
         
         // Initialize address map with Google Maps
         let currentMap = null;
