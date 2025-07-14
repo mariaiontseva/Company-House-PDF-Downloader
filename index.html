@@ -11225,22 +11225,42 @@
         function tryMultipleLogoSources(domain, logoSources) {
             let bestLogo = null;
             let loadedCount = 0;
+            let loadedLogos = [];
             
+            // Add crossorigin attribute for CORS (but not for all sources as some don't support it)
             logoSources.forEach((logoUrl, index) => {
                 const img = new Image();
+                
+                // Only add crossOrigin for sources that support it
+                if (logoUrl.includes('clearbit.com') || logoUrl.includes('google.com')) {
+                    img.crossOrigin = 'anonymous';
+                }
+                
                 img.onload = function() {
                     console.log(`🔸 Logo loaded successfully from: ${logoUrl} (${this.width}x${this.height})`);
                     
-                    // Use the first successfully loaded logo with decent size
-                    if (!bestLogo || (this.width > 64 && this.height > 64)) {
-                        bestLogo = logoUrl;
+                    loadedLogos.push({
+                        url: logoUrl,
+                        width: this.width,
+                        height: this.height,
+                        size: this.width * this.height
+                    });
+                    
+                    // Sort by size and pick the best one
+                    loadedLogos.sort((a, b) => b.size - a.size);
+                    
+                    // Use logo with best size (prefer larger than 64x64)
+                    const goodLogo = loadedLogos.find(l => l.width >= 64 && l.height >= 64) || loadedLogos[0];
+                    
+                    if (goodLogo && goodLogo.url !== bestLogo) {
+                        bestLogo = goodLogo.url;
                         updateCompanyWebsiteAndLogo(domain, bestLogo);
                     }
                     
                     loadedCount++;
-                    if (loadedCount === logoSources.length && !bestLogo) {
+                    if (loadedCount === logoSources.length && !bestLogo && loadedLogos.length > 0) {
                         // If no good logo found, use the first one that loaded
-                        updateCompanyWebsiteAndLogo(domain, logoSources[0]);
+                        updateCompanyWebsiteAndLogo(domain, loadedLogos[0].url);
                     }
                 };
                 
@@ -11249,9 +11269,18 @@
                     loadedCount++;
                     if (loadedCount === logoSources.length && !bestLogo) {
                         // If all failed, still show the website without logo
+                        console.log('🔸 All logo sources failed, showing website only');
                         updateCompanyWebsiteAndLogo(domain, null);
                     }
                 };
+                
+                // Set timeout to prevent hanging
+                setTimeout(() => {
+                    if (!img.complete) {
+                        console.log(`🔸 Logo loading timeout: ${logoUrl}`);
+                        img.onerror();
+                    }
+                }, 5000);
                 
                 img.src = logoUrl;
             });
