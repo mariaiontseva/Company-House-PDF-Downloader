@@ -10,6 +10,18 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Health check route for Railway
+app.get('/', (req, res) => {
+  res.json({ 
+    status: 'ok', 
+    message: 'Companies API with OpenAI integration is running',
+    endpoints: {
+      companies: '/api/oldest, /api/newest, /api/search/:query',
+      openai: '/api/openai/completions'
+    }
+  });
+});
+
 // Your Railway MySQL connection
 const connection = mysql.createConnection({
   host: 'turntable.proxy.rlwy.net',
