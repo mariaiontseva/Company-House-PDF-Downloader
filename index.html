@@ -57,7 +57,7 @@
     </script>
     
     <!-- Configuration script - load first -->
-    <script src="config.js?v=6"></script>
+    <script src="config.js?v=7"></script>
     
     <!-- Google Maps JavaScript API -->
     <script>
@@ -11496,10 +11496,16 @@
 
         // Generate AI snippet about the company
         async function generateAISnippet(companyData) {
+            console.log('generateAISnippet called with:', companyData);
             const snippetElement = document.getElementById('aiSnippet');
-            if (!snippetElement) return;
+            if (!snippetElement) {
+                console.error('AI snippet element not found');
+                return;
+            }
             
             try {
+                console.log('AI Analysis enabled:', window.APP_CONFIG?.ENABLE_AI_ANALYSIS);
+                console.log('OpenAI Proxy URL:', window.APP_CONFIG?.OPENAI_PROXY_URL);
                 let insights = [];
                 
                 // Industry Analysis from SIC Codes
@@ -11581,7 +11587,45 @@
                     insights.join('<br><br>') : 
                     'Limited company information available. Check official filings for more details.';
                 
-                snippetElement.innerHTML = snippetHTML;
+                // If AI analysis is enabled and we have the proxy URL, use OpenAI
+                if (window.APP_CONFIG?.ENABLE_AI_ANALYSIS && window.APP_CONFIG?.OPENAI_PROXY_URL) {
+                    console.log('Making OpenAI API call...');
+                    try {
+                        const response = await fetch(`${window.APP_CONFIG.OPENAI_PROXY_URL}/api/openai/completions`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                model: 'gpt-3.5-turbo',
+                                messages: [{
+                                    role: 'user',
+                                    content: `Analyze this UK company and provide a single professional paragraph (3-4 sentences) highlighting the most interesting aspects: Company Name: ${companyData.company_name}, Status: ${companyData.company_status}, Type: ${companyData.type || 'Limited Company'}, Incorporated: ${companyData.date_of_creation}, Industry: ${insights.join(', ')}. Focus on what makes this company notable or interesting from a business perspective.`
+                                }],
+                                max_tokens: 150,
+                                temperature: 0.7
+                            })
+                        });
+
+                        if (response.ok) {
+                            const data = await response.json();
+                            const aiContent = data.choices[0].message.content;
+                            console.log('AI response received:', aiContent);
+                            snippetElement.innerHTML = `<p style="margin: 0;">${aiContent}</p>`;
+                        } else {
+                            console.error('AI API error:', response.status);
+                            // Fall back to rule-based snippet
+                            snippetElement.innerHTML = snippetHTML;
+                        }
+                    } catch (error) {
+                        console.error('Error calling OpenAI:', error);
+                        // Fall back to rule-based snippet
+                        snippetElement.innerHTML = snippetHTML;
+                    }
+                } else {
+                    // Use rule-based snippet if AI is disabled
+                    snippetElement.innerHTML = snippetHTML;
+                }
                 
             } catch (error) {
                 console.error('Error generating AI snippet:', error);
