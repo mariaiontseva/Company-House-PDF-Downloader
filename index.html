@@ -10631,6 +10631,9 @@
         function updateModalHeader(companyData) {
             console.log('🔸 updateModalHeader called with:', companyData.company_name);
             
+            // Store company data globally for AI snippet regeneration
+            window.currentModalCompanyData = companyData;
+            
             // Update SEO meta tags for this company
             updateCompanySEO(companyData);
             
@@ -10952,10 +10955,7 @@
                 initializeAddressMap(companyData.registered_office_address);
             }, 100);
             
-            // Generate AI snippet after fetching officers
-            setTimeout(() => {
-                generateAISnippet(companyData);
-            }, 2000);
+            // AI snippet will be generated after officers data is loaded
             
             // Fetch and populate timeline
             fetchCompanyTimeline(companyData.company_number);
@@ -11508,22 +11508,23 @@
             // Wait a bit for officers data to load
             await new Promise(resolve => setTimeout(resolve, 1500));
             
-            // Get the main director from the officers list
+            // Get the main director from the global officers data
             let mainDirector = null;
-            const officerElements = document.querySelectorAll('#companyModal .person-card');
-            console.log(`Found ${officerElements.length} officer elements`);
             
-            for (const element of officerElements) {
-                const roleElement = element.querySelector('.person-role');
-                const nameElement = element.querySelector('.person-name');
-                if (roleElement && nameElement) {
-                    console.log(`Officer: ${nameElement.textContent}, Role: ${roleElement.textContent}`);
-                    if (roleElement.textContent.includes('Director') && !element.classList.contains('resigned')) {
-                        mainDirector = nameElement.textContent.trim();
-                        console.log(`Selected main director: ${mainDirector}`);
-                        break;
-                    }
+            if (currentCompanyOfficers && currentCompanyOfficers.length > 0) {
+                // Find the first active director
+                const activeDirector = currentCompanyOfficers.find(officer => 
+                    officer.role && officer.role.toLowerCase().includes('director') && !officer.resigned
+                );
+                
+                if (activeDirector) {
+                    mainDirector = activeDirector.name;
+                    console.log(`Found main director from officers data: ${mainDirector}`);
+                } else {
+                    console.log('No active directors found in officers data');
                 }
+            } else {
+                console.log('No officers data available yet');
             }
             
             try {
@@ -13087,6 +13088,10 @@
             }
         }
         
+        // Global variables to store current company data
+        let currentCompanyOfficers = [];
+        window.currentModalCompanyData = null;
+        
         // Fetch and populate officers data
         async function fetchOfficers(companyNumber, incorporationDate) {
             try {
@@ -13120,6 +13125,10 @@
                         type: 'officer',
                         officerId: officer.links?.officer?.appointments ? officer.links.officer.appointments.split('/')[2] : null
                     }));
+                    
+                    // Store officers globally for AI snippet
+                    currentCompanyOfficers = officers;
+                    console.log(`Stored ${officers.length} officers globally`);
                     
                     // Update officers count in stat box (2nd box) - show total like Companies House
                     const officersBox = document.querySelector('#companyModal .stat-box:nth-child(2)');
@@ -13167,6 +13176,13 @@
                 }
                 
                 populateOfficersTab(officers, pscs, statements, companyNumber, incorporationDate);
+                
+                // Regenerate AI snippet now that we have officers data
+                const currentCompanyData = window.currentModalCompanyData;
+                if (currentCompanyData && officers.length > 0) {
+                    console.log('Regenerating AI snippet with officers data...');
+                    generateAISnippet(currentCompanyData);
+                }
                 
                 // Also enhance immediately if People tab is visible
                 setTimeout(() => {
