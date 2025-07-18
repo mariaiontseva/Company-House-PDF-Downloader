@@ -10823,6 +10823,59 @@
                 }
             }
             
+            // Update SIC code dropdown badge
+            const sicBadge = document.querySelector('#companyModal .dropdown-badge');
+            if (sicBadge && companyData.sic_codes && companyData.sic_codes.length > 0) {
+                const primarySic = companyData.sic_codes[0];
+                const sicDescription = sicCodeDescriptions[primarySic] || 'Business activities';
+                
+                // Get a short category name for the badge
+                let categoryName = 'Other Services';
+                if (primarySic.startsWith('62') || primarySic.startsWith('63')) {
+                    categoryName = 'Technology';
+                } else if (primarySic.startsWith('68')) {
+                    categoryName = 'Real Estate';
+                } else if (primarySic.startsWith('70')) {
+                    categoryName = 'Management';
+                } else if (primarySic.startsWith('46') || primarySic.startsWith('47')) {
+                    categoryName = 'Retail & Trade';
+                } else if (primarySic.startsWith('72')) {
+                    categoryName = 'Research & Development';
+                } else if (primarySic.startsWith('86') || primarySic.startsWith('87')) {
+                    categoryName = 'Healthcare';
+                } else if (primarySic.startsWith('41') || primarySic.startsWith('42') || primarySic.startsWith('43')) {
+                    categoryName = 'Construction';
+                } else if (primarySic.startsWith('56')) {
+                    categoryName = 'Food & Hospitality';
+                } else if (primarySic.startsWith('69')) {
+                    categoryName = 'Legal & Accounting';
+                } else if (primarySic.startsWith('74')) {
+                    categoryName = 'Professional Services';
+                } else if (primarySic.startsWith('82')) {
+                    categoryName = 'Business Support';
+                }
+                
+                // Update the badge text (keep the SVG)
+                const svgElement = sicBadge.querySelector('svg');
+                const tooltipElement = sicBadge.querySelector('.tooltip');
+                
+                sicBadge.innerHTML = categoryName;
+                if (svgElement) sicBadge.appendChild(svgElement);
+                
+                // Update or create tooltip
+                if (tooltipElement) {
+                    tooltipElement.textContent = `${primarySic} - ${sicDescription}`;
+                    sicBadge.appendChild(tooltipElement);
+                } else {
+                    const newTooltip = document.createElement('div');
+                    newTooltip.className = 'tooltip';
+                    newTooltip.textContent = `${primarySic} - ${sicDescription}`;
+                    sicBadge.appendChild(newTooltip);
+                }
+                
+                console.log(`🔸 Updated SIC badge: ${categoryName} (${primarySic})`);
+            }
+            
             // Update charges count (will be updated later when charges API returns)
             const chargesBox = document.querySelector('#companyModal .stat-box:nth-child(4)');
             if (chargesBox) {
@@ -14826,17 +14879,11 @@
         function formatSicCodes(sicCodes) {
             if (!sicCodes || sicCodes.length === 0) return 'No SIC codes available';
             
-            // Mock SIC code descriptions (in real implementation, you'd fetch these)
-            const sicDescriptions = {
-                '62020': 'Information technology consultancy activities',
-                '62090': 'Other information technology service activities',
-                '47110': 'Retail sale in non-specialised stores with food, beverages or tobacco predominating',
-                '47190': 'Other retail sale in non-specialised stores'
-            };
-            
-            return sicCodes.map(code => 
-                `${code} - ${sicDescriptions[code] || 'Business activity'}`
-            ).join('<br>');
+            // Use the comprehensive sicCodeDescriptions object
+            return sicCodes.map(code => {
+                const description = sicCodeDescriptions[code] || 'Business activity';
+                return `${code} - ${description}`;
+            }).join('<br>');
         }
         
         // Tab switching functionality for modal
