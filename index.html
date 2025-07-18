@@ -11508,23 +11508,45 @@
             // Wait a bit for officers data to load
             await new Promise(resolve => setTimeout(resolve, 1500));
             
-            // Get the main director from the global officers data
-            let mainDirector = null;
+            // Get PSC (Person with Significant Control) data
+            let pscInfo = '';
             
-            if (currentCompanyOfficers && currentCompanyOfficers.length > 0) {
-                // Find the first active director
-                const activeDirector = currentCompanyOfficers.find(officer => 
-                    officer.role && officer.role.toLowerCase().includes('director') && !officer.resigned
-                );
+            if (currentCompanyPSCs && currentCompanyPSCs.length > 0) {
+                // Format PSC information with ownership percentages
+                const activePSCs = currentCompanyPSCs.filter(psc => !psc.resigned);
                 
-                if (activeDirector) {
-                    mainDirector = activeDirector.name;
-                    console.log(`Found main director from officers data: ${mainDirector}`);
+                if (activePSCs.length > 0) {
+                    const pscDescriptions = activePSCs.map(psc => {
+                        let ownership = '';
+                        if (psc.naturesOfControl && psc.naturesOfControl.length > 0) {
+                            // Extract ownership percentage from natures of control
+                            const ownershipNature = psc.naturesOfControl.find(n => 
+                                n.includes('ownership') || n.includes('shares')
+                            );
+                            
+                            if (ownershipNature) {
+                                if (ownershipNature.includes('75%')) {
+                                    ownership = '75%+';
+                                } else if (ownershipNature.includes('50%')) {
+                                    ownership = '50-75%';
+                                } else if (ownershipNature.includes('25%')) {
+                                    ownership = '25-50%';
+                                } else {
+                                    ownership = 'significant';
+                                }
+                            }
+                        }
+                        
+                        return `${psc.name}${ownership ? ' (' + ownership + ')' : ''}`;
+                    });
+                    
+                    pscInfo = pscDescriptions.join(' and ');
+                    console.log(`PSC info: ${pscInfo}`);
                 } else {
-                    console.log('No active directors found in officers data');
+                    console.log('No active PSCs found');
                 }
             } else {
-                console.log('No officers data available yet');
+                console.log('No PSC data available yet');
             }
             
             try {
@@ -11599,7 +11621,7 @@
                                 model: 'gpt-3.5-turbo',
                                 messages: [{
                                     role: 'user',
-                                    content: `Write exactly 2 short sentences about ${companyData.company_name}. USE ONLY THESE FACTS: Industry="${industryType || 'business services'}", Age="${age} years", Status="${companyData.company_status}"${mainDirector ? `, Director="${mainDirector}"` : ', Director=unknown'}${companyData.previous_company_names?.length > 0 ? `, Renamed=${companyData.previous_company_names.length} times` : ''}. First sentence: company name + industry + age. Second sentence: director name + any notable fact. Do NOT add any information not provided.`
+                                    content: `Write exactly 2 short sentences about ${companyData.company_name}. USE ONLY THESE FACTS: Industry="${industryType || 'business services'}", Age="${age} years", Status="${companyData.company_status}"${pscInfo ? `, Control="${pscInfo}"` : ''}${companyData.previous_company_names?.length > 0 ? `, Renamed=${companyData.previous_company_names.length} times` : ''}. First sentence: company name + industry + age. Second sentence: ${pscInfo ? 'who controls the company (use "controlled by")' : 'mention status'} + any notable fact. Do NOT add any information not provided.`
                                 }],
                                 max_tokens: 60,
                                 temperature: 0.3
@@ -11623,10 +11645,10 @@
                     }
                 } else {
                     // Use rule-based snippet if AI is disabled
-                    // Add director info to the snippet
-                    if (mainDirector) {
-                        const directorInsight = `Led by ${mainDirector}.`;
-                        insights.splice(1, 0, directorInsight);
+                    // Add PSC info to the snippet
+                    if (pscInfo) {
+                        const pscInsight = `Controlled by ${pscInfo}.`;
+                        insights.splice(1, 0, pscInsight);
                     }
                     
                     // Keep it concise - just the first 2-3 insights
@@ -13090,6 +13112,7 @@
         
         // Global variables to store current company data
         let currentCompanyOfficers = [];
+        let currentCompanyPSCs = [];
         window.currentModalCompanyData = null;
         
         // Fetch and populate officers data
@@ -13162,6 +13185,10 @@
                         identification: psc.identification
                     })) : [];
                     console.log(`🔸 Found ${pscs.length} PSCs`);
+                    
+                    // Store PSCs globally for AI snippet
+                    currentCompanyPSCs = pscs;
+                    console.log(`Stored ${pscs.length} PSCs globally`);
                 }
                 
                 if (statementsResponse.ok) {
@@ -13177,10 +13204,10 @@
                 
                 populateOfficersTab(officers, pscs, statements, companyNumber, incorporationDate);
                 
-                // Regenerate AI snippet now that we have officers data
+                // Regenerate AI snippet now that we have officers and PSC data
                 const currentCompanyData = window.currentModalCompanyData;
-                if (currentCompanyData && officers.length > 0) {
-                    console.log('Regenerating AI snippet with officers data...');
+                if (currentCompanyData && (officers.length > 0 || pscs.length > 0)) {
+                    console.log('Regenerating AI snippet with officers and PSC data...');
                     generateAISnippet(currentCompanyData);
                 }
                 
