@@ -26,13 +26,32 @@ app.get('/', (req, res) => {
   });
 });
 
-// Your Railway MySQL connection
-const connection = mysql.createConnection({
-  host: 'turntable.proxy.rlwy.net',
-  port: 51124,
-  user: 'root',
-  password: 'FuEbybhbhPwJXtsPAqdKdXyvbyOCxVWc',
-  database: 'railway'
+// Create MySQL connection pool to handle reconnections
+const pool = mysql.createPool({
+  host: process.env.MYSQL_HOST || 'turntable.proxy.rlwy.net',
+  port: process.env.MYSQL_PORT || 51124,
+  user: process.env.MYSQL_USER || 'root',
+  password: process.env.MYSQL_PASSWORD || 'FuEbybhbhPwJXtsPAqdKdXyvbyOCxVWc',
+  database: process.env.MYSQL_DATABASE || 'railway',
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
+  enableKeepAlive: true,
+  keepAliveInitialDelay: 0
+});
+
+// Convert pool to promise-based for better error handling
+const promisePool = pool.promise();
+
+// Test database connection on startup
+pool.getConnection((err, connection) => {
+  if (err) {
+    console.error('Error connecting to MySQL:', err);
+    console.log('Server will continue running but database queries will fail');
+  } else {
+    console.log('Successfully connected to MySQL database');
+    connection.release();
+  }
 });
 
 // Get oldest companies with pagination
@@ -48,8 +67,11 @@ app.get('/api/oldest/:offset?', (req, res) => {
     LIMIT 5 OFFSET ?
   `;
   
-  connection.query(query, [offset], (err, results) => {
-    if (err) return res.status(500).json({ error: err.message });
+  pool.query(query, [offset], (err, results) => {
+    if (err) {
+      console.error('Database query error:', err);
+      return res.status(500).json({ error: 'Database query failed' });
+    }
     res.json(results);
   });
 });
@@ -67,8 +89,11 @@ app.get('/api/newest/:offset?', (req, res) => {
     LIMIT 5 OFFSET ?
   `;
   
-  connection.query(query, [offset], (err, results) => {
-    if (err) return res.status(500).json({ error: err.message });
+  pool.query(query, [offset], (err, results) => {
+    if (err) {
+      console.error('Database query error:', err);
+      return res.status(500).json({ error: 'Database query failed' });
+    }
     res.json(results);
   });
 });
@@ -85,8 +110,11 @@ app.get('/api/search/:query', (req, res) => {
   `;
   
   const searchTerm = `%${searchQuery}%`;
-  connection.query(query, [searchTerm, searchTerm], (err, results) => {
-    if (err) return res.status(500).json({ error: err.message });
+  pool.query(query, [searchTerm, searchTerm], (err, results) => {
+    if (err) {
+      console.error('Database query error:', err);
+      return res.status(500).json({ error: 'Database query failed' });
+    }
     res.json(results);
   });
 });
@@ -106,8 +134,11 @@ app.get('/api/oldest-plc/:limit?', (req, res) => {
     LIMIT ?
   `;
   
-  connection.query(query, [limit], (err, results) => {
-    if (err) return res.status(500).json({ error: err.message });
+  pool.query(query, [limit], (err, results) => {
+    if (err) {
+      console.error('Database query error:', err);
+      return res.status(500).json({ error: 'Database query failed' });
+    }
     res.json(results);
   });
 });
@@ -122,8 +153,11 @@ app.get('/api/stats', (req, res) => {
     FROM companies
   `;
   
-  connection.query(query, (err, results) => {
-    if (err) return res.status(500).json({ error: err.message });
+  pool.query(query, (err, results) => {
+    if (err) {
+      console.error('Database query error:', err);
+      return res.status(500).json({ error: 'Database query failed' });
+    }
     res.json(results[0]);
   });
 });
@@ -199,7 +233,38 @@ app.post('/api/openai/completions', async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+const PORT = process.env.PORT || 8080;
+const server = app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('SIGTERM signal received: closing HTTP server and database pool');
+  server.close(() => {
+    console.log('HTTP server closed');
+    pool.end((err) => {
+      if (err) {
+        console.error('Error closing database pool:', err);
+      } else {
+        console.log('Database pool closed');
+      }
+      process.exit(0);
+    });
+  });
+});
+
+process.on('SIGINT', () => {
+  console.log('SIGINT signal received: closing HTTP server and database pool');
+  server.close(() => {
+    console.log('HTTP server closed');
+    pool.end((err) => {
+      if (err) {
+        console.error('Error closing database pool:', err);
+      } else {
+        console.log('Database pool closed');
+      }
+      process.exit(0);
+    });
+  });
 });
