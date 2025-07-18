@@ -10952,8 +10952,10 @@
                 initializeAddressMap(companyData.registered_office_address);
             }, 100);
             
-            // Generate AI snippet
-            generateAISnippet(companyData);
+            // Generate AI snippet after fetching officers
+            setTimeout(() => {
+                generateAISnippet(companyData);
+            }, 2000);
             
             // Fetch and populate timeline
             fetchCompanyTimeline(companyData.company_number);
@@ -11509,12 +11511,18 @@
             // Get the main director from the officers list
             let mainDirector = null;
             const officerElements = document.querySelectorAll('#companyModal .person-card');
+            console.log(`Found ${officerElements.length} officer elements`);
+            
             for (const element of officerElements) {
                 const roleElement = element.querySelector('.person-role');
                 const nameElement = element.querySelector('.person-name');
-                if (roleElement && nameElement && roleElement.textContent.includes('Director') && !element.classList.contains('resigned')) {
-                    mainDirector = nameElement.textContent.trim();
-                    break;
+                if (roleElement && nameElement) {
+                    console.log(`Officer: ${nameElement.textContent}, Role: ${roleElement.textContent}`);
+                    if (roleElement.textContent.includes('Director') && !element.classList.contains('resigned')) {
+                        mainDirector = nameElement.textContent.trim();
+                        console.log(`Selected main director: ${mainDirector}`);
+                        break;
+                    }
                 }
             }
             
@@ -11529,20 +11537,12 @@
                     const primarySic = companyData.sic_codes[0];
                     const sicDescription = sicCodeDescriptions[primarySic] || 'Business activities';
                     
-                    // Create a concise industry description
+                    // Use the actual SIC description but make it concise
                     industryType = sicDescription.toLowerCase();
-                    if (primarySic.startsWith('62') || primarySic.startsWith('63')) {
-                        industryType = 'technology';
-                    } else if (primarySic.startsWith('68')) {
-                        industryType = 'real estate';
-                    } else if (primarySic.startsWith('70')) {
-                        industryType = 'management consultancy';
-                    } else if (primarySic.startsWith('46') || primarySic.startsWith('47')) {
-                        industryType = 'trading/retail';
-                    } else if (primarySic.startsWith('86') || primarySic.startsWith('87')) {
-                        industryType = 'healthcare';
-                    } else if (primarySic.startsWith('72')) {
-                        industryType = 'research & development';
+                    
+                    // For SIC 72110 specifically (Mitocholine's code)
+                    if (primarySic === '72110') {
+                        industryType = 'biotechnology research';
                     }
                 }
                 
@@ -11598,10 +11598,10 @@
                                 model: 'gpt-3.5-turbo',
                                 messages: [{
                                     role: 'user',
-                                    content: `Write exactly 2 sentences (40 words max) about this UK company. Facts: ${companyData.company_name}, ${industryType || 'business services'}, ${age} years old${mainDirector ? `, director: ${mainDirector}` : ''}${companyData.previous_company_names?.length > 0 ? ', renamed ' + companyData.previous_company_names.length + ' times' : ''}. Mention the industry focus and operating history in sentence 1, and the director plus any notable aspect in sentence 2.`
+                                    content: `Write exactly 2 short sentences about ${companyData.company_name}. USE ONLY THESE FACTS: Industry="${industryType || 'business services'}", Age="${age} years", Status="${companyData.company_status}"${mainDirector ? `, Director="${mainDirector}"` : ', Director=unknown'}${companyData.previous_company_names?.length > 0 ? `, Renamed=${companyData.previous_company_names.length} times` : ''}. First sentence: company name + industry + age. Second sentence: director name + any notable fact. Do NOT add any information not provided.`
                                 }],
-                                max_tokens: 100,
-                                temperature: 0.7
+                                max_tokens: 60,
+                                temperature: 0.3
                             })
                         });
 
