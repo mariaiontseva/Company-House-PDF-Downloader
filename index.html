@@ -11598,7 +11598,7 @@
                                 model: 'gpt-3.5-turbo',
                                 messages: [{
                                     role: 'user',
-                                    content: `Write a concise 2-3 sentence summary of this UK company: ${companyData.company_name} is ${companyData.company_status === 'Active' ? 'an active' : 'a ' + companyData.company_status.toLowerCase()} ${companyData.type || 'company'} incorporated in ${new Date(companyData.date_of_creation).getFullYear()}, operating in ${industryType || 'business services'}${mainDirector ? `, led by ${mainDirector}` : ''}. Highlight what makes it notable - focus on industry position, longevity, or business focus. Keep it under 50 words.`
+                                    content: `Write exactly 2 sentences (40 words max) about this UK company. Facts: ${companyData.company_name}, ${industryType || 'business services'}, ${age} years old${mainDirector ? `, director: ${mainDirector}` : ''}${companyData.previous_company_names?.length > 0 ? ', renamed ' + companyData.previous_company_names.length + ' times' : ''}. Mention the industry focus and operating history in sentence 1, and the director plus any notable aspect in sentence 2.`
                                 }],
                                 max_tokens: 100,
                                 temperature: 0.7
