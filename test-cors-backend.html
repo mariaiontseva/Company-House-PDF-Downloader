@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test CORS and Backend</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .success { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
+        .info { color: blue; }
+        .warning { color: orange; font-weight: bold; }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .response-details {
+            background: #f0f0f0;
+            padding: 10px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test CORS and Backend Configuration</h1>
+    
+    <div class="test-section">
+        <h2>Backend Status Check</h2>
+        <button onclick="checkBackendHealth()">Check Backend Health</button>
+        <button onclick="testCORSPreflight()">Test CORS Preflight</button>
+        <button onclick="testOpenAIEndpoint()">Test OpenAI Endpoint</button>
+        <button onclick="clearResults()">Clear Results</button>
+    </div>
+    
+    <div id="results" class="test-section">
+        <h2>Test Results</h2>
+        <div id="output"></div>
+    </div>
+    
+    <script>
+        const output = document.getElementById('output');
+        const BACKEND_URL = 'https://company-house-pdf-downloader-production.up.railway.app';
+        
+        function log(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = type;
+            div.innerHTML = message;
+            output.appendChild(div);
+        }
+        
+        function clearResults() {
+            output.innerHTML = '';
+        }
+        
+        async function checkBackendHealth() {
+            clearResults();
+            log('<h3>Checking Backend Health...</h3>');
+            
+            try {
+                log(`Fetching: ${BACKEND_URL}/`);
+                const response = await fetch(BACKEND_URL + '/', {
+                    method: 'GET',
+                    mode: 'cors'
+                });
+                
+                log(`Status: ${response.status} ${response.statusText}`);
+                
+                // Check CORS headers
+                const corsHeaders = {
+                    'Access-Control-Allow-Origin': response.headers.get('access-control-allow-origin'),
+                    'Access-Control-Allow-Methods': response.headers.get('access-control-allow-methods'),
+                    'Access-Control-Allow-Headers': response.headers.get('access-control-allow-headers')
+                };
+                
+                log('\nCORS Headers:');
+                for (const [header, value] of Object.entries(corsHeaders)) {
+                    if (value) {
+                        log(`${header}: ${value}`, 'info');
+                    } else {
+                        log(`${header}: Not present`, 'warning');
+                    }
+                }
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log('\n✅ Backend is running!', 'success');
+                    log('\nResponse data:', 'info');
+                    const detailsDiv = document.createElement('div');
+                    detailsDiv.className = 'response-details';
+                    detailsDiv.textContent = JSON.stringify(data, null, 2);
+                    output.appendChild(detailsDiv);
+                } else {
+                    log(`❌ Backend returned error: ${response.status}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Failed to reach backend: ${error.message}`, 'error');
+                if (error.message.includes('Failed to fetch')) {
+                    log('The backend might be down or not deployed yet', 'warning');
+                }
+            }
+        }
+        
+        async function testCORSPreflight() {
+            clearResults();
+            log('<h3>Testing CORS Preflight Request...</h3>');
+            
+            try {
+                log(`Sending OPTIONS request to: ${BACKEND_URL}/api/openai/completions`);
+                
+                const response = await fetch(`${BACKEND_URL}/api/openai/completions`, {
+                    method: 'OPTIONS',
+                    headers: {
+                        'Origin': 'https://docspace.uk',
+                        'Access-Control-Request-Method': 'POST',
+                        'Access-Control-Request-Headers': 'content-type'
+                    }
+                });
+                
+                log(`Preflight Status: ${response.status}`);
+                
+                const headers = {
+                    'Access-Control-Allow-Origin': response.headers.get('access-control-allow-origin'),
+                    'Access-Control-Allow-Methods': response.headers.get('access-control-allow-methods'),
+                    'Access-Control-Allow-Headers': response.headers.get('access-control-allow-headers'),
+                    'Access-Control-Max-Age': response.headers.get('access-control-max-age')
+                };
+                
+                log('\nPreflight Response Headers:');
+                for (const [header, value] of Object.entries(headers)) {
+                    if (value) {
+                        log(`${header}: ${value}`, 'info');
+                    } else {
+                        log(`${header}: Not present`, 'warning');
+                    }
+                }
+                
+                if (response.status === 204 || response.status === 200) {
+                    log('\n✅ CORS preflight passed!', 'success');
+                } else {
+                    log('\n❌ CORS preflight failed', 'error');
+                }
+                
+            } catch (error) {
+                log(`❌ Preflight request failed: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testOpenAIEndpoint() {
+            clearResults();
+            log('<h3>Testing OpenAI Endpoint...</h3>');
+            
+            try {
+                const testPayload = {
+                    model: 'gpt-3.5-turbo',
+                    messages: [
+                        {
+                            role: 'system',
+                            content: 'You are a test assistant. Reply with exactly: "CORS test successful"'
+                        },
+                        {
+                            role: 'user',
+                            content: 'Test message'
+                        }
+                    ],
+                    temperature: 0,
+                    max_tokens: 10
+                };
+                
+                log(`Sending POST to: ${BACKEND_URL}/api/openai/completions`);
+                log('Payload:', 'info');
+                const payloadDiv = document.createElement('div');
+                payloadDiv.className = 'response-details';
+                payloadDiv.textContent = JSON.stringify(testPayload, null, 2);
+                output.appendChild(payloadDiv);
+                
+                const response = await fetch(`${BACKEND_URL}/api/openai/completions`, {
+                    method: 'POST',
+                    mode: 'cors',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(testPayload)
+                });
+                
+                log(`\nResponse Status: ${response.status}`);
+                
+                // Check response headers
+                const responseHeaders = {
+                    'Content-Type': response.headers.get('content-type'),
+                    'Access-Control-Allow-Origin': response.headers.get('access-control-allow-origin'),
+                    'Access-Control-Allow-Credentials': response.headers.get('access-control-allow-credentials')
+                };
+                
+                log('\nResponse Headers:');
+                for (const [header, value] of Object.entries(responseHeaders)) {
+                    if (value) {
+                        log(`${header}: ${value}`, 'info');
+                    }
+                }
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log('\n✅ OpenAI endpoint working!', 'success');
+                    
+                    if (data.choices && data.choices[0]) {
+                        log('\nAI Response:', 'info');
+                        const aiDiv = document.createElement('div');
+                        aiDiv.className = 'response-details';
+                        aiDiv.textContent = data.choices[0].message.content;
+                        output.appendChild(aiDiv);
+                    }
+                } else {
+                    const errorText = await response.text();
+                    log(`\n❌ OpenAI endpoint error: ${response.status}`, 'error');
+                    log('Error details:', 'error');
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'response-details';
+                    errorDiv.textContent = errorText;
+                    output.appendChild(errorDiv);
+                }
+                
+            } catch (error) {
+                log(`\n❌ Request failed: ${error.message}`, 'error');
+                console.error('Full error:', error);
+                
+                if (error.message.includes('Failed to fetch')) {
+                    log('\nPossible causes:', 'warning');
+                    log('1. Backend is not running', 'warning');
+                    log('2. CORS is blocking the request', 'warning');
+                    log('3. Network connectivity issue', 'warning');
+                }
+            }
+        }
+        
+        // Show current origin
+        window.addEventListener('DOMContentLoaded', () => {
+            log(`Current page origin: ${window.location.origin}`, 'info');
+            log(`Testing against backend: ${BACKEND_URL}`, 'info');
+            log('\nClick the buttons above to run tests.', 'info');
+        });
+    </script>
+</body>
+</html>

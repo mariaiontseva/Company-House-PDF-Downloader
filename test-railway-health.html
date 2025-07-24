@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Railway Health</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test { margin: 20px 0; padding: 15px; background: #f0f0f0; }
+        .success { color: green; }
+        .error { color: red; }
+        button { padding: 10px 20px; margin: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Test Railway Backend Health</h1>
+    
+    <button onclick="testRailwayAPI()">Test Railway API</button>
+    <button onclick="testOpenAIDirect()">Test OpenAI Direct</button>
+    
+    <div id="results"></div>
+    
+    <script>
+        const results = document.getElementById('results');
+        
+        async function testRailwayAPI() {
+            results.innerHTML = '<div class="test">Testing Railway API endpoint...</div>';
+            
+            try {
+                // Test the companies API endpoint that we know was working
+                const response = await fetch('https://companies-api-production-68c2.up.railway.app/api/oldest');
+                
+                results.innerHTML += `<div class="test">Status: ${response.status}</div>`;
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    results.innerHTML += '<div class="test success">✅ Railway API is working!</div>';
+                    results.innerHTML += `<div class="test">Found ${data.length} companies</div>`;
+                } else {
+                    results.innerHTML += '<div class="test error">❌ Railway API returned error</div>';
+                }
+            } catch (error) {
+                results.innerHTML += `<div class="test error">❌ Failed to reach Railway: ${error.message}</div>`;
+            }
+        }
+        
+        async function testOpenAIDirect() {
+            results.innerHTML = '<div class="test">Testing OpenAI endpoint directly...</div>';
+            
+            // First check if the main Railway app is up
+            try {
+                const healthResponse = await fetch('https://company-house-pdf-downloader-production.up.railway.app/');
+                results.innerHTML += `<div class="test">Health check status: ${healthResponse.status}</div>`;
+                
+                if (!healthResponse.ok) {
+                    results.innerHTML += '<div class="test error">❌ Main app is not responding</div>';
+                    return;
+                }
+                
+                // Now test OpenAI endpoint
+                const testPayload = {
+                    model: 'gpt-3.5-turbo',
+                    messages: [{
+                        role: 'user',
+                        content: 'Reply with: test successful'
+                    }],
+                    max_tokens: 10
+                };
+                
+                const response = await fetch('https://company-house-pdf-downloader-production.up.railway.app/api/openai/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(testPayload)
+                });
+                
+                results.innerHTML += `<div class="test">OpenAI endpoint status: ${response.status}</div>`;
+                
+                if (response.ok) {
+                    results.innerHTML += '<div class="test success">✅ OpenAI endpoint accessible</div>';
+                } else {
+                    const error = await response.text();
+                    results.innerHTML += `<div class="test error">❌ OpenAI error: ${error}</div>`;
+                }
+                
+            } catch (error) {
+                results.innerHTML += `<div class="test error">❌ Error: ${error.message}</div>`;
+            }
+        }
+    </script>
+</body>
+</html>
