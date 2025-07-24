@@ -15544,13 +15544,6 @@
                 html += '</div>';
             }
             
-            // Asset changes
-            if (assetsMetric.percent !== 0) {
-                html += '<div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0;">';
-                html += '<span style="color: #94a3b8; font-size: 12px;">Asset Growth</span>';
-                html += `<span style="font-weight: 600; font-size: 14px; color: ${assetsMetric.isIncrease ? '#34d399' : '#f87171'};">${assetsMetric.isIncrease ? '+' : ''}${assetsMetric.percent.toFixed(1)}%</span>`;
-                html += '</div>';
-            }
             
             html += '</div>';
             html += '</div>'; // End scrollable section
