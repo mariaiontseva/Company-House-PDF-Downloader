@@ -7,7 +7,15 @@ require('dotenv').config();
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 
 const app = express();
-app.use(cors());
+
+// Configure CORS to allow requests from production domain
+app.use(cors({
+  origin: ['https://docspace.uk', 'http://localhost:8080', 'http://localhost:3000'],
+  credentials: true,
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 app.use(express.json());
 
 // Health check route for Railway

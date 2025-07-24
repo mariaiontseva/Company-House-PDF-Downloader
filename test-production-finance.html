@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Production Finance Loading</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .success { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
+        .info { color: blue; }
+        .url-display {
+            background: #f0f0f0;
+            padding: 10px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 12px;
+            word-break: break-all;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .data-display {
+            background: #e8f5e9;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test Production Finance Data Loading</h1>
+    
+    <div class="test-section">
+        <h2>Test Configuration</h2>
+        <p>Company: 09051662 (MITOCHOLINE LTD)</p>
+        <p>This test will verify that financial data loads correctly on production.</p>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test Controls</h2>
+        <button onclick="testProduction()">Test Production URLs</button>
+        <button onclick="clearResults()">Clear Results</button>
+    </div>
+    
+    <div id="results" class="test-section">
+        <h2>Test Results</h2>
+        <div id="output"></div>
+    </div>
+    
+    <!-- Load the actual production scripts -->
+    <script src="real-xbrl-parser.js"></script>
+    <script src="finance-parser-minimal.js"></script>
+    
+    <script>
+        const output = document.getElementById('output');
+        
+        function log(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = type;
+            div.innerHTML = message;
+            output.appendChild(div);
+        }
+        
+        function clearResults() {
+            output.innerHTML = '';
+        }
+        
+        async function testProduction() {
+            clearResults();
+            log('<h3>Testing Production Finance Data Loading...</h3>');
+            
+            const COMPANY_NUMBER = '09051662';
+            
+            try {
+                // Test 1: Check if FinanceParser is loaded
+                log('Checking FinanceParser availability...');
+                if (typeof FinanceParser !== 'undefined') {
+                    log('✅ FinanceParser is loaded', 'success');
+                } else {
+                    log('❌ FinanceParser is not loaded', 'error');
+                    return;
+                }
+                
+                // Test 2: Check if we're using production URLs
+                log('\nChecking proxy URL configuration...');
+                const proxyUrl = FinanceParser.PROXY_URL;
+                log(`Proxy URL: ${proxyUrl}`);
+                
+                if (proxyUrl.includes('blue-flower')) {
+                    log('✅ Using production Cloudflare Worker', 'success');
+                } else {
+                    log('⚠️ Not using production URL', 'error');
+                }
+                
+                // Test 3: Call FinanceParser.extractFinancialData
+                log('\nCalling FinanceParser.extractFinancialData...');
+                const startTime = Date.now();
+                
+                const result = await FinanceParser.extractFinancialData(COMPANY_NUMBER);
+                
+                const elapsed = Date.now() - startTime;
+                log(`Completed in ${elapsed}ms`);
+                
+                // Test 4: Check the results
+                log('\n<h4>Results Analysis:</h4>');
+                
+                if (result.historicalData && result.historicalData.length > 0) {
+                    log(`✅ Found ${result.historicalData.length} years of financial data`, 'success');
+                    
+                    // Display the data
+                    const dataDiv = document.createElement('div');
+                    dataDiv.className = 'data-display';
+                    dataDiv.innerHTML = '<h4>Financial Data Retrieved:</h4>';
+                    
+                    result.historicalData.forEach(yearData => {
+                        const yearDiv = document.createElement('div');
+                        yearDiv.style.marginBottom = '10px';
+                        yearDiv.innerHTML = `
+                            <strong>${yearData.year}:</strong><br>
+                            - Total Assets: £${(yearData.metrics.totalAssets?.value || 0).toLocaleString()}<br>
+                            - Net Assets: £${(yearData.metrics.netAssets?.value || 0).toLocaleString()}<br>
+                            - Total Liabilities: £${(yearData.metrics.totalLiabilities?.value || 0).toLocaleString()}<br>
+                            - Employees: ${yearData.metrics.employees?.value || 'N/A'}
+                        `;
+                        dataDiv.appendChild(yearDiv);
+                    });
+                    
+                    output.appendChild(dataDiv);
+                    
+                    log('\n✅ Financial data is loading correctly on production!', 'success');
+                } else {
+                    log('❌ No financial data returned', 'error');
+                    log('This indicates the URLs are still returning 404 errors', 'error');
+                    
+                    // Show what we got back
+                    log('\nDebug info:');
+                    log(`Total filings: ${result.totalFilings}`);
+                    log(`Filings with data: ${result.filingsWithData}`);
+                    
+                    // Check if we're getting mock data
+                    if (result.historicalData && result.historicalData.length > 0) {
+                        const firstYear = result.historicalData[0];
+                        if (firstYear.year === '2024' && firstYear.metrics.totalAssets?.value === 176195) {
+                            log('⚠️ Getting mock/fallback data, not real XBRL data', 'error');
+                        }
+                    }
+                }
+                
+            } catch (error) {
+                log(`❌ Error: ${error.message}`, 'error');
+                console.error('Full error:', error);
+            }
+        }
+        
+        // Run test automatically on load
+        window.addEventListener('DOMContentLoaded', () => {
+            log('Page loaded. Click "Test Production URLs" to begin.');
+        });
+    </script>
+</body>
+</html>

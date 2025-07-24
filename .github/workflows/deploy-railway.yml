@@ -1,8 +1,12 @@
-name: Deploy to Railway
+name: Deploy Backend to Railway
 
 on:
   push:
     branches: [ PDF ]
+    paths:
+      - 'index.js'
+      - 'package.json'
+      - 'package-lock.json'
   workflow_dispatch:
 
 jobs:
