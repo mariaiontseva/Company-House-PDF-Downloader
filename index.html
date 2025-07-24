@@ -667,6 +667,12 @@
             100% { transform: rotate(360deg); }
         }
         
+        /* Desktop nav auth container */
+        #navAuthContainer {
+            display: flex !important;
+            align-items: center;
+        }
+        
         /* Responsive Nav Styles */
         @media (max-width: 768px) {
             .sticky-nav {
@@ -694,6 +700,7 @@
                 height: 20px;
             }
             
+            /* Hide nav auth on mobile - button is in mobile menu instead */
             #navAuthContainer {
                 display: none !important;
             }
@@ -1647,9 +1654,25 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <script src="https://js.stripe.com/v3/"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="enhanced-xbrl-parser.js?v=20250706-3"></script>
+    <script src="real-xbrl-parser.js?v=20250720-5"></script>
+    <script src="enhanced-xbrl-parser.js?v=20250720-4"></script>
     <script src="enhanced-pdf-parser.js?v=20250706-1"></script>
-    <script src="finance-parser.js?v=20250706-5"></script>
+    <script src="finance-parser-minimal.js?v=20250720-4"></script>
+    
+    <script>
+        // Immediate URL check before page loads
+        console.log('🚀 Immediate script running...');
+        console.log('🚀 Current URL:', window.location.href);
+        const immediateQuery = window.location.search.substring(1);
+        const immediateOldFormat = immediateQuery && !immediateQuery.includes('=') && /^[0-9A-Z]{8}$/i.test(immediateQuery);
+        
+        console.log('🚀 Query:', immediateQuery, 'Is old format:', immediateOldFormat);
+        
+        if (immediateOldFormat) {
+            console.log('🚀 Immediate redirect needed for:', immediateQuery);
+            window.location.replace(window.location.origin + window.location.pathname + '#company/' + immediateQuery);
+        }
+    </script>
     
     <style>
         :root {
@@ -8597,6 +8620,9 @@
         
         // Check for payment status on page load
         window.addEventListener('DOMContentLoaded', async () => {
+            console.log('🔸 DOMContentLoaded fired, URL:', window.location.href);
+            console.log('🔸 Query string:', window.location.search);
+            
             // Wait a bit for Supabase to initialize
             await new Promise(resolve => setTimeout(resolve, 100));
             
@@ -9503,6 +9529,10 @@
         
         // Initial render on page load
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('🔸 Main DOMContentLoaded handler');
+            console.log('🔸 Current hash:', window.location.hash);
+            console.log('🔸 Current query:', window.location.search);
+            
             // Load initial data if arrays are empty OR if visiting a company URL directly
             const isCompanyURL = window.location.hash.startsWith('#company/');
             if (oldestCompanies.length === 0 || (isCompanyURL && window.oldestCompanies?.length === 0)) {
@@ -9696,7 +9726,19 @@
             console.log('🔸 showCompanyPage called with:', companyData);
             const companyPageContainer = document.getElementById('companyModal');
             console.log('🔸 Company page container found:', !!companyPageContainer);
+            console.log('🔸 Container display style:', companyPageContainer ? companyPageContainer.style.display : 'N/A');
             if (companyPageContainer) {
+                // Show the modal
+                companyPageContainer.style.display = 'block';
+                document.body.style.overflow = 'hidden';
+                
+                // Hide home content
+                let homeContentElement = document.querySelector('.main-container');
+                if (homeContentElement) {
+                    homeContentElement.style.display = 'none';
+                    console.log('🔸 Home content hidden');
+                }
+                
                 // Always start on Overview tab when opening modal for new company
                 switchModalTab('overview');
                 
@@ -9714,8 +9756,8 @@
                 document.body.style.overflow = 'hidden';
                 console.log('🔸 Company page should now be visible');
                 
-                // Hide home content
-                const homeContent = document.querySelector('.main-container');
+                // Hide home content  
+                let homeContent = document.querySelector('.main-container');
                 if (homeContent) {
                     homeContent.style.display = 'none';
                 }
@@ -9781,6 +9823,7 @@
         async function updateNavAuthButton() {
             const container = document.getElementById('navAuthContainer');
             const mobileMenuContent = document.getElementById('mobileMenuContent');
+            console.log('🔸 updateNavAuthButton called, container found:', !!container);
             if (!container) return;
             
             try {
@@ -9997,6 +10040,7 @@
         async function handleCompanyHash() {
             const hash = window.location.hash;
             console.log('🔸 handleCompanyHash called, hash:', hash);
+            console.log('🔸 Current URL:', window.location.href);
             if (hash.startsWith('#company/')) {
                 const companyNumber = hash.replace('#company/', '');
                 if (companyNumber) {
@@ -14961,7 +15005,18 @@
             try {
                 // Use real FinanceParser to extract iXBRL data
                 console.log('🔸 Fetching real iXBRL data for company:', companyNumber);
+                console.log('🔸 FinanceParser available:', typeof FinanceParser !== 'undefined');
+                console.log('🔸 FinanceParser.extractFinancialData available:', typeof FinanceParser !== 'undefined' && typeof FinanceParser.extractFinancialData === 'function');
+                
+                if (typeof FinanceParser === 'undefined') {
+                    console.error('🔸 FinanceParser is not loaded!');
+                    showFinanceNoData();
+                    return;
+                }
+                
+                console.log('🔸 Calling FinanceParser.extractFinancialData...');
                 const financialData = await FinanceParser.extractFinancialData(companyNumber);
+                console.log('🔸 FinanceParser returned:', financialData);
                 
                 if (!financialData) {
                     console.log('🔸 No financial data found from iXBRL parser');
@@ -15336,20 +15391,27 @@
             html += '<h3 class="chart-title">Net Assets, Total Assets & Total Liabilities (' + 
                     (oldestData.year || '2015') + '-' + (latestData.year || '2024') + ')</h3>';
             
-            // Add legend
+            // Add legend to match the chart colors
             html += '<div class="chart-legend">';
-            html += '<div class="legend-item"><div class="legend-color" style="background: #14b8a6;"></div>Total Assets</div>';
-            html += '<div class="legend-item"><div class="legend-color" style="background: #94a3b8;"></div>Total Liabilities</div>';
-            html += '<div class="legend-item"><div class="legend-color" style="background: #6366f1;"></div>Net Assets</div>';
+            html += '<div class="legend-item"><div class="legend-color" style="background: #7fa3d0; opacity: 0.8;"></div>Net Assets</div>';
+            html += '<div class="legend-item"><div class="legend-color" style="background: #fca5a5; opacity: 0.8;"></div>Total Liabilities</div>';
+            html += '<div class="legend-item"><div class="legend-color" style="background: #86efac; opacity: 0.5;"></div>Total Assets</div>';
             html += '</div>';
             
             html += '<canvas id="finance-main-chart" width="1600" height="600" style="width: 100%; height: 300px;"></canvas>';
             html += '</div>';
             
+            // Debug data
+            console.log('🎨 Finance data being passed to chart:', data);
+            console.log('🎨 Historical data length:', data.historicalData?.length);
+            if (data.historicalData && data.historicalData.length > 0) {
+                console.log('🎨 Sample data point:', data.historicalData[0]);
+            }
+            
             // Historical Performance block (1/4 width)
             html += '<div class="finance-historical-performance">';
             html += '<div class="finance-details">';
-            html += '<h4 style="font-size: 15px; margin-bottom: 16px;">Performance Analysis</h4>';
+            html += '<h4 style="font-size: 15px; margin-bottom: 16px;">Company Overview</h4>';
             html += '<div style="display: flex; flex-direction: column; height: calc(100% - 40px);">';
             
             // Calculate useful metrics
@@ -15383,8 +15445,52 @@
             // Quick metrics section
             html += '<div style="flex: 1; overflow-y: auto;">';
             
-            // Period and data quality
+            // Company Size section
+            const employeesCount = latestData.metrics?.employees?.value || 0;
+            const totalRevenue = latestData.metrics?.revenue?.value || 0;
+            const totalAssets = latestData.metrics?.totalAssets?.value || 0;
+            
+            // Determine company size based on UK definitions
+            let companySize = 'Micro';
+            let sizeColor = '#94a3b8';
+            const sizeInfo = [];
+            
+            if (totalRevenue > 36000000 || totalAssets > 18000000 || employeesCount > 250) {
+                companySize = 'Large';
+                sizeColor = '#8b5cf6';
+            } else if (totalRevenue > 10200000 || totalAssets > 5100000 || employeesCount > 50) {
+                companySize = 'Medium';
+                sizeColor = '#3b82f6';
+            } else if (totalRevenue > 632000 || totalAssets > 316000 || employeesCount > 10) {
+                companySize = 'Small';
+                sizeColor = '#10b981';
+            }
+            
+            // Build size info
+            if (totalRevenue > 0) {
+                sizeInfo.push(`Turnover: ${FinanceParser.formatCurrency(totalRevenue)}`);
+            }
+            if (totalAssets > 0) {
+                sizeInfo.push(`Balance sheet: ${FinanceParser.formatCurrency(totalAssets)}`);
+            }
+            if (employeesCount > 0) {
+                sizeInfo.push(`${employeesCount.toLocaleString()} employees`);
+            } else {
+                sizeInfo.push('Employee count not disclosed');
+            }
+            
             html += '<div style="background: rgba(99, 102, 241, 0.05); padding: 12px; border-radius: 8px; margin-bottom: 12px;">';
+            html += `<div style="color: #94a3b8; font-size: 11px; margin-bottom: 4px;">SIZE</div>`;
+            html += `<div style="color: ${sizeColor}; font-size: 16px; font-weight: 700; margin-bottom: 8px;">${companySize}</div>`;
+            sizeInfo.forEach(info => {
+                html += `<div style="color: #94a3b8; font-size: 12px; margin-bottom: 3px; display: flex; align-items: center;">`;
+                html += `<span style="color: #64748b; margin-right: 6px;">ⓘ</span>${info}`;
+                html += `</div>`;
+            });
+            html += '</div>';
+            
+            // Period and data quality
+            html += '<div style="background: rgba(34, 197, 94, 0.05); padding: 12px; border-radius: 8px; margin-bottom: 12px;">';
             html += `<div style="color: #94a3b8; font-size: 11px; margin-bottom: 4px;">DATA COVERAGE</div>`;
             html += `<div style="color: #f1f5f9; font-size: 13px; font-weight: 600;">${firstYear} - ${lastYear}</div>`;
             html += `<div style="color: #94a3b8; font-size: 12px; margin-top: 4px;">${yearsOfData} annual filings analyzed</div>`;
@@ -15447,22 +15553,46 @@
             // Bottom insight - always visible
             html += '<div style="background: rgba(148, 163, 184, 0.08); padding: 12px; border-radius: 8px; margin-top: 12px;">';
             
-            // Calculate financial health score
-            let healthScore = 0;
-            if (revenueCAGR > 10) healthScore += 2;
-            else if (revenueCAGR > 0) healthScore += 1;
-            if (profitMargin > 10) healthScore += 2;
-            else if (profitMargin > 5) healthScore += 1;
-            if (roa > 10) healthScore += 2;
-            else if (roa > 5) healthScore += 1;
-            if (debtToEquity !== null && debtToEquity < 1) healthScore += 1;
+            // Calculate financial health based on key indicators
+            const healthNetAssets = latestData.metrics?.netAssets?.value || 0;
+            const healthLiabilities = latestData.metrics?.totalLiabilities?.value || 0;
+            const healthAssets = latestData.metrics?.totalAssets?.value || 0;
             
-            // Status indicator
+            // Key financial health indicators
+            const healthDebtRatio = healthAssets > 0 ? (healthLiabilities / healthAssets) : 1;
+            const hasPositiveNetAssets = healthNetAssets > 0;
+            const assetGrowth = assetsMetric.percent || 0;
+            const netAssetGrowth = ((latestData.metrics?.netAssets?.value || 0) - (oldestData.metrics?.netAssets?.value || 0)) / 
+                                  (oldestData.metrics?.netAssets?.value || 1) * 100;
+            
+            // Determine financial health status
             let status, statusColor;
-            if (healthScore >= 6) { status = 'Strong'; statusColor = '#34d399'; }
-            else if (healthScore >= 4) { status = 'Moderate'; statusColor = '#fbbf24'; }
-            else if (healthScore >= 2) { status = 'Weak'; statusColor = '#f87171'; }
-            else { status = 'Critical'; statusColor = '#dc2626'; }
+            
+            if (hasPositiveNetAssets && healthDebtRatio < 0.5 && netAssetGrowth > 10) {
+                status = 'Strong';
+                statusColor = '#34d399';
+            } else if (hasPositiveNetAssets && healthDebtRatio < 0.7) {
+                status = 'Moderate';
+                statusColor = '#3b82f6';
+            } else if (hasPositiveNetAssets || healthDebtRatio < 0.8) {
+                status = 'Weak';
+                statusColor = '#fbbf24';
+            } else {
+                status = 'Critical';
+                statusColor = '#f87171';
+            }
+            
+            // Special cases
+            if (healthNetAssets < 0) {
+                status = 'Critical';
+                statusColor = '#dc2626';
+            } else if (companySize === 'Micro' && hasPositiveNetAssets) {
+                // Be more lenient with micro companies
+                if (healthDebtRatio < 0.8) {
+                    status = 'Moderate';
+                    statusColor = '#3b82f6';
+                }
+            }
             
             html += `<div style="display: flex; justify-content: space-between; align-items: center;">`;
             html += `<span style="color: #94a3b8; font-size: 11px; text-transform: uppercase;">Financial Health</span>`;
@@ -15479,51 +15609,72 @@
             // Metrics cards below chart
             html += '<div class="finance-metrics-grid">';
             
-            // Calculate meaningful financial indicators instead of meaningless "Increased by" percentages
+            // Get latest and previous year data for comparisons
             const latestMetrics = latestData.metrics || {};
-            const latestRatios = latestData.ratios || {};
+            const previousData = data.historicalData.length > 1 ? data.historicalData[1] : null;
+            const previousMetrics = previousData?.metrics || {};
             
-            // 1. Cash Position - Just the number
-            const cashValue = latestMetrics.cashAndEquivalents?.value || 0;
-            
-            html += `<div class="finance-metric-card">
-                <h4 class="metric-title">Cash in Bank</h4>
-                <div class="metric-main-value">${FinanceParser.formatCurrency(cashValue)}</div>
-                <div class="metric-change neutral">
-                    ${cashValue > 0 ? 'Available funds' : 'No cash data'}
-                </div>
-            </div>`;
-            
-            // 2. Revenue - Just the number
-            const revenueValue = latestMetrics.revenue?.value || 0;
-            
-            html += `<div class="finance-metric-card">
-                <h4 class="metric-title">Turnover</h4>
-                <div class="metric-main-value">${FinanceParser.formatCurrency(revenueValue)}</div>
-                <div class="metric-change neutral">
-                    ${revenueValue > 0 ? 'Annual revenue' : 'No revenue data'}
-                </div>
-            </div>`;
-            
-            // 3. Employees - Just the number
-            const employeesValue = latestMetrics.employees?.value || 0;
-            
-            html += `<div class="finance-metric-card">
-                <h4 class="metric-title">Employees</h4>
-                <div class="metric-main-value">${employeesValue.toLocaleString()}</div>
-                <div class="metric-change neutral">
-                    ${employeesValue > 0 ? 'Total workforce' : 'No employee data'}
-                </div>
-            </div>`;
-            
-            // 4. Total Assets - Just the number
-            const assetsValue = latestMetrics.totalAssets?.value || 0;
+            // 1. Total Assets with year-over-year change
+            const totalAssetsValue = latestMetrics.totalAssets?.value || 0;
+            const prevTotalAssetsValue = previousMetrics.totalAssets?.value || 0;
+            const assetsChange = totalAssetsValue - prevTotalAssetsValue;
+            const assetsChangePercent = prevTotalAssetsValue > 0 ? ((assetsChange / prevTotalAssetsValue) * 100) : 0;
             
             html += `<div class="finance-metric-card">
                 <h4 class="metric-title">Total Assets</h4>
-                <div class="metric-main-value">${FinanceParser.formatCurrency(assetsValue)}</div>
-                <div class="metric-change neutral">
-                    ${assetsValue > 0 ? 'Company assets' : 'No asset data'}
+                <div class="metric-main-value">${FinanceParser.formatCurrency(totalAssetsValue)}</div>
+                <div class="metric-change ${assetsChange >= 0 ? 'positive' : 'negative'}">
+                    ${assetsChange !== 0 && prevTotalAssetsValue > 0 ? 
+                        `<span class="change-arrow">${assetsChange >= 0 ? '▲' : '▼'}</span> ${assetsChange >= 0 ? 'Increased' : 'Decreased'} by ${FinanceParser.formatCurrency(Math.abs(assetsChange))} (${assetsChange >= 0 ? '+' : ''}${assetsChangePercent.toFixed(0)}%)` : 
+                        'No prior year data'}
+                </div>
+            </div>`;
+            
+            // 2. Net Assets with year-over-year change
+            const currentNetAssetsValue = latestMetrics.netAssets?.value || latestMetrics.shareholdersEquity?.value || 0;
+            const prevNetAssetsValue = previousMetrics.netAssets?.value || previousMetrics.shareholdersEquity?.value || 0;
+            const netAssetsChange = currentNetAssetsValue - prevNetAssetsValue;
+            const netAssetsChangePercent = prevNetAssetsValue > 0 ? ((netAssetsChange / prevNetAssetsValue) * 100) : 0;
+            
+            html += `<div class="finance-metric-card">
+                <h4 class="metric-title">Net Assets</h4>
+                <div class="metric-main-value">${FinanceParser.formatCurrency(currentNetAssetsValue)}</div>
+                <div class="metric-change ${netAssetsChange >= 0 ? 'positive' : 'negative'}">
+                    ${netAssetsChange !== 0 && prevNetAssetsValue > 0 ? 
+                        `<span class="change-arrow">${netAssetsChange >= 0 ? '▲' : '▼'}</span> ${netAssetsChange >= 0 ? 'Increased' : 'Decreased'} by ${FinanceParser.formatCurrency(Math.abs(netAssetsChange))} (${netAssetsChange >= 0 ? '+' : ''}${netAssetsChangePercent.toFixed(0)}%)` : 
+                        'No prior year data'}
+                </div>
+            </div>`;
+            
+            // 3. Total Liabilities with year-over-year change (show as negative value)
+            const currentLiabilitiesValue = latestMetrics.totalLiabilities?.value || 0;
+            const prevLiabilitiesValue = previousMetrics.totalLiabilities?.value || 0;
+            const liabilitiesChange = currentLiabilitiesValue - prevLiabilitiesValue;
+            const liabilitiesChangePercent = prevLiabilitiesValue > 0 ? ((liabilitiesChange / prevLiabilitiesValue) * 100) : 0;
+            
+            html += `<div class="finance-metric-card">
+                <h4 class="metric-title">Total Liabilities</h4>
+                <div class="metric-main-value">-${FinanceParser.formatCurrency(currentLiabilitiesValue)}</div>
+                <div class="metric-change ${liabilitiesChange <= 0 ? 'positive' : 'negative'}">
+                    ${liabilitiesChange !== 0 && prevLiabilitiesValue > 0 ? 
+                        `<span class="change-arrow">${liabilitiesChange > 0 ? '▲' : '▼'}</span> ${liabilitiesChange > 0 ? 'Increased' : 'Decreased'} by ${FinanceParser.formatCurrency(Math.abs(liabilitiesChange))} (${liabilitiesChange >= 0 ? '+' : ''}${liabilitiesChangePercent.toFixed(0)}%)` : 
+                        'No prior year data'}
+                </div>
+            </div>`;
+            
+            // 4. Debt Ratio (%) with year-over-year change
+            const debtRatio = totalAssetsValue > 0 ? (currentLiabilitiesValue / totalAssetsValue) * 100 : 0;
+            const prevDebtRatio = prevTotalAssetsValue > 0 ? (prevLiabilitiesValue / prevTotalAssetsValue) * 100 : 0;
+            const debtRatioChange = debtRatio - prevDebtRatio;
+            const debtRatioChangePercent = prevDebtRatio > 0 ? ((debtRatioChange / prevDebtRatio) * 100) : 0;
+            
+            html += `<div class="finance-metric-card">
+                <h4 class="metric-title">Debt Ratio (%)</h4>
+                <div class="metric-main-value">${debtRatio.toFixed(0)}%</div>
+                <div class="metric-change ${debtRatioChange <= 0 ? 'positive' : 'negative'}">
+                    ${debtRatioChange !== 0 && prevDebtRatio > 0 ? 
+                        `<span class="change-arrow">${debtRatioChange > 0 ? '▲' : '▼'}</span> ${debtRatioChange > 0 ? 'Increased' : 'Decreased'} by ${Math.abs(debtRatioChange).toFixed(2)}% (${debtRatioChange >= 0 ? '+' : ''}${debtRatioChangePercent.toFixed(0)}%)` : 
+                        'No prior year data'}
                 </div>
             </div>`;
             
@@ -15536,17 +15687,39 @@
             
             // Draw the main chart
             setTimeout(() => {
-                drawFinancialChart(data);
-            }, 100);
+                console.log('🎨 About to draw financial chart');
+                const canvas = document.getElementById('finance-main-chart');
+                if (canvas) {
+                    console.log('🎨 Canvas found:', canvas);
+                    console.log('🎨 Canvas parent:', canvas.parentElement);
+                    console.log('🎨 Canvas computed style:', window.getComputedStyle(canvas).display);
+                    drawFinancialChart(data);
+                } else {
+                    console.error('🎨 Canvas not found!');
+                }
+            }, 500);
         }
         
         // Draw financial chart like in the screenshot
         function drawFinancialChart(data) {
-            const canvas = document.getElementById('finance-main-chart');
-            if (!canvas || !data.historicalData || data.historicalData.length === 0) {
-                console.log('🔸 Chart: No canvas or historical data available');
-                return;
-            }
+            try {
+                const canvas = document.getElementById('finance-main-chart');
+                console.log('🎨 drawFinancialChart called with data:', data);
+                
+                if (!canvas) {
+                    console.log('🔸 Chart: No canvas element found');
+                    return;
+                }
+                
+                if (!data || !data.historicalData) {
+                    console.log('🔸 Chart: No data or historicalData provided');
+                    return;
+                }
+                
+                if (data.historicalData.length === 0) {
+                    console.log('🔸 Chart: Historical data array is empty');
+                    return;
+                }
             
             // Get device pixel ratio for sharp rendering
             const dpr = window.devicePixelRatio || 1;
@@ -15575,23 +15748,93 @@
             ctx.clearRect(0, 0, width, height);
             
             // Prepare data - ensure we have valid numeric values
-            const years = data.historicalData.map(d => d.year || d.date.substring(0, 4)).reverse();
-            const netAssets = data.historicalData.map(d => {
-                const value = d.metrics.shareholdersEquity?.value || 
-                             d.metrics.netAssets?.value || 
-                             d.metrics.shareholdersFunds?.value || 0;
-                return typeof value === 'number' ? value : 0;
-            }).reverse();
+            // Sort by year to ensure correct chronological order
+            const sortedData = [...data.historicalData].sort((a, b) => {
+                const yearA = parseInt(a.year || a.date.substring(0, 4));
+                const yearB = parseInt(b.year || b.date.substring(0, 4));
+                return yearA - yearB;
+            });
             
-            const totalAssets = data.historicalData.map(d => {
-                const value = d.metrics.totalAssets?.value || 0;
+            const years = sortedData.map(d => d.year || d.date.substring(0, 4));
+            const netAssets = sortedData.map(d => {
+                // Debug the structure for ALL years
+                console.log(`🔸 Chart: Year ${d.year} full data:`, d);
+                console.log(`🔸 Chart: Year ${d.year} metrics object:`, d.metrics);
+                console.log(`🔸 Chart: Year ${d.year} metrics keys:`, d.metrics ? Object.keys(d.metrics) : 'null');
+                
+                // Debug each possible source
+                if (d.metrics) {
+                    console.log(`🔸 Chart: Year ${d.year} debug values:`, {
+                        'netAssets': d.metrics.netAssets,
+                        'shareholdersEquity': d.metrics.shareholdersEquity,
+                        'shareholdersFunds': d.metrics.shareholdersFunds,
+                        'totalAssets': d.metrics.totalAssets,
+                        'totalLiabilities': d.metrics.totalLiabilities
+                    });
+                }
+                
+                // Try multiple sources for net assets/equity
+                const value = d.metrics?.netAssets?.value || 
+                             d.metrics?.shareholdersEquity?.value || 
+                             d.metrics?.shareholdersFunds?.value || 
+                             d.metrics?.['uk-gaap:ShareholdersFunds']?.value || 
+                             d.metrics?.['uk-gaap:NetAssetsLiabilities']?.value || 0;
+                             
+                console.log(`🔸 Chart: Year ${d.year} Net Assets chosen value:`, value);
+                
                 return typeof value === 'number' ? value : 0;
-            }).reverse();
+            });
             
-            const totalLiabilities = data.historicalData.map(d => {
-                const value = d.metrics.totalLiabilities?.value || 0;
-                return typeof value === 'number' ? value : 0;
-            }).reverse();
+            const totalAssets = sortedData.map((d, index) => {
+                // Get the values
+                const totalAssetsValue = d.metrics?.totalAssets?.value || 
+                                       d.metrics?.['uk-gaap:BalanceSheetTotal']?.value || 
+                                       d.metrics?.['uk-gaap:TotalAssets']?.value || 0;
+                const netAssetsValue = d.metrics?.shareholdersEquity?.value || 
+                                      d.metrics?.netAssets?.value || 
+                                      d.metrics?.shareholdersFunds?.value || 
+                                      d.metrics?.['uk-gaap:ShareholdersFunds']?.value || 
+                                      d.metrics?.['uk-gaap:NetAssetsLiabilities']?.value || 0;
+                const liabilitiesValue = d.metrics?.totalLiabilities?.value || 
+                                        d.metrics?.['uk-gaap:Creditors']?.value || 
+                                        d.metrics?.['uk-gaap:TotalLiabilities']?.value || 0;
+                
+                // Log what we're getting
+                if (d.year === '2016' || d.year === '2017') {
+                    console.log(`🔸 Chart Debug Year ${d.year}:`, {
+                        totalAssets: totalAssetsValue,
+                        netAssets: netAssetsValue,
+                        liabilities: liabilitiesValue,
+                        calculatedAssets: netAssetsValue + liabilitiesValue
+                    });
+                }
+                
+                // Total Assets should always equal Net Assets + Total Liabilities
+                // If the extracted totalAssets is wrong, calculate it
+                const calculatedAssets = Math.abs(netAssetsValue) + Math.abs(liabilitiesValue);
+                
+                // Use calculated value if it's significantly different from extracted
+                if (Math.abs(totalAssetsValue - calculatedAssets) > 1000) {
+                    console.log(`🔸 Chart: Year ${d.year} - Using calculated Total Assets: ${totalAssetsValue} -> ${calculatedAssets}`);
+                    return calculatedAssets;
+                }
+                
+                return typeof totalAssetsValue === 'number' ? totalAssetsValue : 0;
+            });
+            
+            const totalLiabilities = sortedData.map((d, index) => {
+                let value = d.metrics?.totalLiabilities?.value || 
+                           d.metrics?.['uk-gaap:Creditors']?.value || 
+                           d.metrics?.['uk-gaap:TotalLiabilities']?.value || 0;
+                
+                // If liabilities are zero but we have assets and net assets, calculate
+                if (value === 0 && d.metrics.totalAssets?.value && d.metrics.netAssets?.value) {
+                    value = Math.abs(d.metrics.totalAssets.value) - Math.abs(d.metrics.netAssets.value);
+                    console.log(`🔸 Chart: Year ${d.year} - Calculated liabilities from equation: ${value}`);
+                }
+                
+                return typeof value === 'number' ? Math.abs(value) : 0;
+            });
             
             console.log('🔸 Chart: Years:', years);
             console.log('🔸 Chart: Net Assets:', netAssets);
@@ -15599,6 +15842,16 @@
             console.log('🔸 Chart: Total Liabilities:', totalLiabilities);
             
             // Check if we have any non-zero data
+            console.log('🔸 Chart: Final data check before drawing:', {
+                netAssetsLength: netAssets.length,
+                totalAssetsLength: totalAssets.length,
+                totalLiabilitiesLength: totalLiabilities.length,
+                netAssetsSample: netAssets.slice(0, 3),
+                totalAssetsSample: totalAssets.slice(0, 3),
+                totalLiabilitiesSample: totalLiabilities.slice(0, 3),
+                allValues: [...netAssets, ...totalAssets, ...totalLiabilities]
+            });
+            
             const hasData = [...netAssets, ...totalAssets, ...totalLiabilities].some(v => v !== 0);
             if (!hasData) {
                 console.log('🔸 Chart: All values are zero, skipping chart');
@@ -15610,61 +15863,41 @@
                 return;
             }
             
-            // Find max value for scaling - adaptive to actual data
-            const allValues = [...netAssets, ...totalAssets, ...totalLiabilities].filter(v => !isNaN(v) && v !== 0);
+            // Find max value for scaling - handle both positive and negative values
+            const allValues = [...netAssets, ...totalAssets, ...totalLiabilities].filter(v => !isNaN(v));
             
             let maxValue, minValue, range;
             
             if (allValues.length === 0) {
                 // No data, use default scale
-                maxValue = 15000000000;
-                minValue = -15000000000;
+                maxValue = 3000000;
+                minValue = -3000000;
                 range = maxValue - minValue;
             } else {
-                // Calculate actual min/max from data
-                let dataMax = Math.max(...allValues);
-                let dataMin = Math.min(...allValues);
+                // For Endole-style chart, we need to find the max of assets and the min of liabilities
+                const maxAssets = Math.max(...totalAssets.filter(v => !isNaN(v)));
+                const maxNetAssets = Math.max(...netAssets.filter(v => !isNaN(v)));
+                const maxLiabilities = Math.max(...totalLiabilities.map(v => Math.abs(v)).filter(v => !isNaN(v)));
                 
-                // Calculate the center point of the data
-                const dataCenter = (dataMax + dataMin) / 2;
-                const dataSpread = Math.max(Math.abs(dataMax - dataCenter), Math.abs(dataCenter - dataMin));
+                // Get the overall max value
+                const dataMax = Math.max(maxAssets, maxNetAssets, maxLiabilities);
                 
-                // Create symmetrical bounds around the center with padding
-                let padding;
-                if (dataSpread < 10000) {
-                    padding = dataSpread * 0.5; // 50% padding for small values
-                } else if (dataSpread < 1000000) {
-                    padding = dataSpread * 0.3; // 30% padding for medium values
-                } else {
-                    padding = dataSpread * 0.2; // 20% padding for large values
-                }
+                // Add padding
+                let paddingAmount = dataMax * 0.15; // 15% padding
                 
-                // Set max and min symmetrically around the data
-                maxValue = Math.max(dataMax + padding, dataCenter + dataSpread + padding);
-                minValue = Math.min(dataMin - padding, dataCenter - dataSpread - padding);
-                
-                // Ensure proper spacing around zero line
-                if (dataMin >= 0 && dataMax > 0) {
-                    // All positive values - add space below zero
-                    const zeroSpace = dataMax * 0.2;
-                    minValue = -zeroSpace;
-                } else if (dataMin < 0 && dataMax > 0) {
-                    // Mixed positive/negative - ensure both sides have good spacing
-                    const maxAbs = Math.max(Math.abs(dataMax), Math.abs(dataMin));
-                    const expandFactor = 1.3; // 30% expansion
-                    maxValue = Math.max(maxValue, maxAbs * expandFactor);
-                    minValue = Math.min(minValue, -maxAbs * expandFactor);
-                }
+                // Set scale to show both positive and negative values properly
+                maxValue = dataMax + paddingAmount;
+                minValue = -(maxLiabilities + paddingAmount);
                 
                 // Round to nice numbers for better axis labels
                 const roundToNice = (value) => {
                     if (value === 0) return 0;
                     const magnitude = Math.pow(10, Math.floor(Math.log10(Math.abs(value))));
-                    return Math.sign(value) * Math.ceil(Math.abs(value) / magnitude) * magnitude;
+                    return Math.ceil(Math.abs(value) / magnitude) * magnitude;
                 };
                 
                 maxValue = roundToNice(maxValue);
-                minValue = roundToNice(minValue);
+                minValue = -roundToNice(Math.abs(minValue));
                 
                 range = maxValue - minValue;
             }
@@ -15692,9 +15925,9 @@
                 ctx.fillText(formatAxisValue(value), padding - 10, y + 4);
             }
             
-            // Draw zero line
+            // Draw zero line (important for showing negative liabilities)
             const zeroY = padding + ((maxValue - 0) / range) * (height - padding - bottomPadding);
-            ctx.strokeStyle = '#6366f1';
+            ctx.strokeStyle = 'rgba(148, 163, 184, 0.3)';
             ctx.lineWidth = 2;
             ctx.beginPath();
             ctx.moveTo(padding, zeroY);
@@ -15705,86 +15938,372 @@
             ctx.imageSmoothingEnabled = true;
             ctx.imageSmoothingQuality = 'high';
             
-            // Draw area charts
-            const drawAreaChart = (data, color, alpha) => {
+            // Log the data to debug
+            console.log('Chart Debug - Net Assets:', netAssets);
+            console.log('Chart Debug - Total Assets:', totalAssets);
+            console.log('Chart Debug - Total Liabilities:', totalLiabilities);
+            
+            // Also log the raw historical data
+            console.log('Chart Debug - Raw Historical Data:');
+            data.historicalData.forEach(d => {
+                console.log(`Year ${d.year || d.date}: Assets=${d.metrics.totalAssets?.value}, Liabilities=${d.metrics.totalLiabilities?.value}, NetAssets=${d.metrics.shareholdersEquity?.value || d.metrics.netAssets?.value}`);
+            });
+            
+            // Check the accounting equation: Assets = Liabilities + Equity
+            console.log('🎨 Checking accounting equation:');
+            for (let i = 0; i < totalAssets.length; i++) {
+                const assets = totalAssets[i];
+                const liabilities = totalLiabilities[i];
+                const equity = netAssets[i];
+                const calculatedAssets = Math.abs(liabilities) + Math.abs(equity);
+                console.log(`Year ${years[i]}: Assets=${assets}, Liab=${liabilities}, Equity=${equity}, Calc=${calculatedAssets}, Diff=${assets - calculatedAssets}`);
+            }
+            
+            // Additional debugging for company 05254058
+            if (data.companyNumber === '05254058') {
+                console.log('🎨 Special debugging for company 05254058:');
+                console.log('Historical data:', data.historicalData);
+                
+                // Show the specific values for 2020 to compare with Endole
+                const data2020 = data.historicalData.find(d => d.year === '2020');
+                if (data2020) {
+                    console.log('🎨 2020 data comparison:');
+                    console.log('  Our Net Assets:', data2020.metrics.netAssets?.value || data2020.metrics.shareholdersEquity?.value || 'N/A');
+                    console.log('  Our Total Assets:', data2020.metrics.totalAssets?.value || 'N/A');
+                    console.log('  Our Total Liabilities:', data2020.metrics.totalLiabilities?.value || 'N/A');
+                    console.log('  Endole shows: Net Assets: £108,681, Total Assets: £151,488, Total Liabilities: £42,807');
+                }
+            }
+            
+            // Draw the three areas like Endole's chart
+            // Endole shows:
+            // 1. Total Assets as the topmost area (light teal/blue)
+            // 2. Total Liabilities as negative area below zero (gray)
+            // 3. Net Assets as a blue area above zero
+            
+            console.log('🎨 Chart Drawing - Endole Style Implementation');
+            
+            // Use the zero line position already calculated above
+            const bottomY = height - bottomPadding;
+            
+            console.log('🎨 Zero Y:', zeroY, 'Bottom Y:', bottomY);
+            
+            // Save context
+            ctx.save();
+            
+            // Helper function to create smooth curve points
+            const createSmoothPath = (data) => {
+                const points = data.map((value, index) => ({
+                    x: padding + (index / (data.length - 1)) * (width - 2 * padding),
+                    y: padding + ((maxValue - value) / range) * (height - padding - bottomPadding)
+                }));
+                
+                // Create smooth curve using quadratic bezier curves
+                const smoothPath = new Path2D();
+                if (points.length > 0) {
+                    smoothPath.moveTo(points[0].x, points[0].y);
+                    
+                    for (let i = 1; i < points.length - 1; i++) {
+                        const cp1x = (points[i].x + points[i - 1].x) / 2;
+                        const cp1y = points[i - 1].y;
+                        const cp2x = (points[i].x + points[i - 1].x) / 2;
+                        const cp2y = points[i].y;
+                        
+                        smoothPath.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, points[i].x, points[i].y);
+                    }
+                    
+                    // Last point
+                    if (points.length > 1) {
+                        const lastIndex = points.length - 1;
+                        smoothPath.lineTo(points[lastIndex].x, points[lastIndex].y);
+                    }
+                }
+                
+                return { path: smoothPath, points };
+            };
+            
+            // Helper function to draw a smooth area
+            const drawSmoothArea = (data, color, alpha, fromY = zeroY) => {
+                const { path, points } = createSmoothPath(data);
+                
                 ctx.fillStyle = color;
                 ctx.globalAlpha = alpha;
                 ctx.beginPath();
                 
-                // Start from zero line
-                ctx.moveTo(padding, zeroY);
+                // Start from baseline
+                ctx.moveTo(padding, fromY);
                 
-                // Draw smooth line using quadratic curves
-                data.forEach((value, index) => {
-                    const x = padding + (index / (data.length - 1)) * (width - 2 * padding);
-                    const y = padding + ((maxValue - value) / range) * (height - padding - bottomPadding);
+                // Add the smooth curve
+                if (points.length > 0) {
+                    ctx.lineTo(points[0].x, points[0].y);
                     
-                    if (index === 0) {
-                        ctx.lineTo(x, y);
-                    } else if (index < data.length - 1) {
-                        // Use quadratic curve for smoother lines
-                        const nextX = padding + ((index + 1) / (data.length - 1)) * (width - 2 * padding);
-                        const nextY = padding + ((maxValue - data[index + 1]) / range) * (height - padding - bottomPadding);
-                        const cpX = (x + nextX) / 2;
-                        const cpY = (y + nextY) / 2;
-                        ctx.quadraticCurveTo(x, y, cpX, cpY);
-                    } else {
-                        ctx.lineTo(x, y);
+                    for (let i = 1; i < points.length - 1; i++) {
+                        const cp1x = (points[i].x + points[i - 1].x) / 2;
+                        const cp1y = points[i - 1].y;
+                        const cp2x = (points[i].x + points[i - 1].x) / 2;
+                        const cp2y = points[i].y;
+                        
+                        ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, points[i].x, points[i].y);
                     }
-                });
+                    
+                    if (points.length > 1) {
+                        ctx.lineTo(points[points.length - 1].x, points[points.length - 1].y);
+                    }
+                }
                 
-                // Close path
-                ctx.lineTo(width - padding, zeroY);
+                // Close back to baseline
+                ctx.lineTo(width - padding, fromY);
+                ctx.lineTo(padding, fromY);
                 ctx.closePath();
                 ctx.fill();
-                ctx.globalAlpha = 1;
             };
             
-            // Draw total liabilities (bottom/negative area) - use blue-gray
-            drawAreaChart(totalLiabilities.map(v => -v), '#94a3b8', 0.3);
+            // Important: Endole shows Net Assets as the AREA BETWEEN Assets and Liabilities
+            // Not as a separate area!
             
-            // Draw total assets (top area) - use teal
-            drawAreaChart(totalAssets, '#14b8a6', 0.5);
+            // Make sure liabilities are negative for display
+            const liabilitiesForDisplay = totalLiabilities.map(v => -Math.abs(v));
             
-            // Draw net assets line
-            ctx.strokeStyle = '#6366f1';
-            ctx.lineWidth = 3;
+            console.log('🎨 Chart values for display:');
+            console.log('  Total Assets:', totalAssets);
+            console.log('  Total Liabilities (for display):', liabilitiesForDisplay);
+            console.log('  Net Assets (calculated):', netAssets);
+            
+            // Endole's chart shows:
+            // 1. Total Liabilities (gray) - below zero line (negative values)
+            // 2. Net Assets (blue) - above zero line (positive values)
+            // 3. Total Assets (light teal) - as a light overlay showing the sum
+            
+            ctx.save();
+            
+            // Draw chart exactly like before - 3 distinct areas
+            // The key is drawing in the right order with the right colors
+            
+            console.log('🎨 Chart Data Check:');
+            console.log('Net Assets:', netAssets);
+            console.log('Total Liabilities:', totalLiabilities);
+            console.log('Total Assets:', totalAssets);
+            
+            // 1. Draw Total Assets area (green - from zero up) with smooth curves
+            ctx.fillStyle = '#86efac'; // Light green
+            ctx.globalAlpha = 0.3;
+            ctx.beginPath();
+            ctx.moveTo(padding, zeroY);
+            
+            for (let i = 0; i < totalAssets.length; i++) {
+                const x = padding + (i / (totalAssets.length - 1)) * (width - 2 * padding);
+                const y = padding + ((maxValue - totalAssets[i]) / range) * (height - padding - bottomPadding);
+                
+                if (i === 0) {
+                    ctx.lineTo(x, y);
+                } else {
+                    // Smooth curve
+                    const prevX = padding + ((i - 1) / (totalAssets.length - 1)) * (width - 2 * padding);
+                    const prevY = padding + ((maxValue - totalAssets[i - 1]) / range) * (height - padding - bottomPadding);
+                    const cpx = (prevX + x) / 2;
+                    ctx.quadraticCurveTo(prevX, prevY, cpx, (prevY + y) / 2);
+                }
+            }
+            
+            ctx.lineTo(width - padding, zeroY);
+            ctx.closePath();
+            ctx.fill();
+            
+            // 2. Draw Total Liabilities area (red - below zero) with smooth curves
+            ctx.fillStyle = '#fca5a5'; // Light red
+            ctx.globalAlpha = 0.6;
+            ctx.beginPath();
+            ctx.moveTo(padding, zeroY);
+            
+            for (let i = 0; i < liabilitiesForDisplay.length; i++) {
+                const x = padding + (i / (liabilitiesForDisplay.length - 1)) * (width - 2 * padding);
+                const y = padding + ((maxValue - liabilitiesForDisplay[i]) / range) * (height - padding - bottomPadding);
+                
+                if (i === 0) {
+                    ctx.lineTo(x, y);
+                } else {
+                    // Smooth curve
+                    const prevX = padding + ((i - 1) / (liabilitiesForDisplay.length - 1)) * (width - 2 * padding);
+                    const prevY = padding + ((maxValue - liabilitiesForDisplay[i - 1]) / range) * (height - padding - bottomPadding);
+                    const cpx = (prevX + x) / 2;
+                    ctx.quadraticCurveTo(prevX, prevY, cpx, (prevY + y) / 2);
+                }
+            }
+            
+            ctx.lineTo(width - padding, zeroY);
+            ctx.closePath();
+            ctx.fill();
+            
+            // 3. Draw Net Assets area (blue - above zero) with smooth curves
+            ctx.fillStyle = '#7fa3d0'; // Blue like Endole
+            ctx.globalAlpha = 0.6;
+            ctx.beginPath();
+            ctx.moveTo(padding, zeroY);
+            
+            for (let i = 0; i < netAssets.length; i++) {
+                const x = padding + (i / (netAssets.length - 1)) * (width - 2 * padding);
+                const y = padding + ((maxValue - netAssets[i]) / range) * (height - padding - bottomPadding);
+                
+                if (i === 0) {
+                    ctx.lineTo(x, y);
+                } else {
+                    // Smooth curve
+                    const prevX = padding + ((i - 1) / (netAssets.length - 1)) * (width - 2 * padding);
+                    const prevY = padding + ((maxValue - netAssets[i - 1]) / range) * (height - padding - bottomPadding);
+                    const cpx = (prevX + x) / 2;
+                    ctx.quadraticCurveTo(prevX, prevY, cpx, (prevY + y) / 2);
+                }
+            }
+            
+            ctx.lineTo(width - padding, zeroY);
+            ctx.closePath();
+            ctx.fill();
+            
+            ctx.restore();
+            
+            // Restore context
+            ctx.restore();
+            
+            // Reset alpha
             ctx.globalAlpha = 1;
             
-            // First draw the line
-            ctx.beginPath();
-            netAssets.forEach((value, index) => {
-                const x = padding + (index / (netAssets.length - 1)) * (width - 2 * padding);
-                const y = padding + ((maxValue - value) / range) * (height - padding - bottomPadding);
+            // Store chart data for interactivity
+            canvas.chartData = {
+                years, netAssets, totalLiabilities, totalAssets, 
+                padding, width, height, bottomPadding, maxValue, minValue, range, dpr
+            };
+            
+            // Add interactivity - hover tooltips
+            canvas.onmousemove = function(e) {
+                const rect = canvas.getBoundingClientRect();
+                const x = (e.clientX - rect.left) * (canvas.width / rect.width) / dpr;
+                const y = (e.clientY - rect.top) * (canvas.height / rect.height) / dpr;
                 
-                if (index === 0) {
-                    ctx.moveTo(x, y);
+                // Redraw chart to clear previous hover line
+                drawFinancialChart(data);
+                
+                // Check if mouse is in chart area (with extended bounds for edge years)
+                const extendedPadding = padding - 20; // Allow hover slightly outside chart for edge years
+                if (x >= extendedPadding && x <= width - extendedPadding && y >= padding && y <= height - bottomPadding) {
+                    // Find which year we're hovering over
+                    const chartWidth = width - 2 * padding;
+                    const dataPoints = years.length;
+                    const xPos = Math.max(0, Math.min(chartWidth, x - padding));
+                    const index = Math.max(0, Math.min(dataPoints - 1, Math.round((xPos / chartWidth) * (dataPoints - 1))));
+                    
+                    if (index >= 0 && index < dataPoints) {
+                        const year = years[index];
+                        const netAssetsValue = netAssets[index];
+                        const liabilitiesValue = totalLiabilities[index];
+                        const totalAssetsValue = totalAssets[index];
+                        
+                        // Create or update tooltip
+                        let tooltip = document.getElementById('finance-tooltip');
+                        if (!tooltip) {
+                            tooltip = document.createElement('div');
+                            tooltip.id = 'finance-tooltip';
+                            tooltip.style.cssText = `
+                                position: fixed;
+                                background: rgba(30, 41, 59, 0.95);
+                                border: 1px solid rgba(255, 255, 255, 0.1);
+                                border-radius: 8px;
+                                padding: 12px 16px;
+                                color: white;
+                                font-size: 14px;
+                                pointer-events: none;
+                                z-index: 10000;
+                                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+                                backdrop-filter: blur(10px);
+                            `;
+                            document.body.appendChild(tooltip);
+                        }
+                        
+                        // Format values
+                        const formatValue = (val) => {
+                            if (val === 0) return '£0';
+                            const absVal = Math.abs(val);
+                            if (absVal >= 1000000) {
+                                return `£${(val / 1000000).toFixed(1)}M`;
+                            } else if (absVal >= 1000) {
+                                return `£${(val / 1000).toFixed(0)}K`;
+                            }
+                            return `£${val.toLocaleString()}`;
+                        };
+                        
+                        tooltip.innerHTML = `
+                            <div style="font-weight: 600; margin-bottom: 8px; color: #e2e8f0;">${year}</div>
+                            <div style="display: flex; align-items: center; margin-bottom: 4px;">
+                                <div style="width: 12px; height: 12px; background: #7fa3d0; border-radius: 2px; margin-right: 8px;"></div>
+                                <span style="color: #94a3b8;">Net Assets:</span>
+                                <span style="margin-left: auto; font-weight: 500;">${formatValue(netAssetsValue)}</span>
+                            </div>
+                            <div style="display: flex; align-items: center; margin-bottom: 4px;">
+                                <div style="width: 12px; height: 12px; background: #fca5a5; border-radius: 2px; margin-right: 8px;"></div>
+                                <span style="color: #94a3b8;">Total Liabilities:</span>
+                                <span style="margin-left: auto; font-weight: 500;">-${formatValue(liabilitiesValue)}</span>
+                            </div>
+                            <div style="border-top: 1px solid rgba(255, 255, 255, 0.1); margin: 8px -16px; padding: 0 16px;"></div>
+                            <div style="display: flex; align-items: center; margin-top: 8px;">
+                                <div style="width: 12px; height: 12px; background: #86efac; border-radius: 2px; margin-right: 8px;"></div>
+                                <span style="color: #94a3b8;">Total Assets:</span>
+                                <span style="margin-left: auto; font-weight: 600; color: #10b981;">${formatValue(totalAssetsValue)}</span>
+                            </div>
+                        `;
+                        
+                        // Position tooltip
+                        tooltip.style.display = 'block';
+                        tooltip.style.left = (e.clientX + 15) + 'px';
+                        tooltip.style.top = (e.clientY - 60) + 'px';
+                        
+                        // Draw vertical line on hover
+                        ctx.save();
+                        ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+                        ctx.lineWidth = 1;
+                        ctx.setLineDash([5, 5]);
+                        ctx.beginPath();
+                        const hoverX = padding + (index / (dataPoints - 1)) * chartWidth;
+                        ctx.moveTo(hoverX, padding);
+                        ctx.lineTo(hoverX, height - bottomPadding);
+                        ctx.stroke();
+                        ctx.restore();
+                    }
                 } else {
-                    ctx.lineTo(x, y);
+                    // Hide tooltip
+                    const tooltip = document.getElementById('finance-tooltip');
+                    if (tooltip) {
+                        tooltip.style.display = 'none';
+                    }
                 }
-            });
-            ctx.stroke();
+            };
             
-            // Then draw points on top
-            ctx.fillStyle = '#6366f1';
-            netAssets.forEach((value, index) => {
-                const x = padding + (index / (netAssets.length - 1)) * (width - 2 * padding);
-                const y = padding + ((maxValue - value) / range) * (height - padding - bottomPadding);
-                
-                ctx.beginPath();
-                ctx.arc(x, y, 4, 0, 2 * Math.PI);
-                ctx.fill();
-            });
+            canvas.onmouseleave = function() {
+                const tooltip = document.getElementById('finance-tooltip');
+                if (tooltip) {
+                    tooltip.style.display = 'none';
+                }
+                // Redraw to clear any hover effects
+                drawFinancialChart(data);
+            };
             
-            // Draw x-axis labels
+            // Draw x-axis labels - show all years if less than 20, otherwise show every other
             ctx.fillStyle = '#94a3b8';
             ctx.textAlign = 'center';
+            ctx.font = '11px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+            
+            const showEveryNth = years.length > 20 ? 2 : 1;
             years.forEach((year, index) => {
-                if (index % Math.ceil(years.length / 10) === 0) { // Show every nth year
+                if (index % showEveryNth === 0) {
                     const x = padding + (index / (years.length - 1)) * (width - 2 * padding);
                     ctx.fillText(year, x, height - bottomPadding + 20);
                 }
             });
+            
+            // Draw legend (removing duplicate)
+            // Legend is already drawn in the HTML, so we don't need to draw it on canvas
+            } catch (error) {
+                console.error('🔸 Chart drawing error:', error);
+                console.error('🔸 Chart error stack:', error.stack);
+            }
         }
         
         // Format axis values
@@ -15998,6 +16517,7 @@
         
         // SEO Integration - Dynamic Meta Tags and URL Management
         function initializeSEO() {
+            console.log('🔍 initializeSEO called');
             // First check if we're on a direct company URL path
             const path = window.location.pathname;
             if (path.startsWith('/company/')) {
@@ -16016,11 +16536,21 @@
             const urlParams = new URLSearchParams(window.location.search);
             const company = urlParams.get('company');
             
+            // Also check for old format where company number is the entire query string
+            const queryString = window.location.search.substring(1);
+            const isOldFormat = queryString && !queryString.includes('=') && /^[0-9A-Z]{8}$/i.test(queryString);
+            
             if (company) {
                 // Handle company URL routing
                 console.log('🔍 SEO: Loading company from URL parameter:', company);
                 setTimeout(() => {
                     window.location.hash = `#company/${company}`;
+                }, 200);
+            } else if (isOldFormat) {
+                // Handle old format ?05254058
+                console.log('🔍 SEO: Loading company from old format:', queryString);
+                setTimeout(() => {
+                    window.location.hash = `#company/${queryString}`;
                 }, 200);
             }
         }
@@ -16038,12 +16568,20 @@
             const company = urlParams.get('company');
             const category = urlParams.get('category');
             
-            console.log('🔍 SEO: Checking URL parameters - company:', company);
+            // Also check for old format where company number is the entire query string
+            const queryString = window.location.search.substring(1);
+            const isOldFormat = queryString && !queryString.includes('=') && /^[0-9A-Z]{8}$/i.test(queryString);
+            
+            console.log('🔍 SEO: Checking URL parameters - company:', company, 'old format:', isOldFormat);
             
             if (company) {
                 // Handle company URL routing
                 console.log('🔍 SEO: Loading company from URL parameter:', company);
                 window.location.hash = `#company/${company}`;
+            } else if (isOldFormat) {
+                // Handle old format ?05254058
+                console.log('🔍 SEO: Loading company from old format:', queryString);
+                window.location.hash = `#company/${queryString}`;
             } else if (category) {
                 // Handle category pages
                 console.log('🔍 SEO: Loading category page:', category);
