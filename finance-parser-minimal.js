@@ -126,8 +126,8 @@ const FinanceParser = {
                                     totalLiabilities: parsed.totalLiabilities ? { value: parsed.totalLiabilities.value } : { value: 0 },
                                     cash: parsed.cash ? { value: parsed.cash.value } : { value: 0 },
                                     cashAndEquivalents: parsed.cash ? { value: parsed.cash.value } : { value: 0 },
-                                    revenue: parsed.revenue ? { value: parsed.revenue.value } : { value: 0 },
-                                    employees: parsed.employees ? { value: parsed.employees.value } : { value: 0 }
+                                    revenue: parsed.revenue ? { value: parsed.revenue.value } : null,
+                                    employees: parsed.employees || null
                                 }
                             });
                             
