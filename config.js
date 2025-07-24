@@ -14,7 +14,7 @@ window.APP_CONFIG = {
     ENABLE_MAPS: true,
     ENABLE_PDF_DOWNLOAD: true,
     ENABLE_ANALYTICS: true,
-    ENABLE_AI_ANALYSIS: true
+    ENABLE_AI_ANALYSIS: false // Temporarily disabled due to Railway deployment issues
 };
 
 console.log('Config loaded:', window.APP_CONFIG);
