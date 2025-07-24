@@ -25,11 +25,20 @@ const FinanceParser = {
         console.log('🔸 FinanceParser.extractFinancialData called with:', companyNumber);
         
         try {
-            // Get filing history
-            const proxyUrl = `${this.PROXY_URL}/api/proxy/companies-house/company/${companyNumber}/filing-history?category=accounts&items_per_page=20`;
-            console.log('🔸 Fetching filing history from:', proxyUrl);
+            // Get filing history - use appropriate URL based on environment
+            let apiUrl;
+            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                // Local development - use proxy server
+                apiUrl = `${this.PROXY_URL}/api/proxy/companies-house/company/${companyNumber}/filing-history?category=accounts&items_per_page=20`;
+            } else {
+                // Production - use Cloudflare Worker with API key
+                const apiKey = window.APP_CONFIG?.COMPANIES_HOUSE_API_KEY || '22aefa40-ee9e-47c0-b40a-2dd3c03165c6';
+                apiUrl = `${this.PROXY_URL}/?url=${encodeURIComponent(`https://api.companieshouse.gov.uk/company/${companyNumber}/filing-history?category=accounts&items_per_page=20`)}&apiKey=${apiKey}`;
+            }
             
-            const response = await fetch(proxyUrl);
+            console.log('🔸 Fetching filing history from:', apiUrl);
+            
+            const response = await fetch(apiUrl);
             if (!response.ok) {
                 throw new Error('Failed to fetch filing history');
             }
@@ -84,7 +93,17 @@ const FinanceParser = {
                 
                 try {
                     // Fetch XBRL document
-                    const xbrlUrl = `${this.PROXY_URL}/api/proxy/ixbrl/${companyNumber}/${filing.transaction_id}?format=xhtml`;
+                    let xbrlUrl;
+                    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                        // Local development
+                        xbrlUrl = `${this.PROXY_URL}/api/proxy/ixbrl/${companyNumber}/${filing.transaction_id}?format=xhtml`;
+                    } else {
+                        // Production - use document API URL through worker
+                        const apiKey = window.APP_CONFIG?.COMPANIES_HOUSE_API_KEY || '22aefa40-ee9e-47c0-b40a-2dd3c03165c6';
+                        const docUrl = `https://document-api.companieshouse.gov.uk/document/${filing.transaction_id}/content`;
+                        xbrlUrl = `${this.PROXY_URL}/?url=${encodeURIComponent(docUrl)}&apiKey=${apiKey}&accept=application/xhtml%2Bxml`;
+                    }
+                    
                     console.log(`🔸 Fetching XBRL for year ${year}...`);
                     
                     const xbrlResponse = await fetch(xbrlUrl);
