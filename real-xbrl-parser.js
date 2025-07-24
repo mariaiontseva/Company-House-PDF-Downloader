@@ -66,6 +66,15 @@ const RealXBRLParser = {
         // Extract structured financial data
         const result = this.extractFinancialData(values);
         
+        // If no employees found, try enhanced extraction
+        if (!result.employees && typeof EnhancedEmployeeParser !== 'undefined') {
+            console.log('No employees found with standard tags, trying enhanced extraction...');
+            const enhancedResult = EnhancedEmployeeParser.extractEmployees(xbrlText);
+            if (enhancedResult) {
+                result.employees = enhancedResult;
+            }
+        }
+        
         console.log('📊 Real XBRL Parser: Extracted data:', result);
         return result;
     },
@@ -197,7 +206,7 @@ const RealXBRLParser = {
                 'uk-gaap:Revenue'
             ]),
             
-            // Number of employees
+            // Number of employees - try standard tags first
             employees: getCurrentValue([
                 'core:AverageNumberEmployees',
                 'uk-gaap:AverageNumberEmployeesDuringPeriod',
@@ -209,7 +218,14 @@ const RealXBRLParser = {
                 'uk-bus:AverageNumberEmployeesDuringPeriod',
                 'uk-direp:AverageNumberUKEmployees',
                 'uk-direp:NumberDirectorsExecutives',
-                'uk-direp:StatutoryEmployeeNumbers'
+                'uk-direp:StatutoryEmployeeNumbers',
+                'uk-gaap:EmployeesTotal',
+                'uk-core:EmployeesTotal',
+                'uk-core:NumberEmployees',
+                'AverageNumberEmployeesDuringPeriod',
+                'AverageNumberEmployees',
+                'NumberEmployees',
+                'EmployeesTotal'
             ]),
             
             // Get accounting period info
