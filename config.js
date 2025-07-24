@@ -8,7 +8,7 @@ window.APP_CONFIG = {
     // API URLs
     WORKER_URL: 'https://blue-flower-d40f.mahin84.workers.dev',
     RAILWAY_API_URL: 'https://companies-api-production-68c2.up.railway.app',
-    OPENAI_PROXY_URL: '', // Temporarily disabled - Railway deployment issue
+    OPENAI_PROXY_URL: 'https://company-house-pdf-downloader-production.up.railway.app', // Production proxy server for OpenAI
     
     // Feature Flags
     ENABLE_MAPS: true,

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Verify Production Features</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .success { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
+        .info { color: blue; }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .data-box {
+            background: #f0f0f0;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <h1>Verify Production Features - Company 09051662</h1>
+    
+    <div class="test-section">
+        <h2>Test Both Features</h2>
+        <button onclick="verifyProduction()">Verify Production Status</button>
+        <button onclick="clearResults()">Clear</button>
+    </div>
+    
+    <div id="results" class="test-section">
+        <h2>Results</h2>
+        <div id="output"></div>
+    </div>
+    
+    <script>
+        const output = document.getElementById('output');
+        
+        function log(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = type;
+            div.innerHTML = message;
+            output.appendChild(div);
+        }
+        
+        function clearResults() {
+            output.innerHTML = '';
+        }
+        
+        async function verifyProduction() {
+            clearResults();
+            log('<h3>Verifying Production Features...</h3>');
+            
+            // Load production page in iframe to check console
+            log('\n<h4>1. Checking Configuration</h4>');
+            
+            try {
+                // Fetch production config
+                const configResponse = await fetch('https://docspace.uk/config.js');
+                const configText = await configResponse.text();
+                
+                // Parse config
+                const openAIMatch = configText.match(/OPENAI_PROXY_URL:\s*['"]([^'"]*)['"]/);
+                const aiEnabledMatch = configText.match(/ENABLE_AI_ANALYSIS:\s*(true|false)/);
+                
+                log(`OpenAI Proxy URL: "${openAIMatch ? openAIMatch[1] : 'not found'}"`, openAIMatch && openAIMatch[1] ? 'success' : 'warning');
+                log(`AI Analysis Enabled: ${aiEnabledMatch ? aiEnabledMatch[1] : 'not found'}`, aiEnabledMatch && aiEnabledMatch[1] === 'true' ? 'success' : 'warning');
+                
+                // Test finance parser
+                log('\n<h4>2. Testing Finance Data</h4>');
+                
+                const financeResponse = await fetch('https://docspace.uk/finance-parser-minimal.js?v=20250720-5');
+                if (financeResponse.ok) {
+                    const financeText = await financeResponse.text();
+                    
+                    // Check if it's using the correct URL
+                    if (financeText.includes('find-and-update.company-information.service.gov.uk')) {
+                        log('✅ Finance parser using correct public URLs', 'success');
+                    } else {
+                        log('⚠️ Finance parser may be using old URLs', 'warning');
+                    }
+                }
+                
+                // Make actual API call to test
+                log('\n<h4>3. Testing Live API Calls</h4>');
+                
+                // Test filing history
+                const filingUrl = 'https://blue-flower-d40f.mahin84.workers.dev/?url=' + 
+                    encodeURIComponent('https://api.companieshouse.gov.uk/company/09051662/filing-history?category=accounts&items_per_page=5') + 
+                    '&key=22aefa40-ee9e-47c0-b40a-2dd3c03165c6';
+                
+                const filingResponse = await fetch(filingUrl);
+                
+                if (filingResponse.ok) {
+                    const filingData = await filingResponse.json();
+                    log(`✅ Filing history API works - found ${filingData.items?.length || 0} filings`, 'success');
+                    
+                    if (filingData.items && filingData.items[0]) {
+                        // Test document fetch
+                        const transactionId = filingData.items[0].transaction_id;
+                        const docUrl = 'https://blue-flower-d40f.mahin84.workers.dev/?url=' +
+                            encodeURIComponent(`https://find-and-update.company-information.service.gov.uk/company/09051662/filing-history/${transactionId}/document?format=xhtml&download=0`) +
+                            '&key=22aefa40-ee9e-47c0-b40a-2dd3c03165c6&accept=application/xhtml%2Bxml';
+                        
+                        const docResponse = await fetch(docUrl);
+                        
+                        if (docResponse.ok) {
+                            const docText = await docResponse.text();
+                            if (docText.includes('ix:') || docText.includes('xmlns:ix')) {
+                                log('✅ XBRL document fetch works!', 'success');
+                                log('Financial data should be loading correctly', 'success');
+                            } else {
+                                log('⚠️ Document fetched but may not be XBRL', 'warning');
+                            }
+                        } else {
+                            log(`❌ Document fetch failed: ${docResponse.status}`, 'error');
+                        }
+                    }
+                } else {
+                    log(`❌ Filing history API failed: ${filingResponse.status}`, 'error');
+                }
+                
+                // Check AI endpoint if configured
+                if (openAIMatch && openAIMatch[1]) {
+                    log('\n<h4>4. Testing AI Endpoint</h4>');
+                    log(`Checking: ${openAIMatch[1]}/api/openai/completions`);
+                    
+                    try {
+                        const aiResponse = await fetch(`${openAIMatch[1]}/api/openai/completions`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                model: 'gpt-3.5-turbo',
+                                messages: [{ role: 'user', content: 'test' }],
+                                max_tokens: 5
+                            })
+                        });
+                        
+                        log(`AI endpoint status: ${aiResponse.status}`, aiResponse.ok ? 'success' : 'error');
+                        
+                        if (!aiResponse.ok && aiResponse.status === 0) {
+                            log('CORS error detected on AI endpoint', 'error');
+                        }
+                    } catch (e) {
+                        log(`AI endpoint error: ${e.message}`, 'error');
+                    }
+                } else {
+                    log('\n<h4>4. AI Endpoint Status</h4>');
+                    log('AI endpoint is disabled (empty URL)', 'warning');
+                }
+                
+                log('\n<h4>Summary</h4>');
+                log('Visit https://docspace.uk/#company/09051662 to see the actual results', 'info');
+                
+            } catch (error) {
+                log(`Error: ${error.message}`, 'error');
+            }
+        }
+    </script>
+</body>
+</html>

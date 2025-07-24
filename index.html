@@ -11709,7 +11709,11 @@
                 if (window.APP_CONFIG?.ENABLE_AI_ANALYSIS && window.APP_CONFIG?.OPENAI_PROXY_URL) {
                     console.log('Making OpenAI API call...');
                     try {
-                        const response = await fetch(`${window.APP_CONFIG.OPENAI_PROXY_URL}/api/openai/completions`, {
+                        // Updated to work with Cloudflare Worker endpoint
+                        const endpoint = window.APP_CONFIG.OPENAI_PROXY_URL.includes('/openai') 
+                            ? window.APP_CONFIG.OPENAI_PROXY_URL 
+                            : `${window.APP_CONFIG.OPENAI_PROXY_URL}/api/openai/completions`;
+                        const response = await fetch(endpoint, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
