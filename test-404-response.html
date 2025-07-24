@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test 404 Response</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .response { background: #f0f0f0; padding: 10px; margin: 10px 0; }
+        button { padding: 10px 20px; margin: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Test 404 Response Details</h1>
+    <button onclick="testDocumentAPI()">Test Document API</button>
+    <div id="results"></div>
+    
+    <script>
+        async function testDocumentAPI() {
+            const results = document.getElementById('results');
+            const TRANSACTION_ID = 'MzQzNzQ4MTU2NGFkaXF6a2N4';
+            const API_KEY = '22aefa40-ee9e-47c0-b40a-2dd3c03165c6';
+            
+            results.innerHTML = '<h2>Testing Document API...</h2>';
+            
+            // Test different URL patterns
+            const urlPatterns = [
+                {
+                    name: 'With /content',
+                    url: `https://document-api.companieshouse.gov.uk/document/${TRANSACTION_ID}/content`
+                },
+                {
+                    name: 'Without /content',
+                    url: `https://document-api.companieshouse.gov.uk/document/${TRANSACTION_ID}`
+                },
+                {
+                    name: 'With format parameter',
+                    url: `https://document-api.companieshouse.gov.uk/document/${TRANSACTION_ID}/content?format=xhtml`
+                },
+                {
+                    name: 'Alternative domain',
+                    url: `https://document-api.company-information.service.gov.uk/document/${TRANSACTION_ID}/content`
+                }
+            ];
+            
+            for (const pattern of urlPatterns) {
+                const div = document.createElement('div');
+                div.className = 'response';
+                div.innerHTML = `<h3>${pattern.name}</h3>`;
+                
+                const workerUrl = `https://blue-flower-d40f.mahin84.workers.dev/?url=${encodeURIComponent(pattern.url)}&key=${API_KEY}&accept=application/xhtml%2Bxml`;
+                
+                try {
+                    const response = await fetch(workerUrl);
+                    const text = await response.text();
+                    
+                    div.innerHTML += `
+                        <p><strong>URL:</strong> ${pattern.url}</p>
+                        <p><strong>Status:</strong> ${response.status}</p>
+                        <p><strong>Response:</strong> ${text.substring(0, 200)}...</p>
+                    `;
+                    
+                    if (response.status === 200) {
+                        div.style.borderLeft = '5px solid green';
+                    } else {
+                        div.style.borderLeft = '5px solid red';
+                    }
+                } catch (error) {
+                    div.innerHTML += `<p style="color: red;">Error: ${error.message}</p>`;
+                }
+                
+                results.appendChild(div);
+            }
+            
+            // Also test via localhost if available
+            try {
+                const localUrl = `http://localhost:3002/api/proxy/ixbrl/09051662/${TRANSACTION_ID}?format=xhtml`;
+                const localResponse = await fetch(localUrl);
+                
+                const localDiv = document.createElement('div');
+                localDiv.className = 'response';
+                localDiv.style.borderLeft = '5px solid blue';
+                localDiv.innerHTML = `
+                    <h3>Local Proxy Test</h3>
+                    <p><strong>Status:</strong> ${localResponse.status}</p>
+                    <p><strong>Works:</strong> ${localResponse.status === 200 ? 'YES ✅' : 'NO ❌'}</p>
+                `;
+                results.appendChild(localDiv);
+            } catch (error) {
+                console.log('Local proxy not available');
+            }
+        }
+    </script>
+</body>
+</html>

@@ -98,9 +98,9 @@ const FinanceParser = {
                         // Local development
                         xbrlUrl = `${this.PROXY_URL}/api/proxy/ixbrl/${companyNumber}/${filing.transaction_id}?format=xhtml`;
                     } else {
-                        // Production - use document API URL through worker
+                        // Production - use public website URL through worker
                         const apiKey = window.APP_CONFIG?.COMPANIES_HOUSE_API_KEY || '22aefa40-ee9e-47c0-b40a-2dd3c03165c6';
-                        const docUrl = `https://document-api.companieshouse.gov.uk/document/${filing.transaction_id}/content`;
+                        const docUrl = `https://find-and-update.company-information.service.gov.uk/company/${companyNumber}/filing-history/${filing.transaction_id}/document?format=xhtml&download=0`;
                         xbrlUrl = `${this.PROXY_URL}/?url=${encodeURIComponent(docUrl)}&key=${apiKey}&accept=application/xhtml%2Bxml`;
                     }
                     

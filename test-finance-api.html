@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finance API Test - Company 09051662</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .test-header {
+            font-weight: bold;
+            color: #007bff;
+            margin-bottom: 10px;
+        }
+        .url-display {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            word-break: break-all;
+            margin: 10px 0;
+        }
+        .success {
+            color: #28a745;
+            font-weight: bold;
+        }
+        .error {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        .response-data {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 11px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 10px 0;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        .status-success { background-color: #28a745; }
+        .status-error { background-color: #dc3545; }
+        .status-pending { background-color: #ffc107; }
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .comparison-table th,
+        .comparison-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        .comparison-table th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+        .log-entry {
+            margin: 5px 0;
+            padding: 5px;
+            background-color: #f8f9fa;
+            border-left: 3px solid #007bff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Finance API Test - Company 09051662</h1>
+        
+        <div class="test-section">
+            <div class="test-header">Environment Information</div>
+            <div id="env-info"></div>
+        </div>
+
+        <div class="test-section">
+            <div class="test-header">Test Controls</div>
+            <button onclick="runAllTests()">Run All Tests</button>
+            <button onclick="testLocalhost()">Test Localhost Only</button>
+            <button onclick="testCloudflare()">Test Cloudflare Only</button>
+            <button onclick="clearResults()">Clear Results</button>
+        </div>
+
+        <div class="test-section">
+            <div class="test-header">Test Results</div>
+            <div id="test-results"></div>
+        </div>
+
+        <div class="test-section">
+            <div class="test-header">Comparison Table</div>
+            <table class="comparison-table" id="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Test</th>
+                        <th>Localhost</th>
+                        <th>Cloudflare Worker</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody id="comparison-tbody">
+                </tbody>
+            </table>
+        </div>
+
+        <div class="test-section">
+            <div class="test-header">Detailed Logs</div>
+            <div id="detailed-logs"></div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const COMPANY_NUMBER = '09051662';
+        const API_KEY = '22aefa40-ee9e-47c0-b40a-2dd3c03165c6';
+        const LOCALHOST_PROXY = 'http://localhost:3002';
+        const CLOUDFLARE_WORKER = 'https://blue-flower-d40f.mahin84.workers.dev';
+
+        // Global results storage
+        const testResults = {
+            localhost: {},
+            cloudflare: {}
+        };
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            displayEnvironmentInfo();
+        });
+
+        function displayEnvironmentInfo() {
+            const envInfo = document.getElementById('env-info');
+            envInfo.innerHTML = `
+                <p><strong>Current URL:</strong> ${window.location.href}</p>
+                <p><strong>Hostname:</strong> ${window.location.hostname}</p>
+                <p><strong>Protocol:</strong> ${window.location.protocol}</p>
+                <p><strong>Company Number:</strong> ${COMPANY_NUMBER}</p>
+                <p><strong>API Key:</strong> ${API_KEY.substring(0, 8)}...</p>
+                <p><strong>User Agent:</strong> ${navigator.userAgent}</p>
+            `;
+        }
+
+        function log(message, type = 'info') {
+            const logsDiv = document.getElementById('detailed-logs');
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry';
+            const timestamp = new Date().toISOString().substring(11, 23);
+            logEntry.innerHTML = `<strong>[${timestamp}]</strong> ${message}`;
+            logsDiv.appendChild(logEntry);
+            console.log(`[${type}] ${message}`);
+        }
+
+        function addResult(message, isSuccess = true) {
+            const resultsDiv = document.getElementById('test-results');
+            const result = document.createElement('div');
+            result.innerHTML = `
+                <span class="status-indicator status-${isSuccess ? 'success' : 'error'}"></span>
+                <span class="${isSuccess ? 'success' : 'error'}">${message}</span>
+            `;
+            resultsDiv.appendChild(result);
+        }
+
+        function displayUrl(url) {
+            const resultsDiv = document.getElementById('test-results');
+            const urlDiv = document.createElement('div');
+            urlDiv.className = 'url-display';
+            urlDiv.textContent = url;
+            resultsDiv.appendChild(urlDiv);
+        }
+
+        function displayResponse(data, label) {
+            const resultsDiv = document.getElementById('test-results');
+            const responseDiv = document.createElement('div');
+            responseDiv.innerHTML = `<strong>${label}:</strong>`;
+            resultsDiv.appendChild(responseDiv);
+            
+            const dataDiv = document.createElement('div');
+            dataDiv.className = 'response-data';
+            dataDiv.textContent = JSON.stringify(data, null, 2);
+            resultsDiv.appendChild(dataDiv);
+        }
+
+        async function testFilingHistoryAPI(proxyUrl, isLocalhost) {
+            const testName = isLocalhost ? 'Localhost' : 'Cloudflare';
+            log(`Testing Filing History API on ${testName}...`);
+
+            let apiUrl;
+            if (isLocalhost) {
+                // Localhost URL pattern
+                apiUrl = `${proxyUrl}/api/proxy/companies-house/company/${COMPANY_NUMBER}/filing-history?category=accounts&items_per_page=20`;
+            } else {
+                // Cloudflare Worker URL pattern
+                const baseUrl = `https://api.companieshouse.gov.uk/company/${COMPANY_NUMBER}/filing-history?category=accounts&items_per_page=20`;
+                apiUrl = `${proxyUrl}/?url=${encodeURIComponent(baseUrl)}&key=${API_KEY}`;
+            }
+
+            addResult(`${testName} Filing History Test`);
+            displayUrl(apiUrl);
+            log(`Full URL: ${apiUrl}`);
+
+            try {
+                const startTime = Date.now();
+                const response = await fetch(apiUrl);
+                const responseTime = Date.now() - startTime;
+                
+                log(`Response received in ${responseTime}ms`);
+                log(`Status: ${response.status} ${response.statusText}`);
+                log(`Headers: ${JSON.stringify(Object.fromEntries(response.headers))}`);
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`HTTP ${response.status}: ${errorText}`);
+                }
+
+                const data = await response.json();
+                addResult(`✓ Filing History API Success (${responseTime}ms)`, true);
+                displayResponse(data, `${testName} Filing History Response`);
+
+                // Store result for comparison
+                testResults[isLocalhost ? 'localhost' : 'cloudflare'].filingHistory = {
+                    success: true,
+                    responseTime,
+                    itemCount: data.items?.length || 0,
+                    status: response.status
+                };
+
+                // Test document fetch if we have a transaction_id
+                if (data.items && data.items.length > 0) {
+                    const filing = data.items[0];
+                    if (filing.transaction_id) {
+                        await testDocumentAPI(proxyUrl, filing.transaction_id, isLocalhost);
+                    }
+                }
+
+                return data;
+            } catch (error) {
+                addResult(`✗ Filing History API Error: ${error.message}`, false);
+                log(`Error details: ${error.stack}`, 'error');
+                
+                testResults[isLocalhost ? 'localhost' : 'cloudflare'].filingHistory = {
+                    success: false,
+                    error: error.message
+                };
+                
+                return null;
+            }
+        }
+
+        async function testDocumentAPI(proxyUrl, transactionId, isLocalhost) {
+            const testName = isLocalhost ? 'Localhost' : 'Cloudflare';
+            log(`Testing Document API on ${testName} for transaction ${transactionId}...`);
+
+            let apiUrl;
+            if (isLocalhost) {
+                // Localhost URL pattern
+                apiUrl = `${proxyUrl}/api/proxy/ixbrl/${COMPANY_NUMBER}/${transactionId}?format=xhtml`;
+            } else {
+                // Cloudflare Worker URL pattern for document API
+                const docUrl = `https://document-api.companieshouse.gov.uk/document/${transactionId}/content`;
+                apiUrl = `${proxyUrl}/?url=${encodeURIComponent(docUrl)}&key=${API_KEY}&accept=application/xhtml%2Bxml`;
+            }
+
+            addResult(`${testName} Document API Test (Transaction: ${transactionId})`);
+            displayUrl(apiUrl);
+            log(`Full URL: ${apiUrl}`);
+
+            try {
+                const startTime = Date.now();
+                const response = await fetch(apiUrl);
+                const responseTime = Date.now() - startTime;
+                
+                log(`Response received in ${responseTime}ms`);
+                log(`Status: ${response.status} ${response.statusText}`);
+                log(`Content-Type: ${response.headers.get('content-type')}`);
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`HTTP ${response.status}: ${errorText}`);
+                }
+
+                const contentType = response.headers.get('content-type');
+                const responseText = await response.text();
+                
+                addResult(`✓ Document API Success (${responseTime}ms)`, true);
+                
+                // Show first 500 chars of response
+                displayResponse(
+                    responseText.substring(0, 500) + (responseText.length > 500 ? '...' : ''),
+                    `${testName} Document Response (first 500 chars)`
+                );
+
+                // Store result for comparison
+                testResults[isLocalhost ? 'localhost' : 'cloudflare'].document = {
+                    success: true,
+                    responseTime,
+                    contentType,
+                    responseLength: responseText.length,
+                    status: response.status
+                };
+
+                return responseText;
+            } catch (error) {
+                addResult(`✗ Document API Error: ${error.message}`, false);
+                log(`Error details: ${error.stack}`, 'error');
+                
+                testResults[isLocalhost ? 'localhost' : 'cloudflare'].document = {
+                    success: false,
+                    error: error.message
+                };
+                
+                return null;
+            }
+        }
+
+        async function testLocalhost() {
+            clearResults();
+            log('Starting Localhost proxy tests...');
+            await testFilingHistoryAPI(LOCALHOST_PROXY, true);
+            updateComparisonTable();
+        }
+
+        async function testCloudflare() {
+            clearResults();
+            log('Starting Cloudflare Worker tests...');
+            await testFilingHistoryAPI(CLOUDFLARE_WORKER, false);
+            updateComparisonTable();
+        }
+
+        async function runAllTests() {
+            clearResults();
+            log('Starting comprehensive API tests...');
+            
+            // Test localhost
+            await testFilingHistoryAPI(LOCALHOST_PROXY, true);
+            
+            // Add delay between tests
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            // Test Cloudflare
+            await testFilingHistoryAPI(CLOUDFLARE_WORKER, false);
+            
+            updateComparisonTable();
+        }
+
+        function updateComparisonTable() {
+            const tbody = document.getElementById('comparison-tbody');
+            tbody.innerHTML = '';
+
+            // Filing History comparison
+            const filingRow = document.createElement('tr');
+            const localhostFiling = testResults.localhost.filingHistory;
+            const cloudflareFiling = testResults.cloudflare.filingHistory;
+            
+            filingRow.innerHTML = `
+                <td>Filing History API</td>
+                <td>${localhostFiling ? 
+                    (localhostFiling.success ? 
+                        `✓ Success (${localhostFiling.responseTime}ms, ${localhostFiling.itemCount} items)` : 
+                        `✗ Failed: ${localhostFiling.error}`) : 
+                    'Not tested'}</td>
+                <td>${cloudflareFiling ? 
+                    (cloudflareFiling.success ? 
+                        `✓ Success (${cloudflareFiling.responseTime}ms, ${cloudflareFiling.itemCount} items)` : 
+                        `✗ Failed: ${cloudflareFiling.error}`) : 
+                    'Not tested'}</td>
+                <td>${compareResults(localhostFiling, cloudflareFiling)}</td>
+            `;
+            tbody.appendChild(filingRow);
+
+            // Document API comparison
+            const docRow = document.createElement('tr');
+            const localhostDoc = testResults.localhost.document;
+            const cloudflareDoc = testResults.cloudflare.document;
+            
+            docRow.innerHTML = `
+                <td>Document API</td>
+                <td>${localhostDoc ? 
+                    (localhostDoc.success ? 
+                        `✓ Success (${localhostDoc.responseTime}ms, ${localhostDoc.responseLength} bytes)` : 
+                        `✗ Failed: ${localhostDoc.error}`) : 
+                    'Not tested'}</td>
+                <td>${cloudflareDoc ? 
+                    (cloudflareDoc.success ? 
+                        `✓ Success (${cloudflareDoc.responseTime}ms, ${cloudflareDoc.responseLength} bytes)` : 
+                        `✗ Failed: ${cloudflareDoc.error}`) : 
+                    'Not tested'}</td>
+                <td>${compareResults(localhostDoc, cloudflareDoc)}</td>
+            `;
+            tbody.appendChild(docRow);
+        }
+
+        function compareResults(localhost, cloudflare) {
+            if (!localhost || !cloudflare) return 'Incomplete test';
+            
+            if (localhost.success && cloudflare.success) {
+                return 'Both working correctly';
+            } else if (!localhost.success && !cloudflare.success) {
+                return 'Both failing';
+            } else if (localhost.success && !cloudflare.success) {
+                return 'Cloudflare Worker issue';
+            } else {
+                return 'Localhost proxy issue';
+            }
+        }
+
+        function clearResults() {
+            document.getElementById('test-results').innerHTML = '';
+            document.getElementById('detailed-logs').innerHTML = '';
+            testResults.localhost = {};
+            testResults.cloudflare = {};
+        }
+    </script>
+</body>
+</html>
