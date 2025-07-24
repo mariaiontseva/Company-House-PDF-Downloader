@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug XBRL Values for Company 05254058</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .debug-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; background: #f9f9f9; }
+        .error { color: red; }
+        .success { color: green; }
+        table { border-collapse: collapse; width: 100%; margin: 10px 0; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .highlight { background-color: #ffeb3b; }
+    </style>
+</head>
+<body>
+    <h1>Debug XBRL Values for Company 05254058</h1>
+    
+    <button onclick="debugCompany()">Debug Company 05254058</button>
+    <div id="results"></div>
+
+    <script src="finance-parser.js"></script>
+    <script src="enhanced-xbrl-parser.js"></script>
+    <script>
+        async function debugCompany() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<p>Debugging company 05254058...</p>';
+            
+            try {
+                // Extract financial data
+                const financialData = await FinanceParser.extractFinancialData('05254058');
+                
+                if (!financialData) {
+                    results.innerHTML += '<div class="error">❌ No financial data found</div>';
+                    return;
+                }
+                
+                // Create a comparison table for each year
+                let tableHtml = '<div class="debug-section"><h2>Financial Data Comparison</h2><table>';
+                tableHtml += '<tr><th>Year</th><th>Our Total Assets</th><th>Our Net Assets</th><th>Our Liabilities</th><th>Endole Total Assets</th><th>Endole Net Assets</th><th>Endole Liabilities</th><th>Notes</th></tr>';
+                
+                // Known Endole values for comparison
+                const endoleData = {
+                    '2024': { totalAssets: 176195, netAssets: 117370, liabilities: 58825 },
+                    '2023': { totalAssets: 140238, netAssets: 88846, liabilities: 51392 },
+                    '2022': { totalAssets: 153740, netAssets: 110119, liabilities: 43621 },
+                    '2021': { totalAssets: 162749, netAssets: 109308, liabilities: 53441 },
+                    '2020': { totalAssets: 151488, netAssets: 108681, liabilities: 42807 },
+                    '2019': { totalAssets: 145346, netAssets: 96761, liabilities: 48585 },
+                    '2018': { totalAssets: 152491, netAssets: 99849, liabilities: 52642 },
+                    '2017': { totalAssets: 111655, netAssets: 94362, liabilities: 17293 },
+                    '2016': { totalAssets: 90848, netAssets: 31491, liabilities: 59357 },
+                    '2015': { totalAssets: 94017, netAssets: 17316, liabilities: 76701 }
+                };
+                
+                // Sort by year descending
+                const sortedData = financialData.historicalData.sort((a, b) => {
+                    const yearA = parseInt(a.year) || 0;
+                    const yearB = parseInt(b.year) || 0;
+                    return yearB - yearA;
+                });
+                
+                sortedData.forEach(data => {
+                    const year = data.year;
+                    const ourTotalAssets = data.metrics.totalAssets?.value || 0;
+                    const ourNetAssets = data.metrics.netAssets?.value || data.metrics.shareholdersEquity?.value || 0;
+                    const ourLiabilities = data.metrics.totalLiabilities?.value || 0;
+                    
+                    const endole = endoleData[year] || {};
+                    
+                    // Check if values match
+                    const totalAssetsMatch = ourTotalAssets === endole.totalAssets;
+                    const netAssetsMatch = ourNetAssets === endole.netAssets;
+                    const liabilitiesMatch = ourLiabilities === endole.liabilities;
+                    
+                    // Check if we're confusing values
+                    const confusedAssets = ourTotalAssets === endole.netAssets; // Are we showing net assets as total?
+                    const confusedNet = ourNetAssets === endole.totalAssets; // Are we showing total as net?
+                    
+                    let notes = [];
+                    if (confusedAssets) notes.push('Total Assets = Endole Net Assets!');
+                    if (confusedNet) notes.push('Net Assets = Endole Total Assets!');
+                    if (!totalAssetsMatch && !confusedAssets) notes.push('Total Assets mismatch');
+                    if (!netAssetsMatch && !confusedNet) notes.push('Net Assets mismatch');
+                    if (!liabilitiesMatch) notes.push('Liabilities mismatch');
+                    
+                    tableHtml += `<tr class="${confusedAssets || confusedNet ? 'highlight' : ''}">
+                        <td>${year}</td>
+                        <td style="color: ${totalAssetsMatch ? 'green' : 'red'}">${ourTotalAssets}</td>
+                        <td style="color: ${netAssetsMatch ? 'green' : 'red'}">${ourNetAssets}</td>
+                        <td style="color: ${liabilitiesMatch ? 'green' : 'red'}">${ourLiabilities}</td>
+                        <td>${endole.totalAssets || 'N/A'}</td>
+                        <td>${endole.netAssets || 'N/A'}</td>
+                        <td>${endole.liabilities || 'N/A'}</td>
+                        <td>${notes.join(', ') || '✓ All match'}</td>
+                    </tr>`;
+                });
+                
+                tableHtml += '</table></div>';
+                results.innerHTML += tableHtml;
+                
+                // Show raw XBRL tags for the latest year
+                const latestData = sortedData[0];
+                if (latestData && latestData.metrics) {
+                    results.innerHTML += '<div class="debug-section"><h3>Raw XBRL Data for ' + latestData.year + '</h3><pre>' + 
+                        JSON.stringify(latestData.metrics, null, 2) + '</pre></div>';
+                }
+                
+                results.innerHTML += '<div class="success">✅ Debug completed</div>';
+                
+            } catch (error) {
+                console.error('❌ Error debugging company:', error);
+                results.innerHTML += `<div class="error">❌ Error: ${error.message}</div>`;
+            }
+        }
+    </script>
+</body>
+</html>

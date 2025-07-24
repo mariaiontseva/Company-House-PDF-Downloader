@@ -33,7 +33,7 @@ const FinanceParser = {
             } else {
                 // Production - use Cloudflare Worker with API key
                 const apiKey = window.APP_CONFIG?.COMPANIES_HOUSE_API_KEY || '22aefa40-ee9e-47c0-b40a-2dd3c03165c6';
-                apiUrl = `${this.PROXY_URL}/?url=${encodeURIComponent(`https://api.companieshouse.gov.uk/company/${companyNumber}/filing-history?category=accounts&items_per_page=20`)}&apiKey=${apiKey}`;
+                apiUrl = `${this.PROXY_URL}/?url=${encodeURIComponent(`https://api.companieshouse.gov.uk/company/${companyNumber}/filing-history?category=accounts&items_per_page=20`)}&key=${apiKey}`;
             }
             
             console.log('🔸 Fetching filing history from:', apiUrl);
@@ -101,7 +101,7 @@ const FinanceParser = {
                         // Production - use document API URL through worker
                         const apiKey = window.APP_CONFIG?.COMPANIES_HOUSE_API_KEY || '22aefa40-ee9e-47c0-b40a-2dd3c03165c6';
                         const docUrl = `https://document-api.companieshouse.gov.uk/document/${filing.transaction_id}/content`;
-                        xbrlUrl = `${this.PROXY_URL}/?url=${encodeURIComponent(docUrl)}&apiKey=${apiKey}&accept=application/xhtml%2Bxml`;
+                        xbrlUrl = `${this.PROXY_URL}/?url=${encodeURIComponent(docUrl)}&key=${apiKey}&accept=application/xhtml%2Bxml`;
                     }
                     
                     console.log(`🔸 Fetching XBRL for year ${year}...`);

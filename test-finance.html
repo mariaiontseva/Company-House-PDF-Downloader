@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Finance Parser Test</title>
+    <script src="config.js"></script>
+</head>
+<body>
+    <h1>Finance Parser Test</h1>
+    <div id="output"></div>
+    
+    <script src="enhanced-xbrl-parser.js"></script>
+    <script src="finance-parser.js"></script>
+    
+    <script>
+        const API_KEY = window.APP_CONFIG.COMPANIES_HOUSE_API_KEY;
+        
+        async function testFinanceParser() {
+            const output = document.getElementById('output');
+            output.innerHTML = '<p>Testing company 09051662...</p>';
+            
+            try {
+                const financialData = await FinanceParser.extractFinancialData('09051662');
+                console.log('Financial data:', financialData);
+                
+                if (financialData) {
+                    output.innerHTML += `<pre>${JSON.stringify(financialData, null, 2)}</pre>`;
+                } else {
+                    output.innerHTML += '<p>No financial data returned</p>';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                output.innerHTML += `<p style="color: red;">Error: ${error.message}</p>`;
+            }
+        }
+        
+        // Run test
+        testFinanceParser();
+    </script>
+</body>
+</html>

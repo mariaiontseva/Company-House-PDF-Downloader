@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Finance Parser</title>
+</head>
+<body>
+    <h1>Testing Finance Parser Loading</h1>
+    <div id="result"></div>
+    
+    <script>
+        console.log('Starting to load scripts...');
+    </script>
+    
+    <script src="real-xbrl-parser.js"></script>
+    <script src="enhanced-xbrl-parser.js"></script>
+    
+    <script>
+        console.log('After loading parsers:');
+        console.log('RealXBRLParser available:', typeof RealXBRLParser !== 'undefined');
+        console.log('EnhancedXBRLParser available:', typeof EnhancedXBRLParser !== 'undefined');
+    </script>
+    
+    <script src="finance-parser.js"></script>
+    
+    <script>
+        console.log('After loading finance-parser:');
+        console.log('FinanceParser available:', typeof FinanceParser !== 'undefined');
+        
+        document.getElementById('result').innerHTML = `
+            <p>RealXBRLParser: ${typeof RealXBRLParser !== 'undefined' ? 'Loaded' : 'Not loaded'}</p>
+            <p>EnhancedXBRLParser: ${typeof EnhancedXBRLParser !== 'undefined' ? 'Loaded' : 'Not loaded'}</p>
+            <p>FinanceParser: ${typeof FinanceParser !== 'undefined' ? 'Loaded' : 'Not loaded'}</p>
+        `;
+        
+        if (typeof FinanceParser !== 'undefined') {
+            document.getElementById('result').innerHTML += '<p style="color: green;">Success! FinanceParser is available.</p>';
+        } else {
+            document.getElementById('result').innerHTML += '<p style="color: red;">Error: FinanceParser failed to load.</p>';
+        }
+    </script>
+</body>
+</html>

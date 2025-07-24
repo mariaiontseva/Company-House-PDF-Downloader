@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finance Data Debug Test - With Fix</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .issue {
+            background-color: #ffebee;
+            padding: 15px;
+            border-left: 4px solid #f44336;
+            margin: 20px 0;
+        }
+        .fix {
+            background-color: #e8f5e9;
+            padding: 15px;
+            border-left: 4px solid #4caf50;
+            margin: 20px 0;
+        }
+        .log-entry {
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #f5f5f5;
+            border-left: 3px solid #2196F3;
+            font-family: monospace;
+            font-size: 12px;
+            overflow-x: auto;
+        }
+        .error {
+            border-left-color: #f44336;
+            background-color: #ffebee;
+        }
+        .success {
+            border-left-color: #4caf50;
+            background-color: #e8f5e9;
+        }
+        .warning {
+            border-left-color: #ff9800;
+            background-color: #fff3e0;
+        }
+        button {
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #1976D2;
+        }
+        .code-block {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .comparison-table th, .comparison-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        .comparison-table th {
+            background-color: #f5f5f5;
+        }
+        #logs {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Financial Data Loading Issue - Root Cause Analysis</h1>
+        <p>Testing company: <strong>09051662</strong></p>
+        
+        <div class="issue">
+            <h3>🔴 Issue Identified:</h3>
+            <p><strong>Parameter Name Mismatch</strong></p>
+            <ul>
+                <li>The Cloudflare Worker expects parameter: <code>key</code></li>
+                <li>The finance-parser.js sends parameter: <code>apiKey</code></li>
+                <li>Result: Worker returns "Missing url or key parameter" error</li>
+            </ul>
+        </div>
+        
+        <div class="fix">
+            <h3>✅ Fix Required:</h3>
+            <p>In <strong>finance-parser.js</strong> line 449, change:</p>
+            <div class="code-block">
+// Current (BROKEN):
+const params = new URLSearchParams({
+    url: targetUrl,
+    apiKey: typeof API_KEY !== 'undefined' ? API_KEY : '22aefa40-ee9e-47c0-b40a-2dd3c03165c6'
+});
+
+// Fixed:
+const params = new URLSearchParams({
+    url: targetUrl,
+    key: typeof API_KEY !== 'undefined' ? API_KEY : '22aefa40-ee9e-47c0-b40a-2dd3c03165c6'
+});
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>Test Controls</h2>
+        <button onclick="testBroken()">Test Broken Production URL</button>
+        <button onclick="testFixed()">Test Fixed Production URL</button>
+        <button onclick="clearLogs()">Clear Logs</button>
+    </div>
+
+    <div class="container">
+        <h2>Parameter Comparison</h2>
+        <table class="comparison-table">
+            <tr>
+                <th>Version</th>
+                <th>Worker Code Expects</th>
+                <th>Finance Parser Sends</th>
+                <th>Result</th>
+            </tr>
+            <tr>
+                <td>Current (Broken)</td>
+                <td><code>url.searchParams.get('key')</code></td>
+                <td><code>apiKey=...</code></td>
+                <td>❌ Missing parameter error</td>
+            </tr>
+            <tr>
+                <td>Fixed</td>
+                <td><code>url.searchParams.get('key')</code></td>
+                <td><code>key=...</code></td>
+                <td>✅ Works correctly</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="container">
+        <h2>Test Results</h2>
+        <div id="logs"></div>
+    </div>
+
+    <script>
+        const COMPANY_NUMBER = '09051662';
+        const PRODUCTION_BASE = 'https://blue-flower-d40f.mahin84.workers.dev/?';
+        const API_KEY = '22aefa40-ee9e-47c0-b40a-2dd3c03165c6';
+        
+        // Log container
+        const logsContainer = document.getElementById('logs');
+        
+        // Logging function
+        function log(message, type = 'info') {
+            const timestamp = new Date().toISOString();
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry ${type}`;
+            logEntry.innerHTML = `<strong>[${timestamp}]</strong> ${message}`;
+            logsContainer.appendChild(logEntry);
+            logsContainer.scrollTop = logsContainer.scrollHeight;
+        }
+        
+        function clearLogs() {
+            logsContainer.innerHTML = '';
+        }
+        
+        // Test with broken parameter name
+        async function testBroken() {
+            clearLogs();
+            log('=== Testing BROKEN Production URL (using apiKey parameter) ===', 'warning');
+            
+            const targetUrl = 'https://document-api.companieshouse.gov.uk/document/jdqJifW-8lbnx1vVHs-Bv8OmRkGPJqsIRJpVTKBGQWU/content';
+            
+            // This is what finance-parser.js currently does - WRONG parameter name
+            const params = new URLSearchParams({
+                url: targetUrl,
+                apiKey: API_KEY  // WRONG: Worker expects 'key', not 'apiKey'
+            });
+            
+            const fullUrl = `${PRODUCTION_BASE}${params.toString()}`;
+            log(`URL with WRONG parameter: ${fullUrl}`, 'error');
+            
+            try {
+                const response = await fetch(fullUrl);
+                log(`Status: ${response.status} ${response.statusText}`, response.ok ? 'success' : 'error');
+                
+                const text = await response.text();
+                log(`Response: ${text}`, 'error');
+                
+                // This will fail with "Missing url or key parameter"
+                
+            } catch (error) {
+                log(`Error: ${error.message}`, 'error');
+            }
+            
+            log('=== Broken Test Complete - Should show "Missing url or key parameter" ===', 'warning');
+        }
+        
+        // Test with fixed parameter name
+        async function testFixed() {
+            clearLogs();
+            log('=== Testing FIXED Production URL (using key parameter) ===', 'warning');
+            
+            const targetUrl = 'https://document-api.companieshouse.gov.uk/document/jdqJifW-8lbnx1vVHs-Bv8OmRkGPJqsIRJpVTKBGQWU/content';
+            
+            // This is the FIX - use 'key' instead of 'apiKey'
+            const params = new URLSearchParams({
+                url: targetUrl,
+                key: API_KEY  // CORRECT: Worker expects 'key'
+            });
+            
+            const fullUrl = `${PRODUCTION_BASE}${params.toString()}`;
+            log(`URL with CORRECT parameter: ${fullUrl}`, 'success');
+            
+            try {
+                const response = await fetch(fullUrl);
+                log(`Status: ${response.status} ${response.statusText}`, response.ok ? 'success' : 'error');
+                log(`Content-Type: ${response.headers.get('Content-Type')}`, 'info');
+                
+                if (response.ok) {
+                    const text = await response.text();
+                    log(`Response length: ${text.length} characters`, 'success');
+                    
+                    if (text.includes('xbrl') || text.includes('XBRL')) {
+                        log('✅ Success! Response contains XBRL content', 'success');
+                    }
+                } else {
+                    const errorText = await response.text();
+                    log(`Error response: ${errorText}`, 'error');
+                }
+                
+            } catch (error) {
+                log(`Error: ${error.message}`, 'error');
+            }
+            
+            log('=== Fixed Test Complete - Should work correctly! ===', 'warning');
+        }
+        
+        // Show the issue on load
+        clearLogs();
+        log('Issue identified! The Cloudflare Worker expects "key" parameter but finance-parser.js sends "apiKey".', 'error');
+        log('Click "Test Broken Production URL" to see the current broken behavior.', 'warning');
+        log('Click "Test Fixed Production URL" to see how it works with the correct parameter name.', 'success');
+    </script>
+</body>
+</html>

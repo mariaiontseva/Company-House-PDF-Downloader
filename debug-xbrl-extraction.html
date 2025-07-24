@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug XBRL Extraction</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; background: #f9f9f9; }
+        .error { color: red; font-weight: bold; }
+        .success { color: green; font-weight: bold; }
+        .tag { font-family: monospace; background: #f0f0f0; padding: 2px 4px; }
+        table { border-collapse: collapse; width: 100%; margin: 10px 0; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        pre { background: #333; color: #0f0; padding: 10px; overflow-x: auto; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <h1>Debug XBRL Extraction - Company 05254058</h1>
+    
+    <button onclick="debugYear('2020')">Debug 2020</button>
+    <button onclick="debugYear('2016')">Debug 2016</button>
+    <button onclick="debugYear('2024')">Debug 2024</button>
+    
+    <div id="results"></div>
+
+    <script src="finance-parser.js"></script>
+    <script src="enhanced-xbrl-parser.js"></script>
+    <script>
+        async function debugYear(year) {
+            const results = document.getElementById('results');
+            results.innerHTML = `<div class="section"><h2>Debugging ${year}...</h2></div>`;
+            
+            try {
+                // Get all filings
+                const filingUrl = 'company/05254058/filing-history?category=accounts&items_per_page=100';
+                const proxyUrl = `http://localhost:3002/api/proxy/companies-house/${filingUrl}`;
+                
+                console.log('Fetching filing history...');
+                const response = await fetch(proxyUrl);
+                
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch filing history: ${response.status}`);
+                }
+                
+                const filingData = await response.json();
+                
+                // Find filing for the year
+                let targetFiling = null;
+                for (const filing of filingData.items) {
+                    if (filing.category === 'accounts' && filing.links?.document_metadata) {
+                        const match = filing.description.match(/made up to.*?(\d{4})/i) || 
+                                     filing.description.match(/(\d{4})/);
+                        if (match && match[1] === year) {
+                            targetFiling = filing;
+                            break;
+                        }
+                    }
+                }
+                
+                if (!targetFiling) {
+                    results.innerHTML += `<div class="error">No filing found for ${year}</div>`;
+                    return;
+                }
+                
+                results.innerHTML += `<div class="section">
+                    <h3>Filing Found:</h3>
+                    <p><strong>Description:</strong> ${targetFiling.description}</p>
+                    <p><strong>Date Filed:</strong> ${targetFiling.date}</p>
+                    <p><strong>Type:</strong> ${targetFiling.type}</p>
+                </div>`;
+                
+                // Download XBRL
+                const transactionId = targetFiling.links.self.split('/').pop();
+                console.log('Downloading XBRL for transaction:', transactionId);
+                
+                const xbrlResponse = await FinanceParser.downloadAndParseXBRL(targetFiling);
+                
+                if (!xbrlResponse || Object.keys(xbrlResponse).length === 0) {
+                    results.innerHTML += '<div class="error">Failed to parse XBRL</div>';
+                    return;
+                }
+                
+                // Show raw XBRL data
+                let html = '<div class="section">';
+                html += '<h3>Raw XBRL Data Extracted:</h3>';
+                html += '<pre>' + JSON.stringify(xbrlResponse, null, 2) + '</pre>';
+                html += '</div>';
+                results.innerHTML += html;
+                
+                // Extract metrics
+                const metrics = FinanceParser.extractMetrics(xbrlResponse);
+                
+                html = '<div class="section">';
+                html += '<h3>Extracted Metrics:</h3>';
+                html += '<table>';
+                html += '<tr><th>Metric</th><th>Value</th><th>Formatted</th><th>Source</th></tr>';
+                
+                Object.entries(metrics).forEach(([key, data]) => {
+                    if (data && typeof data === 'object') {
+                        html += '<tr>';
+                        html += `<td>${key}</td>`;
+                        html += `<td>${data.value || 'null'}</td>`;
+                        html += `<td>${data.formatted || 'N/A'}</td>`;
+                        html += `<td>${data.source || 'direct'}</td>`;
+                        html += '</tr>';
+                    }
+                });
+                
+                html += '</table>';
+                html += '</div>';
+                results.innerHTML += html;
+                
+                // Show what we're looking for vs what we found
+                const ENDOLE_VALUES = {
+                    '2024': { totalAssets: 176195, netAssets: 117370, totalLiabilities: 58825 },
+                    '2020': { totalAssets: 151488, netAssets: 108681, totalLiabilities: 42807 },
+                    '2016': { totalAssets: 90848, netAssets: 31491, totalLiabilities: 59357 }
+                };
+                
+                if (ENDOLE_VALUES[year]) {
+                    html = '<div class="section">';
+                    html += '<h3>Comparison with Endole:</h3>';
+                    html += '<table>';
+                    html += '<tr><th>Metric</th><th>We Found</th><th>Endole Has</th><th>Status</th></tr>';
+                    
+                    const endole = ENDOLE_VALUES[year];
+                    
+                    // Total Assets
+                    html += '<tr>';
+                    html += '<td>Total Assets</td>';
+                    html += `<td>${metrics.totalAssets?.value || 'NOT FOUND'}</td>`;
+                    html += `<td>${endole.totalAssets}</td>`;
+                    html += `<td>${metrics.totalAssets?.value === endole.totalAssets ? '✓' : '✗'}</td>`;
+                    html += '</tr>';
+                    
+                    // Total Liabilities
+                    html += '<tr>';
+                    html += '<td>Total Liabilities</td>';
+                    html += `<td>${Math.abs(metrics.totalLiabilities?.value || 0)}</td>`;
+                    html += `<td>${endole.totalLiabilities}</td>`;
+                    html += `<td>${Math.abs(metrics.totalLiabilities?.value || 0) === endole.totalLiabilities ? '✓' : '✗'}</td>`;
+                    html += '</tr>';
+                    
+                    // Net Assets
+                    html += '<tr>';
+                    html += '<td>Net Assets</td>';
+                    html += `<td>${metrics.netAssets?.value || metrics.shareholdersEquity?.value || 'NOT FOUND'}</td>`;
+                    html += `<td>${endole.netAssets}</td>`;
+                    html += `<td>${(metrics.netAssets?.value || metrics.shareholdersEquity?.value) === endole.netAssets ? '✓' : '✗'}</td>`;
+                    html += '</tr>';
+                    
+                    html += '</table>';
+                    html += '</div>';
+                    results.innerHTML += html;
+                }
+                
+                // Look for specific tags in raw data
+                html = '<div class="section">';
+                html += '<h3>Key XBRL Tags in Raw Data:</h3>';
+                html += '<ul>';
+                
+                const keyTags = [
+                    'totalAssets', 'balanceSheetTotal', 'netAssets', 'shareholdersFunds',
+                    'totalLiabilities', 'creditors', 'totalAssetsLessCurrentLiabilities'
+                ];
+                
+                Object.keys(xbrlResponse.rawData || {}).forEach(tag => {
+                    const lowerTag = tag.toLowerCase();
+                    if (keyTags.some(key => lowerTag.includes(key.toLowerCase()))) {
+                        const value = xbrlResponse.rawData[tag];
+                        html += `<li><span class="tag">${tag}</span> = ${JSON.stringify(value)}</li>`;
+                    }
+                });
+                
+                html += '</ul>';
+                html += '</div>';
+                results.innerHTML += html;
+                
+            } catch (error) {
+                console.error('Debug error:', error);
+                results.innerHTML += `<div class="error">Error: ${error.message}</div>`;
+            }
+        }
+    </script>
+</body>
+</html>

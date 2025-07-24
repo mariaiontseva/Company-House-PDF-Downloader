@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Parser Directly</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; background: #f9f9f9; }
+        .error { color: red; font-weight: bold; }
+        .success { color: green; font-weight: bold; }
+        table { border-collapse: collapse; width: 100%; margin: 10px 0; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .match { background-color: #d4edda; }
+        .mismatch { background-color: #f8d7da; }
+        pre { background: #f0f0f0; padding: 10px; overflow-x: auto; font-size: 11px; }
+    </style>
+</head>
+<body>
+    <h1>Test XBRL Parser Directly</h1>
+    
+    <button onclick="testCompany()">Test Company 05254058</button>
+    
+    <div id="results"></div>
+
+    <script src="finance-parser.js"></script>
+    <script src="enhanced-xbrl-parser.js"></script>
+    <script src="filleted-accounts-parser.js"></script>
+    <script src="real-xbrl-parser.js"></script>
+    <script>
+        // Endole values for comparison
+        const ENDOLE_VALUES = {
+            '2024': { totalAssets: 176195, netAssets: 117370, totalLiabilities: 58825 },
+            '2023': { totalAssets: 140238, netAssets: 88846, totalLiabilities: 51392 },
+            '2022': { totalAssets: 153740, netAssets: 110119, totalLiabilities: 43621 },
+            '2021': { totalAssets: 162749, netAssets: 109308, totalLiabilities: 53441 },
+            '2020': { totalAssets: 151488, netAssets: 108681, totalLiabilities: 42807 },
+            '2019': { totalAssets: 145346, netAssets: 96761, totalLiabilities: 48585 },
+            '2018': { totalAssets: 152491, netAssets: 99849, totalLiabilities: 52642 },
+            '2017': { totalAssets: 111655, netAssets: 94362, totalLiabilities: 17293 },
+            '2016': { totalAssets: 90848, netAssets: 31491, totalLiabilities: 59357 },
+            '2015': { totalAssets: 94017, netAssets: 17316, totalLiabilities: 76701 }
+        };
+
+        async function testCompany() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<p>Testing company 05254058...</p>';
+            
+            try {
+                console.log('🔍 Starting test...');
+                
+                // Extract financial data using the FinanceParser
+                const financialData = await FinanceParser.extractFinancialData('05254058');
+                
+                if (!financialData || !financialData.historicalData) {
+                    results.innerHTML += '<div class="error">No financial data found</div>';
+                    return;
+                }
+                
+                console.log('📊 Financial data extracted:', financialData);
+                
+                let html = '<div class="section">';
+                html += '<h2>XBRL Extraction Results</h2>';
+                html += `<p>Total filings processed: ${financialData.totalFilings}</p>`;
+                html += `<p>Filings with data: ${financialData.filingsWithData}</p>`;
+                
+                // Create comparison table
+                html += '<table>';
+                html += '<tr><th>Year</th><th>Our Total Assets</th><th>Endole Total Assets</th><th>Our Liabilities</th><th>Endole Liabilities</th><th>Our Net Assets</th><th>Endole Net Assets</th><th>Calculation Check</th></tr>';
+                
+                // Sort by year
+                const sortedData = financialData.historicalData.sort((a, b) => {
+                    const yearA = parseInt(a.year) || 0;
+                    const yearB = parseInt(b.year) || 0;
+                    return yearB - yearA;
+                });
+                
+                sortedData.forEach(yearData => {
+                    const year = yearData.year;
+                    if (!year) return;
+                    
+                    const endole = ENDOLE_VALUES[year] || {};
+                    const metrics = yearData.metrics;
+                    
+                    // Get our values
+                    const ourTotalAssets = metrics.totalAssets?.value || 0;
+                    const ourLiabilities = Math.abs(metrics.totalLiabilities?.value || 0);
+                    const ourNetAssets = metrics.netAssets?.value || metrics.shareholdersEquity?.value || 0;
+                    
+                    // Check matches
+                    const taMatch = ourTotalAssets === endole.totalAssets;
+                    const tlMatch = ourLiabilities === endole.totalLiabilities;
+                    const naMatch = ourNetAssets === endole.netAssets;
+                    
+                    // Calculate check
+                    const calcNetAssets = ourTotalAssets - ourLiabilities;
+                    const calcMatch = calcNetAssets === ourNetAssets;
+                    
+                    html += `<tr class="${(taMatch && tlMatch && naMatch) ? 'match' : 'mismatch'}">`;
+                    html += `<td>${year}</td>`;
+                    html += `<td style="color: ${taMatch ? 'green' : 'red'}">${ourTotalAssets}</td>`;
+                    html += `<td>${endole.totalAssets || 'N/A'}</td>`;
+                    html += `<td style="color: ${tlMatch ? 'green' : 'red'}">${ourLiabilities}</td>`;
+                    html += `<td>${endole.totalLiabilities || 'N/A'}</td>`;
+                    html += `<td style="color: ${naMatch ? 'green' : 'red'}">${ourNetAssets}</td>`;
+                    html += `<td>${endole.netAssets || 'N/A'}</td>`;
+                    html += `<td style="color: ${calcMatch ? 'green' : 'red'}">${ourTotalAssets} - ${ourLiabilities} = ${calcNetAssets}</td>`;
+                    html += '</tr>';
+                    
+                    // Log raw data for debugging
+                    if (!taMatch || !tlMatch || !naMatch) {
+                        console.log(`Year ${year} mismatch:`, {
+                            metrics: metrics,
+                            rawData: yearData.rawData
+                        });
+                    }
+                });
+                
+                html += '</table>';
+                
+                // Show extraction methods for latest year
+                const latestYear = sortedData[0];
+                if (latestYear && latestYear.metrics) {
+                    html += '<h3>Extraction Methods (Latest Year):</h3>';
+                    html += '<ul>';
+                    Object.entries(latestYear.metrics).forEach(([metric, data]) => {
+                        if (data && typeof data === 'object') {
+                            html += `<li><strong>${metric}:</strong> ${data.value} (source: ${data.source || 'direct'}`;
+                            if (data.calculation) {
+                                html += `, calculation: ${data.calculation}`;
+                            }
+                            html += ')</li>';
+                        }
+                    });
+                    html += '</ul>';
+                }
+                
+                html += '</div>';
+                results.innerHTML += html;
+                
+                // Check if we're getting correct data
+                const issues = [];
+                sortedData.forEach(yearData => {
+                    const year = yearData.year;
+                    if (!year || !ENDOLE_VALUES[year]) return;
+                    
+                    const metrics = yearData.metrics;
+                    const endole = ENDOLE_VALUES[year];
+                    
+                    if (metrics.totalAssets?.value !== endole.totalAssets) {
+                        issues.push(`${year}: Total Assets mismatch`);
+                    }
+                    if (Math.abs(metrics.totalLiabilities?.value || 0) !== endole.totalLiabilities) {
+                        issues.push(`${year}: Total Liabilities mismatch`);
+                    }
+                    if ((metrics.netAssets?.value || metrics.shareholdersEquity?.value) !== endole.netAssets) {
+                        issues.push(`${year}: Net Assets mismatch`);
+                    }
+                });
+                
+                if (issues.length > 0) {
+                    html = '<div class="section error">';
+                    html += '<h3>Issues Found:</h3>';
+                    html += '<ul>';
+                    issues.forEach(issue => {
+                        html += `<li>${issue}</li>`;
+                    });
+                    html += '</ul>';
+                    html += '</div>';
+                    results.innerHTML += html;
+                } else {
+                    results.innerHTML += '<div class="section success"><h3>✓ All values match Endole!</h3></div>';
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                results.innerHTML += `<div class="error">Error: ${error.message}</div>`;
+            }
+        }
+    </script>
+</body>
+</html>

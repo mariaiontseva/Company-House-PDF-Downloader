@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test All Years XBRL</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        table { border-collapse: collapse; width: 100%; margin: 20px 0; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .match { background-color: #d4edda; }
+        .mismatch { background-color: #f8d7da; }
+        .processing { background-color: #fff3cd; }
+        .error { color: red; }
+        pre { background: #f0f0f0; padding: 10px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>Extract XBRL Data for All Years</h1>
+    <button onclick="processAllYears()">Process All Years</button>
+    
+    <div id="status"></div>
+    <div id="results"></div>
+    
+    <script src="real-xbrl-parser.js"></script>
+    <script>
+        // Endole values for comparison
+        const ENDOLE_VALUES = {
+            '2024': { totalAssets: 176195, netAssets: 117370, totalLiabilities: 58825 },
+            '2023': { totalAssets: 140238, netAssets: 88846, totalLiabilities: 51392 },
+            '2022': { totalAssets: 153740, netAssets: 110119, totalLiabilities: 43621 },
+            '2021': { totalAssets: 162749, netAssets: 109308, totalLiabilities: 53441 },
+            '2020': { totalAssets: 151488, netAssets: 108681, totalLiabilities: 42807 },
+            '2019': { totalAssets: 145346, netAssets: 96761, totalLiabilities: 48585 },
+            '2018': { totalAssets: 152491, netAssets: 99849, totalLiabilities: 52642 },
+            '2017': { totalAssets: 111655, netAssets: 94362, totalLiabilities: 17293 },
+            '2016': { totalAssets: 90848, netAssets: 31491, totalLiabilities: 59357 },
+            '2015': { totalAssets: 94017, netAssets: 17316, totalLiabilities: 76701 }
+        };
+        
+        async function processAllYears() {
+            const status = document.getElementById('status');
+            const results = document.getElementById('results');
+            
+            status.innerHTML = '<p>Fetching filing history...</p>';
+            
+            try {
+                // Get all filings
+                const response = await fetch('http://localhost:3002/api/proxy/companies-house/company/05254058/filing-history?category=accounts&items_per_page=100');
+                const data = await response.json();
+                
+                const filings = data.items.filter(item => 
+                    item.category === 'accounts' && 
+                    item.links && 
+                    item.links.document_metadata
+                );
+                
+                status.innerHTML = `<p>Found ${filings.length} accounts filings. Processing...</p>`;
+                
+                // Process each filing
+                const processedData = [];
+                
+                for (let i = 0; i < filings.length; i++) {
+                    const filing = filings[i];
+                    status.innerHTML = `<p>Processing filing ${i + 1}/${filings.length}: ${filing.description}</p>`;
+                    
+                    try {
+                        // Download XBRL
+                        const xbrlUrl = `http://localhost:3002/api/proxy/ixbrl/05254058/${filing.transaction_id}?format=xhtml`;
+                        const xbrlResponse = await fetch(xbrlUrl);
+                        const xbrlText = await xbrlResponse.text();
+                        
+                        // Parse XBRL
+                        const parsed = RealXBRLParser.parse(xbrlText);
+                        
+                        // Extract year from accounting period end date
+                        let year = null;
+                        if (parsed.accountingPeriodEnd) {
+                            const yearMatch = parsed.accountingPeriodEnd.match(/\d{4}/);
+                            if (yearMatch) {
+                                year = yearMatch[0];
+                            }
+                        }
+                        
+                        // Fallback to description
+                        if (!year) {
+                            const descMatch = filing.description.match(/made up to.*?(\d{4})/i);
+                            if (descMatch) {
+                                year = descMatch[1];
+                            }
+                        }
+                        
+                        processedData.push({
+                            filing: filing,
+                            year: year,
+                            data: parsed,
+                            totalAssets: parsed.totalAssets ? parsed.totalAssets.value : 0,
+                            totalLiabilities: parsed.totalLiabilities ? parsed.totalLiabilities.value : 0,
+                            netAssets: parsed.netAssets ? parsed.netAssets.value : 
+                                       (parsed.shareholdersFunds ? parsed.shareholdersFunds.value : 0)
+                        });
+                        
+                    } catch (error) {
+                        console.error(`Error processing filing ${i + 1}:`, error);
+                    }
+                }
+                
+                // Display results
+                displayResults(processedData);
+                
+            } catch (error) {
+                status.innerHTML = `<p class="error">Error: ${error.message}</p>`;
+            }
+        }
+        
+        function displayResults(data) {
+            const results = document.getElementById('results');
+            
+            let html = '<h2>XBRL Extraction Results</h2>';
+            html += '<table>';
+            html += '<tr><th>Year</th><th>Our Total Assets</th><th>Endole Total Assets</th>';
+            html += '<th>Our Liabilities</th><th>Endole Liabilities</th>';
+            html += '<th>Our Net Assets</th><th>Endole Net Assets</th>';
+            html += '<th>Calculation Check</th></tr>';
+            
+            // Group by year and sort
+            const byYear = {};
+            data.forEach(item => {
+                if (item.year && !byYear[item.year]) {
+                    byYear[item.year] = item;
+                }
+            });
+            
+            // Sort years descending
+            const years = Object.keys(byYear).sort((a, b) => b - a);
+            
+            years.forEach(year => {
+                const item = byYear[year];
+                const endole = ENDOLE_VALUES[year] || {};
+                
+                const taMatch = Math.abs(item.totalAssets - (endole.totalAssets || 0)) < 100;
+                const tlMatch = Math.abs(item.totalLiabilities - (endole.totalLiabilities || 0)) < 100;
+                const naMatch = Math.abs(item.netAssets - (endole.netAssets || 0)) < 100;
+                
+                const rowClass = (taMatch && tlMatch && naMatch) ? 'match' : 'mismatch';
+                
+                html += `<tr class="${rowClass}">`;
+                html += `<td>${year}</td>`;
+                html += `<td>${item.totalAssets}</td>`;
+                html += `<td>${endole.totalAssets || 'N/A'}</td>`;
+                html += `<td>${item.totalLiabilities}</td>`;
+                html += `<td>${endole.totalLiabilities || 'N/A'}</td>`;
+                html += `<td>${item.netAssets}</td>`;
+                html += `<td>${endole.netAssets || 'N/A'}</td>`;
+                html += `<td>${item.totalAssets} - ${item.totalLiabilities} = ${item.totalAssets - item.totalLiabilities}</td>`;
+                html += '</tr>';
+            });
+            
+            html += '</table>';
+            
+            // Show details for latest year
+            if (years.length > 0 && byYear[years[0]].data) {
+                const latest = byYear[years[0]].data;
+                html += '<h3>Latest Year Details:</h3>';
+                html += '<pre>' + JSON.stringify({
+                    accountingPeriodEnd: latest.accountingPeriodEnd,
+                    fixedAssets: latest.fixedAssets,
+                    currentAssets: latest.currentAssets,
+                    totalAssets: latest.totalAssets,
+                    creditorsWithinOneYear: latest.creditorsWithinOneYear,
+                    netAssets: latest.netAssets,
+                    shareholdersFunds: latest.shareholdersFunds,
+                    cash: latest.cash
+                }, null, 2) + '</pre>';
+            }
+            
+            results.innerHTML = html;
+        }
+    </script>
+</body>
+</html>

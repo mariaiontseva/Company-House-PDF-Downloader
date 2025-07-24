@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test XBRL Direct</title>
+</head>
+<body>
+    <h1>Testing XBRL Extraction</h1>
+    <div id="output"></div>
+    
+    <script src="enhanced-xbrl-parser.js"></script>
+    <script>
+        // Test XBRL content with real data from Companies House
+        const testXBRL = `
+        <html xmlns="http://www.w3.org/1999/xhtml" xmlns:ix="http://www.xbrl.org/2013/inlineXBRL">
+        <body>
+            <!-- Example from 2024 filing -->
+            <ix:nonFraction name="uk-gaap:FixedAssets" contextRef="CurrentYearInstant" unitRef="GBP" decimals="0" scale="0">99821</ix:nonFraction>
+            <ix:nonFraction name="uk-gaap:CurrentAssets" contextRef="CurrentYearInstant" unitRef="GBP" decimals="0" scale="0">76374</ix:nonFraction>
+            <ix:nonFraction name="uk-gaap:CreditorsDueWithinOneYear" contextRef="CurrentYearInstant" unitRef="GBP" decimals="0" scale="0">58825</ix:nonFraction>
+            <ix:nonFraction name="uk-gaap:NetCurrentAssetsLiabilities" contextRef="CurrentYearInstant" unitRef="GBP" decimals="0" scale="0">17549</ix:nonFraction>
+            <ix:nonFraction name="uk-gaap:TotalAssetsLessCurrentLiabilities" contextRef="CurrentYearInstant" unitRef="GBP" decimals="0" scale="0">117370</ix:nonFraction>
+            <ix:nonFraction name="uk-gaap:ShareholdersFunds" contextRef="CurrentYearInstant" unitRef="GBP" decimals="0" scale="0">117370</ix:nonFraction>
+        </body>
+        </html>
+        `;
+        
+        console.log('Testing EnhancedXBRLParser...');
+        const result = EnhancedXBRLParser.parse(testXBRL);
+        console.log('Parser result:', result);
+        
+        const output = document.getElementById('output');
+        output.innerHTML = `
+            <h2>Extracted Values:</h2>
+            <ul>
+                <li>Total Assets: ${result.totalAssets || 'Not found'}</li>
+                <li>Total Liabilities: ${result.totalLiabilities || 'Not found'}</li>
+                <li>Net Assets: ${result.netAssets || 'Not found'}</li>
+            </ul>
+            <h3>Expected for 2024:</h3>
+            <ul>
+                <li>Total Assets: 176195</li>
+                <li>Total Liabilities: 58825</li>
+                <li>Net Assets: 117370</li>
+            </ul>
+            <h3>Calculation Check:</h3>
+            <p>Fixed (99821) + Current (76374) = ${99821 + 76374} (Should be 176195)</p>
+            <p>Current Liabilities: 58825</p>
+            <p>TALCL (Net Assets): 117370</p>
+        `;
+    </script>
+</body>
+</html>

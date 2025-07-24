@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Redirecting...</title>
+    <script>
+        // Get company number from URL
+        const query = window.location.search.substring(1);
+        if (query && !query.includes('=') && /^[0-9A-Z]{8}$/i.test(query)) {
+            // Redirect to company page
+            window.location.href = 'http://localhost:8080/#company/' + query;
+        } else {
+            document.body.innerHTML = 'Invalid company number';
+        }
+    </script>
+</head>
+<body>
+    Redirecting to company page...
+</body>
+</html>

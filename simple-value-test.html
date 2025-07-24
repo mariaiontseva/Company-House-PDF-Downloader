@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple Value Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; background: #f9f9f9; }
+        .error { color: red; font-weight: bold; }
+        .success { color: green; font-weight: bold; }
+        table { border-collapse: collapse; width: 100%; margin: 10px 0; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .value { font-family: monospace; background: #f0f0f0; padding: 2px 4px; }
+        pre { background: #f0f0f0; padding: 10px; overflow-x: auto; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <h1>Simple Value Test - Why are values wrong?</h1>
+    
+    <button onclick="testExtraction()">Test Value Extraction</button>
+    
+    <div id="results"></div>
+
+    <script>
+        // Sample XBRL value formats we might encounter
+        const TEST_VALUES = [
+            { raw: "117370", scale: "0", expected: 117370 },
+            { raw: "117,370", scale: "0", expected: 117370 },
+            { raw: "117370", scale: "3", expected: 117370000 },
+            { raw: "117.370", scale: "3", expected: 117370 },
+            { raw: "(58825)", scale: "0", expected: -58825 },
+            { raw: "58,825", scale: "0", expected: 58825 },
+            { raw: "1", scale: "0", expected: 1 },
+            { raw: "nil", scale: "0", expected: 0 },
+            { raw: "-", scale: "0", expected: 0 }
+        ];
+
+        function parseNumericValue(text, scale = '0') {
+            if (!text || typeof text !== 'string') return null;
+            
+            // Remove currency symbols and whitespace
+            let cleanText = text.replace(/[£$€\s]/g, '');
+            
+            // Handle parentheses for negative numbers
+            const isNegative = cleanText.includes('(') && cleanText.includes(')');
+            cleanText = cleanText.replace(/[()]/g, '');
+            
+            // Remove commas
+            cleanText = cleanText.replace(/,/g, '');
+            
+            // Handle nil/dash
+            if (cleanText === '-' || cleanText === '' || cleanText.toLowerCase() === 'nil') {
+                return 0;
+            }
+            
+            // Parse the number
+            let value = parseFloat(cleanText);
+            
+            if (isNaN(value)) return null;
+            
+            // Apply scale
+            const scaleValue = parseInt(scale) || 0;
+            value = value * Math.pow(10, scaleValue);
+            
+            // Apply negative sign if needed
+            if (isNegative) {
+                value = -Math.abs(value);
+            }
+            
+            return value;
+        }
+
+        function testExtraction() {
+            const results = document.getElementById('results');
+            results.innerHTML = '';
+            
+            // Test value parsing
+            let html = '<div class="section">';
+            html += '<h2>Testing Value Parsing</h2>';
+            html += '<table>';
+            html += '<tr><th>Raw Value</th><th>Scale</th><th>Parsed</th><th>Expected</th><th>Status</th></tr>';
+            
+            TEST_VALUES.forEach(test => {
+                const parsed = parseNumericValue(test.raw, test.scale);
+                const match = parsed === test.expected;
+                
+                html += `<tr class="${match ? '' : 'error'}">`;
+                html += `<td class="value">${test.raw}</td>`;
+                html += `<td>${test.scale}</td>`;
+                html += `<td>${parsed}</td>`;
+                html += `<td>${test.expected}</td>`;
+                html += `<td>${match ? '✓' : '✗'}</td>`;
+                html += '</tr>';
+            });
+            
+            html += '</table>';
+            html += '</div>';
+            results.innerHTML += html;
+            
+            // Test with actual finance parser
+            testFinanceParser();
+        }
+        
+        async function testFinanceParser() {
+            const results = document.getElementById('results');
+            
+            try {
+                // Create mock XBRL data similar to what we might receive
+                const mockXBRL = {
+                    rawData: {
+                        'uk-gaap:BalanceSheetTotal': {
+                            'CurrentPeriodEnd': { value: 176195, formatted: '176,195' },
+                        },
+                        'uk-gaap:ShareholdersFunds': {
+                            'CurrentPeriodEnd': { value: 117370, formatted: '117,370' }
+                        },
+                        'uk-gaap:Creditors': {
+                            'CurrentPeriodEnd': { value: -58825, formatted: '(58,825)' }
+                        }
+                    },
+                    totalAssets: { value: 176195, formatted: '176,195' },
+                    netAssets: { value: 117370, formatted: '117,370' },
+                    totalLiabilities: { value: -58825, formatted: '(58,825)' }
+                };
+                
+                let html = '<div class="section">';
+                html += '<h2>Mock XBRL Data Test</h2>';
+                html += '<pre>' + JSON.stringify(mockXBRL, null, 2) + '</pre>';
+                html += '</div>';
+                results.innerHTML += html;
+                
+                // Load enhanced XBRL parser and test
+                const script = document.createElement('script');
+                script.src = 'enhanced-xbrl-parser.js';
+                script.onload = () => {
+                    // Test parsing a simple XBRL fragment
+                    const testXBRL = `
+                        <html>
+                        <body>
+                            <ix:nonFraction name="uk-gaap:BalanceSheetTotal" contextRef="CurrentPeriodEnd" scale="0">176,195</ix:nonFraction>
+                            <ix:nonFraction name="uk-gaap:ShareholdersFunds" contextRef="CurrentPeriodEnd" scale="0">117,370</ix:nonFraction>
+                            <ix:nonFraction name="uk-gaap:Creditors" contextRef="CurrentPeriodEnd" scale="0">(58,825)</ix:nonFraction>
+                        </body>
+                        </html>
+                    `;
+                    
+                    const parsed = window.EnhancedXBRLParser.parse(testXBRL);
+                    
+                    html = '<div class="section">';
+                    html += '<h2>Enhanced XBRL Parser Result</h2>';
+                    html += '<pre>' + JSON.stringify(parsed, null, 2) + '</pre>';
+                    html += '</div>';
+                    results.innerHTML += html;
+                    
+                    // Check values
+                    html = '<div class="section">';
+                    html += '<h2>Value Check</h2>';
+                    html += '<ul>';
+                    html += `<li>Total Assets: ${parsed.totalAssets?.value} (should be 176195)</li>`;
+                    html += `<li>Net Assets: ${parsed.netAssets?.value} (should be 117370)</li>`;
+                    html += `<li>Total Liabilities: ${Math.abs(parsed.totalLiabilities?.value || 0)} (should be 58825)</li>`;
+                    html += '</ul>';
+                    html += '</div>';
+                    results.innerHTML += html;
+                };
+                document.head.appendChild(script);
+                
+            } catch (error) {
+                results.innerHTML += `<div class="error">Error: ${error.message}</div>`;
+            }
+        }
+    </script>
+</body>
+</html>
