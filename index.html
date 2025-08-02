@@ -11156,6 +11156,9 @@
                 
                 // Check sanctions and add badge after status
                 checkSanctions(companyName).then(sanctionsData => {
+                    // Store sanctions data globally for risk calculation
+                    window.currentCompanySanctionsData = sanctionsData;
+                    
                     if (sanctionsData && sanctionsData.sanctioned) {
                         // Add sanctions badge after status badge
                         setTimeout(() => {
@@ -11167,6 +11170,21 @@
                                 sanctionsBadge.innerHTML = '⚠️ Under Sanctions';
                                 sanctionsBadge.title = `Listed on: ${sanctionsData.lists.join(', ')}`;
                                 statusBadge.parentNode.insertBefore(sanctionsBadge, statusBadge.nextSibling);
+                            }
+                            
+                            // Recalculate risk score with sanctions data
+                            const riskBadge = document.querySelector('#companyModal .risk-badge');
+                            if (riskBadge && !riskBadge.textContent.includes('Loading')) {
+                                window.currentCompanyRiskData = {
+                                    score: calculateRiskScore(company),
+                                    company: company
+                                };
+                                const riskScore = window.currentCompanyRiskData.score;
+                                const riskLevel = riskScore > 80 ? 'low' : riskScore > 50 ? 'medium' : 'high';
+                                const riskText = riskScore > 80 ? 'LOW RISK' : riskScore > 50 ? 'MEDIUM RISK' : 'HIGH RISK';
+                                riskBadge.className = `risk-badge ${riskLevel}`;
+                                riskBadge.innerHTML = `<div class="risk-dot"></div>${riskText} (${riskScore}/100)`;
+                                console.log('🔸 Risk badge updated after sanctions check:', riskText, `(${riskScore}/100)`);
                             }
                         }, 500);
                     }
@@ -11749,6 +11767,9 @@
                 
                 // Check sanctions and add badge after status
                 checkSanctions(companyData.company_name).then(sanctionsData => {
+                    // Store sanctions data globally for risk calculation
+                    window.currentCompanySanctionsData = sanctionsData;
+                    
                     if (sanctionsData && sanctionsData.sanctioned) {
                         // Add sanctions badge after status badge
                         setTimeout(() => {
@@ -11760,6 +11781,21 @@
                                 sanctionsBadge.innerHTML = '⚠️ Under Sanctions';
                                 sanctionsBadge.title = `Listed on: ${sanctionsData.lists.join(', ')}`;
                                 statusBadge.parentNode.insertBefore(sanctionsBadge, statusBadge.nextSibling);
+                            }
+                            
+                            // Recalculate risk score with sanctions data
+                            const riskBadge = document.querySelector('#companyModal .risk-badge');
+                            if (riskBadge && !riskBadge.textContent.includes('Loading')) {
+                                window.currentCompanyRiskData = {
+                                    score: calculateRiskScore(companyData),
+                                    company: companyData
+                                };
+                                const riskScore = window.currentCompanyRiskData.score;
+                                const riskLevel = riskScore > 80 ? 'low' : riskScore > 50 ? 'medium' : 'high';
+                                const riskText = riskScore > 80 ? 'LOW RISK' : riskScore > 50 ? 'MEDIUM RISK' : 'HIGH RISK';
+                                riskBadge.className = `risk-badge ${riskLevel}`;
+                                riskBadge.innerHTML = `<div class="risk-dot"></div>${riskText} (${riskScore}/100)`;
+                                console.log('🔸 Risk badge updated after sanctions check:', riskText, `(${riskScore}/100)`);
                             }
                         }, 500);
                     }
@@ -15667,6 +15703,11 @@
             const riskFactors = [];
             const strengthFactors = [];
             
+            // Sanctions analysis - check first as highest priority risk
+            if (window.currentCompanySanctionsData && window.currentCompanySanctionsData.sanctioned) {
+                riskFactors.push(`⚠️ UNDER SANCTIONS (${window.currentCompanySanctionsData.lists.join(', ')})`);
+            }
+            
             // Age analysis
             if (companyAge > 10) {
                 strengthFactors.push(`Established company (${companyAge} years old)`);
@@ -15746,6 +15787,13 @@
             const companyNumber = company.number || company.company_number || 'unknown';
             console.log(`🔸 Risk calculation for company ${companyNumber}:`);
             console.log(`🔸 Starting score: ${score}`);
+            
+            // Check if company is under sanctions (stored in window object)
+            if (window.currentCompanySanctionsData && window.currentCompanySanctionsData.sanctioned) {
+                const sanctionsDeduction = 50; // Major risk factor
+                score -= sanctionsDeduction;
+                console.log(`🔸 SANCTIONS: Company is under sanctions = -${sanctionsDeduction} points (score: ${score})`);
+            }
             
             // Deduct points for charges
             const totalCharges = company.totalCharges || 0;
