@@ -9832,8 +9832,8 @@
             const industryParam = industryFilter !== 'ALL' ? `?industry=${industryFilter}` : '';
             
             const endpoint = currentView === 'oldest' 
-                ? `${API_BASE_URL}/companies/search?type=oldest${industryParam ? '&' + industryParam.substring(1) : ''}`
-                : `${API_BASE_URL}/companies/search?type=newest${industryParam ? '&' + industryParam.substring(1) : ''}`;
+                ? `${API_BASE_URL}/api/oldest${industryParam}`
+                : `${API_BASE_URL}/api/newest${industryParam}`;
             
             console.log('Fetching from:', endpoint);
             
@@ -9845,61 +9845,61 @@
                 })
                 .then(data => {
                     console.log(`${currentView} companies data:`, data);
-                    // Handle new API response format {companies: [...]}
-                    const companiesArray = data.companies || data;
-                    if (companiesArray && Array.isArray(companiesArray) && companiesArray.length > 0) {
-                        const companies = companiesArray.map(company => {
-                            // Extract year from incorporationDate
+                    if (data && Array.isArray(data) && data.length > 0) {
+                        const companies = data.map(company => {
+                            // Extract year from IncorporationDate
                             let year = 'Unknown';
-                            if (company.incorporationDate) {
-                                const date = new Date(company.incorporationDate);
+                            if (company.IncorporationDate) {
+                                const date = new Date(company.IncorporationDate);
                                 year = date.getFullYear().toString();
                             }
                             
-                            // Get location from address fields (address is already parsed as an object)
-                            let location = 'United Kingdom';
-                            if (company.address) {
-                                location = company.address.postTown || 
-                                          company.address.county || 
-                                          company.address.country || 
+                            // Get location from address fields
+                            let location = company.RegAddress_PostTown || 
+                                          company.RegAddress_County || 
+                                          company.RegAddress_Country || 
                                           'United Kingdom';
-                            }
                             
                             // Determine industry from SIC codes or company name
                             let industry = 'OTHER';
-                            if (company.sicCodes && company.sicCodes[0]) {
-                                industry = guessIndustryFromSIC(company.sicCodes[0]);
+                            if (company.SICCode_SicText_1) {
+                                industry = guessIndustryFromSIC(company.SICCode_SicText_1);
                             } else {
-                                industry = guessIndustry(company.name);
+                                industry = guessIndustry(company.CompanyName);
                             }
                             
                             return {
-                                name: company.name,
-                                number: company.number,
+                                name: company.CompanyName,
+                                number: company.CompanyNumber,
                                 year: year,
                                 location: location,
-                                status: company.status,
+                                status: company.CompanyStatus,
                                 industry: industry,
-                                // Charges data - these fields might not be available from Railway
-                                totalCharges: 0,
-                                outstandingCharges: 0,
-                                satisfiedCharges: 0,
-                                partSatisfiedCharges: 0,
+                                // Charges data - convert strings to numbers
+                                totalCharges: parseInt(company.Mortgages_NumMortCharges) || 0,
+                                outstandingCharges: parseInt(company.Mortgages_NumMortOutstanding) || 0,
+                                satisfiedCharges: parseInt(company.Mortgages_NumMortSatisfied) || 0,
+                                partSatisfiedCharges: parseInt(company.Mortgages_NumMortPartSatisfied) || 0,
                                 // Additional data for expanded view
-                                incorporationDate: company.incorporationDate,
-                                companyType: company.companyType,
-                                sicCodes: company.sicCodes || [],
-                                address: company.address || {
-                                    line1: '',
-                                    line2: '',
-                                    postTown: '',
-                                    county: '',
-                                    postCode: '',
-                                    country: ''
+                                incorporationDate: company.IncorporationDate,
+                                companyType: company.CompanyCategory,
+                                sicCodes: [
+                                    company.SICCode_SicText_1,
+                                    company.SICCode_SicText_2,
+                                    company.SICCode_SicText_3,
+                                    company.SICCode_SicText_4
+                                ].filter(Boolean),
+                                address: {
+                                    line1: company.RegAddress_AddressLine1,
+                                    line2: company.RegAddress_AddressLine2,
+                                    postTown: company.RegAddress_PostTown,
+                                    county: company.RegAddress_County,
+                                    postCode: company.RegAddress_PostCode,
+                                    country: company.RegAddress_Country
                                 },
                                 // Railway date fields for accounts and confirmation statements
-                                railwayAccountsNextDue: company.accountsNextDue,
-                                railwayConfStmtNextDue: company.confirmationNextDue
+                                railwayAccountsNextDue: company.Accounts_NextDueDate,
+                                railwayConfStmtNextDue: company.ConfStmtNextDueDate
                             };
                         });
                         
@@ -9992,14 +9992,13 @@
             }
             
             // First try to hit the API endpoints directly to wake up the database
-            const endpointsToTry = ['/companies/search?type=oldest', '/companies/search?type=newest'];
+            const endpointsToTry = ['/api/oldest', '/api/newest'];
             const endpoint = endpointsToTry[connectionRetryCount % endpointsToTry.length];
             
             fetch(`${API_BASE_URL}${endpoint}`)
                 .then(r => r.json())
                 .then(data => {
-                    const companiesArray = data.companies || data;
-                    if (companiesArray && Array.isArray(companiesArray) && companiesArray.length > 0) {
+                    if (data && Array.isArray(data) && data.length > 0) {
                         // Don't reload if there's an active search
                         if (!exploreSearchQuery || exploreSearchQuery.length === 0) {
                             console.log('✅ Railway database connection restored!');
@@ -10289,8 +10288,8 @@
             const industryParam = industryFilter !== 'ALL' ? `?industry=${industryFilter}` : '';
             
             const endpoint = currentView === 'oldest' 
-                ? `${API_BASE_URL}/companies/search?type=oldest&offset=${companiesOffset}${industryParam ? '&' + industryParam.substring(1) : ''}`
-                : `${API_BASE_URL}/companies/search?type=newest&offset=${companiesOffset}${industryParam ? '&' + industryParam.substring(1) : ''}`;
+                ? `${API_BASE_URL}/api/oldest/${companiesOffset}${industryParam}`
+                : `${API_BASE_URL}/api/newest/${companiesOffset}${industryParam}`;
                 
             fetch(endpoint)
                 .then(r => r.json())
