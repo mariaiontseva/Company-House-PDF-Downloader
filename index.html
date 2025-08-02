@@ -812,6 +812,67 @@
             border: 1px solid rgba(239, 68, 68, 0.3);
         }
         
+        /* Sanctions Badge Styles */
+        .sanctions-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 6px;
+            background: rgba(239, 68, 68, 0.15);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            cursor: help;
+            transition: all 0.2s ease;
+            margin-left: 8px;
+        }
+        
+        .sanctions-badge:hover {
+            background: rgba(239, 68, 68, 0.25);
+            border-color: rgba(239, 68, 68, 0.5);
+            transform: translateY(-1px);
+        }
+        
+        .sanctions-badge .icon {
+            font-size: 14px;
+        }
+        
+        .sanctions-tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            margin-bottom: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 1000;
+        }
+        
+        .sanctions-badge:hover .sanctions-tooltip {
+            opacity: 1;
+        }
+        
+        .sanctions-tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-top-color: #1e293b;
+        }
+        
         .autocomplete-empty {
             padding: 24px;
             text-align: center;
@@ -7948,6 +8009,38 @@
         // Make downloadSingleFiling globally available
         window.downloadSingleFiling = downloadSingleFiling;
         
+        // Sanctions check function
+        async function checkSanctions(entityName) {
+            try {
+                const response = await fetch(`http://localhost:3002/api/sanctions/check/${encodeURIComponent(entityName)}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    return data.data;
+                }
+            } catch (error) {
+                console.error('Sanctions check error:', error);
+            }
+            return null;
+        }
+        
+        // Create sanctions badge HTML
+        function createSanctionsBadge(sanctionsData) {
+            if (!sanctionsData || !sanctionsData.sanctioned) {
+                return '';
+            }
+            
+            const listsText = sanctionsData.lists.join(', ');
+            return `
+                <span class="sanctions-badge" style="position: relative;">
+                    <span class="icon">⚠️</span>
+                    Under Sanctions
+                    <span class="sanctions-tooltip">
+                        Listed on: ${listsText}
+                    </span>
+                </span>
+            `;
+        }
+        
         // Define menu functions early so they're available immediately
         function showUserMenu() {
             const dropdown = document.getElementById('profileDropdown');
@@ -10912,7 +11005,10 @@
                             } else {
                                 return `
                                     <div class="autocomplete-item" onclick="selectNavCompany('${item.company_number}', '${item.title.replace(/'/g, "\\'")}')">
-                                        <div class="company-title">${item.title}</div>
+                                        <div class="company-title">
+                                            ${item.title}
+                                            <span id="sanctions-${item.company_number}" style="display: inline-block;"></span>
+                                        </div>
                                         <div class="company-details">
                                             <span class="company-number">${item.company_number}</span>
                                             <span class="company-status ${item.company_status.toLowerCase()}">${item.company_status}</span>
@@ -10921,6 +11017,18 @@
                                 `;
                             }
                         }).join('');
+                        
+                        // Check sanctions for all displayed companies
+                        allResults.filter(item => item.type === 'company').forEach(async (item) => {
+                            const sanctionsData = await checkSanctions(item.title);
+                            if (sanctionsData && sanctionsData.sanctioned) {
+                                const badge = createSanctionsBadge(sanctionsData);
+                                const element = document.getElementById(`sanctions-${item.company_number}`);
+                                if (element) {
+                                    element.innerHTML = badge;
+                                }
+                            }
+                        });
                     }
                     dropdown.classList.add('show');
                 } catch (error) {
@@ -11043,7 +11151,26 @@
             // Update company name
             const titleElement = document.querySelector('#companyModal .company-title');
             if (titleElement) {
-                titleElement.textContent = company.name || company.title || 'Company Name';
+                const companyName = company.name || company.title || 'Company Name';
+                titleElement.innerHTML = companyName;
+                
+                // Check sanctions and add badge after status
+                checkSanctions(companyName).then(sanctionsData => {
+                    if (sanctionsData && sanctionsData.sanctioned) {
+                        // Add sanctions badge after status badge
+                        setTimeout(() => {
+                            const statusBadge = document.querySelector('#companyModal .active-badge');
+                            if (statusBadge && !document.querySelector('#companyModal .sanctions-status-badge')) {
+                                const sanctionsBadge = document.createElement('span');
+                                sanctionsBadge.className = 'badge sanctions-status-badge';
+                                sanctionsBadge.style.cssText = 'background: rgba(239, 68, 68, 0.15); color: #f87171; border-color: rgba(239, 68, 68, 0.3);';
+                                sanctionsBadge.innerHTML = '⚠️ Under Sanctions';
+                                sanctionsBadge.title = `Listed on: ${sanctionsData.lists.join(', ')}`;
+                                statusBadge.parentNode.insertBefore(sanctionsBadge, statusBadge.nextSibling);
+                            }
+                        }, 500);
+                    }
+                });
             }
             
             // Update company subtitle
@@ -11617,8 +11744,26 @@
             // Update company name in header
             const titleElement = document.querySelector('#companyModal .company-title');
             if (titleElement && companyData.company_name) {
-                titleElement.textContent = companyData.company_name;
+                titleElement.innerHTML = companyData.company_name;
                 console.log('🔸 Updated modal title to:', companyData.company_name);
+                
+                // Check sanctions and add badge after status
+                checkSanctions(companyData.company_name).then(sanctionsData => {
+                    if (sanctionsData && sanctionsData.sanctioned) {
+                        // Add sanctions badge after status badge
+                        setTimeout(() => {
+                            const statusBadge = document.querySelector('#companyModal .active-badge');
+                            if (statusBadge && !document.querySelector('#companyModal .sanctions-status-badge')) {
+                                const sanctionsBadge = document.createElement('span');
+                                sanctionsBadge.className = 'badge sanctions-status-badge';
+                                sanctionsBadge.style.cssText = 'background: rgba(239, 68, 68, 0.15); color: #f87171; border-color: rgba(239, 68, 68, 0.3);';
+                                sanctionsBadge.innerHTML = '⚠️ Under Sanctions';
+                                sanctionsBadge.title = `Listed on: ${sanctionsData.lists.join(', ')}`;
+                                statusBadge.parentNode.insertBefore(sanctionsBadge, statusBadge.nextSibling);
+                            }
+                        }, 500);
+                    }
+                });
             }
             
             // Update company number badge

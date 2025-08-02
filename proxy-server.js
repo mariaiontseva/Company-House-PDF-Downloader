@@ -289,6 +289,60 @@ app.get('/api/proxy/ixbrl/:companyNumber/:transactionId', async (req, res) => {
     }
 });
 
+// Temporary sanctions check endpoint (simulated until we get API key)
+app.get('/api/sanctions/check/:name', async (req, res) => {
+    try {
+        const { name } = req.params;
+        console.log(`Sanctions check requested for: ${name}`);
+        
+        // Simulated sanctions data for testing
+        // In production, this will call the OpenSanctions API
+        const testSanctionedEntities = [
+            'vladimir putin',
+            'roman abramovich',
+            'oleg deripaska',
+            'viktor vekselberg',
+            'alisher usmanov',
+            'gazprom',
+            'rosneft',
+            'sberbank',
+            'vtb bank'
+        ];
+        
+        const normalizedName = name.toLowerCase().trim();
+        const isSanctioned = testSanctionedEntities.some(entity => 
+            normalizedName.includes(entity) || entity.includes(normalizedName)
+        );
+        
+        // Simulated response format based on OpenSanctions API
+        const response = {
+            status: 'success',
+            data: {
+                entity: name,
+                sanctioned: isSanctioned,
+                lists: isSanctioned ? ['EU Sanctions', 'UK Sanctions', 'US OFAC'] : [],
+                lastUpdated: new Date().toISOString(),
+                source: 'simulated' // Will be 'opensanctions' in production
+            }
+        };
+        
+        // Add cache headers (24 hours)
+        res.set({
+            'Cache-Control': 'public, max-age=86400',
+            'X-Sanctions-Source': 'simulated'
+        });
+        
+        res.json(response);
+        
+    } catch (error) {
+        console.error('Sanctions check error:', error);
+        res.status(500).json({
+            status: 'error',
+            message: 'Failed to check sanctions status'
+        });
+    }
+});
+
 // Start server
 app.listen(PORT, () => {
     console.log(`Proxy server running on http://localhost:${PORT}`);
@@ -298,4 +352,5 @@ app.listen(PORT, () => {
     console.log('  - GET /api/proxy/document/*');
     console.log('  - GET /api/proxy/ixbrl/:companyNumber/:transactionId');
     console.log('  - GET /api/railway/companies/search');
+    console.log('  - GET /api/sanctions/check/:name');
 });
