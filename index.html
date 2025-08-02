@@ -812,6 +812,13 @@
             border: 1px solid rgba(239, 68, 68, 0.3);
         }
         
+        .company-status.sanctions {
+            background: rgba(239, 68, 68, 0.15);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            margin-left: 8px;
+        }
+        
         /* Sanctions Badge Styles */
         .sanctions-badge {
             display: inline-flex;
@@ -11005,13 +11012,11 @@
                             } else {
                                 return `
                                     <div class="autocomplete-item" onclick="selectNavCompany('${item.company_number}', '${item.title.replace(/'/g, "\\'")}')">
-                                        <div class="company-title">
-                                            ${item.title}
-                                            <span id="sanctions-${item.company_number}" style="display: inline-block;"></span>
-                                        </div>
+                                        <div class="company-title">${item.title}</div>
                                         <div class="company-details">
                                             <span class="company-number">${item.company_number}</span>
                                             <span class="company-status ${item.company_status.toLowerCase()}">${item.company_status}</span>
+                                            <span id="sanctions-${item.company_number}" style="display: none;"></span>
                                         </div>
                                     </div>
                                 `;
@@ -11022,10 +11027,12 @@
                         allResults.filter(item => item.type === 'company').forEach(async (item) => {
                             const sanctionsData = await checkSanctions(item.title);
                             if (sanctionsData && sanctionsData.sanctioned) {
-                                const badge = createSanctionsBadge(sanctionsData);
                                 const element = document.getElementById(`sanctions-${item.company_number}`);
                                 if (element) {
-                                    element.innerHTML = badge;
+                                    element.className = 'company-status sanctions';
+                                    element.innerHTML = '⚠️ Under Sanctions';
+                                    element.style.display = 'inline-block';
+                                    element.title = `Listed on: ${sanctionsData.lists.join(', ')}`;
                                 }
                             }
                         });
