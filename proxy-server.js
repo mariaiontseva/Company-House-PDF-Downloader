@@ -343,6 +343,31 @@ app.get('/api/sanctions/check/:name', async (req, res) => {
     }
 });
 
+// Get sanctions count for UK companies
+app.get('/api/sanctions/count', async (req, res) => {
+    try {
+        // In production, this would query OpenSanctions API for actual count
+        // For now, return a simulated count
+        const count = 127; // Simulated number of sanctioned UK companies
+        
+        res.json({
+            status: 'success',
+            data: {
+                count: count,
+                lastUpdated: new Date().toISOString(),
+                source: 'simulated'
+            }
+        });
+        
+    } catch (error) {
+        console.error('Sanctions count error:', error);
+        res.status(500).json({
+            status: 'error',
+            message: 'Failed to get sanctions count'
+        });
+    }
+});
+
 // Start server
 app.listen(PORT, () => {
     console.log(`Proxy server running on http://localhost:${PORT}`);
@@ -353,4 +378,5 @@ app.listen(PORT, () => {
     console.log('  - GET /api/proxy/ixbrl/:companyNumber/:transactionId');
     console.log('  - GET /api/railway/companies/search');
     console.log('  - GET /api/sanctions/check/:name');
+    console.log('  - GET /api/sanctions/count');
 });
