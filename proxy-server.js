@@ -1,25 +1,49 @@
 const express = require('express');
 const axios = require('axios');
 const cors = require('cors');
+const mysql = require('mysql2/promise');
+require('dotenv').config();
 
 const app = express();
 const PORT = 3002;
 
 // Enable CORS for all origins
 app.use(cors());
-
-// Health check endpoint
-app.get('/health', (req, res) => {
-    res.json({ 
-        status: 'healthy', 
-        apiKeySet: !!process.env.CH_API_KEY,
-        timestamp: new Date().toISOString()
-    });
-});
 app.use(express.json());
 
 // Companies House API key
-const CH_API_KEY = 'ee8f2dc2-17d8-4fc9-98bc-ad5c554a11f1';
+const CH_API_KEY = process.env.COMPANIES_HOUSE_API_KEY || '22aefa40-ee9e-47c0-b40a-2dd3c03165c6';
+
+// MySQL Database configuration
+const dbConfig = {
+    host: process.env.MYSQL_HOST || 'turntable.proxy.rlwy.net',
+    port: process.env.MYSQL_PORT || 51124,
+    user: process.env.MYSQL_USER || 'root',
+    password: process.env.MYSQL_PASSWORD || 'FuEbybhbhPwJXtsPAqdKdXyvbyOCxVWc',
+    database: process.env.MYSQL_DATABASE || 'railway',
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
+};
+
+// Create MySQL connection pool
+let pool;
+async function initDatabase() {
+    try {
+        pool = mysql.createPool(dbConfig);
+        console.log('MySQL connection pool created successfully');
+        // Test the connection
+        const connection = await pool.getConnection();
+        await connection.ping();
+        connection.release();
+        console.log('Database connection verified');
+    } catch (error) {
+        console.error('Database connection error:', error);
+    }
+}
+
+// Initialize database connection
+initDatabase();
 
 // Logging middleware
 app.use((req, res, next) => {
@@ -29,7 +53,89 @@ app.use((req, res, next) => {
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-    res.json({ status: 'ok', timestamp: new Date().toISOString() });
+    res.json({ 
+        status: 'ok', 
+        timestamp: new Date().toISOString(),
+        databaseConnected: !!pool
+    });
+});
+
+// Railway API endpoints (for database queries)
+app.get('/api/railway/companies/search', async (req, res) => {
+    try {
+        const { type } = req.query;
+        let query;
+        let params = [];
+        
+        if (type === 'oldest') {
+            query = `
+                SELECT CompanyNumber as number, CompanyName as name, 
+                       CompanyStatus as status, CompanyCategory as companyType,
+                       IncorporationDate as incorporationDate,
+                       JSON_OBJECT(
+                           'line1', RegAddress_AddressLine1,
+                           'line2', RegAddress_AddressLine2,
+                           'postTown', RegAddress_PostTown,
+                           'county', RegAddress_County,
+                           'postCode', RegAddress_PostCode,
+                           'country', RegAddress_Country
+                       ) as address,
+                       SICCode_SicText_1 as sicCodes,
+                       Accounts_NextDueDate as accountsNextDue,
+                       ConfStmtNextDueDate as confirmationNextDue
+                FROM companies
+                WHERE IncorporationDate IS NOT NULL 
+                AND IncorporationDate < '1900-01-01'
+                ORDER BY IncorporationDate ASC
+                LIMIT 100
+            `;
+        } else if (type === 'newest') {
+            query = `
+                SELECT CompanyNumber as number, CompanyName as name, 
+                       CompanyStatus as status, CompanyCategory as companyType,
+                       IncorporationDate as incorporationDate,
+                       JSON_OBJECT(
+                           'line1', RegAddress_AddressLine1,
+                           'line2', RegAddress_AddressLine2,
+                           'postTown', RegAddress_PostTown,
+                           'county', RegAddress_County,
+                           'postCode', RegAddress_PostCode,
+                           'country', RegAddress_Country
+                       ) as address,
+                       SICCode_SicText_1 as sicCodes,
+                       Accounts_NextDueDate as accountsNextDue,
+                       ConfStmtNextDueDate as confirmationNextDue
+                FROM companies
+                WHERE IncorporationDate IS NOT NULL
+                ORDER BY IncorporationDate DESC
+                LIMIT 100
+            `;
+        } else {
+            return res.status(400).json({ error: 'Invalid type parameter' });
+        }
+        
+        if (!pool) {
+            throw new Error('Database connection not available');
+        }
+        
+        const [rows] = await pool.execute(query, params);
+        
+        // Parse JSON address field
+        const companies = rows.map(row => ({
+            ...row,
+            address: typeof row.address === 'string' ? JSON.parse(row.address) : row.address,
+            sicCodes: row.sicCodes ? [row.sicCodes] : []
+        }));
+        
+        res.json({ companies });
+        
+    } catch (error) {
+        console.error('Railway API error:', error);
+        res.status(500).json({ 
+            error: 'Database query failed', 
+            message: error.message 
+        });
+    }
 });
 
 // Proxy endpoint for Companies House API
@@ -191,4 +297,5 @@ app.listen(PORT, () => {
     console.log('  - GET /api/proxy/companies-house/*');
     console.log('  - GET /api/proxy/document/*');
     console.log('  - GET /api/proxy/ixbrl/:companyNumber/:transactionId');
+    console.log('  - GET /api/railway/companies/search');
 });
