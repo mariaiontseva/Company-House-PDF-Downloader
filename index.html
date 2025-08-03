@@ -8101,12 +8101,29 @@
         // Sanctions check function
         async function checkSanctions(entityName) {
             try {
-                // Use localhost URL for now - production needs deployed proxy server
-                const baseUrl = window.location.hostname === 'localhost' ? 'http://localhost:3002' : 'http://localhost:3002';
+                // Detect if we're on mobile
+                const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+                console.log(`📱 Device type: ${isMobile ? 'Mobile' : 'Desktop'}, Hostname: ${window.location.hostname}`);
+                
+                // Use Railway deployed URL for production
+                const baseUrl = window.location.hostname === 'localhost' 
+                    ? 'http://localhost:3002' 
+                    : 'https://docspace-proxy-production.up.railway.app';
                 const url = `${baseUrl}/api/sanctions/check/${encodeURIComponent(entityName)}`;
                 console.log('🔍 Checking sanctions for:', entityName, 'URL:', url);
                 
-                const response = await fetch(url);
+                // Add timeout for mobile
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 5000);
+                
+                const response = await fetch(url, {
+                    signal: controller.signal,
+                    mode: 'cors',
+                    credentials: 'omit'
+                });
+                
+                clearTimeout(timeoutId);
+                
                 if (response.ok) {
                     const data = await response.json();
                     console.log('✅ Sanctions data received:', data);
@@ -8115,7 +8132,11 @@
                     console.error('❌ Sanctions check failed with status:', response.status);
                 }
             } catch (error) {
-                console.error('❌ Sanctions check error:', error);
+                if (error.name === 'AbortError') {
+                    console.error('❌ Sanctions check timeout after 5 seconds');
+                } else {
+                    console.error('❌ Sanctions check error:', error.message, error);
+                }
             }
             return null;
         }
@@ -8141,7 +8162,9 @@
         // Update sanctions count in the moving stripe
         async function updateSanctionsCount() {
             try {
-                const baseUrl = window.location.hostname === 'localhost' ? 'http://localhost:3002' : 'http://localhost:3002';
+                const baseUrl = window.location.hostname === 'localhost' 
+                    ? 'http://localhost:3002' 
+                    : 'https://docspace-proxy-production.up.railway.app';
                 const response = await fetch(`${baseUrl}/api/sanctions/count`);
                 if (response.ok) {
                     const data = await response.json();
