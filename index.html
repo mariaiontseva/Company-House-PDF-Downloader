@@ -1412,17 +1412,51 @@
                 opacity: 1 !important;
                 min-width: fit-content;
                 white-space: nowrap;
+                font-size: 11px !important;
+                padding: 2px 6px !important;
+                margin-left: 4px !important;
             }
             
             .sanctions-status-badge {
                 display: inline-flex !important;
                 visibility: visible !important;
                 opacity: 1 !important;
+                font-size: 11px !important;
+                padding: 4px 8px !important;
+                margin-top: 4px !important;
             }
             
             .company-details {
                 flex-wrap: wrap;
-                gap: 8px;
+                gap: 6px;
+                line-height: 1.5;
+            }
+            
+            /* Ensure autocomplete items have enough height for badges */
+            .autocomplete-item {
+                min-height: 60px !important;
+            }
+            
+            /* Fix badge positioning in explore cards on mobile */
+            .explore-company-card > div:first-child {
+                flex-wrap: wrap;
+                gap: 4px;
+                line-height: 1.4;
+            }
+            
+            /* Fix company modal header badges on mobile */
+            #companyModal .card-header {
+                flex-wrap: wrap !important;
+            }
+            
+            #companyModal .badge {
+                margin-top: 4px !important;
+                margin-bottom: 4px !important;
+            }
+            
+            #companyModal .company-header-badges {
+                flex-wrap: wrap !important;
+                gap: 4px !important;
             }
         }
         
@@ -8067,13 +8101,20 @@
         // Sanctions check function
         async function checkSanctions(entityName) {
             try {
-                const response = await fetch(`http://localhost:3002/api/sanctions/check/${encodeURIComponent(entityName)}`);
+                // Use relative URL that works both locally and in production
+                const url = `/api/sanctions/check/${encodeURIComponent(entityName)}`;
+                console.log('🔍 Checking sanctions for:', entityName, 'URL:', url);
+                
+                const response = await fetch(url);
                 if (response.ok) {
                     const data = await response.json();
+                    console.log('✅ Sanctions data received:', data);
                     return data.data;
+                } else {
+                    console.error('❌ Sanctions check failed with status:', response.status);
                 }
             } catch (error) {
-                console.error('Sanctions check error:', error);
+                console.error('❌ Sanctions check error:', error);
             }
             return null;
         }
@@ -11261,12 +11302,16 @@
                     
                     if (sanctionsData && sanctionsData.sanctioned) {
                         // Add sanctions badge after status badge
+                        // Use longer timeout on mobile devices
+                        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+                        const timeout = isMobile ? 1500 : 500;
+                        
                         setTimeout(() => {
                             const statusBadge = document.querySelector('#companyModal .active-badge');
                             if (statusBadge && !document.querySelector('#companyModal .sanctions-status-badge')) {
                                 const sanctionsBadge = document.createElement('span');
                                 sanctionsBadge.className = 'badge sanctions-status-badge';
-                                sanctionsBadge.style.cssText = 'background: rgba(239, 68, 68, 0.15); color: #f87171; border-color: rgba(239, 68, 68, 0.3);';
+                                sanctionsBadge.style.cssText = 'display: inline-flex !important; align-items: center !important; gap: 4px !important; background: rgba(239, 68, 68, 0.15) !important; color: #f87171 !important; border: 1px solid rgba(239, 68, 68, 0.3) !important; padding: 6px 12px !important; border-radius: 6px !important; font-size: 12px !important; font-weight: 600 !important; letter-spacing: 0.3px !important; margin-left: 8px !important; visibility: visible !important; opacity: 1 !important;';
                                 sanctionsBadge.innerHTML = '⚠️ Under Sanctions';
                                 sanctionsBadge.title = `Listed on: ${sanctionsData.lists.join(', ')}`;
                                 statusBadge.parentNode.insertBefore(sanctionsBadge, statusBadge.nextSibling);
@@ -11286,7 +11331,7 @@
                                 riskBadge.innerHTML = `<div class="risk-dot"></div>${riskText} (${riskScore}/100)`;
                                 console.log('🔸 Risk badge updated after sanctions check:', riskText, `(${riskScore}/100)`);
                             }
-                        }, 500);
+                        }, timeout);
                     }
                 });
             }
@@ -11872,12 +11917,16 @@
                     
                     if (sanctionsData && sanctionsData.sanctioned) {
                         // Add sanctions badge after status badge
+                        // Use longer timeout on mobile devices
+                        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+                        const timeout = isMobile ? 1500 : 500;
+                        
                         setTimeout(() => {
                             const statusBadge = document.querySelector('#companyModal .active-badge');
                             if (statusBadge && !document.querySelector('#companyModal .sanctions-status-badge')) {
                                 const sanctionsBadge = document.createElement('span');
                                 sanctionsBadge.className = 'badge sanctions-status-badge';
-                                sanctionsBadge.style.cssText = 'background: rgba(239, 68, 68, 0.15); color: #f87171; border-color: rgba(239, 68, 68, 0.3);';
+                                sanctionsBadge.style.cssText = 'display: inline-flex !important; align-items: center !important; gap: 4px !important; background: rgba(239, 68, 68, 0.15) !important; color: #f87171 !important; border: 1px solid rgba(239, 68, 68, 0.3) !important; padding: 6px 12px !important; border-radius: 6px !important; font-size: 12px !important; font-weight: 600 !important; letter-spacing: 0.3px !important; margin-left: 8px !important; visibility: visible !important; opacity: 1 !important;';
                                 sanctionsBadge.innerHTML = '⚠️ Under Sanctions';
                                 sanctionsBadge.title = `Listed on: ${sanctionsData.lists.join(', ')}`;
                                 statusBadge.parentNode.insertBefore(sanctionsBadge, statusBadge.nextSibling);
@@ -11897,7 +11946,7 @@
                                 riskBadge.innerHTML = `<div class="risk-dot"></div>${riskText} (${riskScore}/100)`;
                                 console.log('🔸 Risk badge updated after sanctions check:', riskText, `(${riskScore}/100)`);
                             }
-                        }, 500);
+                        }, timeout);
                     }
                 });
             }
@@ -12071,7 +12120,7 @@
                                 if (ageDetail) ageDetail.textContent = 'Age unknown';
                                 console.log('🔸 Failed to get Railway data after retries');
                             }
-                        }, 500);
+                        }, timeout);
                     }
                 } else {
                     // Unknown incorporation date
