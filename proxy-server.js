@@ -298,6 +298,7 @@ app.get('/api/sanctions/check/:name', async (req, res) => {
         
         // Get API key from environment or use the provided one
         const apiKey = process.env.OPENSANCTIONS_API_KEY || '655046606e62014766354db22d62488c';
+        console.log(`Using API key: ${apiKey ? apiKey.substring(0, 8) + '...' : 'None'}`);
         
         // Make request to OpenSanctions API
         const response = await fetch('https://api.opensanctions.org/match/default', {
@@ -319,8 +320,9 @@ app.get('/api/sanctions/check/:name', async (req, res) => {
         });
         
         if (!response.ok) {
-            console.error(`OpenSanctions API error: ${response.status}`);
-            throw new Error(`API returned ${response.status}`);
+            const errorBody = await response.text();
+            console.error(`OpenSanctions API error: ${response.status} - ${errorBody}`);
+            throw new Error(`API returned ${response.status}: ${errorBody}`);
         }
         
         const data = await response.json();
