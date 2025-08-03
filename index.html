@@ -816,6 +816,9 @@
             color: #f87171;
             border: 1px solid rgba(239, 68, 68, 0.3);
             margin-left: 4px;
+            display: inline-flex !important;
+            align-items: center;
+            gap: 4px;
         }
         
         /* Sanctions Badge Styles */
@@ -1399,6 +1402,28 @@
         
         @keyframes spin {
             to { transform: rotate(360deg); }
+        }
+        
+        /* Mobile fixes for sanctions badges */
+        @media (max-width: 768px) {
+            .company-status.sanctions {
+                display: inline-flex !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+                min-width: fit-content;
+                white-space: nowrap;
+            }
+            
+            .sanctions-status-badge {
+                display: inline-flex !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+            }
+            
+            .company-details {
+                flex-wrap: wrap;
+                gap: 8px;
+            }
         }
         
         /* Mobile Responsive */
@@ -10341,6 +10366,7 @@
                         ${company.totalCharges > 0 ? `
                             <span class="charges-indicator" data-tooltip="${company.totalCharges} charge${company.totalCharges !== 1 ? 's' : ''} (${company.outstandingCharges} outstanding)">!</span>
                         ` : ''}
+                        <span id="sanctions-explore-${company.number}" class="company-status" style="display: none;"></span>
                     </div>
                     <div style="color: #94a3b8; font-size: 14px; display: flex; align-items: center;">
                         ${company.year} • ${company.location} • ${company.number}
@@ -10405,6 +10431,21 @@
                     </div>
                 </div>
             `}).join('');
+            
+            // Check sanctions for all displayed companies
+            filtered.forEach(async (company) => {
+                const sanctionsData = await checkSanctions(company.name);
+                if (sanctionsData && sanctionsData.sanctioned) {
+                    const element = document.getElementById(`sanctions-explore-${company.number}`);
+                    if (element) {
+                        element.className = 'company-status sanctions';
+                        element.innerHTML = '⚠️ Under Sanctions';
+                        element.style.display = 'inline-flex';
+                        element.style.cssText = 'display: inline-flex !important; background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); margin-left: 4px; padding: 3px 8px; border-radius: 6px; font-weight: 600; font-size: 12px; letter-spacing: 0.3px; align-items: center; gap: 4px;';
+                        element.title = `Listed on: ${sanctionsData.lists.join(', ')}`;
+                    }
+                }
+            });
             
             // If no companies after filter, show message
             if (filtered.length === 0) {
@@ -11067,7 +11108,7 @@
                                         <div class="company-details">
                                             <span class="company-number">${item.company_number}</span>
                                             <span class="company-status ${item.company_status.toLowerCase()}">${item.company_status}</span>
-                                            <span id="sanctions-${item.company_number}" style="display: none;"></span>
+                                            <span id="sanctions-${item.company_number}" class="company-status" style="display: none;"></span>
                                         </div>
                                     </div>
                                 `;
@@ -11082,7 +11123,8 @@
                                 if (element) {
                                     element.className = 'company-status sanctions';
                                     element.innerHTML = '⚠️ Under Sanctions';
-                                    element.style.display = 'inline-block';
+                                    element.style.display = 'inline-flex';
+                                    element.style.cssText = 'display: inline-flex !important; background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); margin-left: 4px; padding: 3px 8px; border-radius: 6px; font-weight: 600; font-size: 12px; letter-spacing: 0.3px; align-items: center; gap: 4px;';
                                     element.title = `Listed on: ${sanctionsData.lists.join(', ')}`;
                                 }
                             }
