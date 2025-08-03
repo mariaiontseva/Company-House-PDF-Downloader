@@ -2,6 +2,7 @@ const express = require('express');
 const axios = require('axios');
 const cors = require('cors');
 const mysql = require('mysql2/promise');
+const fetch = require('node-fetch');
 require('dotenv').config();
 
 const app = express();
