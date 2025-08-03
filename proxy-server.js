@@ -59,7 +59,17 @@ app.get('/health', (req, res) => {
         timestamp: new Date().toISOString(),
         databaseConnected: !!pool,
         hasOpenSanctionsKey: !!process.env.OPENSANCTIONS_API_KEY,
-        version: '2.0-no-fallback'
+        version: '3.0-real-api',
+        deployedAt: '2025-08-03T09:00:00Z'
+    });
+});
+
+// Version endpoint to verify deployment
+app.get('/version', (req, res) => {
+    res.json({
+        version: '3.0',
+        message: 'Real OpenSanctions API - No fallback',
+        deployed: new Date().toISOString()
     });
 });
 
