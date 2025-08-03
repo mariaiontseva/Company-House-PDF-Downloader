@@ -349,8 +349,40 @@ app.get('/api/sanctions/check/:name', async (req, res) => {
         if (topMatch && topMatch.score > 0.7) { // 70% match threshold
             // The entity data is directly in topMatch, not topMatch.entity
             const datasets = topMatch.datasets || [];
-            const sanctionsList = [];
             
+            // Define actual sanctions datasets
+            const sanctionsDatasets = [
+                'us_ofac_sdn', 'us_ofac_cons', 'us_trade_csl',
+                'gb_hmt_sanctions', 'gb_fcdo_sanctions',
+                'eu_fsf', 'eu_eeas_sanctions',
+                'un_sc_sanctions',
+                'ch_seco_sanctions',
+                'au_dfat_sanctions',
+                'ca_dfatd_sema_sanctions',
+                'jp_meti_eul', 'jp_mof_sanctions'
+            ];
+            
+            // Check if any dataset is actually a sanctions list
+            const isSanctioned = datasets.some(dataset => 
+                sanctionsDatasets.some(sanctionDs => dataset.includes(sanctionDs))
+            );
+            
+            if (!isSanctioned) {
+                // Not on any sanctions list, just in other datasets
+                return res.json({
+                    status: 'success',
+                    data: {
+                        entity: name,
+                        sanctioned: false,
+                        lists: [],
+                        lastUpdated: new Date().toISOString(),
+                        source: 'opensanctions'
+                    }
+                });
+            }
+            
+            // Extract sanctions programs
+            const sanctionsList = [];
             datasets.forEach(dataset => {
                 if (dataset.includes('eu_fsf') || dataset.includes('eu_')) sanctionsList.push('EU Sanctions');
                 if (dataset.includes('gb_hmt') || dataset.includes('uk_')) sanctionsList.push('UK Sanctions');
