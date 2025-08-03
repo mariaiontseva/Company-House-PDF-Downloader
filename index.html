@@ -1935,6 +1935,28 @@
             align-items: center;
             flex-wrap: wrap;
         }
+        
+        /* Director Sanctions Badge */
+        .director-sanctions-badge {
+            display: inline-flex !important;
+            align-items: center;
+            gap: 4px;
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 12px;
+            vertical-align: middle;
+            transition: all 0.2s ease;
+        }
+        
+        .director-sanctions-badge:hover {
+            background: rgba(239, 68, 68, 0.25);
+            border-color: rgba(239, 68, 68, 0.5);
+        }
 
         /* Mobile Responsive */
         @media (max-width: 600px) {
@@ -8200,6 +8222,50 @@
         
         // Make downloadSingleFiling globally available
         window.downloadSingleFiling = downloadSingleFiling;
+        
+        // Check directors and PSCs for sanctions
+        async function checkDirectorsForSanctions(people) {
+            if (!people || people.length === 0) return;
+            
+            console.log(`Checking ${people.length} people for sanctions...`);
+            
+            for (const person of people) {
+                if (!person.name) continue;
+                
+                try {
+                    const sanctionsData = await checkSanctions(person.name);
+                    
+                    if (sanctionsData && sanctionsData.sanctioned) {
+                        // Find the person's card and add sanctions badge
+                        const personId = person.name.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase();
+                        const badgeElement = document.getElementById(`sanctions-${personId}`);
+                        
+                        if (badgeElement) {
+                            badgeElement.style.cssText = `
+                                display: inline-flex !important;
+                                align-items: center;
+                                gap: 4px;
+                                background: rgba(239, 68, 68, 0.15);
+                                color: #ef4444;
+                                border: 1px solid rgba(239, 68, 68, 0.3);
+                                padding: 4px 10px;
+                                border-radius: 6px;
+                                font-size: 12px;
+                                font-weight: 600;
+                                margin-left: 12px;
+                                vertical-align: middle;
+                            `;
+                            badgeElement.innerHTML = '⚠️ Sanctioned';
+                            badgeElement.title = `Listed on: ${sanctionsData.lists.join(', ')}`;
+                            
+                            console.log(`✅ Added sanctions badge for ${person.name}`);
+                        }
+                    }
+                } catch (error) {
+                    console.error(`Error checking sanctions for ${person.name}:`, error);
+                }
+            }
+        }
         
         // Sanctions check function
         async function checkSanctions(entityName) {
@@ -14781,6 +14847,9 @@
                 const resignedText = person.resigned ? ` - ${person.type === 'psc' ? 'Ceased' : 'Resigned'}: ${new Date(person.resigned).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}` : '';
                 const isResigned = person.resigned;
                 
+                // Generate unique ID for sanctions check
+                const personId = person.name.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase();
+                
                 // Calculate age if date of birth is available
                 const ageText = person.dateOfBirth ? (() => {
                     const [month, year] = person.dateOfBirth.split('/');
@@ -14898,7 +14967,7 @@
                                     color: #f8fafc;
                                     line-height: 1.2;
                                     word-break: break-word;
-                                ">${person.name}</h4>
+                                ">${person.name}<span id="sanctions-${personId}" class="director-sanctions-badge" style="display: none;"></span></h4>
                                 
                                 <span style="
                                     background: ${themeColors.primary};
@@ -15404,6 +15473,10 @@
             // Enhance officer names with director lookup badges
             console.log('Calling enhanceOfficerNames...');
             enhanceOfficerNames();
+            
+            // Check all directors and PSCs for sanctions
+            console.log('Checking directors and PSCs for sanctions...');
+            checkDirectorsForSanctions([...officers, ...pscs]);
         }
         
         // Fetch other appointments for an officer
