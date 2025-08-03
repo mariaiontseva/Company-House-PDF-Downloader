@@ -17,9 +17,9 @@ const colors = {
 const SANCTIONED_COMPANIES = [
     'Wagner Group',
     'Sberbank',
-    'Gazprom',
+    'PAO Gazprom',  // Changed from just Gazprom
     'Rosneft',
-    'VTB Bank',
+    'VTB Bank PJSC',  // Changed from just VTB Bank
     'Alfa Bank',
     'Bank Otkritie',
     'Sovcombank',
