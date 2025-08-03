@@ -337,10 +337,8 @@ app.get('/api/sanctions/check/:name', async (req, res) => {
         const topMatch = results[0];
         
         if (topMatch && topMatch.score > 0.7) { // 70% match threshold
-            const entity = topMatch.entity;
-            
-            // Extract sanctions programs
-            const datasets = entity.datasets || [];
+            // The entity data is directly in topMatch, not topMatch.entity
+            const datasets = topMatch.datasets || [];
             const sanctionsList = [];
             
             datasets.forEach(dataset => {
@@ -360,8 +358,8 @@ app.get('/api/sanctions/check/:name', async (req, res) => {
                     sanctioned: true,
                     lists: uniqueLists.length > 0 ? uniqueLists : ['Sanctions List'],
                     matchScore: topMatch.score,
-                    matchedName: entity.caption || entity.properties?.name?.[0],
-                    aliases: entity.properties?.alias || [],
+                    matchedName: topMatch.caption || topMatch.properties?.name?.[0],
+                    aliases: topMatch.properties?.alias || [],
                     datasets: datasets,
                     lastUpdated: new Date().toISOString(),
                     source: 'opensanctions'
