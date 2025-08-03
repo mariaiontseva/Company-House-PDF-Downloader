@@ -57,7 +57,8 @@ app.get('/health', (req, res) => {
     res.json({ 
         status: 'ok', 
         timestamp: new Date().toISOString(),
-        databaseConnected: !!pool
+        databaseConnected: !!pool,
+        hasOpenSanctionsKey: !!process.env.OPENSANCTIONS_API_KEY
     });
 });
 
