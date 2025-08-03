@@ -8108,7 +8108,7 @@
                 // Use Railway deployed URL for production
                 const baseUrl = window.location.hostname === 'localhost' 
                     ? 'http://localhost:3002' 
-                    : 'https://docspace-proxy-production.up.railway.app';
+                    : 'https://company-house-pdf-downloader-production-1eb5.up.railway.app';
                 const url = `${baseUrl}/api/sanctions/check/${encodeURIComponent(entityName)}`;
                 console.log('🔍 Checking sanctions for:', entityName, 'URL:', url);
                 
@@ -8164,7 +8164,7 @@
             try {
                 const baseUrl = window.location.hostname === 'localhost' 
                     ? 'http://localhost:3002' 
-                    : 'https://docspace-proxy-production.up.railway.app';
+                    : 'https://company-house-pdf-downloader-production-1eb5.up.railway.app';
                 const response = await fetch(`${baseUrl}/api/sanctions/count`);
                 if (response.ok) {
                     const data = await response.json();
