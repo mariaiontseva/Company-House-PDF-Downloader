@@ -293,15 +293,13 @@ app.get('/api/proxy/ixbrl/:companyNumber/:transactionId', async (req, res) => {
 
 // Real OpenSanctions API integration
 app.get('/api/sanctions/check/:name', async (req, res) => {
+    const { name } = req.params;
+    console.log(`Sanctions check requested for: ${name}`);
+    
+    // ALWAYS use real API - no fallback
+    const apiKey = process.env.OPENSANCTIONS_API_KEY || '655046606e62014766354db22d62488c';
+    
     try {
-        const { name } = req.params;
-        console.log(`Sanctions check requested for: ${name}`);
-        
-        // Get API key from environment or use the provided one
-        const apiKey = process.env.OPENSANCTIONS_API_KEY || '655046606e62014766354db22d62488c';
-        console.log(`Using API key: ${apiKey ? apiKey.substring(0, 8) + '...' : 'None'}`);
-        
-        // Make request to OpenSanctions API
         const response = await fetch('https://api.opensanctions.org/match/default', {
             method: 'POST',
             headers: {
@@ -321,9 +319,13 @@ app.get('/api/sanctions/check/:name', async (req, res) => {
         });
         
         if (!response.ok) {
-            const errorBody = await response.text();
-            console.error(`OpenSanctions API error: ${response.status} - ${errorBody}`);
-            throw new Error(`API returned ${response.status}: ${errorBody}`);
+            const errorText = await response.text();
+            console.error(`OpenSanctions API error: ${response.status} - ${errorText}`);
+            return res.status(500).json({
+                status: 'error',
+                message: `OpenSanctions API failed: ${response.status}`,
+                details: errorText.substring(0, 200)
+            });
         }
         
         const data = await response.json();
@@ -396,46 +398,12 @@ app.get('/api/sanctions/check/:name', async (req, res) => {
         }
         
     } catch (error) {
-        console.error('Sanctions check error:', error.message);
-        console.error('Full error:', error);
-        
-        // Return error instead of fallback for debugging
+        console.error('Sanctions API error:', error.message);
         return res.status(500).json({
             status: 'error',
-            error: error.message,
-            message: 'OpenSanctions API failed'
+            message: 'Failed to check sanctions',
+            error: error.message
         });
-        
-        // Fallback to test data on error (disabled for debugging)
-        /*
-        const testSanctionedEntities = [
-            'vladimir putin',
-            'roman abramovich',
-            'oleg deripaska',
-            'viktor vekselberg',
-            'alisher usmanov',
-            'gazprom',
-            'rosneft',
-            'sberbank',
-            'vtb bank'
-        ];
-        
-        const normalizedName = req.params.name.toLowerCase().trim();
-        const isSanctioned = testSanctionedEntities.some(entity => 
-            normalizedName.includes(entity) || entity.includes(normalizedName)
-        );
-        
-        res.json({
-            status: 'success',
-            data: {
-                entity: req.params.name,
-                sanctioned: isSanctioned,
-                lists: isSanctioned ? ['EU Sanctions', 'UK Sanctions', 'US OFAC'] : [],
-                lastUpdated: new Date().toISOString(),
-                source: 'simulated' // Fallback to test data
-            }
-        });
-        */
     }
 });
 
