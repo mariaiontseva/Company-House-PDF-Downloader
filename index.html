@@ -2774,23 +2774,14 @@
         }
         
         .hero-badge.sanctions {
-            background: rgba(239, 68, 68, 0.15);
+            background: rgba(220, 38, 38, 0.8);
+            backdrop-filter: blur(10px);
             border: 1px solid rgba(239, 68, 68, 0.5);
-            box-shadow: 0 0 20px rgba(239, 68, 68, 0.4), 0 4px 12px rgba(239, 68, 68, 0.3);
-            animation: pulseGlow 2s ease-in-out infinite;
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
         }
         
         .hero-badge.sanctions svg {
-            color: #f87171;
-        }
-        
-        @keyframes pulseGlow {
-            0%, 100% {
-                box-shadow: 0 0 20px rgba(239, 68, 68, 0.4), 0 4px 12px rgba(239, 68, 68, 0.3);
-            }
-            50% {
-                box-shadow: 0 0 30px rgba(239, 68, 68, 0.6), 0 4px 16px rgba(239, 68, 68, 0.4);
-            }
+            color: #fca5a5;
         }
 
         .price-badge {
@@ -7374,6 +7365,13 @@
                             </svg>
                             <span>Smart Reports</span>
                         </div>
+                        <div class="hero-badge sanctions" id="sanctionsCounter">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/>
+                                <path d="M12 7v5m0 4h.01"/>
+                            </svg>
+                            <span>127 Sanctioned Companies</span>
+                        </div>
                         <div class="hero-badge">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"/>
@@ -7398,13 +7396,6 @@
                                 <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                             </svg>
                             <span>Watch Lists</span>
-                        </div>
-                        <div class="hero-badge sanctions" id="sanctionsCounter">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/>
-                                <path d="M12 7v5m0 4h.01"/>
-                            </svg>
-                            <span>0 Under Sanctions</span>
                         </div>
                         <!-- Duplicate set for seamless loop -->
                         <div class="hero-badge">
@@ -7431,6 +7422,13 @@
                             </svg>
                             <span>Smart Reports</span>
                         </div>
+                        <div class="hero-badge sanctions">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/>
+                                <path d="M12 7v5m0 4h.01"/>
+                            </svg>
+                            <span>127 Sanctioned Companies</span>
+                        </div>
                         <div class="hero-badge">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"/>
@@ -7455,13 +7453,6 @@
                                 <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                             </svg>
                             <span>Watch Lists</span>
-                        </div>
-                        <div class="hero-badge sanctions">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/>
-                                <path d="M12 7v5m0 4h.01"/>
-                            </svg>
-                            <span id="sanctionsCounterDup">0 Under Sanctions</span>
                         </div>
                     </div>
                 </div>
@@ -8083,7 +8074,7 @@
         // Update sanctions count in the moving stripe
         async function updateSanctionsCount() {
             try {
-                const response = await fetch('http://localhost:3002/api/sanctions/count');
+                const response = await fetch('/api/sanctions/count');
                 if (response.ok) {
                     const data = await response.json();
                     if (data.status === 'success' && data.data.count) {
@@ -8093,10 +8084,10 @@
                         const counterDupElement = document.getElementById('sanctionsCounterDup');
                         
                         if (counterElement) {
-                            counterElement.textContent = `${count} Under Sanctions`;
+                            counterElement.textContent = `${count} Sanctioned Companies`;
                         }
                         if (counterDupElement) {
-                            counterDupElement.textContent = `${count} Under Sanctions`;
+                            counterDupElement.textContent = `${count} Sanctioned Companies`;
                         }
                     }
                 }

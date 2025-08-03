@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test FIND THE BALANCE LIMITED</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .result { background: #f0f0f0; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .success { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>Test Employee Extraction for FIND THE BALANCE LIMITED</h1>
+    <button onclick="testCompany()">Test Company</button>
+    <div id="results"></div>
+    
+    <script src="enhanced-employee-parser.js"></script>
+    <script src="real-xbrl-parser.js"></script>
+    <script src="finance-parser-minimal.js"></script>
+    
+    <script>
+        async function testCompany() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<p>Testing FIND THE BALANCE LIMITED (11236758)...</p>';
+            
+            try {
+                // Set to use local proxy
+                const originalUrl = FinanceParser.PROXY_URL;
+                FinanceParser.PROXY_URL = 'http://localhost:3002';
+                
+                const data = await FinanceParser.extractFinancialData('11236758');
+                
+                FinanceParser.PROXY_URL = originalUrl;
+                
+                if (data.historicalData && data.historicalData.length > 0) {
+                    results.innerHTML += '<div class="result">';
+                    results.innerHTML += '<h3>Financial Data Found:</h3>';
+                    
+                    data.historicalData.forEach(year => {
+                        const employees = year.metrics.employees;
+                        
+                        results.innerHTML += `<div style="margin: 10px 0; padding: 10px; background: white; border-left: 3px solid ${employees ? '#4CAF50' : '#f44336'};">`;
+                        results.innerHTML += `<strong>Year ${year.year}:</strong><br>`;
+                        
+                        if (employees && employees.value) {
+                            results.innerHTML += `<span class="success">✓ Employees: ${employees.value}</span><br>`;
+                            results.innerHTML += `<small>Source: ${employees.source}</small><br>`;
+                        } else {
+                            results.innerHTML += `<span class="error">✗ No employee data found</span><br>`;
+                        }
+                        
+                        // Also show other financial metrics
+                        results.innerHTML += `<small>Total Assets: £${year.metrics.totalAssets?.value ? year.metrics.totalAssets.value.toLocaleString() : 'N/A'}</small><br>`;
+                        results.innerHTML += `<small>Net Assets: £${year.metrics.netAssets?.value ? year.metrics.netAssets.value.toLocaleString() : 'N/A'}</small>`;
+                        
+                        results.innerHTML += '</div>';
+                    });
+                    
+                    results.innerHTML += '</div>';
+                } else {
+                    results.innerHTML += '<p class="error">No financial data available</p>';
+                }
+                
+                // Also fetch and inspect the latest XBRL directly
+                results.innerHTML += '<h3>Direct XBRL Inspection:</h3>';
+                
+                const filingResponse = await fetch(`http://localhost:3002/api/proxy/companies-house/company/11236758/filing-history?category=accounts&items_per_page=1`);
+                const filingData = await filingResponse.json();
+                
+                if (filingData.items && filingData.items.length > 0) {
+                    const filing = filingData.items[0];
+                    results.innerHTML += `<p>Latest filing: ${filing.description} (${filing.date})</p>`;
+                    
+                    const xbrlUrl = `http://localhost:3002/api/proxy/ixbrl/11236758/${filing.transaction_id}?format=xhtml`;
+                    const xbrlResponse = await fetch(xbrlUrl);
+                    const xbrlText = await xbrlResponse.text();
+                    
+                    // Search for employee mentions
+                    const employeeRegex = /(.{0,100}[Ee]mployee.{0,100})/g;
+                    const matches = [...xbrlText.matchAll(employeeRegex)];
+                    
+                    if (matches.length > 0) {
+                        results.innerHTML += `<p class="success">Found ${matches.length} employee mentions in XBRL</p>`;
+                        results.innerHTML += '<div class="result" style="font-family: monospace; font-size: 12px;">';
+                        matches.slice(0, 3).forEach((match, i) => {
+                            results.innerHTML += `<div style="margin: 5px 0;">${i+1}. ${match[0].replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`;
+                        });
+                        results.innerHTML += '</div>';
+                    } else {
+                        results.innerHTML += '<p class="error">No employee mentions found in XBRL</p>';
+                    }
+                }
+                
+            } catch (error) {
+                results.innerHTML += `<p class="error">Error: ${error.message}</p>`;
+                console.error(error);
+            }
+        }
+    </script>
+</body>
+</html>

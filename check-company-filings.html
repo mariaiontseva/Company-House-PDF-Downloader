@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Check Company Filings</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .filing { background: white; padding: 15px; margin: 10px 0; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .success { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>Check Company Filings</h1>
+    <button onclick="checkFilings()">Check FIND THE BALANCE LIMITED Filings</button>
+    <div id="results"></div>
+    
+    <script src="enhanced-employee-parser.js"></script>
+    <script src="real-xbrl-parser.js"></script>
+    
+    <script>
+        async function checkFilings() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<p>Fetching filings...</p>';
+            
+            try {
+                // Get all recent filings
+                const filingResponse = await fetch(`http://localhost:3002/api/proxy/companies-house/company/11236758/filing-history?category=accounts&items_per_page=5`);
+                const filingData = await filingResponse.json();
+                
+                results.innerHTML = '<h2>FIND THE BALANCE LIMITED (11236758)</h2>';
+                
+                if (filingData.items && filingData.items.length > 0) {
+                    results.innerHTML += `<p>Found ${filingData.items.length} filings</p>`;
+                    
+                    for (const filing of filingData.items) {
+                        results.innerHTML += `<div class="filing">`;
+                        results.innerHTML += `<h3>${filing.description}</h3>`;
+                        results.innerHTML += `<p>Date: ${filing.date}</p>`;
+                        results.innerHTML += `<p>Transaction ID: ${filing.transaction_id}</p>`;
+                        
+                        // Try to get employee data for this filing
+                        try {
+                            const xbrlUrl = `http://localhost:3002/api/proxy/ixbrl/11236758/${filing.transaction_id}?format=xhtml`;
+                            const xbrlResponse = await fetch(xbrlUrl);
+                            
+                            if (xbrlResponse.ok) {
+                                const xbrlText = await xbrlResponse.text();
+                                
+                                // Parse with enhanced parser
+                                const employeeData = EnhancedEmployeeParser.extractEmployees(xbrlText);
+                                
+                                if (employeeData) {
+                                    results.innerHTML += `<p class="success">Employees: ${employeeData.value} (Source: ${employeeData.source})</p>`;
+                                } else {
+                                    results.innerHTML += `<p class="error">No employee data found</p>`;
+                                }
+                                
+                                // Also check for the specific text pattern from the image
+                                if (xbrlText.includes('Average number of persons employed by the company')) {
+                                    const match = xbrlText.match(/Average\s+number\s+of\s+persons\s+employed\s+by\s+the\s+company[^0-9]*([0-9]+)/i);
+                                    if (match) {
+                                        results.innerHTML += `<p>Found in text: ${match[1]} employees</p>`;
+                                    }
+                                }
+                            } else {
+                                results.innerHTML += `<p class="error">Failed to fetch XBRL</p>`;
+                            }
+                        } catch (error) {
+                            results.innerHTML += `<p class="error">Error: ${error.message}</p>`;
+                        }
+                        
+                        results.innerHTML += `</div>`;
+                    }
+                } else {
+                    results.innerHTML += '<p class="error">No filings found</p>';
+                }
+                
+            } catch (error) {
+                results.innerHTML += `<p class="error">Error: ${error.message}</p>`;
+                console.error(error);
+            }
+        }
+    </script>
+</body>
+</html>

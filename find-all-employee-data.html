@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Find All Employee Data</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .section { background: white; padding: 15px; margin: 10px 0; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .tag-data { background: #e3f2fd; padding: 10px; margin: 5px 0; font-family: monospace; font-size: 12px; }
+        .highlight { background: yellow; }
+    </style>
+</head>
+<body>
+    <h1>Find All Employee Data in XBRL</h1>
+    <button onclick="findAllEmployeeData()">Find All Employee Data</button>
+    <div id="results"></div>
+    
+    <script>
+        async function findAllEmployeeData() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<p>Searching for all employee data...</p>';
+            
+            try {
+                // Fetch XBRL for FIND THE BALANCE LIMITED
+                const filingResponse = await fetch(`http://localhost:3002/api/proxy/companies-house/company/11236758/filing-history?category=accounts&items_per_page=1`);
+                const filingData = await filingResponse.json();
+                
+                if (filingData.items && filingData.items.length > 0) {
+                    const filing = filingData.items[0];
+                    
+                    const xbrlUrl = `http://localhost:3002/api/proxy/ixbrl/11236758/${filing.transaction_id}?format=xhtml`;
+                    const xbrlResponse = await fetch(xbrlUrl);
+                    const xbrlText = await xbrlResponse.text();
+                    
+                    results.innerHTML = '<div class="section"><h3>All Employee-Related XBRL Tags</h3>';
+                    
+                    // Parse as DOM
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(xbrlText, 'text/html');
+                    
+                    // Find ALL elements that might contain employee data
+                    const allElements = doc.querySelectorAll('*[name]');
+                    const employeeElements = [];
+                    
+                    allElements.forEach(element => {
+                        const name = element.getAttribute('name');
+                        if (name && (
+                            name.toLowerCase().includes('employ') || 
+                            name.toLowerCase().includes('staff') || 
+                            name.toLowerCase().includes('headcount') ||
+                            name.toLowerCase().includes('worker') ||
+                            name.toLowerCase().includes('personnel')
+                        )) {
+                            employeeElements.push({
+                                tagName: element.tagName,
+                                name: name,
+                                content: element.textContent.trim(),
+                                contextRef: element.getAttribute('contextRef'),
+                                decimals: element.getAttribute('decimals'),
+                                format: element.getAttribute('format'),
+                                outerHTML: element.outerHTML
+                            });
+                        }
+                    });
+                    
+                    if (employeeElements.length > 0) {
+                        results.innerHTML += `<p>Found ${employeeElements.length} employee-related XBRL elements:</p>`;
+                        
+                        employeeElements.forEach((elem, index) => {
+                            results.innerHTML += `<div class="tag-data">`;
+                            results.innerHTML += `<strong>Element ${index + 1}:</strong><br>`;
+                            results.innerHTML += `Tag: ${elem.tagName}<br>`;
+                            results.innerHTML += `Name: <span class="highlight">${elem.name}</span><br>`;
+                            results.innerHTML += `Content: <strong>${elem.content}</strong><br>`;
+                            results.innerHTML += `Context: ${elem.contextRef || 'none'}<br>`;
+                            if (elem.decimals) results.innerHTML += `Decimals: ${elem.decimals}<br>`;
+                            if (elem.format) results.innerHTML += `Format: ${elem.format}<br>`;
+                            results.innerHTML += `HTML: ${elem.outerHTML.replace(/</g, '&lt;').replace(/>/g, '&gt;')}<br>`;
+                            results.innerHTML += `</div>`;
+                        });
+                    } else {
+                        results.innerHTML += '<p>No employee-related XBRL elements found</p>';
+                    }
+                    
+                    // Also search for text patterns
+                    results.innerHTML += '<h3>Text Pattern Search</h3>';
+                    
+                    // Remove all tags to get pure text
+                    const pureText = xbrlText.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
+                    
+                    // Search for various patterns
+                    const patterns = [
+                        /employees?\s*[:=]?\s*(\d+)/gi,
+                        /(\d+)\s*employees?/gi,
+                        /average\s+number\s+of\s+(?:persons\s+)?employed[^0-9]*(\d+)/gi,
+                        /staff\s*[:=]?\s*(\d+)/gi,
+                        /headcount\s*[:=]?\s*(\d+)/gi,
+                        /number\s+of\s+(?:persons\s+)?employed[^0-9]*(\d+)/gi
+                    ];
+                    
+                    const textMatches = [];
+                    patterns.forEach(pattern => {
+                        const matches = [...pureText.matchAll(pattern)];
+                        matches.forEach(match => {
+                            textMatches.push({
+                                pattern: pattern.source,
+                                fullMatch: match[0],
+                                number: match[1] || match[2]
+                            });
+                        });
+                    });
+                    
+                    if (textMatches.length > 0) {
+                        results.innerHTML += `<p>Found ${textMatches.length} text matches:</p>`;
+                        textMatches.forEach(match => {
+                            results.innerHTML += `<div class="tag-data">`;
+                            results.innerHTML += `Pattern: ${match.pattern}<br>`;
+                            results.innerHTML += `Match: "${match.fullMatch}"<br>`;
+                            results.innerHTML += `Number: <strong>${match.number}</strong>`;
+                            results.innerHTML += `</div>`;
+                        });
+                    }
+                    
+                    results.innerHTML += '</div>';
+                }
+                
+            } catch (error) {
+                results.innerHTML += `<p style="color: red;">Error: ${error.message}</p>`;
+                console.error(error);
+            }
+        }
+    </script>
+</body>
+</html>

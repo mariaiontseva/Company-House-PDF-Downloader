@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Inspect Real XBRL Structure</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .section { background: white; padding: 15px; margin: 10px 0; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .code { background: #f0f0f0; padding: 10px; font-family: monospace; font-size: 11px; overflow-x: auto; white-space: pre-wrap; }
+        .highlight { background: yellow; font-weight: bold; }
+        .cell-info { background: #e3f2fd; padding: 5px; margin: 5px 0; }
+    </style>
+</head>
+<body>
+    <h1>Inspect Real XBRL Structure</h1>
+    <button onclick="inspectXBRL()">Inspect XBRL</button>
+    <div id="results"></div>
+    
+    <script>
+        async function inspectXBRL() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<p>Fetching XBRL...</p>';
+            
+            try {
+                // Fetch filing
+                const filingResponse = await fetch(`http://localhost:3002/api/proxy/companies-house/company/11236758/filing-history?category=accounts&items_per_page=1`);
+                const filingData = await filingResponse.json();
+                
+                if (filingData.items && filingData.items.length > 0) {
+                    const filing = filingData.items[0];
+                    
+                    // Fetch XBRL
+                    const xbrlUrl = `http://localhost:3002/api/proxy/ixbrl/11236758/${filing.transaction_id}?format=xhtml`;
+                    const xbrlResponse = await fetch(xbrlUrl);
+                    const xbrlText = await xbrlResponse.text();
+                    
+                    results.innerHTML = '<div class="section"><h3>XBRL Analysis</h3>';
+                    
+                    // Parse as DOM
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(xbrlText, 'text/html');
+                    
+                    // Find all table rows
+                    const rows = doc.querySelectorAll('tr');
+                    results.innerHTML += `<p>Found ${rows.length} table rows</p>`;
+                    
+                    // Look for employee-related rows
+                    results.innerHTML += '<h4>Employee-related rows:</h4>';
+                    let foundEmployeeRows = 0;
+                    
+                    rows.forEach((row, index) => {
+                        const text = row.textContent.toLowerCase();
+                        if (text.includes('employee') || text.includes('persons employed') || text.includes('staff')) {
+                            foundEmployeeRows++;
+                            results.innerHTML += '<div class="cell-info">';
+                            results.innerHTML += `<strong>Row ${index}:</strong><br>`;
+                            
+                            // Get all cells in this row
+                            const cells = row.querySelectorAll('td, th');
+                            cells.forEach((cell, cellIndex) => {
+                                results.innerHTML += `Cell ${cellIndex}: "${cell.textContent.trim()}"<br>`;
+                                if (cell.id) {
+                                    results.innerHTML += `ID: ${cell.id}<br>`;
+                                }
+                                if (cell.className) {
+                                    results.innerHTML += `Class: ${cell.className}<br>`;
+                                }
+                            });
+                            
+                            // Show the raw HTML
+                            results.innerHTML += '<div class="code">' + 
+                                row.outerHTML.replace(/</g, '&lt;').replace(/>/g, '&gt;') + 
+                                '</div>';
+                            results.innerHTML += '</div>';
+                        }
+                    });
+                    
+                    if (foundEmployeeRows === 0) {
+                        results.innerHTML += '<p>No employee-related rows found in tables</p>';
+                    }
+                    
+                    // Search for employee mentions outside tables
+                    results.innerHTML += '<h4>Employee mentions in document:</h4>';
+                    const employeeRegex = /(.{0,300}(?:employee|persons\s+employed|staff\s+number).{0,300})/gi;
+                    const matches = [...xbrlText.matchAll(employeeRegex)];
+                    
+                    if (matches.length > 0) {
+                        results.innerHTML += `<p>Found ${matches.length} mentions</p>`;
+                        matches.slice(0, 5).forEach((match, i) => {
+                            results.innerHTML += `<div class="code">${match[0]
+                                .replace(/</g, '&lt;')
+                                .replace(/>/g, '&gt;')
+                                .replace(/(employee|persons\s+employed|staff)/gi, '<span class="highlight">$1</span>')}</div>`;
+                        });
+                    }
+                    
+                    // Look specifically for the cell with ID employeesNote-curr-val
+                    const employeeCell = doc.querySelector('#employeesNote-curr-val');
+                    if (employeeCell) {
+                        results.innerHTML += '<h4>Found employee cell by ID:</h4>';
+                        results.innerHTML += '<div class="cell-info">';
+                        results.innerHTML += `Content: "${employeeCell.textContent.trim()}"<br>`;
+                        results.innerHTML += `Parent row HTML:<br>`;
+                        const parentRow = employeeCell.closest('tr');
+                        if (parentRow) {
+                            results.innerHTML += '<div class="code">' + 
+                                parentRow.outerHTML.replace(/</g, '&lt;').replace(/>/g, '&gt;') + 
+                                '</div>';
+                        }
+                        results.innerHTML += '</div>';
+                    }
+                    
+                    results.innerHTML += '</div>';
+                }
+                
+            } catch (error) {
+                results.innerHTML += `<p style="color: red;">Error: ${error.message}</p>`;
+                console.error(error);
+            }
+        }
+    </script>
+</body>
+</html>

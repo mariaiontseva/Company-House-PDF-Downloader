@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Officer API Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { background: #f5f5f5; padding: 20px; margin: 20px 0; border-radius: 8px; }
+        pre { background: #000; color: #0f0; padding: 15px; overflow-x: auto; font-size: 12px; }
+        .officer-card { background: white; padding: 15px; margin: 10px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        button { padding: 8px 16px; margin: 5px; cursor: pointer; }
+        .error { color: red; font-weight: bold; }
+        .success { color: green; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>Officer API Response Test</h1>
+    
+    <div class="test-section">
+        <h2>Search Officers</h2>
+        <input type="text" id="searchQuery" placeholder="Enter name (e.g. SMITH)" value="SMITH" style="width: 300px; padding: 8px;">
+        <button onclick="searchOfficers()">Search Officers</button>
+        
+        <div id="searchResults"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Direct Officer Lookup</h2>
+        <input type="text" id="officerId" placeholder="Enter officer ID" style="width: 300px; padding: 8px;">
+        <button onclick="lookupOfficer()">Lookup Officer</button>
+        
+        <div id="officerDetails"></div>
+    </div>
+    
+    <script>
+        async function searchOfficers() {
+            const query = document.getElementById('searchQuery').value;
+            const resultsDiv = document.getElementById('searchResults');
+            
+            resultsDiv.innerHTML = '<p>Searching...</p>';
+            
+            try {
+                const response = await fetch(`http://localhost:3002/api/proxy/companies-house/search/officers?q=${encodeURIComponent(query)}&items_per_page=3`);
+                const data = await response.json();
+                
+                resultsDiv.innerHTML = '<h3>Raw API Response:</h3>';
+                resultsDiv.innerHTML += '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                
+                if (data.items && data.items.length > 0) {
+                    resultsDiv.innerHTML += '<h3>Officer Analysis:</h3>';
+                    
+                    data.items.forEach((officer, index) => {
+                        // Try different methods to extract officer ID
+                        const method1 = officer.links?.self?.split('/').pop();
+                        const method2 = officer.links?.officer?.appointments?.split('/')[2];
+                        const method3 = officer.links?.self?.match(/\/officers\/([^\/]+)\//)?.[1];
+                        const method4 = officer.links?.self?.split('/')[2];
+                        
+                        resultsDiv.innerHTML += `
+                            <div class="officer-card">
+                                <h4>Officer ${index + 1}: ${officer.title}</h4>
+                                <p><strong>Description:</strong> ${officer.description || 'N/A'}</p>
+                                <p><strong>Appointment Count:</strong> ${officer.appointment_count || 0}</p>
+                                
+                                <h5>Links Object:</h5>
+                                <pre>${JSON.stringify(officer.links, null, 2)}</pre>
+                                
+                                <h5>Officer ID Extraction Methods:</h5>
+                                <ul>
+                                    <li>Method 1 (links.self.split('/').pop()): <code>${method1 || 'FAILED'}</code></li>
+                                    <li>Method 2 (links.officer.appointments): <code>${method2 || 'FAILED'}</code></li>
+                                    <li>Method 3 (regex /officers/ID/): <code>${method3 || 'FAILED'}</code></li>
+                                    <li>Method 4 (links.self.split('/')[2]): <code>${method4 || 'FAILED'}</code></li>
+                                </ul>
+                                
+                                <button onclick="testOfficerPage('${method3 || method4 || method2 || 'unknown'}')">
+                                    Test Officer Page (Best Method)
+                                </button>
+                            </div>
+                        `;
+                    });
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = `<p class="error">Error: ${error.message}</p>`;
+            }
+        }
+        
+        async function lookupOfficer() {
+            const officerId = document.getElementById('officerId').value;
+            const detailsDiv = document.getElementById('officerDetails');
+            
+            if (!officerId) {
+                detailsDiv.innerHTML = '<p class="error">Please enter an officer ID</p>';
+                return;
+            }
+            
+            detailsDiv.innerHTML = '<p>Loading officer details...</p>';
+            
+            try {
+                const response = await fetch(`http://localhost:3002/api/proxy/companies-house/officers/${officerId}`);
+                const data = await response.json();
+                
+                detailsDiv.innerHTML = '<h3>Officer Details:</h3>';
+                detailsDiv.innerHTML += '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+            } catch (error) {
+                detailsDiv.innerHTML = `<p class="error">Error: ${error.message}</p>`;
+            }
+        }
+        
+        function testOfficerPage(officerId) {
+            console.log('Testing officer page with ID:', officerId);
+            window.open(`http://localhost:8080/#officer/${officerId}`, '_blank');
+        }
+        
+        // Auto-search on load
+        window.onload = () => searchOfficers();
+    </script>
+</body>
+</html>

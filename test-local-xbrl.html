@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Local XBRL File</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .section { background: white; padding: 15px; margin: 10px 0; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .success { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
+        .info { color: blue; }
+    </style>
+</head>
+<body>
+    <h1>Test Local XBRL File</h1>
+    <input type="file" id="fileInput" accept=".xhtml,.html,.xml">
+    <button onclick="testLocalFile()">Test XBRL File</button>
+    <div id="results"></div>
+    
+    <script src="enhanced-employee-parser.js"></script>
+    <script src="real-xbrl-parser.js"></script>
+    
+    <script>
+        async function testLocalFile() {
+            const fileInput = document.getElementById('fileInput');
+            const results = document.getElementById('results');
+            
+            if (!fileInput.files.length) {
+                results.innerHTML = '<p class="error">Please select a file</p>';
+                return;
+            }
+            
+            const file = fileInput.files[0];
+            results.innerHTML = `<p class="info">Testing ${file.name}...</p>`;
+            
+            try {
+                const text = await file.text();
+                
+                // Test Enhanced Parser
+                results.innerHTML += '<div class="section"><h3>Enhanced Parser Test</h3>';
+                const enhancedResult = EnhancedEmployeeParser.extractEmployees(text);
+                
+                if (enhancedResult) {
+                    results.innerHTML += `<p class="success">✓ Found: ${enhancedResult.value} employees</p>`;
+                    results.innerHTML += `<p>Source: ${enhancedResult.source}</p>`;
+                } else {
+                    results.innerHTML += '<p class="error">✗ No employees found</p>';
+                }
+                results.innerHTML += '</div>';
+                
+                // Test XBRL Parser
+                results.innerHTML += '<div class="section"><h3>XBRL Parser Test</h3>';
+                const xbrlResult = RealXBRLParser.parse(text);
+                
+                if (xbrlResult.employees) {
+                    results.innerHTML += `<p class="success">✓ Found: ${xbrlResult.employees.value} employees</p>`;
+                } else {
+                    results.innerHTML += '<p class="error">✗ No employees found</p>';
+                }
+                results.innerHTML += '</div>';
+                
+                // Show actual employee content
+                results.innerHTML += '<div class="section"><h3>Employee Content in File</h3>';
+                
+                // Look for the specific pattern
+                const employeeSection = text.match(/Average\s+number\s+of\s+persons\s+employed[\s\S]{0,500}/i);
+                if (employeeSection) {
+                    results.innerHTML += '<p>Found employee section:</p>';
+                    results.innerHTML += '<pre>' + employeeSection[0].substring(0, 300).replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</pre>';
+                }
+                
+                // Parse DOM and find employee table
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(text, 'text/html');
+                
+                // Look for the table row with employee data
+                const rows = doc.querySelectorAll('tr');
+                rows.forEach(row => {
+                    const cells = row.querySelectorAll('td');
+                    cells.forEach(cell => {
+                        if (cell.textContent.includes('Average number of persons employed')) {
+                            results.innerHTML += '<p>Found employee row in table:</p>';
+                            const nextCell = cell.nextElementSibling;
+                            if (nextCell) {
+                                results.innerHTML += `<p>Current year value: <strong>${nextCell.textContent.trim()}</strong></p>`;
+                            }
+                            const nextNextCell = nextCell ? nextCell.nextElementSibling : null;
+                            if (nextNextCell) {
+                                results.innerHTML += `<p>Previous year value: <strong>${nextNextCell.textContent.trim()}</strong></p>`;
+                            }
+                        }
+                    });
+                });
+                
+                results.innerHTML += '</div>';
+                
+            } catch (error) {
+                results.innerHTML += `<p class="error">Error: ${error.message}</p>`;
+                console.error(error);
+            }
+        }
+    </script>
+</body>
+</html>

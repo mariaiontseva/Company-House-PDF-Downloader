@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Check Company 05254058</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .section { background: white; padding: 15px; margin: 10px 0; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .success { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>Check Company 05254058</h1>
+    <button onclick="checkCompany()">Check Company</button>
+    <div id="results"></div>
+    
+    <script src="enhanced-employee-parser.js"></script>
+    <script src="finance-parser-minimal.js"></script>
+    
+    <script>
+        async function checkCompany() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<p>Checking company 05254058...</p>';
+            
+            try {
+                // Get company profile
+                const profileResponse = await fetch(`http://localhost:3002/api/proxy/companies-house/company/05254058`);
+                const profileData = await profileResponse.json();
+                
+                results.innerHTML = '<div class="section">';
+                results.innerHTML += `<h2>${profileData.company_name}</h2>`;
+                results.innerHTML += `<p>Company Number: ${profileData.company_number}</p>`;
+                results.innerHTML += `<p>Status: ${profileData.company_status}</p>`;
+                results.innerHTML += `<p>Type: ${profileData.type}</p>`;
+                results.innerHTML += '</div>';
+                
+                // Test finance parser
+                results.innerHTML += '<div class="section"><h3>Testing Finance Parser</h3>';
+                
+                // Use local proxy
+                const originalUrl = FinanceParser.PROXY_URL;
+                FinanceParser.PROXY_URL = 'http://localhost:3002';
+                
+                const financeData = await FinanceParser.extractFinancialData('05254058');
+                
+                FinanceParser.PROXY_URL = originalUrl;
+                
+                if (financeData.historicalData && financeData.historicalData.length > 0) {
+                    results.innerHTML += '<h4>Financial Data:</h4>';
+                    
+                    financeData.historicalData.slice(0, 3).forEach(year => {
+                        results.innerHTML += `<div style="margin: 10px 0; padding: 10px; background: #f0f0f0;">`;
+                        results.innerHTML += `<strong>Year ${year.year}:</strong><br>`;
+                        
+                        if (year.metrics.employees && year.metrics.employees.value !== undefined) {
+                            results.innerHTML += `<span class="success">Employees: ${year.metrics.employees.value}</span><br>`;
+                            results.innerHTML += `<small>Source: ${year.metrics.employees.source}</small><br>`;
+                        } else {
+                            results.innerHTML += '<span class="error">No employee data</span><br>';
+                        }
+                        
+                        results.innerHTML += `<small>Total Assets: £${year.metrics.totalAssets?.value?.toLocaleString() || 'N/A'}</small>`;
+                        results.innerHTML += '</div>';
+                    });
+                } else {
+                    results.innerHTML += '<p class="error">No financial data found</p>';
+                }
+                
+                results.innerHTML += '</div>';
+                
+            } catch (error) {
+                results.innerHTML += `<p class="error">Error: ${error.message}</p>`;
+                console.error(error);
+            }
+        }
+    </script>
+</body>
+</html>

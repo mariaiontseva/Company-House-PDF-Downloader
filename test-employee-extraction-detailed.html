@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Detailed Employee Extraction Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .section { background: white; padding: 15px; margin: 10px 0; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .success { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
+        .code { background: #f0f0f0; padding: 10px; font-family: monospace; font-size: 12px; overflow-x: auto; }
+        .highlight { background: yellow; }
+    </style>
+</head>
+<body>
+    <h1>Detailed Employee Extraction Test</h1>
+    <button onclick="testExtraction()">Test Employee Extraction</button>
+    <div id="results"></div>
+    
+    <script src="enhanced-employee-parser.js"></script>
+    <script src="real-xbrl-parser.js"></script>
+    <script src="finance-parser-minimal.js"></script>
+    
+    <script>
+        async function testExtraction() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<p>Testing employee extraction...</p>';
+            
+            try {
+                // Test with the exact format from the image
+                const testXBRL = `
+                    <table>
+                        <tr>
+                            <td>2 Employees</td>
+                            <td>2024</td>
+                            <td>2023</td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td>Number</td>
+                            <td>Number</td>
+                        </tr>
+                        <tr>
+                            <td>Average number of persons employed by the company</td>
+                            <td>1</td>
+                            <td>1</td>
+                        </tr>
+                    </table>
+                `;
+                
+                results.innerHTML += '<div class="section"><h3>Test 1: Sample XBRL</h3>';
+                results.innerHTML += '<div class="code">' + testXBRL.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</div>';
+                
+                // Test enhanced parser
+                console.log('Testing enhanced parser...');
+                const enhancedResult = EnhancedEmployeeParser.extractEmployees(testXBRL);
+                
+                if (enhancedResult) {
+                    results.innerHTML += `<p class="success">✓ Enhanced parser found: ${enhancedResult.value} employees (Source: ${enhancedResult.source})</p>`;
+                } else {
+                    results.innerHTML += '<p class="error">✗ Enhanced parser found nothing</p>';
+                }
+                
+                // Test XBRL parser
+                console.log('Testing XBRL parser...');
+                const xbrlResult = RealXBRLParser.parse(testXBRL);
+                
+                if (xbrlResult.employees) {
+                    results.innerHTML += `<p class="success">✓ XBRL parser found: ${xbrlResult.employees.value} employees</p>`;
+                } else {
+                    results.innerHTML += '<p class="error">✗ XBRL parser found no employees</p>';
+                }
+                results.innerHTML += '</div>';
+                
+                // Now test with real company data
+                results.innerHTML += '<div class="section"><h3>Test 2: Real Company Data (11236758)</h3>';
+                
+                // Fetch filing
+                const filingResponse = await fetch(`http://localhost:3002/api/proxy/companies-house/company/11236758/filing-history?category=accounts&items_per_page=1`);
+                const filingData = await filingResponse.json();
+                
+                if (filingData.items && filingData.items.length > 0) {
+                    const filing = filingData.items[0];
+                    results.innerHTML += `<p>Filing: ${filing.description} (${filing.date})</p>`;
+                    
+                    // Fetch XBRL
+                    const xbrlUrl = `http://localhost:3002/api/proxy/ixbrl/11236758/${filing.transaction_id}?format=xhtml`;
+                    const xbrlResponse = await fetch(xbrlUrl);
+                    const xbrlText = await xbrlResponse.text();
+                    
+                    // Look for the specific section
+                    const startIndex = xbrlText.indexOf('Average number of persons employed');
+                    if (startIndex !== -1) {
+                        const context = xbrlText.substring(Math.max(0, startIndex - 500), Math.min(xbrlText.length, startIndex + 500));
+                        results.innerHTML += '<p>Found employee section in XBRL:</p>';
+                        results.innerHTML += '<div class="code">' + 
+                            context.replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                                   .replace(/(persons employed|employee)/gi, '<span class="highlight">$1</span>') + 
+                            '</div>';
+                    }
+                    
+                    // Test parsers on real data
+                    console.log('Testing parsers on real XBRL...');
+                    const realEnhanced = EnhancedEmployeeParser.extractEmployees(xbrlText);
+                    const realXBRL = RealXBRLParser.parse(xbrlText);
+                    
+                    results.innerHTML += '<h4>Parser Results:</h4>';
+                    if (realEnhanced) {
+                        results.innerHTML += `<p class="success">✓ Enhanced parser: ${realEnhanced.value} employees (${realEnhanced.source})</p>`;
+                    } else {
+                        results.innerHTML += '<p class="error">✗ Enhanced parser: No employees found</p>';
+                    }
+                    
+                    if (realXBRL.employees) {
+                        results.innerHTML += `<p class="success">✓ XBRL parser: ${realXBRL.employees.value} employees</p>`;
+                    } else {
+                        results.innerHTML += '<p class="error">✗ XBRL parser: No employees found</p>';
+                    }
+                    
+                    // Test finance parser
+                    const financeData = await FinanceParser.extractFinancialData('11236758');
+                    if (financeData.historicalData && financeData.historicalData.length > 0) {
+                        const latest = financeData.historicalData[0];
+                        results.innerHTML += '<h4>Finance Parser Result:</h4>';
+                        if (latest.metrics.employees) {
+                            results.innerHTML += `<p class="success">✓ Finance parser: ${latest.metrics.employees.value} employees</p>`;
+                        } else {
+                            results.innerHTML += '<p class="error">✗ Finance parser: No employees found</p>';
+                        }
+                    }
+                }
+                results.innerHTML += '</div>';
+                
+            } catch (error) {
+                results.innerHTML += `<p class="error">Error: ${error.message}</p>`;
+                console.error(error);
+            }
+        }
+    </script>
+</body>
+</html>

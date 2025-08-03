@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Officer Debug</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { background: white; padding: 20px; margin: 20px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .officer-result { background: #f0f0f0; padding: 10px; margin: 10px 0; border-radius: 4px; }
+        .debug-info { font-family: monospace; font-size: 12px; color: #666; }
+    </style>
+</head>
+<body>
+    <h1>Officer Search Debug</h1>
+    
+    <div class="test-section">
+        <h2>Search for Officers</h2>
+        <input type="text" id="searchInput" placeholder="Enter officer name (e.g., SMITH)" style="width: 300px; padding: 8px;">
+        <button onclick="searchOfficers()">Search</button>
+        <div id="results"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Direct Officer Test</h2>
+        <p>Enter an officer ID to test direct navigation:</p>
+        <input type="text" id="officerId" placeholder="Officer ID" style="width: 300px; padding: 8px;">
+        <button onclick="testDirectNavigation()">Test Navigation</button>
+    </div>
+    
+    <script>
+        async function searchOfficers() {
+            const query = document.getElementById('searchInput').value;
+            const resultsDiv = document.getElementById('results');
+            
+            if (!query) {
+                resultsDiv.innerHTML = '<p>Please enter a search term</p>';
+                return;
+            }
+            
+            resultsDiv.innerHTML = '<p>Searching...</p>';
+            
+            try {
+                const response = await fetch(`http://localhost:3002/api/proxy/companies-house/search/officers?q=${encodeURIComponent(query)}&items_per_page=5`);
+                const data = await response.json();
+                
+                if (data.items && data.items.length > 0) {
+                    resultsDiv.innerHTML = '<h3>Officer Results:</h3>';
+                    
+                    data.items.forEach((officer, index) => {
+                        // Debug: show raw officer data
+                        console.log(`Officer ${index}:`, officer);
+                        
+                        // Extract officer ID
+                        const officerIdFromLink = officer.links?.self?.split('/').pop() || 'UNKNOWN';
+                        
+                        // Get appointment info
+                        const appointment = officer.items && officer.items[0];
+                        const companyName = appointment ? appointment.appointed_to?.company_name : 'Unknown';
+                        const role = appointment ? appointment.officer_role : 'Unknown';
+                        
+                        resultsDiv.innerHTML += `
+                            <div class="officer-result">
+                                <strong>${officer.title}</strong><br>
+                                <span>Role: ${role}</span><br>
+                                <span>Company: ${companyName}</span><br>
+                                <span>Appointments: ${officer.appointment_count || 1}</span><br>
+                                <div class="debug-info">
+                                    Officer ID: ${officerIdFromLink}<br>
+                                    Links.self: ${officer.links?.self || 'MISSING'}<br>
+                                    <button onclick="navigateToOfficer('${officerIdFromLink}')">Navigate to Officer</button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                } else {
+                    resultsDiv.innerHTML = '<p>No officers found</p>';
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+                console.error('Search error:', error);
+            }
+        }
+        
+        function navigateToOfficer(officerId) {
+            console.log('Navigating to officer:', officerId);
+            const url = `http://localhost:8080/#officer/${officerId}`;
+            console.log('URL:', url);
+            window.open(url, '_blank');
+        }
+        
+        function testDirectNavigation() {
+            const officerId = document.getElementById('officerId').value;
+            if (officerId) {
+                navigateToOfficer(officerId);
+            } else {
+                alert('Please enter an officer ID');
+            }
+        }
+    </script>
+</body>
+</html>

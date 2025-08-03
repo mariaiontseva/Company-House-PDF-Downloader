@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Parser Flow</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .method { background: white; padding: 15px; margin: 10px 0; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .success { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
+        .code { background: #f0f0f0; padding: 10px; font-family: monospace; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <h1>Debug Enhanced Employee Parser</h1>
+    <button onclick="debugParser()">Debug Parser</button>
+    <div id="results"></div>
+    
+    <script src="enhanced-employee-parser.js"></script>
+    <script src="real-xbrl-parser.js"></script>
+    <script src="finance-parser-minimal.js"></script>
+    
+    <script>
+        async function debugParser() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<p>Debugging parser...</p>';
+            
+            try {
+                // Fetch XBRL for FIND THE BALANCE LIMITED
+                const filingResponse = await fetch(`http://localhost:3002/api/proxy/companies-house/company/11236758/filing-history?category=accounts&items_per_page=1`);
+                const filingData = await filingResponse.json();
+                
+                if (filingData.items && filingData.items.length > 0) {
+                    const filing = filingData.items[0];
+                    
+                    const xbrlUrl = `http://localhost:3002/api/proxy/ixbrl/11236758/${filing.transaction_id}?format=xhtml`;
+                    const xbrlResponse = await fetch(xbrlUrl);
+                    const xbrlText = await xbrlResponse.text();
+                    
+                    results.innerHTML = '<h2>Testing Each Parser Method</h2>';
+                    
+                    // Test Method 1: Direct tag search
+                    results.innerHTML += '<div class="method"><h3>Method 1: Direct Tag Search</h3>';
+                    try {
+                        const result1 = EnhancedEmployeeParser.searchDirectTags(xbrlText);
+                        if (result1) {
+                            results.innerHTML += `<p class="success">✓ Found: ${result1.value} employees (Source: ${result1.source})</p>`;
+                        } else {
+                            results.innerHTML += '<p class="error">✗ No result</p>';
+                        }
+                    } catch (e) {
+                        results.innerHTML += `<p class="error">Error: ${e.message}</p>`;
+                    }
+                    results.innerHTML += '</div>';
+                    
+                    // Test Method 2: DOM parsing
+                    results.innerHTML += '<div class="method"><h3>Method 2: DOM Parsing</h3>';
+                    try {
+                        const result2 = EnhancedEmployeeParser.searchInDOM(xbrlText);
+                        if (result2) {
+                            results.innerHTML += `<p class="success">✓ Found: ${result2.value} employees (Source: ${result2.source})</p>`;
+                        } else {
+                            results.innerHTML += '<p class="error">✗ No result</p>';
+                        }
+                    } catch (e) {
+                        results.innerHTML += `<p class="error">Error: ${e.message}</p>`;
+                    }
+                    results.innerHTML += '</div>';
+                    
+                    // Test Method 3: Regex search
+                    results.innerHTML += '<div class="method"><h3>Method 3: Regex Search</h3>';
+                    try {
+                        const result3 = EnhancedEmployeeParser.searchWithRegex(xbrlText);
+                        if (result3) {
+                            results.innerHTML += `<p class="success">✓ Found: ${result3.value} employees (Source: ${result3.source})</p>`;
+                        } else {
+                            results.innerHTML += '<p class="error">✗ No result</p>';
+                        }
+                    } catch (e) {
+                        results.innerHTML += `<p class="error">Error: ${e.message}</p>`;
+                    }
+                    results.innerHTML += '</div>';
+                    
+                    // Test Method 4: Text content search
+                    results.innerHTML += '<div class="method"><h3>Method 4: Text Content Search</h3>';
+                    try {
+                        const result4 = EnhancedEmployeeParser.searchInTextContent(xbrlText);
+                        if (result4) {
+                            results.innerHTML += `<p class="success">✓ Found: ${result4.value} employees (Source: ${result4.source})</p>`;
+                        } else {
+                            results.innerHTML += '<p class="error">✗ No result</p>';
+                        }
+                    } catch (e) {
+                        results.innerHTML += `<p class="error">Error: ${e.message}</p>`;
+                    }
+                    results.innerHTML += '</div>';
+                    
+                    // Test complete extraction
+                    results.innerHTML += '<div class="method"><h3>Complete Extraction</h3>';
+                    const finalResult = EnhancedEmployeeParser.extractEmployees(xbrlText);
+                    if (finalResult) {
+                        results.innerHTML += `<p class="success">✓ Final result: ${finalResult.value} employees (Source: ${finalResult.source})</p>`;
+                    } else {
+                        results.innerHTML += '<p class="error">✗ No employee data found</p>';
+                    }
+                    results.innerHTML += '</div>';
+                    
+                    // Show a sample of the XBRL around "1 Employees"
+                    const employeeIndex = xbrlText.indexOf('1</span><strong><!-- DS:NOCHANGE -->Employees');
+                    if (employeeIndex !== -1) {
+                        results.innerHTML += '<div class="method"><h3>XBRL Context Around "1 Employees"</h3>';
+                        const context = xbrlText.substring(Math.max(0, employeeIndex - 200), Math.min(xbrlText.length, employeeIndex + 200));
+                        results.innerHTML += '<div class="code">' + context.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</div>';
+                        results.innerHTML += '</div>';
+                    }
+                }
+                
+            } catch (error) {
+                results.innerHTML += `<p class="error">Error: ${error.message}</p>`;
+                console.error(error);
+            }
+        }
+    </script>
+</body>
+</html>

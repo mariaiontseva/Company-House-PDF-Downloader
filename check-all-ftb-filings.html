@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Check All FTB Filings</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .filing { background: white; padding: 15px; margin: 10px 0; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .success { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
+        .info { color: blue; }
+    </style>
+</head>
+<body>
+    <h1>Check All Filings for FIND THE BALANCE LIMITED</h1>
+    <button onclick="checkAllFilings()">Check All Filings</button>
+    <div id="results"></div>
+    
+    <script src="enhanced-employee-parser.js"></script>
+    <script src="real-xbrl-parser.js"></script>
+    
+    <script>
+        async function checkAllFilings() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<p>Fetching all filings...</p>';
+            
+            try {
+                // Get ALL filings
+                const filingResponse = await fetch(`http://localhost:3002/api/proxy/companies-house/company/11236758/filing-history?items_per_page=100`);
+                const filingData = await filingResponse.json();
+                
+                results.innerHTML = '<h2>FIND THE BALANCE LIMITED (11236758)</h2>';
+                results.innerHTML += `<p>Total filings: ${filingData.total_count}</p>`;
+                
+                // Filter for accounts only
+                const accountFilings = filingData.items.filter(item => item.category === 'accounts');
+                results.innerHTML += `<p>Account filings: ${accountFilings.length}</p>`;
+                
+                // Check each accounts filing
+                for (let i = 0; i < Math.min(accountFilings.length, 10); i++) {
+                    const filing = accountFilings[i];
+                    
+                    results.innerHTML += `<div class="filing">`;
+                    results.innerHTML += `<h3>Filing ${i + 1}: ${filing.description}</h3>`;
+                    results.innerHTML += `<p>Date: ${filing.date}</p>`;
+                    results.innerHTML += `<p>Type: ${filing.type}</p>`;
+                    results.innerHTML += `<p>Transaction ID: ${filing.transaction_id}</p>`;
+                    
+                    // Check if it has a document link
+                    if (filing.links && filing.links.document_metadata) {
+                        results.innerHTML += '<p class="info">Has document metadata</p>';
+                        
+                        // Try to fetch XBRL and extract employees
+                        try {
+                            const xbrlUrl = `http://localhost:3002/api/proxy/ixbrl/11236758/${filing.transaction_id}?format=xhtml`;
+                            const xbrlResponse = await fetch(xbrlUrl);
+                            
+                            if (xbrlResponse.ok) {
+                                const xbrlText = await xbrlResponse.text();
+                                
+                                // Check for employee data
+                                const employeeData = EnhancedEmployeeParser.extractEmployees(xbrlText);
+                                
+                                if (employeeData) {
+                                    if (employeeData.value > 0) {
+                                        results.innerHTML += `<p class="success">✓ Employees: ${employeeData.value} (Source: ${employeeData.source})</p>`;
+                                    } else {
+                                        results.innerHTML += `<p class="error">Employees: ${employeeData.value}</p>`;
+                                    }
+                                } else {
+                                    results.innerHTML += '<p class="error">No employee data found</p>';
+                                }
+                                
+                                // Also check if it contains "Average number of persons employed"
+                                if (xbrlText.includes('Average number of persons employed')) {
+                                    results.innerHTML += '<p class="info">Contains employee section</p>';
+                                }
+                            } else {
+                                results.innerHTML += `<p class="error">Failed to fetch XBRL: ${xbrlResponse.status}</p>`;
+                            }
+                        } catch (error) {
+                            results.innerHTML += `<p class="error">Error: ${error.message}</p>`;
+                        }
+                    } else {
+                        results.innerHTML += '<p>No document metadata</p>';
+                    }
+                    
+                    results.innerHTML += '</div>';
+                }
+                
+            } catch (error) {
+                results.innerHTML += `<p class="error">Error: ${error.message}</p>`;
+                console.error(error);
+            }
+        }
+    </script>
+</body>
+</html>
