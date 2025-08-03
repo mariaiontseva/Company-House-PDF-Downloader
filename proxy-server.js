@@ -453,6 +453,48 @@ app.get('/api/sanctions/count', async (req, res) => {
     }
 });
 
+// Test endpoint to debug OpenSanctions API
+app.get('/api/sanctions/test', async (req, res) => {
+    try {
+        const apiKey = process.env.OPENSANCTIONS_API_KEY || '655046606e62014766354db22d62488c';
+        
+        const testResponse = await fetch('https://api.opensanctions.org/match/default', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${apiKey}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                queries: {
+                    q1: {
+                        schema: 'LegalEntity',
+                        properties: {
+                            name: ['Gazprom']
+                        }
+                    }
+                }
+            })
+        });
+        
+        const responseText = await testResponse.text();
+        
+        res.json({
+            status: testResponse.status,
+            statusText: testResponse.statusText,
+            headers: Object.fromEntries(testResponse.headers.entries()),
+            body: responseText.substring(0, 500),
+            apiKeyPresent: !!process.env.OPENSANCTIONS_API_KEY,
+            apiKeyUsed: apiKey ? apiKey.substring(0, 8) + '...' : 'None'
+        });
+        
+    } catch (error) {
+        res.json({
+            error: error.message,
+            stack: error.stack
+        });
+    }
+});
+
 // Start server
 app.listen(PORT, () => {
     console.log(`Proxy server running on http://localhost:${PORT}`);
