@@ -8101,8 +8101,9 @@
         // Sanctions check function
         async function checkSanctions(entityName) {
             try {
-                // Use relative URL that works both locally and in production
-                const url = `/api/sanctions/check/${encodeURIComponent(entityName)}`;
+                // Use localhost URL for now - production needs deployed proxy server
+                const baseUrl = window.location.hostname === 'localhost' ? 'http://localhost:3002' : 'http://localhost:3002';
+                const url = `${baseUrl}/api/sanctions/check/${encodeURIComponent(entityName)}`;
                 console.log('🔍 Checking sanctions for:', entityName, 'URL:', url);
                 
                 const response = await fetch(url);
@@ -8140,7 +8141,8 @@
         // Update sanctions count in the moving stripe
         async function updateSanctionsCount() {
             try {
-                const response = await fetch('/api/sanctions/count');
+                const baseUrl = window.location.hostname === 'localhost' ? 'http://localhost:3002' : 'http://localhost:3002';
+                const response = await fetch(`${baseUrl}/api/sanctions/count`);
                 if (response.ok) {
                     const data = await response.json();
                     if (data.status === 'success' && data.data.count) {
