@@ -58,7 +58,8 @@ app.get('/health', (req, res) => {
         status: 'ok', 
         timestamp: new Date().toISOString(),
         databaseConnected: !!pool,
-        hasOpenSanctionsKey: !!process.env.OPENSANCTIONS_API_KEY
+        hasOpenSanctionsKey: !!process.env.OPENSANCTIONS_API_KEY,
+        version: '2.0-no-fallback'
     });
 });
 
