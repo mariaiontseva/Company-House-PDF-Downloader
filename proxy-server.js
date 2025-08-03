@@ -396,9 +396,18 @@ app.get('/api/sanctions/check/:name', async (req, res) => {
         }
         
     } catch (error) {
-        console.error('Sanctions check error:', error);
+        console.error('Sanctions check error:', error.message);
+        console.error('Full error:', error);
         
-        // Fallback to test data on error
+        // Return error instead of fallback for debugging
+        return res.status(500).json({
+            status: 'error',
+            error: error.message,
+            message: 'OpenSanctions API failed'
+        });
+        
+        // Fallback to test data on error (disabled for debugging)
+        /*
         const testSanctionedEntities = [
             'vladimir putin',
             'roman abramovich',
@@ -426,6 +435,7 @@ app.get('/api/sanctions/check/:name', async (req, res) => {
                 source: 'simulated' // Fallback to test data
             }
         });
+        */
     }
 });
 
