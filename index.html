@@ -1441,6 +1441,53 @@
                     align-items: flex-start;
                 }
                 
+                /* Mobile modal badge layout fix */
+                #companyModal .badges-row {
+                    flex-direction: column !important;
+                    align-items: flex-start !important;
+                    gap: 12px !important;
+                }
+                
+                #companyModal .company-badges {
+                    order: 2 !important; /* Move badges below risk badge */
+                    width: 100% !important;
+                    justify-content: flex-start !important;
+                    flex-wrap: wrap !important;
+                    gap: 8px !important;
+                }
+                
+                #companyModal .risk-badge {
+                    order: 1 !important; /* Risk badge first */
+                    width: 100% !important;
+                    justify-content: center !important;
+                    margin: 0 !important;
+                }
+                
+                /* Ensure sanctions badge matches other badges on mobile */
+                #companyModal .sanctions-status-badge {
+                    margin: 0 !important;
+                    display: inline-flex !important;
+                    font-size: 10px !important;
+                    padding: 4px 8px !important;
+                    border-radius: 4px !important;
+                    font-weight: 600 !important;
+                    letter-spacing: 0.3px !important;
+                    order: 2; /* Place after active badge */
+                }
+                
+                #companyModal .active-badge,
+                #companyModal .dissolved-badge {
+                    order: 1; /* Status badge first */
+                }
+                
+                #companyModal .company-number {
+                    order: 3;
+                }
+                
+                #companyModal .company-type {
+                    order: 4;
+                }
+                
                 .sanctions-status-badge {
                     margin-left: 0 !important;
                     margin-top: 8px !important;
@@ -6340,9 +6387,9 @@
             
             #companyModal .badges-row {
                 display: flex;
-                flex-wrap: wrap;
-                gap: 8px;
-                align-items: center;
+                flex-direction: column;
+                gap: 12px;
+                align-items: flex-start;
                 margin: 0 0 16px 0;
                 width: 100%;
             }
@@ -11396,7 +11443,8 @@
                                 sanctionsBadge.className = 'badge sanctions-status-badge';
                                 // Apply responsive styles matching active badge
                                 if (window.innerWidth <= 768) {
-                                    sanctionsBadge.style.cssText = 'display: block !important; align-items: center !important; gap: 4px !important; background: rgba(239, 68, 68, 0.1) !important; color: #ef4444 !important; border: 1px solid rgba(239, 68, 68, 0.3) !important; padding: 4px 8px !important; border-radius: 100px !important; font-size: 11px !important; font-weight: 600 !important; letter-spacing: 0.3px !important; margin-left: 0 !important; margin-top: 8px !important; width: fit-content !important; visibility: visible !important; opacity: 1 !important;';
+                                    // On mobile, match the exact style of other badges
+                                    sanctionsBadge.style.cssText = 'display: inline-flex !important; align-items: center !important; gap: 4px !important; background: rgba(239, 68, 68, 0.1) !important; color: #ef4444 !important; border: 1px solid rgba(239, 68, 68, 0.3) !important; padding: 4px 8px !important; border-radius: 4px !important; font-size: 10px !important; font-weight: 600 !important; letter-spacing: 0.3px !important; margin: 0 !important; white-space: nowrap !important; visibility: visible !important; opacity: 1 !important; order: 2 !important;';
                                 } else {
                                     sanctionsBadge.style.cssText = 'display: inline-flex !important; align-items: center !important; gap: 6px !important; background: rgba(239, 68, 68, 0.1) !important; color: #ef4444 !important; border: 1px solid rgba(239, 68, 68, 0.3) !important; padding: 8px 16px !important; border-radius: 100px !important; font-size: 14px !important; font-weight: 600 !important; margin-left: 8px !important; visibility: visible !important; opacity: 1 !important;';
                                 }
@@ -12016,7 +12064,8 @@
                                 sanctionsBadge.className = 'badge sanctions-status-badge';
                                 // Apply responsive styles matching active badge
                                 if (window.innerWidth <= 768) {
-                                    sanctionsBadge.style.cssText = 'display: block !important; align-items: center !important; gap: 4px !important; background: rgba(239, 68, 68, 0.1) !important; color: #ef4444 !important; border: 1px solid rgba(239, 68, 68, 0.3) !important; padding: 4px 8px !important; border-radius: 100px !important; font-size: 11px !important; font-weight: 600 !important; letter-spacing: 0.3px !important; margin-left: 0 !important; margin-top: 8px !important; width: fit-content !important; visibility: visible !important; opacity: 1 !important;';
+                                    // On mobile, match the exact style of other badges
+                                    sanctionsBadge.style.cssText = 'display: inline-flex !important; align-items: center !important; gap: 4px !important; background: rgba(239, 68, 68, 0.1) !important; color: #ef4444 !important; border: 1px solid rgba(239, 68, 68, 0.3) !important; padding: 4px 8px !important; border-radius: 4px !important; font-size: 10px !important; font-weight: 600 !important; letter-spacing: 0.3px !important; margin: 0 !important; white-space: nowrap !important; visibility: visible !important; opacity: 1 !important; order: 2 !important;';
                                 } else {
                                     sanctionsBadge.style.cssText = 'display: inline-flex !important; align-items: center !important; gap: 6px !important; background: rgba(239, 68, 68, 0.1) !important; color: #ef4444 !important; border: 1px solid rgba(239, 68, 68, 0.3) !important; padding: 8px 16px !important; border-radius: 100px !important; font-size: 14px !important; font-weight: 600 !important; margin-left: 8px !important; visibility: visible !important; opacity: 1 !important;';
                                 }
