@@ -43,9 +43,6 @@ async function initDatabase() {
     }
 }
 
-// Initialize database connection
-initDatabase();
-
 // Logging middleware
 app.use((req, res, next) => {
     console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
@@ -59,8 +56,8 @@ app.get('/health', (req, res) => {
         timestamp: new Date().toISOString(),
         databaseConnected: !!pool,
         hasOpenSanctionsKey: !!process.env.OPENSANCTIONS_API_KEY,
-        version: '3.2-multi-result-scanning',
-        deployedAt: '2025-08-07T08:40:00Z'
+        version: '3.3-fixed-server-lifecycle',
+        deployedAt: new Date().toISOString()
     });
 });
 
@@ -538,15 +535,29 @@ app.get('/api/sanctions/test', async (req, res) => {
     }
 });
 
-// Start server
-app.listen(PORT, () => {
-    console.log(`Proxy server running on http://localhost:${PORT}`);
-    console.log('Available endpoints:');
-    console.log('  - GET /health');
-    console.log('  - GET /api/proxy/companies-house/*');
-    console.log('  - GET /api/proxy/document/*');
-    console.log('  - GET /api/proxy/ixbrl/:companyNumber/:transactionId');
-    console.log('  - GET /api/railway/companies/search');
-    console.log('  - GET /api/sanctions/check/:name');
-    console.log('  - GET /api/sanctions/count');
-});
+// Start server with database initialization
+async function startServer() {
+    try {
+        // Initialize database first
+        await initDatabase();
+        
+        // Then start the server
+        app.listen(PORT, () => {
+            console.log(`Proxy server running on http://localhost:${PORT}`);
+            console.log('Available endpoints:');
+            console.log('  - GET /health');
+            console.log('  - GET /api/proxy/companies-house/*');
+            console.log('  - GET /api/proxy/document/*');
+            console.log('  - GET /api/proxy/ixbrl/:companyNumber/:transactionId');
+            console.log('  - GET /api/railway/companies/search');
+            console.log('  - GET /api/sanctions/check/:name');
+            console.log('  - GET /api/sanctions/count');
+        });
+    } catch (error) {
+        console.error('Failed to start server:', error);
+        process.exit(1);
+    }
+}
+
+// Start the server
+startServer();
