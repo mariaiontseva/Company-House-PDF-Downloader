@@ -310,6 +310,31 @@ app.get('/api/sanctions/check/:name', async (req, res) => {
     // ALWAYS use real API - no fallback
     const apiKey = process.env.OPENSANCTIONS_API_KEY || '655046606e62014766354db22d62488c';
     
+    // Extract core company name for better matching
+    // Remove common suffixes like (UK) LIMITED, PLC, etc.
+    let coreName = name
+        .replace(/\s*\(UK\)\s*/gi, ' ')
+        .replace(/\s+(LIMITED|LTD|PLC|LLP|LP|INC|LLC|CORP|CORPORATION)\.?$/gi, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+    
+    // Special handling for known sanctioned company patterns
+    // Extract main company name from subsidiaries
+    if (coreName.includes('CIB')) {
+        // SBERBANK CIB -> Sberbank
+        coreName = coreName.replace(/\s+CIB\s*/gi, '').trim();
+    }
+    if (coreName.includes('CAPITAL')) {
+        // VTB CAPITAL -> VTB
+        coreName = coreName.replace(/\s+CAPITAL\s*/gi, '').trim();
+    }
+    if (coreName.includes('BANK')) {
+        // VEB BANK -> VEB
+        coreName = coreName.replace(/\s+BANK\s*/gi, '').trim();
+    }
+    
+    console.log(`Core name extracted: "${coreName}" from "${name}"`);
+    
     try {
         const response = await fetch('https://api.opensanctions.org/match/default', {
             method: 'POST',
@@ -322,7 +347,7 @@ app.get('/api/sanctions/check/:name', async (req, res) => {
                     q1: {
                         schema: 'LegalEntity',
                         properties: {
-                            name: [name]
+                            name: [name, coreName] // Search both full and core name
                         }
                     }
                 }
