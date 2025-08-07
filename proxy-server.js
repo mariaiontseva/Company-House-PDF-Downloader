@@ -59,8 +59,8 @@ app.get('/health', (req, res) => {
         timestamp: new Date().toISOString(),
         databaseConnected: !!pool,
         hasOpenSanctionsKey: !!process.env.OPENSANCTIONS_API_KEY,
-        version: '3.1-improved-matching',
-        deployedAt: '2025-08-07T08:30:00Z'
+        version: '3.2-multi-result-scanning',
+        deployedAt: '2025-08-07T08:40:00Z'
     });
 });
 
@@ -369,37 +369,49 @@ app.get('/api/sanctions/check/:name', async (req, res) => {
         
         // Process the response
         const results = data.responses?.q1?.results || [];
-        const topMatch = results[0];
         
-        if (topMatch && topMatch.score > 0.7) { // 70% match threshold
-            // The entity data is directly in topMatch, not topMatch.entity
-            const datasets = topMatch.datasets || [];
-            
-            // Define actual sanctions datasets
-            const sanctionsDatasets = [
-                'us_ofac_sdn', 'us_ofac_cons', 'us_trade_csl',
-                'gb_hmt_sanctions', 'gb_fcdo_sanctions',
-                'eu_fsf', 'eu_eeas_sanctions',
-                'un_sc_sanctions',
-                'ch_seco_sanctions',
-                'au_dfat_sanctions',
-                'ca_dfatd_sema_sanctions',
-                'jp_meti_eul', 'jp_mof_sanctions'
-            ];
-            
-            // Check if any dataset is actually a sanctions list
-            const isSanctioned = datasets.some(dataset => 
-                sanctionsDatasets.some(sanctionDs => dataset.includes(sanctionDs))
-            );
-            
-            if (!isSanctioned) {
-                // Not on any sanctions list, just in other datasets
-                return res.json({
-                    status: 'success',
-                    data: {
-                        entity: name,
-                        sanctioned: false,
-                        lists: [],
+        // Define actual sanctions datasets
+        const sanctionsDatasets = [
+            'us_ofac_sdn', 'us_ofac_cons', 'us_trade_csl',
+            'gb_hmt_sanctions', 'gb_fcdo_sanctions',
+            'eu_fsf', 'eu_eeas_sanctions', 'eu_journal_sanctions', 'eu_sanctions_map',
+            'un_sc_sanctions',
+            'ch_seco_sanctions',
+            'au_dfat_sanctions',
+            'ca_dfatd_sema_sanctions',
+            'jp_meti_eul', 'jp_mof_sanctions',
+            'ua_nsdc_sanctions', 'nz_russia_sanctions', 'tw_shtc'
+        ];
+        
+        // Look through all results to find sanctioned entities
+        let sanctionedMatch = null;
+        
+        for (const match of results) {
+            if (match.score > 0.7) { // 70% match threshold
+                const datasets = match.datasets || [];
+                const sanctionLists = datasets.filter(dataset => 
+                    sanctionsDatasets.some(sanctionDs => dataset.includes(sanctionDs))
+                );
+                
+                if (sanctionLists.length > 0) {
+                    // Found a sanctioned entity
+                    sanctionedMatch = {
+                        match,
+                        sanctionLists
+                    };
+                    break; // Use the first sanctioned match
+                }
+            }
+        }
+        
+        if (!sanctionedMatch) {
+            // No sanctioned entities found
+            return res.json({
+                status: 'success',
+                data: {
+                    entity: name,
+                    sanctioned: false,
+                    lists: [],
                         lastUpdated: new Date().toISOString(),
                         source: 'opensanctions'
                     }
@@ -408,11 +420,18 @@ app.get('/api/sanctions/check/:name', async (req, res) => {
             
             // Extract sanctions programs
             const sanctionsList = [];
-            datasets.forEach(dataset => {
+            sanctionedMatch.sanctionLists.forEach(dataset => {
                 if (dataset.includes('eu_fsf') || dataset.includes('eu_')) sanctionsList.push('EU Sanctions');
                 if (dataset.includes('gb_hmt') || dataset.includes('uk_')) sanctionsList.push('UK Sanctions');
                 if (dataset.includes('us_ofac') || dataset.includes('us_')) sanctionsList.push('US OFAC');
                 if (dataset.includes('un_sc')) sanctionsList.push('UN Sanctions');
+                if (dataset.includes('ch_seco')) sanctionsList.push('Swiss Sanctions');
+                if (dataset.includes('au_dfat')) sanctionsList.push('Australian Sanctions');
+                if (dataset.includes('ca_dfatd')) sanctionsList.push('Canadian Sanctions');
+                if (dataset.includes('jp_')) sanctionsList.push('Japanese Sanctions');
+                if (dataset.includes('ua_nsdc')) sanctionsList.push('Ukraine Sanctions');
+                if (dataset.includes('nz_')) sanctionsList.push('NZ Sanctions');
+                if (dataset.includes('tw_')) sanctionsList.push('Taiwan Sanctions');
             });
             
             // Remove duplicates
@@ -424,10 +443,10 @@ app.get('/api/sanctions/check/:name', async (req, res) => {
                     entity: name,
                     sanctioned: true,
                     lists: uniqueLists.length > 0 ? uniqueLists : ['Sanctions List'],
-                    matchScore: topMatch.score,
-                    matchedName: topMatch.caption || topMatch.properties?.name?.[0],
-                    aliases: topMatch.properties?.alias || [],
-                    datasets: datasets,
+                    matchScore: sanctionedMatch.match.score,
+                    matchedName: sanctionedMatch.match.caption || sanctionedMatch.match.properties?.name?.[0],
+                    aliases: sanctionedMatch.match.properties?.alias || [],
+                    datasets: sanctionedMatch.sanctionLists,
                     lastUpdated: new Date().toISOString(),
                     source: 'opensanctions'
                 }
@@ -437,7 +456,7 @@ app.get('/api/sanctions/check/:name', async (req, res) => {
             res.set({
                 'Cache-Control': 'public, max-age=604800',
                 'X-Sanctions-Source': 'opensanctions',
-                'X-Match-Score': topMatch.score.toString()
+                'X-Match-Score': sanctionedMatch.match.score.toString()
             });
             
             res.json(responseData);
