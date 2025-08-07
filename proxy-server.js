@@ -412,15 +412,15 @@ app.get('/api/sanctions/check/:name', async (req, res) => {
                     entity: name,
                     sanctioned: false,
                     lists: [],
-                        lastUpdated: new Date().toISOString(),
-                        source: 'opensanctions'
-                    }
-                });
-            }
-            
-            // Extract sanctions programs
-            const sanctionsList = [];
-            sanctionedMatch.sanctionLists.forEach(dataset => {
+                    lastUpdated: new Date().toISOString(),
+                    source: 'opensanctions'
+                }
+            });
+        }
+        
+        // Extract sanctions programs
+        const sanctionsList = [];
+        sanctionedMatch.sanctionLists.forEach(dataset => {
                 if (dataset.includes('eu_fsf') || dataset.includes('eu_')) sanctionsList.push('EU Sanctions');
                 if (dataset.includes('gb_hmt') || dataset.includes('uk_')) sanctionsList.push('UK Sanctions');
                 if (dataset.includes('us_ofac') || dataset.includes('us_')) sanctionsList.push('US OFAC');
@@ -460,27 +460,6 @@ app.get('/api/sanctions/check/:name', async (req, res) => {
             });
             
             res.json(responseData);
-        } else {
-            // No match or low confidence
-            const responseData = {
-                status: 'success',
-                data: {
-                    entity: name,
-                    sanctioned: false,
-                    lists: [],
-                    lastUpdated: new Date().toISOString(),
-                    source: 'opensanctions'
-                }
-            };
-            
-            // Add cache headers (24 hours for negative matches)
-            res.set({
-                'Cache-Control': 'public, max-age=86400',
-                'X-Sanctions-Source': 'opensanctions'
-            });
-            
-            res.json(responseData);
-        }
         
     } catch (error) {
         console.error('Sanctions API error:', error.message);
