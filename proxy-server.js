@@ -59,8 +59,8 @@ app.get('/health', (req, res) => {
         timestamp: new Date().toISOString(),
         databaseConnected: !!pool,
         hasOpenSanctionsKey: !!process.env.OPENSANCTIONS_API_KEY,
-        version: '3.0-real-api',
-        deployedAt: '2025-08-03T09:00:00Z'
+        version: '3.1-improved-matching',
+        deployedAt: '2025-08-07T08:30:00Z'
     });
 });
 

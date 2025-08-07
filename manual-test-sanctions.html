@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sanctions API Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test { margin: 10px 0; padding: 10px; border: 1px solid #ccc; }
+        .sanctioned { background: #ffebee; }
+        .not-sanctioned { background: #e8f5e9; }
+        button { padding: 10px 20px; margin: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Manual Sanctions API Test</h1>
+    <button onclick="runTests()">Run Tests</button>
+    <div id="results"></div>
+
+    <script>
+        const PROXY_URL = 'https://company-house-pdf-downloader-production-1eb5.up.railway.app';
+        
+        async function checkSanctions(name) {
+            try {
+                const response = await fetch(`${PROXY_URL}/api/sanctions/check/${encodeURIComponent(name)}`);
+                const data = await response.json();
+                return data.data;
+            } catch (error) {
+                return { error: error.message };
+            }
+        }
+        
+        async function runTests() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<h2>Testing...</h2>';
+            
+            const companies = [
+                { name: 'SBERBANK CIB (UK) LIMITED', number: '04783112' },
+                { name: 'SBERBANK CIB', number: '04783112' },
+                { name: 'SBERBANK', number: '04783112' },
+                { name: 'VTB CAPITAL PLC', number: '02577764' },
+                { name: 'VTB CAPITAL', number: '02577764' },
+                { name: 'VTB', number: '02577764' }
+            ];
+            
+            let html = '<h2>Results:</h2>';
+            
+            for (const company of companies) {
+                const result = await checkSanctions(company.name);
+                const className = result.sanctioned ? 'sanctioned' : 'not-sanctioned';
+                
+                html += `<div class="test ${className}">
+                    <strong>${company.name}</strong><br>
+                    Sanctioned: ${result.sanctioned || false}<br>
+                    ${result.sanctioned ? `Lists: ${result.lists.join(', ')}<br>` : ''}
+                    ${result.sanctioned ? `<a href="https://docspace.uk/#company/${company.number}" target="_blank">View on docspace.uk</a>` : ''}
+                </div>`;
+            }
+            
+            results.innerHTML = html;
+        }
+    </script>
+</body>
+</html>
