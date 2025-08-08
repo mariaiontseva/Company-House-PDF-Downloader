@@ -185,6 +185,157 @@ app.get('/api/proxy/companies-house/*', async (req, res) => {
     }
 });
 
+// UK Gazette API endpoint for additional insolvency information
+app.get('/api/proxy/gazette/:searchTerm', async (req, res) => {
+    try {
+        const { searchTerm } = req.params;
+        const { exec } = require('child_process');
+        const util = require('util');
+        const execAsync = util.promisify(exec);
+        
+        console.log(`Fetching Gazette notices for: ${searchTerm}`);
+        
+        // The Gazette API supports searching by text in notices
+        // We can search by company number or company name
+        const searchUrl = `https://www.thegazette.co.uk/insolvency/notice/data.json?text=${encodeURIComponent(searchTerm)}`;
+        
+        console.log(`Calling Gazette API via curl: ${searchUrl}`);
+        
+        try {
+            const { stdout, stderr } = await execAsync(`curl -s "${searchUrl}"`);
+            
+            if (stderr) {
+                console.error('Curl error:', stderr);
+            }
+            
+            const data = JSON.parse(stdout);
+            
+            console.log('Gazette API response received via curl');
+            
+            // Parse the response
+            const entries = data.entry || [];
+            
+            if (entries.length > 0) {
+            console.log(`Found ${entries.length} Gazette notices for ${searchTerm}`);
+            
+            // Process and simplify the response
+            const notices = entries.map(entry => {
+                // Extract text content from HTML
+                let textContent = '';
+                if (entry.content) {
+                    // Remove HTML tags and get text
+                    textContent = entry.content.replace(/<[^>]*>/g, ' ').trim();
+                }
+                
+                // Extract category
+                let category = '';
+                if (entry.category) {
+                    category = entry.category['@term'] || entry.category;
+                }
+                
+                // Get notice links
+                let noticeUrl = null;
+                let pdfUrl = null;
+                if (entry.link && Array.isArray(entry.link)) {
+                    const selfLink = entry.link.find(l => l['@rel'] === 'self');
+                    if (selfLink) {
+                        noticeUrl = selfLink['@href'];
+                        // Construct PDF URL from notice URL
+                        if (noticeUrl) {
+                            const noticeId = noticeUrl.split('/').pop();
+                            pdfUrl = `https://www.thegazette.co.uk/notice/${noticeId}/data.pdf`;
+                        }
+                    }
+                }
+                
+                return {
+                    id: entry.id,
+                    title: entry.title || 'Gazette Notice',
+                    published: entry.published,
+                    noticeType: category || 'Insolvency',
+                    noticeCode: entry['f:notice-code'],
+                    content: textContent,
+                    noticeUrl: noticeUrl,
+                    pdfUrl: pdfUrl
+                };
+            });
+            
+            res.json({
+                status: 'success',
+                searchTerm: searchTerm,
+                noticeCount: notices.length,
+                notices: notices
+            });
+        } else {
+            res.json({
+                status: 'success',
+                searchTerm: searchTerm,
+                noticeCount: 0,
+                notices: []
+            });
+        }
+        } catch (curlError) {
+            console.error('Curl execution failed:', curlError);
+            throw new Error(`Failed to fetch from Gazette API: ${curlError.message}`);
+        }
+        
+    } catch (error) {
+        console.error('Gazette API error:', error.message);
+        console.error('Error stack:', error.stack);
+        if (error.response) {
+            console.error('Response status:', error.response.status);
+            console.error('Response data:', error.response.data);
+        }
+        
+        // Return a more informative error response
+        res.status(error.response?.status || 500).json({
+            error: error.message,
+            status: error.response?.status || 500,
+            searchTerm: req.params.searchTerm,
+            details: error.response?.data ? JSON.stringify(error.response.data).substring(0, 200) : 'No response data'
+        });
+    }
+});
+
+// Specific endpoint for insolvency data with better error handling
+app.get('/api/proxy/insolvency/:companyNumber', async (req, res) => {
+    try {
+        const { companyNumber } = req.params;
+        const url = `https://api.companieshouse.gov.uk/company/${companyNumber}/insolvency`;
+        
+        console.log(`Fetching insolvency data for company: ${companyNumber}`);
+        
+        const response = await axios({
+            method: 'GET',
+            url: url,
+            headers: {
+                'Authorization': `Basic ${Buffer.from(CH_API_KEY + ':').toString('base64')}`,
+                'Accept': 'application/json'
+            }
+        });
+        
+        console.log(`Insolvency data found for ${companyNumber}:`, response.data);
+        res.json(response.data);
+        
+    } catch (error) {
+        if (error.response?.status === 404) {
+            // No insolvency data - this is normal for most companies
+            console.log(`No insolvency data for company ${req.params.companyNumber}`);
+            res.json({ 
+                status: 'no-insolvency',
+                cases: [],
+                etag: null 
+            });
+        } else {
+            console.error('Insolvency API error:', error.message);
+            res.status(error.response?.status || 500).json({
+                error: error.message,
+                status: error.response?.status
+            });
+        }
+    }
+});
+
 // Proxy endpoint for document API
 app.get('/api/proxy/document/*', async (req, res) => {
     try {
@@ -547,6 +698,8 @@ async function startServer() {
             console.log('Available endpoints:');
             console.log('  - GET /health');
             console.log('  - GET /api/proxy/companies-house/*');
+            console.log('  - GET /api/proxy/insolvency/:companyNumber');
+            console.log('  - GET /api/proxy/gazette/:companyNumber');
             console.log('  - GET /api/proxy/document/*');
             console.log('  - GET /api/proxy/ixbrl/:companyNumber/:transactionId');
             console.log('  - GET /api/railway/companies/search');

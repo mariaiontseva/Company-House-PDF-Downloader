@@ -11021,6 +11021,15 @@
                 // Always start on Overview tab when opening modal for new company
                 switchModalTab('overview');
                 
+                // Hide insolvency tab by default (will be shown if company has insolvency data)
+                const insolvencyTabBtn = document.getElementById('insolvency-tab-btn');
+                if (insolvencyTabBtn) {
+                    insolvencyTabBtn.style.display = 'none';
+                }
+                
+                // Clear previous insolvency data
+                window.currentCompanyInsolvencyData = null;
+                
                 // Clear any previous financial data to prevent showing old data
                 currentCompanyFinancialData = null;
                 const financeContent = document.getElementById('finance-content');
@@ -11611,10 +11620,10 @@
                     statusBadge.style.borderColor = 'rgba(239, 68, 68, 0.3)';
                     statusBadge.style.color = '#ef4444';
                 } else if (status === 'liquidation' || status.includes('liquidation')) {
-                    statusBadge.textContent = '⚠️ In Liquidation';
-                    statusBadge.style.background = 'rgba(251, 146, 60, 0.1)';
-                    statusBadge.style.borderColor = 'rgba(251, 146, 60, 0.3)';
-                    statusBadge.style.color = '#fb923c';
+                    statusBadge.textContent = '● In Liquidation';
+                    statusBadge.style.background = 'rgba(239, 68, 68, 0.1)';
+                    statusBadge.style.borderColor = 'rgba(239, 68, 68, 0.3)';
+                    statusBadge.style.color = '#ef4444';
                 } else {
                     statusBadge.textContent = `● ${status.charAt(0).toUpperCase() + status.slice(1)}`;
                     statusBadge.style.background = 'rgba(148, 163, 184, 0.1)';
@@ -11965,6 +11974,9 @@
                     // Fetch charges
                     fetchCharges(companyNumber);
                     
+                    // Fetch insolvency data
+                    fetchInsolvencyData(companyNumber);
+                    
                     // Fetch filing history
                     fetchFilingHistory(companyNumber, companyData.date_of_creation);
                     
@@ -12042,6 +12054,7 @@
                     // Still try to fetch officers, charges, filings - these might work for some companies
                     fetchOfficers(companyNumber, railwayCompanyData ? railwayCompanyData.incorporationDate : null);
                     fetchCharges(companyNumber);
+                    fetchInsolvencyData(companyNumber);
                     fetchFilingHistory(companyNumber, railwayCompanyData ? railwayCompanyData.incorporationDate : null);
                 }
             } catch (error) {
@@ -12096,6 +12109,7 @@
                 // Even with error, still try to fetch officers, charges, filings
                 fetchOfficers(companyNumber, railwayCompanyData ? railwayCompanyData.incorporationDate : null);
                 fetchCharges(companyNumber);
+                fetchInsolvencyData(companyNumber);
                 fetchFilingHistory(companyNumber, railwayCompanyData ? railwayCompanyData.incorporationDate : null);
                 
                 // Use Railway company data for basic info if provided
@@ -12217,10 +12231,10 @@
                         statusBadge.style.borderColor = 'rgba(239, 68, 68, 0.3)';
                         statusBadge.style.color = '#ef4444';
                     } else if (status === 'liquidation' || status.includes('liquidation')) {
-                        statusBadge.textContent = '⚠️ In Liquidation';
-                        statusBadge.style.background = 'rgba(251, 146, 60, 0.1)';
-                        statusBadge.style.borderColor = 'rgba(251, 146, 60, 0.3)';
-                        statusBadge.style.color = '#fb923c';
+                        statusBadge.textContent = '● In Liquidation';
+                        statusBadge.style.background = 'rgba(239, 68, 68, 0.1)';
+                        statusBadge.style.borderColor = 'rgba(239, 68, 68, 0.3)';
+                        statusBadge.style.color = '#ef4444';
                     } else {
                         // Handle other statuses (administration, receivership, etc.)
                         statusBadge.textContent = `● ${status.charAt(0).toUpperCase() + status.slice(1)}`;
@@ -14967,7 +14981,7 @@
                                     color: #f8fafc;
                                     line-height: 1.2;
                                     word-break: break-word;
-                                ">${person.name}<span id="sanctions-${personId}" class="director-sanctions-badge" style="display: none;"></span></h4>
+                                ">${person.name}</h4>
                                 
                                 <span style="
                                     background: ${themeColors.primary};
@@ -15561,6 +15575,436 @@
                 console.log('Error fetching charges:', error);
                 populateChargesTab([]);
             }
+        }
+        
+        // Fetch Gazette data
+        async function fetchGazetteData(companyNumber, companyName) {
+            console.log('🔸 fetchGazetteData called for company:', companyNumber, companyName);
+            try {
+                const baseUrl = window.location.hostname === 'localhost' 
+                    ? 'http://localhost:3002' 
+                    : 'https://company-house-pdf-downloader-production-1eb5.up.railway.app';
+                
+                // Always use company number for accurate results
+                const url = `${baseUrl}/api/proxy/gazette/${encodeURIComponent(companyNumber)}`;
+                
+                const response = await fetch(url);
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('🔸 Gazette data received:', data);
+                    return data;
+                }
+            } catch (error) {
+                console.error('🔸 Error fetching Gazette data:', error);
+            }
+            return null;
+        }
+        
+        // Fetch and populate insolvency data
+        async function fetchInsolvencyData(companyNumber) {
+            console.log('🔸 fetchInsolvencyData called for company:', companyNumber);
+            try {
+                const baseUrl = window.location.hostname === 'localhost' 
+                    ? 'http://localhost:3002' 
+                    : 'https://company-house-pdf-downloader-production-1eb5.up.railway.app';
+                const url = `${baseUrl}/api/proxy/insolvency/${companyNumber}`;
+                console.log('🔸 Fetching insolvency from URL:', url);
+                
+                const response = await fetch(url);
+                console.log('🔸 Insolvency API response status:', response.status);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('🔸 Insolvency API data received:', data);
+                    
+                    // Store insolvency data globally for risk calculation
+                    window.currentCompanyInsolvencyData = data;
+                    
+                    if (data.status === 'no-insolvency' || !data.cases || data.cases.length === 0) {
+                        console.log('🔸 No insolvency proceedings for company', companyNumber);
+                        // Make sure tab is hidden
+                        const insolvencyTabBtn = document.getElementById('insolvency-tab-btn');
+                        if (insolvencyTabBtn) {
+                            insolvencyTabBtn.style.display = 'none';
+                        }
+                        return null;
+                    }
+                    
+                    console.log('🔸 Company has insolvency cases:', data.cases.length);
+                    
+                    // Add insolvency badge to header
+                    try {
+                        addInsolvencyBadge(data);
+                    } catch (error) {
+                        console.error('🔸 Error adding insolvency badge:', error);
+                    }
+                    
+                    // Fetch Gazette data in parallel
+                    // Always use company number for Gazette searches to ensure accurate results
+                    fetchGazetteData(companyNumber, companyNumber).then(gazetteData => {
+                        if (gazetteData) {
+                            window.currentCompanyGazetteData = gazetteData;
+                            // Update the insolvency tab with Gazette data
+                            updateInsolvencyTabWithGazette(gazetteData);
+                        }
+                    });
+                    
+                    // Populate insolvency tab
+                    try {
+                        populateInsolvencyTab(data);
+                    } catch (error) {
+                        console.error('🔸 Error populating insolvency tab:', error);
+                    }
+                    
+                    return data;
+                } else {
+                    console.log('🔸 Failed to fetch insolvency data:', response.status);
+                    const errorText = await response.text();
+                    console.log('🔸 Error response:', errorText);
+                    return null;
+                }
+            } catch (error) {
+                console.log('🔸 Error fetching insolvency data:', error);
+                return null;
+            }
+        }
+        
+        // Add insolvency badge to company header
+        function addInsolvencyBadge(insolvencyData) {
+            console.log('🔸 addInsolvencyBadge called with:', insolvencyData);
+            if (!insolvencyData || !insolvencyData.cases || insolvencyData.cases.length === 0) {
+                console.log('🔸 No insolvency data to display badge');
+                return;
+            }
+            
+            // Show the insolvency tab
+            const insolvencyTabBtn = document.getElementById('insolvency-tab-btn');
+            console.log('🔸 Insolvency tab button found:', !!insolvencyTabBtn);
+            if (insolvencyTabBtn) {
+                insolvencyTabBtn.style.display = 'inline-block';
+                console.log('🔸 Insolvency tab now visible');
+            }
+        }
+        
+        // Populate insolvency tab with data
+        window.populateInsolvencyTab = function(insolvencyData) {
+            console.log('🔸 populateInsolvencyTab called with:', insolvencyData);
+            const insolvencyContent = document.getElementById('insolvency-content');
+            console.log('🔸 insolvency-content element found:', !!insolvencyContent);
+            if (!insolvencyContent) return;
+            
+            if (!insolvencyData || !insolvencyData.cases || insolvencyData.cases.length === 0) {
+                insolvencyContent.innerHTML = `
+                    <div style="text-align: center; padding: 60px 20px; color: #71767b;">
+                        <p style="font-size: 20px; margin-bottom: 12px;">✓ No Insolvency Proceedings</p>
+                        <p>This company has no recorded insolvency proceedings</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Build HTML for insolvency cases
+            let html = '<div class="data-sections">';
+            
+            insolvencyData.cases.forEach((case_, index) => {
+                const isActive = !case_.dates?.find(d => d.type === 'concluded-on' || d.type === 'dissolved-on');
+                
+                // Get key dates
+                const petitionDate = case_.dates?.find(d => d.type === 'petitioned-on');
+                const woundUpDate = case_.dates?.find(d => d.type === 'wound-up-on');
+                
+                html += `
+                    <div class="data-section">
+                        <!-- Case Information Block -->
+                        <div style="
+                            background: rgba(30, 41, 59, 0.4);
+                            border: 1px solid rgba(71, 85, 105, 0.3);
+                            border-radius: 12px;
+                            padding: 20px;
+                            margin-bottom: 20px;
+                        ">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                <h3 style="font-size: 18px; font-weight: 600; color: #f8fafc; margin: 0;">
+                                    ${formatInsolvencyType(case_.type)}
+                                </h3>
+                                <span class="badge" style="
+                                    background: ${isActive ? 'rgba(239, 68, 68, 0.2)' : 'rgba(148, 163, 184, 0.2)'};
+                                    color: ${isActive ? '#fca5a5' : '#cbd5e1'};
+                                    padding: 6px 14px;
+                                    border-radius: 20px;
+                                    font-size: 13px;
+                                    font-weight: 600;
+                                    border: 1px solid ${isActive ? 'rgba(239, 68, 68, 0.4)' : 'rgba(148, 163, 184, 0.4)'};
+                                ">${isActive ? 'Active' : 'Concluded'}</span>
+                            </div>
+                            ${case_.number ? `
+                                <div style="color: #94a3b8; font-size: 15px;">
+                                    <span style="color: #64748b;">Case Number:</span> 
+                                    <span style="color: #f1f5f9; font-weight: 500;">${case_.number}</span>
+                                </div>
+                            ` : ''}
+                        </div>
+                        
+                        <!-- Key Dates Block -->
+                        ${(petitionDate || woundUpDate) ? `
+                            <div style="
+                                background: rgba(30, 41, 59, 0.4);
+                                border: 1px solid rgba(71, 85, 105, 0.3);
+                                border-radius: 12px;
+                                padding: 20px;
+                                margin-bottom: 20px;
+                                display: grid;
+                                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                                gap: 24px;
+                            ">
+                                ${petitionDate ? `
+                                    <div>
+                                        <div style="color: #64748b; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">
+                                            Petition Filed
+                                        </div>
+                                        <div style="color: #f1f5f9; font-size: 16px; font-weight: 500;">
+                                            ${formatDate(petitionDate.date)}
+                                        </div>
+                                    </div>
+                                ` : ''}
+                                ${woundUpDate ? `
+                                    <div>
+                                        <div style="color: #64748b; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">
+                                            Wound Up
+                                        </div>
+                                        <div style="color: #f1f5f9; font-size: 16px; font-weight: 500;">
+                                            ${formatDate(woundUpDate.date)}
+                                        </div>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        ` : ''}
+                        
+                        <!-- Insolvency Practitioner Block -->
+                        ${case_.practitioners && case_.practitioners.length > 0 ? `
+                            <div style="
+                                background: rgba(30, 41, 59, 0.4);
+                                border: 1px solid rgba(71, 85, 105, 0.3);
+                                border-radius: 12px;
+                                padding: 20px;
+                                margin-bottom: 20px;
+                            ">
+                                <h4 style="font-size: 16px; font-weight: 600; color: #f8fafc; margin: 0 0 16px 0;">
+                                    Insolvency Practitioner${case_.practitioners.length > 1 ? 's' : ''}
+                                </h4>
+                                ${case_.practitioners.map((practitioner, idx) => `
+                                    <div style="${idx > 0 ? 'margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(71, 85, 105, 0.3);' : ''}">
+                                        <div style="font-size: 15px; font-weight: 600; color: #f1f5f9; margin-bottom: 6px;">
+                                            ${practitioner.name}
+                                        </div>
+                                        ${practitioner.role ? `
+                                            <div style="color: #818cf8; font-size: 14px; margin-bottom: 6px;">
+                                                ${formatPractitionerRole(practitioner.role)}
+                                            </div>
+                                        ` : ''}
+                                        ${practitioner.address ? `
+                                            <div style="color: #94a3b8; font-size: 14px; line-height: 1.5;">
+                                                ${formatPractitionerAddress(Array.isArray(practitioner.address) ? practitioner.address[0] : practitioner.address)}
+                                            </div>
+                                        ` : ''}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+                        
+                        ${case_.notes && case_.notes.length > 0 ? `
+                            <div class="data-item">
+                                <div class="data-item-header">Notes</div>
+                                <div class="data-item-detail" style="color: #64748b;">
+                                    ${case_.notes.join(' ')}
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            
+            // Add Gazette section ONCE, outside the cases loop
+            html += `
+                <div style="
+                    background: rgba(99, 102, 241, 0.1);
+                    border: 1px solid rgba(99, 102, 241, 0.3);
+                    border-radius: 12px;
+                    padding: 20px;
+                    margin-top: 20px;
+                ">
+                    <h4 style="font-size: 16px; font-weight: 600; color: #f8fafc; margin: 0 0 12px 0;">
+                        📜 UK Gazette Notices
+                    </h4>
+                    <div id="gazette-content-main" style="color: #94a3b8; font-size: 14px;">
+                        <div style="text-align: center; padding: 20px;">
+                            <div class="spinner" style="margin: 0 auto;"></div>
+                            <p style="margin-top: 12px;">Searching The UK Gazette...</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            console.log('🔸 Setting insolvency content HTML, length:', html.length);
+            insolvencyContent.innerHTML = html;
+            console.log('🔸 Insolvency tab populated successfully');
+        }
+        
+        // Update insolvency tab with Gazette data
+        function updateInsolvencyTabWithGazette(gazetteData) {
+            console.log('🔸 updateInsolvencyTabWithGazette called with:', gazetteData);
+            
+            // Find the single gazette content section
+            const gazetteSection = document.getElementById('gazette-content-main');
+            
+            if (!gazetteSection) {
+                console.log('🔸 No gazette section found');
+                return;
+            }
+            
+            if (!gazetteData) {
+                // Still searching
+                return;
+            } else if (!gazetteData.notices || gazetteData.notices.length === 0) {
+                gazetteSection.innerHTML = `
+                        <div style="color: #94a3b8; font-size: 14px;">
+                            <p style="margin: 0;">No Gazette notices found for this company.</p>
+                            <p style="margin: 8px 0 0 0; font-size: 13px; color: #64748b;">
+                                The UK Gazette publishes official notices for winding-up petitions, liquidator appointments, and creditor meetings.
+                            </p>
+                        </div>
+                    `;
+            } else {
+                let noticesHtml = `
+                        <div style="margin-bottom: 12px; color: #a5b4fc;">
+                            Found ${gazetteData.noticeCount} official notice${gazetteData.noticeCount > 1 ? 's' : ''}
+                        </div>
+                    `;
+                    
+                    gazetteData.notices.forEach((notice, idx) => {
+                        noticesHtml += `
+                            <div style="
+                                background: rgba(30, 41, 59, 0.4);
+                                border: 1px solid rgba(71, 85, 105, 0.3);
+                                border-radius: 8px;
+                                padding: 16px;
+                                margin-bottom: 12px;
+                            ">
+                                <div style="font-weight: 600; color: #f1f5f9; margin-bottom: 8px;">
+                                    ${notice.title || 'Gazette Notice'}
+                                </div>
+                                ${notice.published ? `
+                                    <div style="color: #94a3b8; font-size: 13px; margin-bottom: 8px;">
+                                        Published: ${new Date(notice.published).toLocaleDateString('en-GB', { 
+                                            year: 'numeric', 
+                                            month: 'long', 
+                                            day: 'numeric' 
+                                        })}
+                                    </div>
+                                ` : ''}
+                                ${notice.noticeType ? `
+                                    <div style="color: #818cf8; font-size: 13px; margin-bottom: 8px;">
+                                        Type: ${notice.noticeType}
+                                    </div>
+                                ` : ''}
+                                ${notice.content ? `
+                                    <div style="color: #cbd5e1; font-size: 13px; line-height: 1.5; margin-top: 12px;">
+                                        ${notice.content.substring(0, 200)}${notice.content.length > 200 ? '...' : ''}
+                                    </div>
+                                ` : ''}
+                                ${notice.pdfUrl ? `
+                                    <div style="margin-top: 12px;">
+                                        <a href="${notice.pdfUrl}" target="_blank" style="
+                                            color: #818cf8;
+                                            text-decoration: none;
+                                            font-size: 13px;
+                                            display: inline-flex;
+                                            align-items: center;
+                                            gap: 6px;
+                                        ">
+                                            📄 View Official Notice (PDF)
+                                        </a>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        `;
+                    });
+                    
+                gazetteSection.innerHTML = noticesHtml;
+            }
+        }
+        
+        // Format insolvency type for display
+        function formatInsolvencyType(type) {
+            const typeMap = {
+                'compulsory-liquidation': 'Compulsory Liquidation',
+                'creditors-voluntary-liquidation': 'Creditors\' Voluntary Liquidation',
+                'members-voluntary-liquidation': 'Members\' Voluntary Liquidation',
+                'administration': 'Administration',
+                'receivership': 'Receivership',
+                'administrative-receiver': 'Administrative Receivership',
+                'voluntary-arrangement': 'Company Voluntary Arrangement',
+                'in-administration': 'In Administration',
+                'liquidation': 'Liquidation',
+                'receiver-manager': 'Receiver Manager Appointed',
+                'administrative-receiver': 'Administrative Receiver',
+                'receiver': 'Receiver Appointed'
+            };
+            
+            return typeMap[type] || type.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        }
+        
+        // Format date for display
+        function formatDate(dateString) {
+            if (!dateString) return 'Unknown';
+            const date = new Date(dateString);
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            return date.toLocaleDateString('en-GB', options);
+        }
+        
+        // Format date type for display
+        function formatDateType(type) {
+            const typeMap = {
+                'wound-up-on': 'Wound up',
+                'petitioned-on': 'Petition filed',
+                'concluded-on': 'Concluded',
+                'dissolved-on': 'Dissolved',
+                'instrumented-on': 'Instrumented',
+                'administration-started-on': 'Administration started',
+                'administration-ended-on': 'Administration ended',
+                'voluntary-arrangement-started-on': 'CVA started',
+                'voluntary-arrangement-ended-on': 'CVA ended'
+            };
+            
+            return typeMap[type] || type.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        }
+        
+        // Format practitioner role
+        function formatPractitionerRole(role) {
+            const roleMap = {
+                'practitioner': 'Insolvency Practitioner',
+                'liquidator': 'Liquidator',
+                'administrator': 'Administrator',
+                'receiver': 'Receiver',
+                'receiver-manager': 'Receiver Manager',
+                'administrative-receiver': 'Administrative Receiver',
+                'provisional-liquidator': 'Provisional Liquidator',
+                'interim-liquidator': 'Interim Liquidator'
+            };
+            
+            return roleMap[role] || role.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        }
+        
+        // Format practitioner address
+        function formatPractitionerAddress(address) {
+            const parts = [];
+            if (address.address_line_1) parts.push(address.address_line_1);
+            if (address.address_line_2) parts.push(address.address_line_2);
+            if (address.locality) parts.push(address.locality);
+            if (address.postal_code) parts.push(address.postal_code);
+            return parts.join(', ');
         }
         
         // Populate Charges tab
@@ -16175,6 +16619,24 @@
                 const sanctionsDeduction = 50; // Major risk factor
                 score -= sanctionsDeduction;
                 console.log(`🔸 SANCTIONS: Company is under sanctions = -${sanctionsDeduction} points (score: ${score})`);
+            }
+            
+            // Check if company has insolvency proceedings
+            if (window.currentCompanyInsolvencyData && window.currentCompanyInsolvencyData.cases && window.currentCompanyInsolvencyData.cases.length > 0) {
+                const activeCase = window.currentCompanyInsolvencyData.cases.find(c => {
+                    const concludedDate = c.dates?.find(d => d.type === 'concluded-on' || d.type === 'dissolved-on');
+                    return !concludedDate;
+                });
+                
+                if (activeCase) {
+                    const insolvencyDeduction = 50; // Active insolvency is critical
+                    score -= insolvencyDeduction;
+                    console.log(`🔸 INSOLVENCY: Active ${activeCase.type} = -${insolvencyDeduction} points (score: ${score})`);
+                } else {
+                    const insolvencyDeduction = 30; // Past insolvency still matters
+                    score -= insolvencyDeduction;
+                    console.log(`🔸 INSOLVENCY: Past insolvency proceedings = -${insolvencyDeduction} points (score: ${score})`);
+                }
             }
             
             // Deduct points for charges
@@ -19306,6 +19768,7 @@
                         <button class="tab-btn" onclick="switchModalTab('finance')">Finance</button>
                         <button class="tab-btn" onclick="switchModalTab('charges')">Charges & Securities</button>
                         <button class="tab-btn" onclick="switchModalTab('filings')">Filing History</button>
+                        <button class="tab-btn" onclick="switchModalTab('insolvency')" id="insolvency-tab-btn" style="display: none;">Insolvency</button>
                         <button class="tab-btn" onclick="switchModalTab('insights')">Risk Insights</button>
                     </div>
                     
@@ -19366,6 +19829,14 @@
                             <div style="text-align: center; padding: 60px 20px; color: #71767b;">
                                 <p style="font-size: 20px; margin-bottom: 12px;">✓ No Outstanding Charges</p>
                                 <p>This company has no registered charges or securities</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Insolvency Tab -->
+                        <div class="tab-pane" id="insolvency">
+                            <h3>Insolvency Proceedings</h3>
+                            <div id="insolvency-content">
+                                <!-- Content will be populated by populateInsolvencyTab() -->
                             </div>
                         </div>
                         
