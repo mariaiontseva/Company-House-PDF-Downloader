@@ -9650,6 +9650,7 @@
                     console.log('Force updating UI for logged in user:', session.user.email);
                     currentUser = session.user;
                     updateAuthUI();
+                    updateNavAuthButton();
                 } else {
                     console.log('No session found in force update, trying refresh...');
                     // Try to refresh the session
@@ -9660,12 +9661,15 @@
                         console.log('Session found after refresh:', refreshData.session.user.email);
                         currentUser = refreshData.session.user;
                         updateAuthUI();
+                        updateNavAuthButton();
                     } else {
                         console.log('No session after refresh either');
+                        updateNavAuthButton(); // Update button even with no session to show Create Account
                     }
                 }
             } catch (err) {
                 console.error('Error in force update:', err);
+                updateNavAuthButton(); // Update button even on error
             }
         }, 500);
         
@@ -9883,6 +9887,11 @@
             
             // Update nav auth button (this also updates mobile menu)
             updateNavAuthButton();
+            
+            // Also update after a longer delay to ensure Supabase is fully ready
+            setTimeout(() => {
+                updateNavAuthButton();
+            }, 1000);
             
             // Ensure search is collapsed on mobile
             ensureSearchCollapsed();
