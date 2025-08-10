@@ -7388,6 +7388,11 @@
             #officerPage .data-section {
                 margin-bottom: 24px;
             }
+            
+            /* Single column for related officers companies on mobile */
+            .related-companies-grid {
+                grid-template-columns: 1fr !important;
+            }
         }
     </style>
     
@@ -8057,9 +8062,47 @@
                         <div class="tab-body">
                             <div id="officer-network-content">
                                 <div class="data-section">
-                                    <div class="section-title">Professional Network</div>
-                                    <p style="color: #94a3b8;">Analysis of connected officers and shared directorships</p>
-                                    <div id="officer-network-analysis">Loading network data...</div>
+                                    <div class="section-title">Corporate Network Graph</div>
+                                    <p style="color: #94a3b8;">Interactive visualization of corporate relationships</p>
+                                    <div id="network-graph-container" style="min-height: 600px; position: relative; background: #0f172a; border-radius: 12px; padding: 20px; margin-top: 20px; border: 1px solid rgba(30, 41, 59, 0.5);">
+                                        <div id="network-controls" style="position: absolute; top: 20px; right: 20px; z-index: 10; display: flex; gap: 12px;">
+                                            <button onclick="zoomIn()" style="background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.3); color: #a5b4fc; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 18px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; transition: all 0.2s;" onmouseover="this.style.background='rgba(99, 102, 241, 0.2)'" onmouseout="this.style.background='rgba(99, 102, 241, 0.1)'">
+                                                +
+                                            </button>
+                                            <button onclick="zoomOut()" style="background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.3); color: #a5b4fc; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 18px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; transition: all 0.2s;" onmouseover="this.style.background='rgba(99, 102, 241, 0.2)'" onmouseout="this.style.background='rgba(99, 102, 241, 0.1)'">
+                                                −
+                                            </button>
+                                            <button onclick="resetNetworkView()" style="background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.3); color: #a5b4fc; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 14px; transition: all 0.2s;" onmouseover="this.style.background='rgba(99, 102, 241, 0.2)'" onmouseout="this.style.background='rgba(99, 102, 241, 0.1)'">
+                                                Reset View
+                                            </button>
+                                            <button onclick="expandAllNodes()" style="background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.3); color: #a5b4fc; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 14px; transition: all 0.2s;" onmouseover="this.style.background='rgba(99, 102, 241, 0.2)'" onmouseout="this.style.background='rgba(99, 102, 241, 0.1)'">
+                                                Expand All
+                                            </button>
+                                        </div>
+                                        <svg id="network-svg" width="100%" height="600" style="cursor: grab;">
+                                            <defs>
+                                                <!-- Define gradients for nodes -->
+                                                <linearGradient id="officer-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                                    <stop offset="0%" style="stop-color:#f97316;stop-opacity:1" />
+                                                    <stop offset="100%" style="stop-color:#ea580c;stop-opacity:1" />
+                                                </linearGradient>
+                                                <linearGradient id="company-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                                    <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+                                                    <stop offset="100%" style="stop-color:#2563eb;stop-opacity:1" />
+                                                </linearGradient>
+                                                <linearGradient id="psc-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                                    <stop offset="0%" style="stop-color:#8b5cf6;stop-opacity:1" />
+                                                    <stop offset="100%" style="stop-color:#7c3aed;stop-opacity:1" />
+                                                </linearGradient>
+                                            </defs>
+                                            <g id="network-links"></g>
+                                            <g id="network-nodes"></g>
+                                        </svg>
+                                        <div id="network-loading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #94a3b8; display: none;">
+                                            <div class="spinner"></div>
+                                            <div style="margin-top: 16px;">Loading network data...</div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -9366,10 +9409,15 @@
                 // Add officers to suggestions
                 if (officersResponse.ok) {
                     const officersData = await officersResponse.json();
-                    const officers = (officersData.items || []).map(item => ({
-                        ...item,
-                        type: 'officer'
-                    }));
+                    console.log('Officer search results:', officersData);
+                    const officers = (officersData.items || []).map(item => {
+                        console.log('Officer item:', item);
+                        console.log('Appointment count:', item.appointment_count);
+                        return {
+                            ...item,
+                            type: 'officer'
+                        };
+                    });
                     allSuggestions = [...allSuggestions, ...officers];
                 }
                 
@@ -9410,7 +9458,7 @@
                                     <div class="company-title">${item.title}</div>
                                     <div class="company-details">
                                         <span style="color: #6366f1; font-size: 12px;">
-                                            ${role} • ${item.appointment_count || 1} appointment${item.appointment_count > 1 ? 's' : ''}
+                                            ${role} • ${item.appointment_count || item.total_results || item.items?.length || 1} appointment${(item.appointment_count || item.total_results || item.items?.length || 1) > 1 ? 's' : ''}
                                         </span>
                                         <span style="color: #94a3b8; font-size: 12px;">
                                             ${companyName}
@@ -11431,7 +11479,7 @@
                                             <div style="flex: 1;">
                                                 <div class="company-title">${item.title}</div>
                                                 <div class="company-details">
-                                                    <span style="color: #6366f1;">${role} • ${item.appointment_count || 1} appointment${item.appointment_count > 1 ? 's' : ''}</span>
+                                                    <span style="color: #6366f1;">${role} • ${item.appointment_count || item.total_results || item.items?.length || 1} appointment${(item.appointment_count || item.total_results || item.items?.length || 1) > 1 ? 's' : ''}</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -15017,7 +15065,7 @@
                          ">
                         
                         ${person.officerId && person.type === 'officer' ? `
-                            <button onclick="viewOfficerCompanies('${person.officerId}', '${person.name.replace(/'/g, "\\'")}')" style="
+                            <button onclick="window.location.hash='#officer/${person.officerId}'" style="
                                 position: absolute;
                                 top: 14px;
                                 right: 14px;
@@ -19223,25 +19271,63 @@
         
         async function fetchOfficerDetails(officerId) {
             try {
-                // Companies House API only has appointments endpoint for officer details
-                const appointmentsUrl = `https://api.companieshouse.gov.uk/officers/${officerId}/appointments`;
+                // Fetch ALL officer appointments with pagination
+                let allAppointments = [];
+                let startIndex = 0;
+                const itemsPerPage = 50;
+                let hasMore = true;
+                let totalResults = 0;
+                let appointmentsData = null;
                 
-                const appointmentsResponse = await fetchWithWorker(appointmentsUrl, API_KEY);
-                
-                if (appointmentsResponse.ok) {
-                    const appointmentsData = await appointmentsResponse.json();
-                    console.log('Officer appointments data:', appointmentsData);
+                while (hasMore) {
+                    const appointmentsUrl = `https://api.companieshouse.gov.uk/officers/${officerId}/appointments?start_index=${startIndex}&items_per_page=${itemsPerPage}`;
+                    const appointmentsResponse = await fetchWithWorker(appointmentsUrl, API_KEY);
                     
-                    // Update officer basic info from appointments data
-                    updateOfficerInfo(appointmentsData, officerId);
+                    if (!appointmentsResponse.ok) {
+                        if (startIndex === 0) {
+                            // First request failed
+                            console.error('Failed to fetch officer data:', appointmentsResponse.status);
+                            document.getElementById('officer-name').textContent = 'Officer not found';
+                            document.getElementById('officer-dob-subtitle').textContent = 'Data not available';
+                            return;
+                        }
+                        break; // Stop pagination if request fails
+                    }
                     
-                    // Update appointments list
-                    updateOfficerAppointments(appointmentsData);
-                } else {
-                    console.error('Failed to fetch officer data:', appointmentsResponse.status);
-                    document.getElementById('officer-name').textContent = 'Officer not found';
-                    document.getElementById('officer-dob-subtitle').textContent = 'Data not available';
+                    const data = await appointmentsResponse.json();
+                    console.log(`Officer appointments batch ${startIndex/itemsPerPage + 1}:`, data);
+                    
+                    // Store the first response for metadata
+                    if (startIndex === 0) {
+                        appointmentsData = data;
+                        totalResults = data.total_results || 0;
+                    }
+                    
+                    const items = data.items || [];
+                    allAppointments = allAppointments.concat(items);
+                    
+                    // Check if there are more pages
+                    hasMore = data.total_results > (startIndex + items.length);
+                    startIndex += itemsPerPage;
+                    
+                    // Safety limit to prevent infinite loops
+                    if (startIndex > 500) break;
                 }
+                
+                console.log(`Total appointments fetched: ${allAppointments.length} of ${totalResults}`);
+                
+                // Create combined data with all appointments
+                const combinedData = {
+                    ...appointmentsData,
+                    items: allAppointments,
+                    total_results: totalResults
+                };
+                
+                // Update officer basic info from appointments data
+                updateOfficerInfo(combinedData, officerId);
+                
+                // Update appointments list with all appointments
+                updateOfficerAppointments(combinedData);
                 
             } catch (error) {
                 console.error('Error fetching officer details:', error);
@@ -19254,6 +19340,13 @@
             const officerName = appointmentsData.name || 'Unknown Officer';
             document.getElementById('officer-name').textContent = officerName;
             document.getElementById('officer-full-name').textContent = officerName;
+            
+            // Store officer data for network graph
+            window.currentOfficerData = {
+                officerId: officerId,
+                name: officerName,
+                appointments: appointmentsData.items || []
+            };
             
             // Update statistics
             document.getElementById('officer-appointments-count').textContent = appointmentsData.total_results || '0';
@@ -19365,6 +19458,9 @@
             if (appointmentsData.is_corporate_officer) {
                 document.querySelector('#officer-badges .active-badge').textContent = '● Corporate Officer';
             }
+            
+            // Store current officer ID
+            window.currentOfficerId = officerId;
             
             // Generate career timeline
             generateCareerTimeline(appointmentsData.items);
@@ -19568,6 +19664,11 @@
             if (activeTab) {
                 activeTab.classList.add('active');
             }
+            
+            // If switching to network tab, initialize the network
+            if (tabName === 'network' && window.currentOfficerData) {
+                initializeNetworkGraph(window.currentOfficerData, window.currentOfficersWithCompanies);
+            }
         }
         
         function generateCareerTimeline(appointments) {
@@ -19577,6 +19678,9 @@
                 timelineContainer.innerHTML = '<div style="color: #71767b; text-align: center; padding: 20px;">No appointments found</div>';
                 return;
             }
+            
+            // Store original appointments globally for later update
+            window.originalAppointments = appointments;
             
             // Sort appointments by date (newest first)
             const sortedAppointments = [...appointments].sort((a, b) => {
@@ -19608,6 +19712,103 @@
                         </div>
                     </div>
                 `;
+            }).join('');
+            
+            timelineContainer.innerHTML = timelineHTML;
+        }
+        
+        function updateTimelineWithRelatedOfficers() {
+            if (!window.originalAppointments || relatedOfficersCompanies.length === 0) {
+                return;
+            }
+            
+            const timelineContainer = document.getElementById('officer-timeline');
+            
+            // Combine original appointments with related officers' companies
+            const allAppointments = [...window.originalAppointments];
+            
+            // Create pseudo-appointments for related officers' companies
+            relatedOfficersCompanies.forEach(related => {
+                allAppointments.push({
+                    appointed_on: related.appointedOn || new Date().toISOString(),
+                    resigned_on: related.resignedOn || null,
+                    officer_role: related.role,
+                    appointed_to: {
+                        company_name: related.companyName,
+                        company_number: related.companyNumber,
+                        company_status: related.status
+                    },
+                    isProbableMatch: true,
+                    relatedOfficerName: related.officerName,
+                    relatedOfficerId: related.officerId,
+                    isActive: related.isActive
+                });
+            });
+            
+            // Sort all appointments by date (newest first)
+            const sortedAppointments = allAppointments.sort((a, b) => {
+                const dateA = new Date(a.appointed_on);
+                const dateB = new Date(b.appointed_on);
+                return dateB - dateA;
+            });
+            
+            const timelineHTML = sortedAppointments.map((app, index) => {
+                const isActive = !app.resigned_on;
+                const companyStatus = app.appointed_to.company_status || 'unknown';
+                const statusColor = companyStatus === 'active' ? '#34d399' : '#71767b';
+                
+                if (app.isProbableMatch) {
+                    // Special styling for related officers' companies
+                    const probableStatusColor = app.isActive ? '#a78bfa' : '#71767b';
+                    const probableStatusText = app.isActive ? 'Active' : `Resigned ${app.resigned_on ? new Date(app.resigned_on).getFullYear() : ''}`;
+                    
+                    return `
+                        <div style="position: relative; padding-left: 24px; padding-bottom: 20px; ${index === sortedAppointments.length - 1 ? '' : 'border-left: 2px dashed rgba(99, 102, 241, 0.3);'} margin-left: 8px;">
+                            <div style="position: absolute; left: -8px; top: 0; width: 16px; height: 16px; background: #8b5cf6; border: 3px solid #1e293b; border-radius: 50%;"></div>
+                            
+                            <div style="font-size: 12px; color: #a78bfa; margin-bottom: 4px;">
+                                Probable Match - Related Officer
+                            </div>
+                            
+                            <div style="font-size: 12px; color: #71767b; margin-bottom: 4px;">
+                                ${new Date(app.appointed_on).getFullYear()}${app.resigned_on ? ` - ${new Date(app.resigned_on).getFullYear()}` : ' - Present'}
+                            </div>
+                            
+                            <div style="font-weight: 600; color: #e2e8f0; margin-bottom: 4px;">
+                                ${formatOfficerRole(app.officer_role)} <span style="font-size: 12px; color: ${probableStatusColor}; font-weight: normal;">(${probableStatusText})</span>
+                            </div>
+                            
+                            <div style="font-size: 14px; color: #94a3b8; cursor: pointer;" onclick="searchCompanyForModal('${app.appointed_to.company_number}')">
+                                ${app.appointed_to.company_name}
+                                <span style="color: ${statusColor}; font-size: 12px;">(${companyStatus})</span>
+                            </div>
+                            
+                            <div style="font-size: 12px; color: #8b5cf6; margin-top: 4px; cursor: pointer;" onclick="window.location.hash='#officer/${app.relatedOfficerId}'">
+                                Officer: ${app.relatedOfficerName} →
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // Original timeline item
+                    return `
+                        <div style="position: relative; padding-left: 24px; padding-bottom: 20px; ${index === sortedAppointments.length - 1 ? '' : 'border-left: 2px solid rgba(148, 163, 184, 0.2);'} margin-left: 8px;">
+                            <div style="position: absolute; left: -8px; top: 0; width: 16px; height: 16px; background: ${isActive ? '#6366f1' : '#475569'}; border: 3px solid #1e293b; border-radius: 50%;"></div>
+                            
+                            <div style="font-size: 12px; color: #71767b; margin-bottom: 4px;">
+                                ${new Date(app.appointed_on).getFullYear()}${app.resigned_on ? ` - ${new Date(app.resigned_on).getFullYear()}` : ' - Present'}
+                            </div>
+                            
+                            <div style="font-weight: 600; color: #e2e8f0; margin-bottom: 4px;">
+                                ${formatOfficerRole(app.officer_role)}
+                            </div>
+                            
+                            <div style="font-size: 14px; color: #94a3b8; cursor: pointer;" onclick="searchCompanyForModal('${app.appointed_to.company_number}')">
+                                ${app.appointed_to.company_name}
+                                <span style="color: ${statusColor}; font-size: 12px;">(${companyStatus})</span>
+                            </div>
+                        </div>
+                    `;
+                }
             }).join('');
             
             timelineContainer.innerHTML = timelineHTML;
@@ -19649,6 +19850,18 @@
                 </div>
             `;
         }
+        
+        // Store related officers data globally to use in timeline
+        let relatedOfficersCompanies = [];
+        
+        // Network graph global variables
+        let networkNodes = [];
+        let networkLinks = [];
+        let networkData = {};
+        let expandedNodes = new Set();
+        let svg, nodesGroup, linksGroup;
+        let zoom = 1;
+        let panX = 0, panY = 0;
         
         async function searchRelatedOfficers(officerName, appointments) {
             const container = document.getElementById('related-officers-content');
@@ -19696,33 +19909,236 @@
                     }
                 }
                 
-                // Render related officers
-                if (relatedOfficers.length > 1) {
+                // First, fetch company details for each officer
+                const officersWithCompanies = await Promise.all(
+                    relatedOfficers.map(async (officer) => {
+                        try {
+                            // Fetch ALL officer appointments with pagination
+                            let allAppointments = [];
+                            let startIndex = 0;
+                            const itemsPerPage = 50;
+                            let hasMore = true;
+                            let totalResults = 0;
+                            
+                            while (hasMore) {
+                                const appointmentsResponse = await fetchWithWorker(
+                                    `https://api.companieshouse.gov.uk/officers/${officer.officerId}/appointments?start_index=${startIndex}&items_per_page=${itemsPerPage}`,
+                                    API_KEY
+                                );
+                                
+                                if (!appointmentsResponse.ok) break;
+                                
+                                const data = await appointmentsResponse.json();
+                                const items = data.items || [];
+                                allAppointments = allAppointments.concat(items);
+                                
+                                if (startIndex === 0) {
+                                    totalResults = data.total_results || 0;
+                                }
+                                
+                                // Check if there are more pages
+                                hasMore = data.total_results > (startIndex + items.length);
+                                startIndex += itemsPerPage;
+                                
+                                // Safety limit to prevent infinite loops
+                                if (startIndex > 500) break;
+                            }
+                            
+                            if (allAppointments.length > 0) {
+                                
+                                // Extract birth year if available
+                                let officerBirthYear = null;
+                                for (const app of allAppointments) {
+                                    if (app.date_of_birth && app.date_of_birth.year) {
+                                        officerBirthYear = app.date_of_birth.year;
+                                        break;
+                                    }
+                                }
+                                
+                                // Separate active and resigned appointments
+                                const activeCompanies = allAppointments
+                                    .filter(app => !app.resigned_on)
+                                    .map(app => ({
+                                        name: app.appointed_to?.company_name || 'Unknown Company',
+                                        number: app.appointed_to?.company_number,
+                                        status: app.appointed_to?.company_status || 'Unknown',
+                                        role: app.officer_role || 'Director',
+                                        appointedOn: app.appointed_on,
+                                        isActive: true
+                                    }));
+                                
+                                const previousCompanies = allAppointments
+                                    .filter(app => app.resigned_on)
+                                    .map(app => ({
+                                        name: app.appointed_to?.company_name || 'Unknown Company',
+                                        number: app.appointed_to?.company_number,
+                                        status: app.appointed_to?.company_status || 'Unknown',
+                                        role: app.officer_role || 'Director',
+                                        appointedOn: app.appointed_on,
+                                        resignedOn: app.resigned_on,
+                                        isActive: false
+                                    }));
+                                
+                                return {
+                                    ...officer,
+                                    birthYear: officerBirthYear,
+                                    activeCompanies: activeCompanies,
+                                    previousCompanies: previousCompanies,
+                                    allCompanies: [...activeCompanies, ...previousCompanies],
+                                    totalAppointments: totalResults || allAppointments.length || 0
+                                };
+                            }
+                            return {
+                                ...officer,
+                                activeCompanies: [],
+                                previousCompanies: [],
+                                allCompanies: [],
+                                totalAppointments: officer.appointment_count || 0
+                            };
+                        } catch (error) {
+                            console.error('Error fetching officer appointments:', error);
+                            return {
+                                ...officer,
+                                activeCompanies: [],
+                                previousCompanies: [],
+                                allCompanies: [],
+                                totalAppointments: officer.appointment_count || 0
+                            };
+                        }
+                    })
+                );
+
+                // Store related officers' companies for timeline
+                relatedOfficersCompanies = [];
+                officersWithCompanies.forEach(officer => {
+                    if (officer.officerId !== window.currentOfficerId) { // Don't include current officer
+                        // Add all companies (both active and previous)
+                        if (officer.allCompanies) {
+                            officer.allCompanies.forEach(company => {
+                                relatedOfficersCompanies.push({
+                                    companyName: company.name,
+                                    companyNumber: company.number,
+                                    role: company.role,
+                                    status: company.status,
+                                    officerName: officer.title,
+                                    officerId: officer.officerId,
+                                    isProbableMatch: true,
+                                    isActive: company.isActive,
+                                    appointedOn: company.appointedOn,
+                                    resignedOn: company.resignedOn
+                                });
+                            });
+                        }
+                    }
+                });
+                
+                // Update timeline with related officers' companies
+                updateTimelineWithRelatedOfficers();
+                
+                // Store for network graph
+                window.currentOfficersWithCompanies = officersWithCompanies;
+                
+                // Render related officers with company information
+                if (officersWithCompanies.length > 1) {
                     container.innerHTML = `
-                        <div style="display: grid; gap: 12px;">
-                            ${relatedOfficers.slice(0, 5).map(officer => `
-                                <div style="background: rgba(148, 163, 184, 0.05); border: 1px solid rgba(148, 163, 184, 0.1); border-radius: 8px; padding: 16px; cursor: pointer; transition: all 0.2s;"
-                                     onclick="window.location.hash = '#officer/${officer.officerId}'">
-                                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                                        <div>
-                                            <div style="font-weight: 600; color: #e2e8f0;">${officer.title}</div>
-                                            <div style="font-size: 14px; color: #94a3b8; margin-top: 4px;">
-                                                ${officer.appointment_count || 0} appointments
-                                                ${officer.address_snippet ? ` • ${officer.address_snippet.split(',')[0]}` : ''}
+                        <div style="margin-bottom: 16px; padding: 12px; background: rgba(99, 102, 241, 0.1); border-radius: 8px; border: 1px solid rgba(99, 102, 241, 0.2);">
+                            <div style="font-size: 14px; color: #e2e8f0;">
+                                Found <strong>${officersWithCompanies.length}</strong> officers with the same name
+                            </div>
+                        </div>
+                        <div style="display: grid; gap: 16px;">
+                            ${officersWithCompanies.map(officer => `
+                                <div style="background: rgba(148, 163, 184, 0.05); border: 1px solid rgba(148, 163, 184, 0.1); border-radius: 12px; padding: 20px; cursor: pointer; transition: all 0.2s;"
+                                     onclick="window.location.hash = '#officer/${officer.officerId}'"
+                                     onmouseover="this.style.borderColor='rgba(99, 102, 241, 0.3)'; this.style.background='rgba(148, 163, 184, 0.08)'"
+                                     onmouseout="this.style.borderColor='rgba(148, 163, 184, 0.1)'; this.style.background='rgba(148, 163, 184, 0.05)'">
+                                    <div style="display: flex; justify-content: space-between; align-items: start; gap: 16px;">
+                                        <div style="flex: 1;">
+                                            <div style="display: flex; align-items: baseline; gap: 12px; margin-bottom: 8px;">
+                                                <div style="font-weight: 600; color: #e2e8f0; font-size: 16px;">${officer.title}</div>
+                                                ${officer.birthYear ? `<div style="font-size: 14px; color: #71767b;">(born ${officer.birthYear})</div>` : ''}
                                             </div>
+                                            <div style="font-size: 14px; color: #94a3b8; margin-bottom: 12px;">
+                                                ${officer.totalAppointments} total appointments
+                                                ${officer.address_snippet ? ` • ${officer.address_snippet.split(',').slice(0, 2).join(', ')}` : ''}
+                                            </div>
+                                            ${officer.allCompanies && officer.allCompanies.length > 0 ? `
+                                                <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(148, 163, 184, 0.1);">
+                                                    <!-- Active Companies Section -->
+                                                    ${officer.activeCompanies.length > 0 ? `
+                                                        <div style="margin-bottom: 16px;">
+                                                            <div style="font-size: 13px; color: #71767b; margin-bottom: 8px; font-weight: 500;">ACTIVE COMPANIES (${officer.activeCompanies.length})</div>
+                                                            <div class="related-companies-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px 16px;">
+                                                                ${officer.activeCompanies.map((company, index) => `
+                                                                    <div style="display: flex; align-items: flex-start; gap: 8px; padding: 8px; background: rgba(52, 211, 153, 0.05); border-radius: 6px; border: 1px solid rgba(52, 211, 153, 0.1);">
+                                                                        <div style="width: 4px; height: 4px; background: #34d399; border-radius: 50%; flex-shrink: 0; margin-top: 6px;"></div>
+                                                                        <div style="flex: 1;">
+                                                                            <a href="#company/${company.number}" 
+                                                                               style="color: #e2e8f0; font-size: 14px; text-decoration: none; display: block; margin-bottom: 4px; word-break: break-word;"
+                                                                               onmouseover="this.style.color='#6366f1'; this.style.textDecoration='underline'"
+                                                                               onmouseout="this.style.color='#e2e8f0'; this.style.textDecoration='none'"
+                                                                               onclick="event.stopPropagation(); loadCompany('${company.number}')">
+                                                                                ${company.name}
+                                                                            </a>
+                                                                            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                                                                <span style="color: #34d399; font-size: 12px;">${company.role}</span>
+                                                                                <span style="display: inline-flex; align-items: center; gap: 4px; color: #71767b; font-size: 11px;">
+                                                                                    <span style="width: 6px; height: 6px; border-radius: 50%; background: ${company.status === 'active' ? '#34d399' : '#71767b'}; display: inline-block;"></span>
+                                                                                    ${company.status}
+                                                                                </span>
+                                                                                <span style="color: #71767b; font-size: 11px;">• Appointed ${company.appointedOn ? new Date(company.appointedOn).getFullYear() : 'N/A'}</span>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                `).join('')}
+                                                            </div>
+                                                        </div>
+                                                    ` : ''}
+                                                    
+                                                    <!-- Previous Companies Section -->
+                                                    ${officer.previousCompanies && officer.previousCompanies.length > 0 ? `
+                                                        <div>
+                                                            <div style="font-size: 13px; color: #71767b; margin-bottom: 8px; font-weight: 500;">PREVIOUS COMPANIES (${officer.previousCompanies.length})</div>
+                                                            <div class="related-companies-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px 16px; max-height: 300px; overflow-y: auto; padding-right: 8px;">
+                                                                ${officer.previousCompanies.map((company, index) => `
+                                                                    <div style="display: flex; align-items: flex-start; gap: 8px; padding: 8px; background: rgba(148, 163, 184, 0.05); border-radius: 6px; border: 1px solid rgba(148, 163, 184, 0.1);">
+                                                                        <div style="width: 4px; height: 4px; background: #71767b; border-radius: 50%; flex-shrink: 0; margin-top: 6px;"></div>
+                                                                        <div style="flex: 1;">
+                                                                            <a href="#company/${company.number}" 
+                                                                               style="color: #e2e8f0; font-size: 14px; text-decoration: none; display: block; margin-bottom: 4px; word-break: break-word;"
+                                                                               onmouseover="this.style.color='#6366f1'; this.style.textDecoration='underline'"
+                                                                               onmouseout="this.style.color='#e2e8f0'; this.style.textDecoration='none'"
+                                                                               onclick="event.stopPropagation(); loadCompany('${company.number}')">
+                                                                                ${company.name}
+                                                                            </a>
+                                                                            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                                                                <span style="color: #94a3b8; font-size: 12px;">${company.role}</span>
+                                                                                <span style="display: inline-flex; align-items: center; gap: 4px; color: #71767b; font-size: 11px;">
+                                                                                    <span style="width: 6px; height: 6px; border-radius: 50%; background: ${company.status === 'active' ? '#34d399' : '#71767b'}; display: inline-block;"></span>
+                                                                                    ${company.status}
+                                                                                </span>
+                                                                                <span style="color: #71767b; font-size: 11px;">• ${company.appointedOn ? new Date(company.appointedOn).getFullYear() : 'N/A'} - ${company.resignedOn ? new Date(company.resignedOn).getFullYear() : 'N/A'}</span>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                `).join('')}
+                                                            </div>
+                                                        </div>
+                                                    ` : ''}
+                                                </div>
+                                            ` : `
+                                                <div style="font-size: 13px; color: #71767b; font-style: italic;">
+                                                    No company appointments found
+                                                </div>
+                                            `}
                                         </div>
-                                        <svg width="20" height="20" fill="none" stroke="#6366f1" viewBox="0 0 24 24">
+                                        <svg width="24" height="24" fill="none" stroke="#6366f1" viewBox="0 0 24 24" style="flex-shrink: 0; margin-top: 4px;">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                                         </svg>
                                     </div>
                                 </div>
                             `).join('')}
                         </div>
-                        ${relatedOfficers.length > 5 ? `
-                            <div style="text-align: center; margin-top: 16px; color: #6366f1; font-size: 14px;">
-                                Showing 5 of ${relatedOfficers.length} related officers
-                            </div>
-                        ` : ''}
                     `;
                 } else {
                     container.innerHTML = `
@@ -19759,6 +20175,749 @@
             };
             
             return roleMap[role] || role.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        }
+        
+        // Network Graph Functions
+        async function initializeNetworkGraph(officerData, officersWithCompanies) {
+            console.log('Initializing network graph for officer:', officerData);
+            console.log('Related officers with companies:', officersWithCompanies);
+            
+            const container = document.getElementById('network-graph-container');
+            const loading = document.getElementById('network-loading');
+            
+            if (!container) return;
+            
+            // Show loading
+            loading.style.display = 'block';
+            
+            // Clear previous data
+            networkNodes = [];
+            networkLinks = [];
+            expandedNodes.clear();
+            
+            // Get SVG elements
+            svg = document.getElementById('network-svg');
+            nodesGroup = document.getElementById('network-nodes');
+            linksGroup = document.getElementById('network-links');
+            
+            // Clear previous content
+            nodesGroup.innerHTML = '';
+            linksGroup.innerHTML = '';
+            
+            // Create initial officer node on the left
+            const officerId = officerData.officerId || 'current-officer';
+            const centralNode = {
+                id: officerId,
+                type: 'officer',
+                name: officerData.name,
+                x: 100,
+                y: svg.clientHeight / 2,
+                level: 0,
+                expanded: false
+            };
+            
+            networkNodes.push(centralNode);
+            expandedNodes.add(officerId);
+            
+            // Collect all companies from current officer and related officers
+            const allCompaniesMap = new Map();
+            
+            // Fetch ALL appointments for current officer with pagination
+            if (officerId && officerId !== 'current-officer') {
+                let allAppointments = [];
+                let startIndex = 0;
+                const itemsPerPage = 50;
+                let hasMore = true;
+                
+                while (hasMore) {
+                    try {
+                        const response = await fetchWithWorker(
+                            `https://api.companieshouse.gov.uk/officers/${officerId}/appointments?start_index=${startIndex}&items_per_page=${itemsPerPage}`,
+                            API_KEY
+                        );
+                        
+                        if (!response.ok) break;
+                        
+                        const data = await response.json();
+                        const items = data.items || [];
+                        allAppointments = allAppointments.concat(items);
+                        
+                        // Check if there are more pages
+                        hasMore = data.total_results > (startIndex + items.length);
+                        startIndex += itemsPerPage;
+                        
+                        // Safety limit to prevent infinite loops
+                        if (startIndex > 500) break;
+                    } catch (error) {
+                        console.error('Error fetching officer appointments:', error);
+                        break;
+                    }
+                }
+                
+                console.log(`Officer ${officerData.name} - Total appointments fetched: ${allAppointments.length}`);
+                
+                // Add current officer's appointments to the map
+                allAppointments.forEach(appointment => {
+                    if (appointment.appointed_to && appointment.appointed_to.company_number) {
+                        const company = appointment.appointed_to;
+                        allCompaniesMap.set(company.company_number, {
+                            number: company.company_number,
+                            name: company.company_name || 'Unnamed Company',
+                            status: company.company_status || 'unknown',
+                            role: appointment.officer_role || 'director',
+                            isActive: !appointment.resigned_on,
+                            appointedOn: appointment.appointed_on,
+                            resignedOn: appointment.resigned_on,
+                            fromOfficerId: officerId,
+                            fromOfficerName: officerData.name
+                        });
+                    }
+                });
+            }
+            
+            // Add companies from all officers with the same name
+            if (officersWithCompanies && officersWithCompanies.length > 0) {
+                for (const officer of officersWithCompanies) {
+                    if (officer.allCompanies) {
+                        officer.allCompanies.forEach(company => {
+                            // Use company number as key to avoid duplicates
+                            if (!allCompaniesMap.has(company.number)) {
+                                allCompaniesMap.set(company.number, {
+                                    ...company,
+                                    fromOfficerId: officer.officerId,
+                                    fromOfficerName: officer.title
+                                });
+                            }
+                        });
+                    }
+                }
+            }
+            
+            // Convert map to array and add all unique companies
+            const allUniqueCompanies = Array.from(allCompaniesMap.values());
+            const columnSpacing = 350;
+            const nodeSpacing = 100;
+            const startY = centralNode.y - (allUniqueCompanies.length - 1) * nodeSpacing / 2;
+            
+            allUniqueCompanies.forEach((company, index) => {
+                const companyNode = {
+                    id: company.number,
+                    type: 'company',
+                    name: company.name,
+                    status: company.status,
+                    role: company.role,
+                    x: centralNode.x + columnSpacing,
+                    y: startY + index * nodeSpacing,
+                    level: 1,
+                    expanded: false,
+                    isActive: company.isActive,
+                    appointedOn: company.appointedOn,
+                    resignedOn: company.resignedOn,
+                    fromOfficerId: company.fromOfficerId
+                };
+                
+                networkNodes.push(companyNode);
+                networkLinks.push({
+                    source: centralNode.id,
+                    target: companyNode.id,
+                    role: company.role,
+                    isActive: company.isActive
+                });
+            });
+            
+            // Hide loading
+            loading.style.display = 'none';
+            
+            // Initial render
+            renderNetwork();
+            
+            // Setup pan and zoom
+            setupNetworkInteractions();
+        }
+        
+        async function expandOfficerNode(officerNode) {
+            try {
+                // Fetch ALL officer appointments (handle pagination)
+                let allAppointments = [];
+                let startIndex = 0;
+                const itemsPerPage = 50;
+                let hasMore = true;
+                
+                while (hasMore) {
+                    const response = await fetchWithWorker(
+                        `https://api.companieshouse.gov.uk/officers/${officerNode.id}/appointments?start_index=${startIndex}&items_per_page=${itemsPerPage}`,
+                        API_KEY
+                    );
+                    
+                    if (!response.ok) break;
+                    
+                    const data = await response.json();
+                    const items = data.items || [];
+                    allAppointments = allAppointments.concat(items);
+                    
+                    // Check if there are more pages
+                    hasMore = data.total_results > (startIndex + items.length);
+                    startIndex += itemsPerPage;
+                    
+                    // Safety limit to prevent infinite loops
+                    if (startIndex > 500) break;
+                }
+                
+                console.log(`Officer ${officerNode.name} - Total appointments fetched: ${allAppointments.length}`);
+                
+                // Calculate positions for companies - hierarchical left to right
+                const columnSpacing = 350;
+                // Adjust spacing based on number of appointments
+                const nodeSpacing = Math.min(60, 800 / Math.max(allAppointments.length, 1));
+                const startY = officerNode.y - (allAppointments.length - 1) * nodeSpacing / 2;
+                
+                allAppointments.forEach((appointment, index) => {
+                    if (!appointment.appointed_to) return;
+                    
+                    const companyNode = {
+                        id: appointment.appointed_to.company_number,
+                        type: 'company',
+                        name: appointment.appointed_to.company_name,
+                        status: appointment.appointed_to.company_status,
+                        role: appointment.officer_role,
+                        x: officerNode.x + columnSpacing,
+                        y: startY + index * nodeSpacing,
+                        level: officerNode.level + 1,
+                        expanded: false,
+                        isActive: !appointment.resigned_on
+                    };
+                    
+                    // Check if node already exists
+                    if (!networkNodes.find(n => n.id === companyNode.id)) {
+                        networkNodes.push(companyNode);
+                        
+                        // Add link
+                        networkLinks.push({
+                            source: officerNode.id,
+                            target: companyNode.id,
+                            role: appointment.officer_role,
+                            isActive: !appointment.resigned_on
+                        });
+                    }
+                });
+                
+                officerNode.expanded = true;
+            } catch (error) {
+                console.error('Error expanding officer node:', error);
+            }
+        }
+        
+        async function expandCompanyNode(companyNode) {
+            try {
+                // Fetch company officers
+                const [officersResponse, pscsResponse] = await Promise.all([
+                    fetchWithWorker(
+                        `https://api.companieshouse.gov.uk/company/${companyNode.id}/officers`,
+                        API_KEY
+                    ),
+                    fetchWithWorker(
+                        `https://api.companieshouse.gov.uk/company/${companyNode.id}/persons-with-significant-control`,
+                        API_KEY
+                    )
+                ]);
+                
+                const officers = officersResponse.ok ? (await officersResponse.json()).items || [] : [];
+                const pscs = pscsResponse.ok ? (await pscsResponse.json()).items || [] : [];
+                
+                console.log(`Company ${companyNode.name} - Officers: ${officers.length}, PSCs: ${pscs.length}`);
+                
+                // Mark PSCs explicitly
+                pscs.forEach(psc => psc._isPSC = true);
+                
+                // Show all officers and PSCs
+                const allPeople = [...officers, ...pscs];
+                
+                // Calculate positions - hierarchical left to right
+                const columnSpacing = 350;
+                // Adjust spacing based on number of people
+                const nodeSpacing = Math.min(80, 600 / Math.max(allPeople.length, 1));
+                const startY = companyNode.y - (allPeople.length - 1) * nodeSpacing / 2;
+                
+                allPeople.forEach((person, index) => {
+                    const isPSC = person._isPSC || (person.kind && person.kind.includes('psc'));
+                    
+                    let nodeId, nodeName, nodeType;
+                    
+                    if (isPSC) {
+                        nodeName = person.name || 'Unknown PSC';
+                        
+                        // Check if this PSC is a corporate entity
+                        if (person.kind && person.kind.includes('corporate-entity')) {
+                            // Extract company number from identification if available
+                            const companyNumber = person.identification?.registration_number;
+                            nodeId = companyNumber || `psc-corp-${companyNode.id}-${index}`;
+                            nodeType = 'company';
+                            
+                            console.log('Corporate PSC:', nodeName, 'Company number:', companyNumber);
+                        } else {
+                            // Individual PSC
+                            nodeId = `psc-${companyNode.id}-${index}`;
+                            nodeType = 'psc';
+                        }
+                    } else {
+                        // Extract officer ID from links
+                        const officerIdMatch = person.links?.self?.match(/\/officers\/([^\/]+)\//);
+                        nodeId = officerIdMatch ? officerIdMatch[1] : `officer-${companyNode.id}-${index}`;
+                        nodeName = person.name;
+                        nodeType = 'officer';
+                    }
+                    
+                    const personNode = {
+                        id: nodeId,
+                        type: nodeType,
+                        name: nodeName,
+                        x: companyNode.x + columnSpacing,
+                        y: startY + index * nodeSpacing,
+                        level: companyNode.level + 1,
+                        expanded: false,
+                        isPSC: isPSC && nodeType === 'psc', // Only true for individual PSCs
+                        isCorporatePSC: isPSC && nodeType === 'company', // True for corporate PSCs
+                        isActive: !person.resigned_on && !person.ceased_on,
+                        resignedOn: person.resigned_on,
+                        ceasedOn: person.ceased_on,
+                        role: person.officer_role || (isPSC ? 'PSC' : ''),
+                        status: nodeType === 'company' ? 'active' : undefined // Assume corporate PSCs are active
+                    };
+                    
+                    if (!networkNodes.find(n => n.id === personNode.id)) {
+                        networkNodes.push(personNode);
+                        
+                        networkLinks.push({
+                            source: companyNode.id,
+                            target: personNode.id,
+                            role: isPSC ? 'PSC' : person.officer_role,
+                            isActive: personNode.isActive
+                        });
+                    }
+                });
+                
+                companyNode.expanded = true;
+                expandedNodes.add(companyNode.id);
+                
+                // Re-render the network
+                layoutNetwork();
+                renderNetwork();
+            } catch (error) {
+                console.error('Error expanding company node:', error);
+            }
+        }
+        
+        function renderNetwork() {
+            // Clear existing elements
+            nodesGroup.innerHTML = '';
+            linksGroup.innerHTML = '';
+            
+            // Render links
+            networkLinks.forEach(link => {
+                const sourceNode = networkNodes.find(n => n.id === link.source);
+                const targetNode = networkNodes.find(n => n.id === link.target);
+                
+                if (sourceNode && targetNode) {
+                    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    
+                    // Create elbow connector from right edge of source to left edge of target
+                    const sourceX = sourceNode.x + 120; // Right edge of rectangle (nodeWidth/2)
+                    const targetX = targetNode.x - 120; // Left edge of rectangle
+                    const midX = (sourceX + targetX) / 2;
+                    const d = `M ${sourceX} ${sourceNode.y} L ${midX} ${sourceNode.y} L ${midX} ${targetNode.y} L ${targetX} ${targetNode.y}`;
+                    path.setAttribute('d', d);
+                    if (link.type === 'related') {
+                        path.setAttribute('stroke', 'rgba(99, 102, 241, 0.2)');
+                        path.setAttribute('stroke-width', '1');
+                        path.setAttribute('stroke-dasharray', '4,4');
+                    } else {
+                        path.setAttribute('stroke', link.isActive ? 'rgba(99, 102, 241, 0.2)' : 'rgba(71, 85, 105, 0.2)');
+                        path.setAttribute('stroke-width', '1');
+                        path.setAttribute('stroke-dasharray', link.role === 'PSC' ? '4,4' : 'none');
+                    }
+                    path.setAttribute('fill', 'none');
+                    
+                    linksGroup.appendChild(path);
+                }
+            });
+            
+            // Render nodes
+            networkNodes.forEach(node => {
+                const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                g.setAttribute('transform', `translate(${node.x}, ${node.y})`);
+                g.style.cursor = 'pointer';
+                
+                // Create node container with clean design
+                const nodeWidth = 240;
+                const nodeHeight = 56;
+                
+                // Create main rectangle
+                const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                rect.setAttribute('x', -nodeWidth/2);
+                rect.setAttribute('y', -nodeHeight/2);
+                rect.setAttribute('width', nodeWidth);
+                rect.setAttribute('height', nodeHeight);
+                rect.setAttribute('rx', '8');
+                
+                // Clean dark theme colors matching website style
+                if (node.type === 'psc' || node.isPSC) {
+                    rect.setAttribute('fill', 'rgba(30, 41, 59, 0.8)');
+                    rect.setAttribute('stroke', node.isActive ? 'rgba(236, 72, 153, 0.5)' : 'rgba(236, 72, 153, 0.2)');
+                    if (!node.isActive) {
+                        rect.setAttribute('stroke-dasharray', '4,4');
+                        rect.setAttribute('opacity', '0.6');
+                    }
+                } else if (node.type === 'officer') {
+                    rect.setAttribute('fill', 'rgba(30, 41, 59, 0.8)');
+                    rect.setAttribute('stroke', node.isActive ? 'rgba(99, 102, 241, 0.3)' : 'rgba(71, 85, 105, 0.3)');
+                    if (!node.isActive) {
+                        rect.setAttribute('stroke-dasharray', '4,4');
+                        rect.setAttribute('opacity', '0.6');
+                    }
+                } else if (node.type === 'company') {
+                    rect.setAttribute('fill', 'rgba(30, 41, 59, 0.8)');
+                    rect.setAttribute('stroke', node.isActive ? 'rgba(99, 102, 241, 0.3)' : 'rgba(71, 85, 105, 0.3)');
+                    if (!node.isActive) {
+                        rect.setAttribute('stroke-dasharray', '4,4');
+                    }
+                }
+                
+                rect.setAttribute('stroke-width', '1');
+                
+                // Add hover effect
+                g.addEventListener('mouseenter', () => {
+                    rect.setAttribute('fill', 'rgba(30, 41, 59, 0.95)');
+                    rect.setAttribute('stroke-width', '2');
+                });
+                
+                g.addEventListener('mouseleave', () => {
+                    rect.setAttribute('fill', 'rgba(30, 41, 59, 0.8)');
+                    rect.setAttribute('stroke-width', '1');
+                });
+                
+                // Add click handler
+                g.addEventListener('click', () => handleNodeClick(node));
+                
+                g.appendChild(rect);
+                
+                // Add type indicator on left side
+                if (node.type === 'psc' || node.isPSC) {
+                    const indicator = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                    indicator.setAttribute('x', -nodeWidth/2);
+                    indicator.setAttribute('y', -nodeHeight/2);
+                    indicator.setAttribute('width', '4');
+                    indicator.setAttribute('height', nodeHeight);
+                    indicator.setAttribute('fill', '#ec4899');
+                    indicator.setAttribute('rx', '2');
+                    indicator.setAttribute('opacity', '0.8');
+                    g.appendChild(indicator);
+                }
+                
+                // Add text inside the rectangle
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('text-anchor', 'middle');
+                text.setAttribute('y', '0');
+                text.setAttribute('fill', '#e2e8f0');
+                text.setAttribute('font-size', '14');
+                text.setAttribute('font-weight', '500');
+                text.setAttribute('dominant-baseline', 'middle');
+                
+                // Truncate long names
+                const maxLength = 24;
+                const displayName = node.name.length > maxLength ? 
+                    node.name.substring(0, maxLength) + '...' : node.name;
+                text.textContent = displayName;
+                
+                g.appendChild(text);
+                
+                // Add type indicator for PSCs and role for officers
+                if (node.type === 'psc' || node.isPSC) {
+                    const pscLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    pscLabel.setAttribute('text-anchor', 'middle');
+                    pscLabel.setAttribute('y', '16');
+                    pscLabel.setAttribute('fill', '#ec4899');
+                    pscLabel.setAttribute('font-size', '11');
+                    pscLabel.setAttribute('font-weight', '600');
+                    pscLabel.setAttribute('dominant-baseline', 'middle');
+                    pscLabel.textContent = 'PSC';
+                    g.appendChild(pscLabel);
+                } else if (node.isCorporatePSC) {
+                    const pscLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    pscLabel.setAttribute('text-anchor', 'middle');
+                    pscLabel.setAttribute('y', '16');
+                    pscLabel.setAttribute('fill', '#ec4899');
+                    pscLabel.setAttribute('font-size', '11');
+                    pscLabel.setAttribute('font-weight', '600');
+                    pscLabel.setAttribute('dominant-baseline', 'middle');
+                    pscLabel.textContent = 'PSC';
+                    g.appendChild(pscLabel);
+                } else if (node.role) {
+                    const roleText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    roleText.setAttribute('text-anchor', 'middle');
+                    roleText.setAttribute('y', '16');
+                    roleText.setAttribute('fill', '#64748b');
+                    roleText.setAttribute('font-size', '12');
+                    roleText.setAttribute('dominant-baseline', 'middle');
+                    roleText.textContent = node.role;
+                    g.appendChild(roleText);
+                }
+                
+                // Add small role text below name for companies
+                if (node.type === 'company' && node.role) {
+                    const roleText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    roleText.setAttribute('text-anchor', 'middle');
+                    roleText.setAttribute('y', '16');
+                    roleText.setAttribute('fill', '#64748b');
+                    roleText.setAttribute('font-size', '12');
+                    roleText.setAttribute('dominant-baseline', 'middle');
+                    roleText.textContent = node.role;
+                    g.appendChild(roleText);
+                }
+                
+                // Add status indicator circle
+                const statusGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                statusGroup.setAttribute('transform', `translate(${nodeWidth/2 - 20}, 0)`);
+                
+                // Status circle
+                const statusCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                statusCircle.setAttribute('r', '6');
+                
+                // Color based on status
+                if (node.type === 'company') {
+                    if (node.status === 'active') {
+                        statusCircle.setAttribute('fill', '#22c55e');
+                    } else if (node.status === 'dissolved' || node.status === 'liquidation') {
+                        statusCircle.setAttribute('fill', '#ef4444');
+                    } else {
+                        statusCircle.setAttribute('fill', '#64748b');
+                    }
+                    const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+                    title.textContent = node.status ? node.status.toUpperCase() : 'UNKNOWN';
+                    statusCircle.appendChild(title);
+                } else {
+                    // For officers/PSCs - show active/resigned status
+                    if (node.isActive) {
+                        statusCircle.setAttribute('fill', '#22c55e');
+                    } else {
+                        statusCircle.setAttribute('fill', '#ef4444');
+                    }
+                    const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+                    title.textContent = node.isActive ? 'ACTIVE' : `RESIGNED ${node.resignedOn ? new Date(node.resignedOn).getFullYear() : ''}`;
+                    statusCircle.appendChild(title);
+                }
+                
+                statusGroup.appendChild(statusCircle);
+                g.appendChild(statusGroup);
+                
+                // Add expand indicator for company nodes that can be expanded
+                if (node.type === 'company' && !node.expanded) {
+                    const expandGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                    expandGroup.setAttribute('transform', `translate(${nodeWidth/2 + 15}, 0)`);
+                    expandGroup.style.cursor = 'pointer';
+                    
+                    // Simple chevron
+                    const chevron = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    chevron.setAttribute('d', 'M-4,-4 L2,0 L-4,4');
+                    chevron.setAttribute('stroke', 'rgba(99, 102, 241, 0.5)');
+                    chevron.setAttribute('stroke-width', '2');
+                    chevron.setAttribute('fill', 'none');
+                    chevron.setAttribute('stroke-linecap', 'round');
+                    chevron.setAttribute('stroke-linejoin', 'round');
+                    
+                    // Add hover effect
+                    expandGroup.addEventListener('mouseenter', () => {
+                        chevron.setAttribute('stroke', 'rgba(99, 102, 241, 0.8)');
+                    });
+                    
+                    expandGroup.addEventListener('mouseleave', () => {
+                        chevron.setAttribute('stroke', 'rgba(99, 102, 241, 0.5)');
+                    });
+                    
+                    expandGroup.appendChild(chevron);
+                    
+                    // Prevent click propagation
+                    expandGroup.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        handleNodeClick(node);
+                    });
+                    
+                    g.appendChild(expandGroup);
+                }
+                
+                nodesGroup.appendChild(g);
+            });
+        }
+        
+        function collapseNode(node) {
+            if (!node.expanded) return;
+            
+            // Find all child nodes (nodes that have this node as their source in links)
+            const childLinks = networkLinks.filter(link => link.source === node.id);
+            const childNodeIds = childLinks.map(link => link.target);
+            
+            // Recursively collapse children
+            childNodeIds.forEach(childId => {
+                const childNode = networkNodes.find(n => n.id === childId);
+                if (childNode) {
+                    collapseNode(childNode);
+                }
+            });
+            
+            // Remove child nodes and their links
+            networkNodes = networkNodes.filter(n => !childNodeIds.includes(n.id));
+            networkLinks = networkLinks.filter(link => 
+                !childNodeIds.includes(link.target) && !childNodeIds.includes(link.source)
+            );
+            
+            // Mark node as collapsed
+            node.expanded = false;
+            expandedNodes.delete(node.id);
+        }
+        
+        async function handleNodeClick(node) {
+            if (node.expanded) {
+                // Navigate to the entity page
+                if (node.type === 'officer') {
+                    window.location.hash = `#officer/${node.id}`;
+                } else if (node.type === 'company') {
+                    window.location.hash = `#company/${node.id}`;
+                }
+            } else {
+                // For level 2 and beyond, close other expanded nodes at the same level
+                if (node.level >= 2) {
+                    // Find all nodes at the same level that are expanded
+                    const nodesToCollapse = networkNodes.filter(n => 
+                        n.level === node.level && 
+                        n.expanded && 
+                        n.id !== node.id
+                    );
+                    
+                    // Collapse them and their children
+                    nodesToCollapse.forEach(n => {
+                        collapseNode(n);
+                    });
+                }
+                
+                // Expand the node
+                if (node.type === 'officer') {
+                    await expandOfficerNode(node);
+                } else if (node.type === 'company') {
+                    await expandCompanyNode(node);
+                }
+                
+                // Re-layout and render
+                layoutNetwork();
+                renderNetwork();
+            }
+        }
+        
+        function layoutNetwork() {
+            // Hierarchical layout - organize nodes by level
+            const levelGroups = {};
+            const columnSpacing = 300;
+            const nodeSpacing = 80;
+            
+            // Group nodes by level
+            networkNodes.forEach(node => {
+                if (!levelGroups[node.level]) {
+                    levelGroups[node.level] = [];
+                }
+                levelGroups[node.level].push(node);
+            });
+            
+            // Position each level
+            Object.keys(levelGroups).forEach(level => {
+                const nodes = levelGroups[level];
+                const levelX = parseInt(level) * columnSpacing + 100;
+                
+                // Calculate vertical positions to center the group
+                const totalHeight = (nodes.length - 1) * nodeSpacing;
+                const startY = (svg.clientHeight - totalHeight) / 2;
+                
+                nodes.forEach((node, index) => {
+                    node.x = levelX;
+                    node.y = startY + index * nodeSpacing;
+                });
+            });
+        }
+        
+        function setupNetworkInteractions() {
+            let isDragging = false;
+            let dragStartX, dragStartY;
+            
+            svg.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                dragStartX = e.clientX - panX;
+                dragStartY = e.clientY - panY;
+                svg.style.cursor = 'grabbing';
+            });
+            
+            svg.addEventListener('mousemove', (e) => {
+                if (isDragging) {
+                    panX = e.clientX - dragStartX;
+                    panY = e.clientY - dragStartY;
+                    updateNetworkTransform();
+                }
+            });
+            
+            svg.addEventListener('mouseup', () => {
+                isDragging = false;
+                svg.style.cursor = 'grab';
+            });
+            
+            // Two-finger scroll for panning
+            svg.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                // Use wheel for panning
+                panX -= e.deltaX;
+                panY -= e.deltaY;
+                updateNetworkTransform();
+            });
+        }
+        
+        function updateNetworkTransform() {
+            const transform = `translate(${panX}, ${panY}) scale(${zoom})`;
+            nodesGroup.setAttribute('transform', transform);
+            linksGroup.setAttribute('transform', transform);
+        }
+        
+        function resetNetworkView() {
+            zoom = 1;
+            panX = 0;
+            panY = 0;
+            updateNetworkTransform();
+        }
+        
+        function zoomIn() {
+            zoom *= 1.2;
+            zoom = Math.min(3, zoom);
+            updateNetworkTransform();
+        }
+        
+        function zoomOut() {
+            zoom *= 0.8;
+            zoom = Math.max(0.3, zoom);
+            updateNetworkTransform();
+        }
+        
+        async function expandAllNodes() {
+            const loading = document.getElementById('network-loading');
+            loading.style.display = 'block';
+            
+            // Expand all nodes up to level 1
+            for (const node of networkNodes) {
+                if (!node.expanded && node.level < 1) {
+                    if (node.type === 'officer') {
+                        await expandOfficerNode(node);
+                    } else if (node.type === 'company') {
+                        await expandCompanyNode(node);
+                    }
+                }
+            }
+            
+            layoutNetwork();
+            renderNetwork();
+            loading.style.display = 'none';
         }
         
     </script>
