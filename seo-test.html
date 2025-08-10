@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SEO URL Testing - DocSpace</title>
+    
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: #f1f5f9;
+            margin-bottom: 10px;
+        }
+        
+        .test-info {
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        
+        .test-section {
+            background: rgba(30, 41, 59, 0.6);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .status {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .status.success {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+        }
+        
+        .status.error {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+        
+        .popular-companies-grid {
+            display: grid !important;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)) !important;
+            gap: 16px !important;
+            width: 100% !important;
+            margin-top: 20px;
+        }
+        
+        .popular-company-card {
+            display: block;
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(71, 85, 105, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .popular-company-card:hover {
+            background: rgba(30, 41, 59, 0.8);
+            border-color: rgba(99, 102, 241, 0.4);
+            transform: translateY(-2px);
+        }
+        
+        .company-name {
+            color: #f1f5f9;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+        
+        .company-details {
+            color: #94a3b8;
+            font-size: 14px;
+        }
+        
+        .url-test {
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        
+        .test-results {
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+        }
+        
+        .result-item {
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>SEO URL Testing Page</h1>
+        
+        <div class="test-info">
+            <p><strong>Test URL:</strong> This page is for testing SEO URLs without affecting production</p>
+            <p><strong>Current Location:</strong> <span id="currentUrl"></span></p>
+            <p><strong>Test Status:</strong> <span id="testStatus" class="status">Initializing...</span></p>
+        </div>
+        
+        <div class="test-section">
+            <h2>SEO URL Redirect Test</h2>
+            <p>The following script handles SEO URL redirects:</p>
+            <div class="url-test">
+                <pre id="redirectCode"></pre>
+            </div>
+            <div id="redirectTest" class="result-item"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>Popular Companies Grid Test</h2>
+            <p>Testing grid layout with popular companies:</p>
+            
+            <div class="popular-companies-grid">
+                <a href="/company/revolut-limited-fintech-09366592" class="popular-company-card" onclick="handleCompanyLink(event, '09366592', 'REVOLUT LTD', 'fintech')">
+                    <div class="company-name">Revolut</div>
+                    <div class="company-details">Digital Banking • £33B Valuation</div>
+                </a>
+                <a href="/company/wise-payments-limited-fintech-09836791" class="popular-company-card" onclick="handleCompanyLink(event, '09836791', 'WISE PAYMENTS LIMITED', 'fintech')">
+                    <div class="company-name">Wise</div>
+                    <div class="company-details">Money Transfer • £11B Market Cap</div>
+                </a>
+                <a href="/company/deliveroo-limited-food-delivery-10025549" class="popular-company-card" onclick="handleCompanyLink(event, '10025549', 'DELIVEROO LTD', 'food-delivery')">
+                    <div class="company-name">Deliveroo</div>
+                    <div class="company-details">Food Delivery • FTSE 250</div>
+                </a>
+                <a href="/company/monzo-bank-limited-digital-banking-10024595" class="popular-company-card" onclick="handleCompanyLink(event, '10024595', 'MONZO BANK LIMITED', 'digital-banking')">
+                    <div class="company-name">Monzo</div>
+                    <div class="company-details">Digital Bank • 9M+ Customers</div>
+                </a>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2>URL Generation Test</h2>
+            <p>Test the SEO URL generation function:</p>
+            <div class="test-results" id="urlGenTests"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>Test Links</h2>
+            <p>Click these to test navigation:</p>
+            <ul>
+                <li><a href="/company/tesco-plc-retail-00445790">Test SEO URL: Tesco PLC</a></li>
+                <li><a href="#company/00445790">Test Hash URL: Tesco PLC</a></li>
+                <li><a href="/company/hsbc-holdings-plc-banking-00617987">Test SEO URL: HSBC</a></li>
+                <li><a href="/company/invalid-url-test">Test Invalid SEO URL</a></li>
+            </ul>
+        </div>
+        
+        <div class="test-section">
+            <h2>Console Output</h2>
+            <div class="test-results" id="consoleOutput" style="height: 200px; overflow-y: auto;"></div>
+        </div>
+    </div>
+    
+    <script>
+        // Display current URL
+        document.getElementById('currentUrl').textContent = window.location.href;
+        
+        // Console output capture
+        const consoleOutput = document.getElementById('consoleOutput');
+        const originalLog = console.log;
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            const entry = document.createElement('div');
+            entry.textContent = `[LOG] ${args.join(' ')}`;
+            consoleOutput.appendChild(entry);
+        };
+        
+        // SEO URL Redirect Logic (same as production)
+        const redirectScript = `
+if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+    const path = window.location.pathname;
+    if (path.startsWith('/company/') && path.length > 9) {
+        // Extract company number from SEO URL
+        const pathParts = path.substring(9).split('-');
+        const companyNumber = pathParts[pathParts.length - 1];
+        
+        // Validate company number
+        if (companyNumber && /^[0-9A-Z]{8}$/i.test(companyNumber)) {
+            // For testing, just log instead of redirect
+            console.log('Would redirect to:', window.location.origin + '/#company/' + companyNumber.toUpperCase());
+            document.getElementById('redirectTest').innerHTML = 
+                '<strong>Redirect Test:</strong> Would redirect to: ' + 
+                window.location.origin + '/#company/' + companyNumber.toUpperCase();
+        } else {
+            console.log('Invalid company number:', companyNumber);
+            document.getElementById('redirectTest').innerHTML = 
+                '<strong>Redirect Test:</strong> Invalid company number: ' + companyNumber;
+        }
+    } else {
+        console.log('Not a company URL');
+        document.getElementById('redirectTest').innerHTML = 
+            '<strong>Redirect Test:</strong> Not a company URL';
+    }
+}`;
+        
+        // Display the redirect code
+        document.getElementById('redirectCode').textContent = redirectScript;
+        
+        // Execute redirect test
+        eval(redirectScript);
+        
+        // SEO URL Generation Function
+        function generateCompanySEOUrl(companyNumber, companyName, industry) {
+            const slug = companyName.toLowerCase()
+                .replace(/\s+plc$/i, '-plc')
+                .replace(/\s+ltd$/i, '-limited')
+                .replace(/\s+limited$/i, '-limited')
+                .replace(/[^a-z0-9-]+/g, '-')
+                .replace(/-+/g, '-')
+                .replace(/^-|-$/g, '');
+            
+            const industrySlug = industry ? `-${industry.toLowerCase().replace(/[^a-z0-9]+/g, '-')}` : '';
+            return `/company/${slug}${industrySlug}-${companyNumber.toLowerCase()}`;
+        }
+        
+        // Handle company links
+        function handleCompanyLink(event, companyNumber, companyName, industry) {
+            event.preventDefault();
+            
+            const seoUrl = generateCompanySEOUrl(companyNumber, companyName, industry);
+            console.log('Generated SEO URL:', seoUrl);
+            console.log('Would navigate to:', seoUrl);
+            
+            // For testing, just show what would happen
+            alert(`Would navigate to: ${seoUrl}\n\nOn production, this would redirect to: /#company/${companyNumber}`);
+        }
+        
+        // Test URL generation
+        const urlTests = [
+            { number: '09366592', name: 'REVOLUT LTD', industry: 'fintech' },
+            { number: '00445790', name: 'TESCO PLC', industry: 'retail' },
+            { number: '00617987', name: 'HSBC HOLDINGS PLC', industry: 'banking' },
+            { number: '00733114', name: 'PRIMARK STORES LIMITED', industry: 'fashion-retail' },
+            { number: '12345678', name: 'TEST & COMPANY (UK) LIMITED', industry: '' }
+        ];
+        
+        const urlGenTests = document.getElementById('urlGenTests');
+        urlTests.forEach(test => {
+            const url = generateCompanySEOUrl(test.number, test.name, test.industry);
+            const testResult = document.createElement('div');
+            testResult.className = 'result-item';
+            testResult.innerHTML = `
+                <strong>Company:</strong> ${test.name}<br>
+                <strong>Number:</strong> ${test.number}<br>
+                <strong>Industry:</strong> ${test.industry || 'none'}<br>
+                <strong>Generated URL:</strong> <code>${url}</code>
+            `;
+            urlGenTests.appendChild(testResult);
+        });
+        
+        // Update status
+        document.getElementById('testStatus').textContent = 'Ready';
+        document.getElementById('testStatus').className = 'status success';
+        
+        // Log grid information
+        const grid = document.querySelector('.popular-companies-grid');
+        const computedStyle = window.getComputedStyle(grid);
+        console.log('Grid display:', computedStyle.display);
+        console.log('Grid template columns:', computedStyle.gridTemplateColumns);
+        console.log('Number of grid items:', grid.children.length);
+    </script>
+</body>
+</html>
