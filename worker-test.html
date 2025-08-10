@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Worker Route Test</title>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <h1>Testing Cloudflare Worker Routes</h1>
+    
+    <p>If you see this page at https://docspace.uk/worker-test, then Cloudflare Worker is NOT intercepting requests.</p>
+    
+    <p>If the Worker was active, it would have modified this page or shown different content.</p>
+    
+    <script>
+        console.log('Worker test page loaded from GitHub Pages');
+        console.log('URL:', window.location.href);
+    </script>
+</body>
+</html>
