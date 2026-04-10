@@ -1,45 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
-  <!-- Background circle -->
-  <circle cx="256" cy="256" r="240" fill="#6366f1"/>
-  
-  <!-- Three bars representing buildings/documents -->
-  <g transform="translate(256, 256)">
-    <!-- Left bar -->
-    <rect x="-120" y="-80" width="60" height="160" fill="white" rx="4"/>
-    
-    <!-- Middle bar (taller) -->
-    <rect x="-30" y="-100" width="60" height="200" fill="white" rx="4"/>
-    
-    <!-- Right bar -->
-    <rect x="60" y="-60" width="60" height="140" fill="white" rx="4"/>
-    
-    <!-- Horizontal lines on bars to represent documents/floors -->
-    <!-- Left bar lines -->
-    <line x1="-110" y1="-60" x2="-70" y2="-60" stroke="#6366f1" stroke-width="3"/>
-    <line x1="-110" y1="-40" x2="-70" y2="-40" stroke="#6366f1" stroke-width="3"/>
-    <line x1="-110" y1="-20" x2="-70" y2="-20" stroke="#6366f1" stroke-width="3"/>
-    <line x1="-110" y1="0" x2="-70" y2="0" stroke="#6366f1" stroke-width="3"/>
-    <line x1="-110" y1="20" x2="-70" y2="20" stroke="#6366f1" stroke-width="3"/>
-    <line x1="-110" y1="40" x2="-70" y2="40" stroke="#6366f1" stroke-width="3"/>
-    <line x1="-110" y1="60" x2="-70" y2="60" stroke="#6366f1" stroke-width="3"/>
-    
-    <!-- Middle bar lines -->
-    <line x1="-20" y1="-80" x2="20" y2="-80" stroke="#6366f1" stroke-width="3"/>
-    <line x1="-20" y1="-60" x2="20" y2="-60" stroke="#6366f1" stroke-width="3"/>
-    <line x1="-20" y1="-40" x2="20" y2="-40" stroke="#6366f1" stroke-width="3"/>
-    <line x1="-20" y1="-20" x2="20" y2="-20" stroke="#6366f1" stroke-width="3"/>
-    <line x1="-20" y1="0" x2="20" y2="0" stroke="#6366f1" stroke-width="3"/>
-    <line x1="-20" y1="20" x2="20" y2="20" stroke="#6366f1" stroke-width="3"/>
-    <line x1="-20" y1="40" x2="20" y2="40" stroke="#6366f1" stroke-width="3"/>
-    <line x1="-20" y1="60" x2="20" y2="60" stroke="#6366f1" stroke-width="3"/>
-    <line x1="-20" y1="80" x2="20" y2="80" stroke="#6366f1" stroke-width="3"/>
-    
-    <!-- Right bar lines -->
-    <line x1="70" y1="-40" x2="110" y2="-40" stroke="#6366f1" stroke-width="3"/>
-    <line x1="70" y1="-20" x2="110" y2="-20" stroke="#6366f1" stroke-width="3"/>
-    <line x1="70" y1="0" x2="110" y2="0" stroke="#6366f1" stroke-width="3"/>
-    <line x1="70" y1="20" x2="110" y2="20" stroke="#6366f1" stroke-width="3"/>
-    <line x1="70" y1="40" x2="110" y2="40" stroke="#6366f1" stroke-width="3"/>
-    <line x1="70" y1="60" x2="110" y2="60" stroke="#6366f1" stroke-width="3"/>
-  </g>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- Paper background (rounded square for favicon) -->
+  <rect width="64" height="64" rx="8" fill="#f3ede1"/>
+  <!-- Three bars — ink / signal red / gold (matching nav logo) -->
+  <rect x="10"   y="18" width="12" height="28" fill="#0d1117" rx="1"/>
+  <rect x="26"   y="10" width="12" height="36" fill="#ae2b17" rx="1"/>
+  <rect x="42"   y="22" width="12" height="24" fill="#8a6d2c" rx="1"/>
 </svg>
