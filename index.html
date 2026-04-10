@@ -7559,27 +7559,32 @@
       background: transparent !important;
       position: relative !important;
     }
-    .hero::before{
-      content: "UK Business Intelligence" !important;
-      display: block !important;
+    .hero::before,
+    .hero::after{display: none !important; content: none !important}
+
+    /* Real HTML eyebrow — flex-centered with hairline below */
+    .hero-eyebrow{
       max-width: 1180px !important;
       margin: 0 auto 32px !important;
       padding-bottom: 10px !important;
       border-bottom: 1px solid var(--rule-2) !important;
-      font-family: var(--mono) !important;
-      font-size: 12px !important;
-      font-weight: 700 !important;
-      letter-spacing: .24em !important;
-      text-transform: uppercase !important;
-      color: #d41a0b !important;
-      text-align: center !important;
-      background: none !important;
+      display: flex !important;
+      justify-content: center !important;
+      align-items: center !important;
       position: relative !important;
       z-index: 101 !important;
-      inset: auto !important;
-      filter: none !important;
-      border-radius: 0 !important;
-      text-shadow: 0 0 0 #d41a0b !important;
+    }
+    .hero-eyebrow-text{
+      display: inline-block !important;
+      font-family: var(--mono) !important;
+      font-size: 12px !important;
+      font-weight: 600 !important;
+      letter-spacing: .24em !important;
+      text-transform: uppercase !important;
+      color: #ae2b17 !important;
+      padding-left: .24em !important;
+      line-height: 1 !important;
+      white-space: nowrap !important;
     }
     .hero-content{
       max-width: 1180px !important;
@@ -7593,16 +7598,24 @@
       font-family: var(--serif) !important;
       font-weight: 360 !important;
       font-variation-settings: "opsz" 144, "wght" 360, "SOFT" 30 !important;
-      font-size: clamp(52px, 8.4vw, 124px) !important;
-      line-height: .93 !important;
-      letter-spacing: -.028em !important;
+      font-size: clamp(42px, 6.6vw, 96px) !important;
+      line-height: .96 !important;
+      letter-spacing: -.025em !important;
       color: var(--ink) !important;
       background: none !important;
       -webkit-text-fill-color: var(--ink) !important;
       text-shadow: none !important;
-      margin: 0 auto 36px !important;
+      margin: 0 auto 32px !important;
       max-width: 1100px !important;
+      width: 100% !important;
+      text-align: center !important;
+      display: block !important;
+      padding: 0 16px !important;
+      box-sizing: border-box !important;
+      word-wrap: break-word !important;
+      overflow-wrap: break-word !important;
     }
+    .hero-title .nowrap{white-space: nowrap !important}
     .hero-title em{
       font-style: italic !important;
       font-variation-settings: "opsz" 144, "wght" 340, "SOFT" 60 !important;
@@ -7614,12 +7627,12 @@
     /* ─── HERO DESCRIPTION ─── */
     .hero-description{
       font-family: var(--sans) !important;
-      font-size: 18px !important;
+      font-size: 16px !important;
       line-height: 1.55 !important;
       font-weight: 400 !important;
       color: var(--ink-2) !important;
-      max-width: 640px !important;
-      margin: 0 auto 52px !important;
+      max-width: 600px !important;
+      margin: 0 auto 44px !important;
       letter-spacing: -.003em !important;
     }
 
@@ -7633,20 +7646,20 @@
       mask-image: linear-gradient(90deg, transparent 0, #000 120px, #000 calc(100% - 120px), transparent 100%);
       -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 120px, #000 calc(100% - 120px), transparent 100%);
     }
-    .feature-ribbon{gap: 14px !important}
+    .feature-ribbon{gap: 12px !important}
 
     .hero-badge{
       background: transparent !important;
       border: 1.5px solid var(--rule-2) !important;
       color: var(--ink) !important;
       font-family: var(--mono) !important;
-      font-size: 13px !important;
+      font-size: 11.5px !important;
       font-weight: 500 !important;
-      letter-spacing: .14em !important;
+      letter-spacing: .13em !important;
       text-transform: uppercase !important;
       border-radius: 0 !important;
-      padding: 14px 20px !important;
-      gap: 10px !important;
+      padding: 11px 16px !important;
+      gap: 8px !important;
       box-shadow: none !important;
       backdrop-filter: none !important;
       line-height: 1 !important;
@@ -7655,8 +7668,8 @@
     .hero-badge svg{
       color: var(--signal) !important;
       stroke: var(--signal) !important;
-      width: 16px !important;
-      height: 16px !important;
+      width: 14px !important;
+      height: 14px !important;
     }
     .hero-badge.sanctions{
       background: var(--ink) !important;
@@ -8568,16 +8581,17 @@
 
     #exploreCompanyName.form-input{
       background: #fffaf0 !important;
-      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 24 24' fill='none' stroke='%23ae2b17' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='11' cy='11' r='7'/><line x1='21' y1='21' x2='16.65' y2='16.65'/></svg>") !important;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23ae2b17' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='11' cy='11' r='7'/><line x1='21' y1='21' x2='16.65' y2='16.65'/></svg>") !important;
       background-repeat: no-repeat !important;
-      background-position: left 32px center !important;
-      border: 2.5px solid var(--ink) !important;
+      background-position: left 26px center !important;
+      background-size: 22px 22px !important;
+      border: 2px solid var(--ink) !important;
       border-radius: 2px !important;
-      padding: 32px 32px 32px 80px !important;
+      padding: 26px 28px 26px 66px !important;
       font-family: var(--sans) !important;
       font-weight: 500 !important;
-      font-size: 22px !important;
-      letter-spacing: -.015em !important;
+      font-size: 19px !important;
+      letter-spacing: -.012em !important;
       color: var(--ink) !important;
       box-shadow: none !important;
       transition: border-color .18s ease, background-color .18s ease !important;
@@ -10554,8 +10568,9 @@
     <div class="main-container" style="padding-top: 72px;">
         <!-- Hero section -->
         <div class="hero">
+            <div class="hero-eyebrow"><span class="hero-eyebrow-text">UK BUSINESS INTELLIGENCE</span></div>
             <div class="hero-content">
-                <h1 class="hero-title">AI Business Intelligence on 5.5 Million UK Companies</h1>
+                <h1 class="hero-title">AI Business Intelligence on <span class="nowrap">5.5 Million</span> UK Companies</h1>
                 <p class="hero-description">Go beyond Companies House. Combine insights from 10+ official UK public data sources into one AI-powered platform — detect risks, reveal networks, and access documents at scale.</p>
                 
                 <!-- Feature ribbon -->
@@ -11124,8 +11139,7 @@
             </div>
             <div class="footer-links">
                 <a href="/oldest-plc-companies.html">Oldest PLC Companies</a>
-                <a href="/faq">FAQ</a>
-                <a href="mailto:mahin84@gmail.com">Contact</a>
+                <a href="mailto:mahin84@gmail.com" target="_blank" rel="noopener">Contact</a>
             </div>
             <div class="footer-copyright">
                 © 2025–2026 DocSpace UK — Companies House Document Download Service
