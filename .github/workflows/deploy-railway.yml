@@ -1,0 +1,38 @@
+name: Deploy Backend to Railway
+
+on:
+  push:
+    branches: [ PDF ]
+    paths:
+      - 'index.js'
+      - 'package.json'
+      - 'package-lock.json'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        
+    - name: Install Railway CLI
+      run: npm install -g @railway/cli
+      
+    - name: Deploy to Railway
+      run: |
+        railway login --token ${{ secrets.RAILWAY_TOKEN }}
+        railway link ${{ secrets.RAILWAY_PROJECT_ID }}
+        railway variables set OPENAI_API_KEY="${{ secrets.OPENAI_API_KEY }}"
+        railway variables set NODE_ENV=production
+        railway up --detach
+      env:
+        RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}

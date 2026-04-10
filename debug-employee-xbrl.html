@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Employee XBRL Content</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .success { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
+        .info { color: blue; }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .xbrl-content {
+            background: #f0f0f0;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 11px;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        .highlight {
+            background: yellow;
+            font-weight: bold;
+        }
+        .tag-info {
+            background: #e3f2fd;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Debug Employee Data in XBRL</h1>
+    
+    <div class="section">
+        <h2>Fetch and Analyze XBRL Document</h2>
+        <label>Company Number: <input type="text" id="company-number" value="00445790" placeholder="e.g. 00445790"></label>
+        <button onclick="debugXBRL()">Debug XBRL</button>
+        <div id="results"></div>
+    </div>
+    
+    <script>
+        async function debugXBRL() {
+            const companyNumber = document.getElementById('company-number').value;
+            const results = document.getElementById('results');
+            results.innerHTML = '<p class="info">Fetching XBRL document...</p>';
+            
+            try {
+                // Get filing history
+                const proxyUrl = 'http://localhost:3002';
+                const filingResponse = await fetch(`${proxyUrl}/api/proxy/companies-house/company/${companyNumber}/filing-history?category=accounts&items_per_page=5`);
+                const filingData = await filingResponse.json();
+                
+                if (!filingData.items || filingData.items.length === 0) {
+                    results.innerHTML = '<p class="error">No filings found</p>';
+                    return;
+                }
+                
+                // Get the most recent filing
+                const filing = filingData.items[0];
+                results.innerHTML += `<p>Analyzing: ${filing.description} (${filing.date})</p>`;
+                
+                // Fetch XBRL
+                const xbrlUrl = `${proxyUrl}/api/proxy/ixbrl/${companyNumber}/${filing.transaction_id}?format=xhtml`;
+                const xbrlResponse = await fetch(xbrlUrl);
+                const xbrlText = await xbrlResponse.text();
+                
+                results.innerHTML += `<p>XBRL document size: ${xbrlText.length} characters</p>`;
+                
+                // Search for employee-related content
+                results.innerHTML += '<h3>Searching for Employee Data...</h3>';
+                
+                // Method 1: Search for any text containing "employee"
+                const employeeRegex = /(.{0,100}[Ee]mployee[s]?.{0,100})/g;
+                const employeeMatches = [...xbrlText.matchAll(employeeRegex)];
+                
+                if (employeeMatches.length > 0) {
+                    results.innerHTML += `<p class="success">Found ${employeeMatches.length} mentions of "employee"</p>`;
+                    
+                    // Show first 10 matches
+                    results.innerHTML += '<h4>Employee mentions in document:</h4>';
+                    employeeMatches.slice(0, 10).forEach((match, i) => {
+                        const div = document.createElement('div');
+                        div.className = 'xbrl-content';
+                        div.innerHTML = match[1].replace(/([Ee]mployee[s]?)/g, '<span class="highlight">$1</span>');
+                        results.appendChild(div);
+                    });
+                }
+                
+                // Method 2: Look for specific patterns with numbers
+                const numberPatterns = [
+                    /[Ee]mployee[s]?[^0-9]{0,50}([0-9,]+)/g,
+                    /[Aa]verage\s+number\s+of\s+employees[^0-9]{0,50}([0-9,]+)/g,
+                    /[Nn]umber\s+of\s+employees[^0-9]{0,50}([0-9,]+)/g,
+                    /[Ss]taff\s+numbers?[^0-9]{0,50}([0-9,]+)/g
+                ];
+                
+                results.innerHTML += '<h4>Employee numbers found:</h4>';
+                let foundNumbers = false;
+                
+                for (const pattern of numberPatterns) {
+                    const matches = [...xbrlText.matchAll(pattern)];
+                    if (matches.length > 0) {
+                        foundNumbers = true;
+                        matches.forEach(match => {
+                            const div = document.createElement('div');
+                            div.className = 'tag-info';
+                            div.innerHTML = `Pattern: ${pattern.source}<br>
+                                           Context: ${match[0]}<br>
+                                           Number: <span class="success">${match[1]}</span>`;
+                            results.appendChild(div);
+                        });
+                    }
+                }
+                
+                if (!foundNumbers) {
+                    results.innerHTML += '<p class="error">No employee numbers found with patterns</p>';
+                }
+                
+                // Method 3: Parse DOM and look for XBRL tags
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(xbrlText, 'text/html');
+                
+                // Find all elements with 'name' attribute
+                const namedElements = doc.querySelectorAll('[name]');
+                results.innerHTML += `<h4>Named elements (${namedElements.length} total):</h4>`;
+                
+                const employeeTags = [];
+                namedElements.forEach(element => {
+                    const name = element.getAttribute('name');
+                    if (name && name.toLowerCase().includes('employee')) {
+                        employeeTags.push({
+                            name: name,
+                            value: element.textContent.trim(),
+                            context: element.getAttribute('contextRef')
+                        });
+                    }
+                });
+                
+                if (employeeTags.length > 0) {
+                    results.innerHTML += '<p class="success">Found employee XBRL tags:</p>';
+                    employeeTags.forEach(tag => {
+                        const div = document.createElement('div');
+                        div.className = 'tag-info';
+                        div.innerHTML = `Tag: <strong>${tag.name}</strong><br>
+                                       Value: <strong>${tag.value}</strong><br>
+                                       Context: ${tag.context || 'none'}`;
+                        results.appendChild(div);
+                    });
+                } else {
+                    results.innerHTML += '<p class="error">No employee XBRL tags found</p>';
+                }
+                
+                // Method 4: Look for ix:nonFraction elements
+                const ixElements = doc.querySelectorAll('ix\\:nonFraction, ix\\:nonNumeric');
+                const ixEmployeeTags = [];
+                
+                ixElements.forEach(element => {
+                    const name = element.getAttribute('name');
+                    if (name && name.toLowerCase().includes('employee')) {
+                        ixEmployeeTags.push({
+                            name: name,
+                            value: element.textContent.trim(),
+                            format: element.getAttribute('format'),
+                            decimals: element.getAttribute('decimals')
+                        });
+                    }
+                });
+                
+                if (ixEmployeeTags.length > 0) {
+                    results.innerHTML += '<p class="success">Found ix:nonFraction employee tags:</p>';
+                    ixEmployeeTags.forEach(tag => {
+                        const div = document.createElement('div');
+                        div.className = 'tag-info';
+                        div.innerHTML = `ix:nonFraction Tag: <strong>${tag.name}</strong><br>
+                                       Value: <strong>${tag.value}</strong><br>
+                                       Format: ${tag.format || 'none'}<br>
+                                       Decimals: ${tag.decimals || 'none'}`;
+                        results.appendChild(div);
+                    });
+                }
+                
+                // Method 5: Search in table cells
+                const tableCells = doc.querySelectorAll('td, th');
+                let foundInTable = false;
+                
+                tableCells.forEach(cell => {
+                    if (cell.textContent.toLowerCase().includes('employee')) {
+                        const nextCell = cell.nextElementSibling;
+                        if (nextCell && /^\s*[0-9,]+\s*$/.test(nextCell.textContent)) {
+                            if (!foundInTable) {
+                                results.innerHTML += '<h4>Found in table:</h4>';
+                                foundInTable = true;
+                            }
+                            const div = document.createElement('div');
+                            div.className = 'tag-info';
+                            div.innerHTML = `Label: ${cell.textContent.trim()}<br>
+                                           Value: <span class="success">${nextCell.textContent.trim()}</span>`;
+                            results.appendChild(div);
+                        }
+                    }
+                });
+                
+                // Show a sample of the XBRL around employee mentions
+                if (employeeMatches.length > 0) {
+                    results.innerHTML += '<h4>Full context of first employee mention:</h4>';
+                    const firstMatch = employeeMatches[0];
+                    const index = xbrlText.indexOf(firstMatch[1]);
+                    const contextStart = Math.max(0, index - 500);
+                    const contextEnd = Math.min(xbrlText.length, index + 500);
+                    const context = xbrlText.substring(contextStart, contextEnd);
+                    
+                    const contextDiv = document.createElement('div');
+                    contextDiv.className = 'xbrl-content';
+                    contextDiv.textContent = context;
+                    results.appendChild(contextDiv);
+                }
+                
+            } catch (error) {
+                results.innerHTML += `<p class="error">Error: ${error.message}</p>`;
+                console.error(error);
+            }
+        }
+    </script>
+</body>
+</html>

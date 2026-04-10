@@ -1,0 +1,98 @@
+{
+  "testDate": "2025-07-07T00:05:03.689Z",
+  "testFiling": {
+    "date": "2022-09-21",
+    "description": "accounts-with-accounts-type-full",
+    "type": "AA",
+    "size": 1041075
+  },
+  "parserResults": {
+    "companyNumber": "08508165",
+    "filing": {
+      "transaction_id": "MzM1MjI2NDQzMmFkaXF6a2N4",
+      "barcode": "ABCL5XCR",
+      "type": "AA",
+      "date": "2022-09-21",
+      "category": "accounts",
+      "description": "accounts-with-accounts-type-full",
+      "description_values": {
+        "made_up_date": "2020-12-31"
+      },
+      "pages": 30,
+      "action_date": "2020-12-31",
+      "paper_filed": true,
+      "links": {
+        "self": "/company/08508165/filing-history/MzM1MjI2NDQzMmFkaXF6a2N4",
+        "document_metadata": "https://document-api.company-information.service.gov.uk/document/yk4NsFU3PvVpyWQAAhSKPrlO34pNbfZAnJuCg_7eI2M"
+      },
+      "companyNumber": "08508165",
+      "documentUrl": "https://document-api.company-information.service.gov.uk/document/yk4NsFU3PvVpyWQAAhSKPrlO34pNbfZAnJuCg_7eI2M/content",
+      "pdfSize": 1041075,
+      "metadata": {
+        "company_number": "08508165",
+        "barcode": "ABCL5XCR",
+        "significant_date": "2020-12-31T00:00:00Z",
+        "significant_date_type": "made-up-date",
+        "category": "accounts",
+        "pages": 30,
+        "filename": "",
+        "created_at": "2022-09-22T06:55:30.005599941Z",
+        "etag": "",
+        "links": {
+          "self": "https://document-api.company-information.service.gov.uk/document/yk4NsFU3PvVpyWQAAhSKPrlO34pNbfZAnJuCg_7eI2M",
+          "document": "https://document-api.company-information.service.gov.uk/document/yk4NsFU3PvVpyWQAAhSKPrlO34pNbfZAnJuCg_7eI2M/content"
+        },
+        "resources": {
+          "application/pdf": {
+            "content_length": 1041075
+          }
+        }
+      }
+    },
+    "extractionMethods": [
+      "pdf-parse",
+      "binary-extraction",
+      "pattern-extraction"
+    ],
+    "financialData": {
+      "revenue": null,
+      "profit": null,
+      "totalAssets": null,
+      "netAssets": null,
+      "cash": null,
+      "employees": null,
+      "shareholdersEquity": null,
+      "rawExtractions": []
+    },
+    "metadata": {
+      "isImageBased": true,
+      "pageCount": 30,
+      "documentSize": 1041075,
+      "extractionDate": "2025-07-07T00:05:03.336Z",
+      "hasTextStreams": false,
+      "hasImages": true,
+      "hasTables": true,
+      "imageCount": 30,
+      "encoding": "CCITT Fax (scanned)"
+    },
+    "confidence": 30,
+    "recommendations": [
+      {
+        "type": "warning",
+        "message": "Document is image-based (scanned). Consider OCR for better extraction.",
+        "priority": "high"
+      },
+      {
+        "type": "warning",
+        "message": "No financial metrics extracted. Consider alternative extraction strategies.",
+        "priority": "medium"
+      }
+    ]
+  },
+  "testMetrics": {
+    "extractionMethodsUsed": 3,
+    "financialMetricsFound": 0,
+    "confidenceScore": 30,
+    "isImageBased": true
+  }
+}

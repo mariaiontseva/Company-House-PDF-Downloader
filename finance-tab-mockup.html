@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finance Tab Mockup - Company Modal</title>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f172a;
+            color: #e7e9ea;
+            padding: 20px;
+        }
+        
+        .tab-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 40px;
+        }
+        
+        .tab-pane h3 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 24px;
+        }
+        
+        /* Financial Summary Cards */
+        .finance-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+        
+        .finance-card {
+            background: #334155;
+            border: 1px solid #475569;
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .finance-card:hover {
+            border-color: #6366f1;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.1);
+        }
+        
+        .finance-metric {
+            font-size: 28px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 4px;
+        }
+        
+        .finance-label {
+            font-size: 13px;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+        
+        .finance-change {
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .finance-change.positive {
+            color: #10b981;
+        }
+        
+        .finance-change.negative {
+            color: #ef4444;
+        }
+        
+        /* Financial Statements */
+        .financial-statements {
+            margin-bottom: 32px;
+        }
+        
+        .statement-selector {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #334155;
+        }
+        
+        .statement-tab {
+            padding: 12px 20px;
+            background: none;
+            border: none;
+            color: #94a3b8;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .statement-tab:hover {
+            color: #e2e8f0;
+        }
+        
+        .statement-tab.active {
+            color: #ffffff;
+        }
+        
+        .statement-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #6366f1;
+        }
+        
+        .statement-content {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            padding: 24px;
+        }
+        
+        .statement-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .statement-table th,
+        .statement-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #334155;
+        }
+        
+        .statement-table th {
+            font-size: 12px;
+            font-weight: 600;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .statement-table td {
+            font-size: 14px;
+            color: #e2e8f0;
+        }
+        
+        .statement-table td:not(:first-child) {
+            text-align: right;
+            font-family: 'SF Mono', Monaco, monospace;
+        }
+        
+        .statement-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .statement-table tr.total-row td {
+            font-weight: 700;
+            border-top: 2px solid #475569;
+            padding-top: 16px;
+        }
+        
+        /* Financial Ratios */
+        .financial-ratios {
+            margin-bottom: 32px;
+        }
+        
+        .ratios-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+        }
+        
+        .ratio-item {
+            background: #334155;
+            border: 1px solid #475569;
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+        }
+        
+        .ratio-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 4px;
+        }
+        
+        .ratio-label {
+            font-size: 12px;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        /* Filing Info */
+        .filing-info {
+            background: #334155;
+            border: 1px solid #475569;
+            border-radius: 8px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .filing-info-icon {
+            width: 40px;
+            height: 40px;
+            background: #475569;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .filing-info-text {
+            flex: 1;
+        }
+        
+        .filing-info-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #e2e8f0;
+            margin-bottom: 4px;
+        }
+        
+        .filing-info-detail {
+            font-size: 13px;
+            color: #94a3b8;
+        }
+        
+        /* Charts placeholder */
+        .chart-container {
+            background: #334155;
+            border: 1px solid #475569;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            min-height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748b;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .tab-content {
+                padding: 20px;
+            }
+            
+            .finance-summary {
+                grid-template-columns: 1fr;
+            }
+            
+            .statement-selector {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            .statement-content {
+                overflow-x: auto;
+            }
+            
+            .ratios-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="tab-content">
+        <div class="tab-pane active" id="finance">
+            <h3>Financial Overview</h3>
+            
+            <!-- Filing Info -->
+            <div class="filing-info">
+                <div class="filing-info-icon">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                </div>
+                <div class="filing-info-text">
+                    <div class="filing-info-title">Latest Accounts Filed</div>
+                    <div class="filing-info-detail">Annual accounts made up to 25 February 2024 • Filed 21 May 2024</div>
+                </div>
+            </div>
+            
+            <!-- Financial Summary Cards -->
+            <div class="finance-summary">
+                <div class="finance-card">
+                    <div class="finance-label">Total Revenue</div>
+                    <div class="finance-metric">£65.8B</div>
+                    <div class="finance-change positive">
+                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M8 4l4 4H4l4-4z"/>
+                        </svg>
+                        +7.2% YoY
+                    </div>
+                </div>
+                
+                <div class="finance-card">
+                    <div class="finance-label">Operating Profit</div>
+                    <div class="finance-metric">£2.8B</div>
+                    <div class="finance-change positive">
+                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M8 4l4 4H4l4-4z"/>
+                        </svg>
+                        +13.5% YoY
+                    </div>
+                </div>
+                
+                <div class="finance-card">
+                    <div class="finance-label">Net Profit</div>
+                    <div class="finance-metric">£2.3B</div>
+                    <div class="finance-change positive">
+                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M8 4l4 4H4l4-4z"/>
+                        </svg>
+                        +22.1% YoY
+                    </div>
+                </div>
+                
+                <div class="finance-card">
+                    <div class="finance-label">Total Assets</div>
+                    <div class="finance-metric">£48.6B</div>
+                    <div class="finance-change negative">
+                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M8 12l4-4H4l4 4z"/>
+                        </svg>
+                        -2.3% YoY
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Financial Ratios -->
+            <div class="financial-ratios">
+                <h4 style="font-size: 18px; font-weight: 600; color: #ffffff; margin-bottom: 16px;">Key Financial Ratios</h4>
+                <div class="ratios-grid">
+                    <div class="ratio-item">
+                        <div class="ratio-value">1.08</div>
+                        <div class="ratio-label">Current Ratio</div>
+                    </div>
+                    <div class="ratio-item">
+                        <div class="ratio-value">3.5%</div>
+                        <div class="ratio-label">Net Margin</div>
+                    </div>
+                    <div class="ratio-item">
+                        <div class="ratio-value">4.7%</div>
+                        <div class="ratio-label">ROA</div>
+                    </div>
+                    <div class="ratio-item">
+                        <div class="ratio-value">18.2%</div>
+                        <div class="ratio-label">ROE</div>
+                    </div>
+                    <div class="ratio-item">
+                        <div class="ratio-value">0.82</div>
+                        <div class="ratio-label">Debt/Equity</div>
+                    </div>
+                    <div class="ratio-item">
+                        <div class="ratio-value">272K</div>
+                        <div class="ratio-label">Employees</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Revenue Chart Placeholder -->
+            <div class="chart-container">
+                <div style="text-align: center;">
+                    <svg width="48" height="48" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                    </svg>
+                    <p style="margin-top: 16px;">Revenue Trend Chart (5 Years)</p>
+                </div>
+            </div>
+            
+            <!-- Financial Statements -->
+            <div class="financial-statements">
+                <div class="statement-selector">
+                    <button class="statement-tab active">Income Statement</button>
+                    <button class="statement-tab">Balance Sheet</button>
+                    <button class="statement-tab">Cash Flow</button>
+                </div>
+                
+                <div class="statement-content">
+                    <table class="statement-table">
+                        <thead>
+                            <tr>
+                                <th>Income Statement</th>
+                                <th>2024</th>
+                                <th>2023</th>
+                                <th>Change</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Revenue</td>
+                                <td>£65,762m</td>
+                                <td>£61,344m</td>
+                                <td>+7.2%</td>
+                            </tr>
+                            <tr>
+                                <td>Cost of Sales</td>
+                                <td>(£60,424m)</td>
+                                <td>(£56,422m)</td>
+                                <td>+7.1%</td>
+                            </tr>
+                            <tr>
+                                <td>Gross Profit</td>
+                                <td>£5,338m</td>
+                                <td>£4,922m</td>
+                                <td>+8.5%</td>
+                            </tr>
+                            <tr>
+                                <td>Operating Expenses</td>
+                                <td>(£2,535m)</td>
+                                <td>(£2,454m)</td>
+                                <td>+3.3%</td>
+                            </tr>
+                            <tr>
+                                <td>Operating Profit</td>
+                                <td>£2,803m</td>
+                                <td>£2,468m</td>
+                                <td>+13.6%</td>
+                            </tr>
+                            <tr>
+                                <td>Finance Costs</td>
+                                <td>(£413m)</td>
+                                <td>(£445m)</td>
+                                <td>-7.2%</td>
+                            </tr>
+                            <tr>
+                                <td>Tax</td>
+                                <td>(£525m)</td>
+                                <td>(£451m)</td>
+                                <td>+16.4%</td>
+                            </tr>
+                            <tr class="total-row">
+                                <td>Net Profit</td>
+                                <td>£2,297m</td>
+                                <td>£1,881m</td>
+                                <td>+22.1%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

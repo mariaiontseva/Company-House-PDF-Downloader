@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Employee Debug - FIND THE BALANCE</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .section { background: white; padding: 15px; margin: 10px 0; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .success { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
+        .xbrl-content { background: #f0f0f0; padding: 10px; font-family: monospace; font-size: 11px; max-height: 300px; overflow-y: auto; white-space: pre-wrap; }
+        .highlight { background: yellow; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>Debug Employee Extraction - FIND THE BALANCE LIMITED</h1>
+    <button onclick="debugEmployee()">Debug Employee Data</button>
+    <div id="results"></div>
+    
+    <script src="enhanced-employee-parser.js"></script>
+    <script src="real-xbrl-parser.js"></script>
+    
+    <script>
+        async function debugEmployee() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<p>Fetching XBRL data...</p>';
+            
+            try {
+                // Fetch filing data
+                const filingResponse = await fetch(`http://localhost:3002/api/proxy/companies-house/company/11236758/filing-history?category=accounts&items_per_page=1`);
+                const filingData = await filingResponse.json();
+                
+                if (!filingData.items || filingData.items.length === 0) {
+                    results.innerHTML = '<p class="error">No filings found</p>';
+                    return;
+                }
+                
+                const filing = filingData.items[0];
+                results.innerHTML = `<div class="section"><h3>Filing Info</h3>`;
+                results.innerHTML += `<p>Description: ${filing.description}</p>`;
+                results.innerHTML += `<p>Date: ${filing.date}</p>`;
+                results.innerHTML += `<p>Transaction ID: ${filing.transaction_id}</p></div>`;
+                
+                // Fetch XBRL
+                const xbrlUrl = `http://localhost:3002/api/proxy/ixbrl/11236758/${filing.transaction_id}?format=xhtml`;
+                const xbrlResponse = await fetch(xbrlUrl);
+                const xbrlText = await xbrlResponse.text();
+                
+                results.innerHTML += `<div class="section"><h3>XBRL Analysis</h3>`;
+                results.innerHTML += `<p>Document size: ${xbrlText.length} characters</p>`;
+                
+                // Find employee-related content
+                const employeeRegex = /(.{0,200}(?:employee|Employee|EMPLOYEE|staff|Staff|headcount|Headcount).{0,200})/g;
+                const matches = [...xbrlText.matchAll(employeeRegex)];
+                
+                results.innerHTML += `<p>Found ${matches.length} employee-related sections</p></div>`;
+                
+                // Show each match
+                results.innerHTML += '<div class="section"><h3>Employee Content in XBRL:</h3>';
+                matches.forEach((match, i) => {
+                    const content = match[0]
+                        .replace(/</g, '&lt;')
+                        .replace(/>/g, '&gt;')
+                        .replace(/(employee|Employee|EMPLOYEE|staff|Staff|headcount|Headcount)/g, '<span class="highlight">$1</span>');
+                    results.innerHTML += `<div class="xbrl-content">${i+1}. ${content}</div>`;
+                });
+                results.innerHTML += '</div>';
+                
+                // Parse with DOM
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(xbrlText, 'text/html');
+                
+                // Find the specific employee cell
+                const employeeCell = doc.querySelector('#employeesNote-curr-val');
+                if (employeeCell) {
+                    results.innerHTML += '<div class="section"><h3>Found Employee Cell:</h3>';
+                    results.innerHTML += `<p>ID: employeesNote-curr-val</p>`;
+                    results.innerHTML += `<p>Content: "${employeeCell.textContent}"</p>`;
+                    results.innerHTML += `<p>HTML: ${employeeCell.outerHTML.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>`;
+                    results.innerHTML += '</div>';
+                }
+                
+                // Look for table structure
+                const tables = doc.querySelectorAll('table');
+                results.innerHTML += `<div class="section"><h3>Tables Found: ${tables.length}</h3>`;
+                
+                tables.forEach((table, tableIndex) => {
+                    const rows = table.querySelectorAll('tr');
+                    rows.forEach((row, rowIndex) => {
+                        const cells = row.querySelectorAll('td, th');
+                        cells.forEach(cell => {
+                            if (cell.textContent.toLowerCase().includes('employee')) {
+                                results.innerHTML += `<p>Table ${tableIndex+1}, Row ${rowIndex+1}: ${cell.textContent}</p>`;
+                                // Show next cells in row
+                                const nextSibling = cell.nextElementSibling;
+                                if (nextSibling) {
+                                    results.innerHTML += `<p>Next cell: "${nextSibling.textContent}"</p>`;
+                                }
+                            }
+                        });
+                    });
+                });
+                results.innerHTML += '</div>';
+                
+                // Test enhanced parser
+                results.innerHTML += '<div class="section"><h3>Enhanced Parser Test:</h3>';
+                const enhancedResult = EnhancedEmployeeParser.extractEmployees(xbrlText);
+                if (enhancedResult) {
+                    results.innerHTML += `<p class="success">✓ Found ${enhancedResult.value} employees</p>`;
+                    results.innerHTML += `<p>Source: ${enhancedResult.source}</p>`;
+                } else {
+                    results.innerHTML += '<p class="error">✗ Enhanced parser found no employees</p>';
+                }
+                results.innerHTML += '</div>';
+                
+            } catch (error) {
+                results.innerHTML += `<p class="error">Error: ${error.message}</p>`;
+                console.error(error);
+            }
+        }
+    </script>
+</body>
+</html>

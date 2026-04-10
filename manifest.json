@@ -1,12 +1,26 @@
 {
-  "name": "DocSpace - Companies House Document Downloader",
+  "name": "DocSpace UK - AI Business Intelligence",
   "short_name": "DocSpace",
-  "description": "Download all Companies House documents for any UK company as a ZIP file for £5",
+  "description": "AI Business Intelligence on 5.5 Million UK Companies",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0f172a",
-  "theme_color": "#1e40af",
-  "orientation": "portrait",
+  "background_color": "#f3ede1",
+  "theme_color": "#ae2b17",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.svg?v=3",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon.svg?v=3",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
   "categories": ["business", "finance", "productivity"],
   "lang": "en-GB"
 }

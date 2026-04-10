@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Analyze XBRL Tags for Company 05254058</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; background: #f9f9f9; }
+        .error { color: red; }
+        .success { color: green; }
+        .tag-list { max-height: 300px; overflow-y: auto; }
+        .tag-item { padding: 5px; border-bottom: 1px solid #eee; }
+        .value { color: blue; font-weight: bold; }
+        pre { background: #f0f0f0; padding: 10px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>Analyze XBRL Tags for Company 05254058</h1>
+    
+    <button onclick="analyzeYear('2020')">Analyze 2020 XBRL</button>
+    <button onclick="analyzeYear('2016')">Analyze 2016 XBRL</button>
+    <button onclick="analyzeAllYears()">Analyze All Years</button>
+    
+    <div id="results"></div>
+
+    <script src="config.js"></script>
+    <script>
+        async function fetchFilingHistory(companyNumber) {
+            const response = await fetch(`http://localhost:8080/api/proxy/companies-house/company/${companyNumber}/filing-history?category=accounts&items_per_page=100`);
+            if (!response.ok) throw new Error('Failed to fetch filing history');
+            return await response.json();
+        }
+
+        async function fetchXBRL(transactionId, companyNumber) {
+            const response = await fetch(`http://localhost:8080/api/proxy/ixbrl/${companyNumber}/${transactionId}`);
+            if (!response.ok) throw new Error('Failed to fetch XBRL');
+            return await response.text();
+        }
+
+        function extractXBRLTags(xbrlText) {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(xbrlText, 'text/html');
+            const tags = {};
+            
+            // Get all elements with ix: namespace
+            const allElements = doc.getElementsByTagName('*');
+            
+            for (let i = 0; i < allElements.length; i++) {
+                const element = allElements[i];
+                
+                // Check for ix: namespace elements
+                if (element.tagName.toLowerCase().startsWith('ix:')) {
+                    const name = element.getAttribute('name');
+                    const contextRef = element.getAttribute('contextRef');
+                    const value = element.textContent.trim();
+                    const scale = element.getAttribute('scale') || '0';
+                    
+                    if (name) {
+                        if (!tags[name]) tags[name] = [];
+                        tags[name].push({
+                            value: value,
+                            context: contextRef,
+                            scale: scale,
+                            numericValue: parseFloat(value.replace(/[^0-9.-]/g, '')) * Math.pow(10, parseInt(scale))
+                        });
+                    }
+                }
+                
+                // Also check for elements with name attribute
+                const nameAttr = element.getAttribute('name');
+                if (nameAttr && nameAttr.includes(':')) {
+                    const contextRef = element.getAttribute('contextRef');
+                    const value = element.textContent.trim();
+                    
+                    if (!tags[nameAttr]) tags[nameAttr] = [];
+                    tags[nameAttr].push({
+                        value: value,
+                        context: contextRef,
+                        numericValue: parseFloat(value.replace(/[^0-9.-]/g, ''))
+                    });
+                }
+            }
+            
+            return tags;
+        }
+
+        async function analyzeYear(targetYear) {
+            const results = document.getElementById('results');
+            results.innerHTML = `<p>Analyzing ${targetYear} XBRL data...</p>`;
+            
+            try {
+                const history = await fetchFilingHistory('05254058');
+                const accountsFilings = history.items.filter(item => 
+                    item.category === 'accounts' && 
+                    item.links && 
+                    item.links.document_metadata
+                );
+                
+                // Find filing for target year
+                let targetFiling = null;
+                for (const filing of accountsFilings) {
+                    // Extract year from description
+                    const yearMatch = filing.description.match(/made up to.*?(\d{4})/i) || 
+                                     filing.description.match(/(\d{4})/);
+                    if (yearMatch && yearMatch[1] === targetYear) {
+                        targetFiling = filing;
+                        break;
+                    }
+                }
+                
+                if (!targetFiling) {
+                    results.innerHTML += `<div class="error">No filing found for ${targetYear}</div>`;
+                    return;
+                }
+                
+                const transactionId = targetFiling.links.self.split('/').pop();
+                const xbrlText = await fetchXBRL(transactionId, '05254058');
+                const tags = extractXBRLTags(xbrlText);
+                
+                // Look for relevant tags
+                const relevantTags = [
+                    'BalanceSheetTotal',
+                    'TotalAssets',
+                    'NetAssets',
+                    'ShareholdersFunds',
+                    'TotalLiabilities',
+                    'TotalAssetsLessCurrentLiabilities',
+                    'FixedAssets',
+                    'CurrentAssets',
+                    'Creditors',
+                    'NetAssetsLiabilities'
+                ];
+                
+                let html = `<div class="section">`;
+                html += `<h2>${targetYear} XBRL Analysis</h2>`;
+                html += `<p>Filing: ${targetFiling.description}</p>`;
+                html += `<p>Date: ${targetFiling.date}</p>`;
+                html += '<h3>Relevant Financial Tags Found:</h3>';
+                html += '<div class="tag-list">';
+                
+                for (const tag of relevantTags) {
+                    const foundTags = Object.keys(tags).filter(k => k.toLowerCase().includes(tag.toLowerCase()));
+                    
+                    if (foundTags.length > 0) {
+                        html += `<div class="tag-item"><strong>${tag}:</strong><ul>`;
+                        foundTags.forEach(foundTag => {
+                            tags[foundTag].forEach(data => {
+                                html += `<li>${foundTag} = <span class="value">${data.numericValue || data.value}</span> (context: ${data.context})</li>`;
+                            });
+                        });
+                        html += '</ul></div>';
+                    }
+                }
+                
+                html += '</div>';
+                
+                // Show expected values from Endole
+                const endoleValues = {
+                    '2020': { totalAssets: 151488, netAssets: 108681, liabilities: 42807 },
+                    '2016': { totalAssets: 90848, netAssets: 31491, liabilities: 59357 }
+                };
+                
+                if (endoleValues[targetYear]) {
+                    html += `<h3>Expected Values (from Endole):</h3>`;
+                    html += `<ul>`;
+                    html += `<li>Total Assets: ${endoleValues[targetYear].totalAssets}</li>`;
+                    html += `<li>Net Assets: ${endoleValues[targetYear].netAssets}</li>`;
+                    html += `<li>Total Liabilities: ${endoleValues[targetYear].liabilities}</li>`;
+                    html += `</ul>`;
+                }
+                
+                html += '</div>';
+                
+                results.innerHTML += html;
+                
+            } catch (error) {
+                results.innerHTML += `<div class="error">Error: ${error.message}</div>`;
+            }
+        }
+        
+        async function analyzeAllYears() {
+            const years = ['2024', '2023', '2022', '2021', '2020', '2019', '2018', '2017', '2016', '2015'];
+            for (const year of years) {
+                await analyzeYear(year);
+            }
+        }
+    </script>
+</body>
+</html>

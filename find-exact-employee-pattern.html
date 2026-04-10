@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Find Exact Employee Pattern</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .section { background: white; padding: 15px; margin: 10px 0; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .code { background: #f0f0f0; padding: 10px; font-family: monospace; font-size: 11px; white-space: pre-wrap; overflow-x: auto; }
+        .highlight { background: yellow; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>Find Exact Employee Pattern</h1>
+    <button onclick="findPattern()">Find Pattern</button>
+    <div id="results"></div>
+    
+    <script>
+        async function findPattern() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<p>Searching for employee pattern...</p>';
+            
+            try {
+                // Fetch XBRL
+                const filingResponse = await fetch(`http://localhost:3002/api/proxy/companies-house/company/11236758/filing-history?category=accounts&items_per_page=1`);
+                const filingData = await filingResponse.json();
+                
+                if (filingData.items && filingData.items.length > 0) {
+                    const filing = filingData.items[0];
+                    
+                    const xbrlUrl = `http://localhost:3002/api/proxy/ixbrl/11236758/${filing.transaction_id}?format=xhtml`;
+                    const xbrlResponse = await fetch(xbrlUrl);
+                    const xbrlText = await xbrlResponse.text();
+                    
+                    // Find the note about employees
+                    const noteStart = xbrlText.indexOf('<!-- DS:NOCHANGE -->Employees<!-- DE:NOCHANGE -->');
+                    if (noteStart !== -1) {
+                        // Get a larger context
+                        const contextStart = Math.max(0, noteStart - 500);
+                        const contextEnd = Math.min(xbrlText.length, noteStart + 2000);
+                        const context = xbrlText.substring(contextStart, contextEnd);
+                        
+                        results.innerHTML = '<div class="section"><h3>Employee Note Context:</h3>';
+                        results.innerHTML += '<div class="code">' + 
+                            context.replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                                   .replace(/(Employee|employee|persons employed|staff)/g, '<span class="highlight">$1</span>') + 
+                            '</div></div>';
+                        
+                        // Look for the actual employee table in this section
+                        const tableMatch = context.match(/<table[^>]*class="balancesheet"[^>]*>[\s\S]*?<\/table>/i);
+                        if (tableMatch) {
+                            results.innerHTML += '<div class="section"><h3>Employee Table Found:</h3>';
+                            results.innerHTML += '<div class="code">' + 
+                                tableMatch[0].replace(/</g, '&lt;').replace(/>/g, '&gt;') + 
+                                '</div></div>';
+                            
+                            // Parse the table
+                            const parser = new DOMParser();
+                            const tableDoc = parser.parseFromString(tableMatch[0], 'text/html');
+                            const rows = tableDoc.querySelectorAll('tr');
+                            
+                            results.innerHTML += '<h4>Table Content:</h4>';
+                            rows.forEach((row, index) => {
+                                const cells = row.querySelectorAll('td, th');
+                                if (cells.length > 0) {
+                                    results.innerHTML += `<p>Row ${index + 1}: `;
+                                    cells.forEach((cell, cellIndex) => {
+                                        results.innerHTML += `[${cellIndex}] "${cell.textContent.trim()}" `;
+                                    });
+                                    results.innerHTML += '</p>';
+                                }
+                            });
+                        }
+                    }
+                    
+                    // Also search for the "Average number of persons employed" table
+                    const avgPattern = /Average\s+number\s+of\s+persons\s+employed[\s\S]{0,500}?<\/tr>/gi;
+                    const avgMatches = [...xbrlText.matchAll(avgPattern)];
+                    
+                    if (avgMatches.length > 0) {
+                        results.innerHTML += '<div class="section"><h3>Average Number of Persons Employed:</h3>';
+                        avgMatches.forEach(match => {
+                            results.innerHTML += '<div class="code">' + 
+                                match[0].replace(/</g, '&lt;').replace(/>/g, '&gt;') + 
+                                '</div>';
+                        });
+                        results.innerHTML += '</div>';
+                    }
+                }
+                
+            } catch (error) {
+                results.innerHTML += `<p style="color: red;">Error: ${error.message}</p>`;
+                console.error(error);
+            }
+        }
+    </script>
+</body>
+</html>

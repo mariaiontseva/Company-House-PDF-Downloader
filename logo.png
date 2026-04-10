@@ -1,0 +1,14 @@
+Note: This is a placeholder. You'll need to:
+1. Open logo.svg in a browser
+2. Take a screenshot or use an online converter
+3. Save as logo.png (512x512px)
+4. Upload to your server
+
+Or use this command if you have ImageMagick installed:
+convert logo.svg -resize 512x512 logo.png
+
+For the Open Graph image:
+1. Open og-image-template.html in a browser
+2. Take a screenshot at 1200x630px
+3. Save as og-image.png
+4. Upload to your server

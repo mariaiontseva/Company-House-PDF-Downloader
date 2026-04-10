@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lobster IT Limited - iXBRL Information</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .filing { border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .filing h3 { margin-top: 0; }
+        .available { background-color: #e8f5e9; }
+        .not-available { background-color: #ffebee; }
+        .info { background-color: #e3f2fd; padding: 10px; border-radius: 5px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>Lobster IT Limited - iXBRL Filing Information</h1>
+    
+    <div class="info">
+        <h2>Company Details:</h2>
+        <ul>
+            <li>Company Name: LOBSTER IT LIMITED</li>
+            <li>Company Number: 08510890</li>
+            <li>Status: In Liquidation</li>
+            <li>Incorporated: 26 April 2013</li>
+        </ul>
+    </div>
+    
+    <div class="info">
+        <h2>Known Filings (from Companies House website):</h2>
+        <p>Based on the Companies House website, Lobster IT Limited has the following types of accounts filings:</p>
+        
+        <div class="filing available">
+            <h3>✓ Earlier Active Company Accounts (2014-2017)</h3>
+            <ul>
+                <li>These are likely to have iXBRL format</li>
+                <li>Filed when the company was actively trading</li>
+                <li>Would contain full financial data including:</li>
+                <ul>
+                    <li>Revenue/Turnover</li>
+                    <li>Profit/Loss</li>
+                    <li>Assets and Liabilities</li>
+                    <li>Cash flow information</li>
+                </ul>
+            </ul>
+        </div>
+        
+        <div class="filing not-available">
+            <h3>✗ Recent Dormant Accounts (2018-2023)</h3>
+            <ul>
+                <li>Type: AA (Dormant company accounts)</li>
+                <li>Usually PDF format only</li>
+                <li>Minimal financial information (company not trading)</li>
+                <li>This is why recent filings return PDFs</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="info">
+        <h2>How to Access the iXBRL Data:</h2>
+        <ol>
+            <li><strong>Through the Finance Tab:</strong>
+                <ul>
+                    <li>Search for "Lobster IT Limited" or "08510890"</li>
+                    <li>Click on the company card</li>
+                    <li>Click the Finance tab</li>
+                    <li>The system will now check multiple historical filings to find iXBRL data</li>
+                </ul>
+            </li>
+            <li><strong>What the Finance Parser Does:</strong>
+                <ul>
+                    <li>Fetches up to 50 historical filings</li>
+                    <li>Checks each filing for iXBRL format</li>
+                    <li>Skips PDF-only (dormant) accounts</li>
+                    <li>Uses the first filing with actual financial data</li>
+                </ul>
+            </li>
+        </ol>
+    </div>
+    
+    <div class="info">
+        <h2>Expected iXBRL Data (from active years):</h2>
+        <p>When the system finds iXBRL filings from Lobster IT's active years, it should show:</p>
+        <ul>
+            <li>Revenue figures</li>
+            <li>Profit/Loss statements</li>
+            <li>Balance sheet totals</li>
+            <li>Employee numbers</li>
+            <li>Year-over-year comparisons</li>
+            <li>Financial ratios</li>
+        </ul>
+    </div>
+    
+    <div class="info" style="background-color: #fff3cd;">
+        <h2>⚠️ Current Issue:</h2>
+        <p>The test page is getting a 401 (Unauthorized) error. This might be because:</p>
+        <ul>
+            <li>The API key needs to be refreshed</li>
+            <li>The worker proxy is having issues</li>
+            <li>Rate limiting on the Companies House API</li>
+        </ul>
+        <p><strong>Solution:</strong> Use the main application's Finance tab which has proper authentication set up.</p>
+    </div>
+    
+    <p><a href="/">← Back to main application</a></p>
+</body>
+</html>

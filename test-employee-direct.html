@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Direct Employee Test</title>
+</head>
+<body>
+    <h1>Direct Employee Extraction Test</h1>
+    <button onclick="testEmployee()">Test Employee Extraction</button>
+    <div id="result"></div>
+    
+    <script src="enhanced-employee-parser.js"></script>
+    <script src="real-xbrl-parser.js"></script>
+    <script src="finance-parser-minimal.js"></script>
+    
+    <script>
+        async function testEmployee() {
+            const result = document.getElementById('result');
+            result.innerHTML = 'Testing...';
+            
+            try {
+                // Test with the sample data provided by user
+                const sampleXBRL = `
+                    <table>
+                        <tr>
+                            <td>Average number of employees</td>
+                            <td>2024</td>
+                            <td>2023</td>
+                        </tr>
+                        <tr>
+                            <td>Average number of employees during the year</td>
+                            <td>1</td>
+                            <td>1</td>
+                        </tr>
+                    </table>
+                `;
+                
+                // Test enhanced parser
+                const enhancedResult = EnhancedEmployeeParser.extractEmployees(sampleXBRL);
+                
+                if (enhancedResult) {
+                    result.innerHTML = `<p style="color: green;">Success! Found ${enhancedResult.value} employees (Source: ${enhancedResult.source})</p>`;
+                } else {
+                    result.innerHTML = `<p style="color: red;">Failed to extract employees</p>`;
+                }
+                
+                // Also test with real company data
+                result.innerHTML += '<hr><h3>Testing with real company data:</h3>';
+                
+                const data = await FinanceParser.extractFinancialData('09051662');
+                
+                if (data.historicalData && data.historicalData.length > 0) {
+                    const latestYear = data.historicalData[0];
+                    if (latestYear.metrics.employees && latestYear.metrics.employees.value) {
+                        result.innerHTML += `<p style="color: green;">Real data: ${latestYear.metrics.employees.value} employees in ${latestYear.year}</p>`;
+                    } else {
+                        result.innerHTML += `<p style="color: red;">No employees found in real data</p>`;
+                    }
+                }
+                
+            } catch (error) {
+                result.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>

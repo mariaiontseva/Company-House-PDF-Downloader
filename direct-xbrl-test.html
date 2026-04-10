@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Direct XBRL Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; background: #f9f9f9; }
+        .error { color: red; font-weight: bold; }
+        .success { color: green; font-weight: bold; }
+        table { border-collapse: collapse; width: 100%; margin: 10px 0; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .match { background-color: #d4edda; }
+        .mismatch { background-color: #f8d7da; }
+        pre { background: #f0f0f0; padding: 10px; overflow-x: auto; font-size: 11px; max-height: 300px; }
+    </style>
+</head>
+<body>
+    <h1>Direct XBRL Analysis for Company 05254058</h1>
+    
+    <div class="section">
+        <p>This tests XBRL extraction directly using known transaction IDs.</p>
+    </div>
+    
+    <button onclick="test2020()">Test 2020 XBRL</button>
+    <button onclick="test2016()">Test 2016 XBRL</button>
+    <button onclick="testAll()">Test All Years</button>
+    
+    <div id="results"></div>
+
+    <script>
+        // Known transaction IDs for company 05254058
+        const KNOWN_TRANSACTIONS = {
+            '2024': 'MzQ3MDIxNTAyM2FkaXF6a2N4',
+            '2023': 'MzQyNjMyMzM5OGFkaXF6a2N4',
+            '2022': 'MzM4NzU3MzYwMGFkaXF6a2N4',
+            '2021': 'MzM0MjgwMTE5NWFkaXF6a2N4',
+            '2020': 'MzI5MTM2NjA4NWFkaXF6a2N4',
+            '2019': 'MzI3NDYyOTcxN2FkaXF6a2N4',
+            '2018': 'MzIzNzczOTQxOGFkaXF6a2N4',
+            '2017': 'MzE5OTg5OTExN2FkaXF6a2N4',
+            '2016': 'MzE3Nzg3Mzg2NGFkaXF6a2N4',
+            '2015': 'MzE1MjM5NjM5MWFkaXF6a2N4'
+        };
+
+        // Endole values
+        const ENDOLE_VALUES = {
+            '2024': { totalAssets: 176195, netAssets: 117370, totalLiabilities: 58825 },
+            '2023': { totalAssets: 140238, netAssets: 88846, totalLiabilities: 51392 },
+            '2022': { totalAssets: 153740, netAssets: 110119, totalLiabilities: 43621 },
+            '2021': { totalAssets: 162749, netAssets: 109308, totalLiabilities: 53441 },
+            '2020': { totalAssets: 151488, netAssets: 108681, totalLiabilities: 42807 },
+            '2019': { totalAssets: 145346, netAssets: 96761, totalLiabilities: 48585 },
+            '2018': { totalAssets: 152491, netAssets: 99849, totalLiabilities: 52642 },
+            '2017': { totalAssets: 111655, netAssets: 94362, totalLiabilities: 17293 },
+            '2016': { totalAssets: 90848, netAssets: 31491, totalLiabilities: 59357 },
+            '2015': { totalAssets: 94017, netAssets: 17316, totalLiabilities: 76701 }
+        };
+
+        async function fetchXBRL(year) {
+            const transactionId = KNOWN_TRANSACTIONS[year];
+            if (!transactionId) {
+                throw new Error(`No transaction ID for year ${year}`);
+            }
+            
+            const url = `http://localhost:3001/api/proxy/ixbrl/05254058/${transactionId}`;
+            console.log(`Fetching XBRL from: ${url}`);
+            
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
+            return await response.text();
+        }
+
+        function analyzeXBRL(xbrlText, year) {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(xbrlText, 'text/html');
+            
+            // Find all elements with 'name' attribute
+            const elements = doc.querySelectorAll('[name]');
+            console.log(`Found ${elements.length} elements with name attribute`);
+            
+            const tags = {};
+            const relevantTags = {
+                totalAssets: {},
+                netAssets: {},
+                totalLiabilities: {},
+                currentAssets: {},
+                fixedAssets: {},
+                currentLiabilities: {}
+            };
+            
+            elements.forEach(element => {
+                const name = element.getAttribute('name');
+                const value = element.textContent.trim();
+                const scale = element.getAttribute('scale') || '0';
+                const context = element.getAttribute('contextRef') || 'default';
+                
+                let numericValue = parseFloat(value.replace(/[£$,()]/g, '').replace(/\s+/g, ''));
+                if (!isNaN(numericValue) && !name.toLowerCase().includes('employee')) {
+                    numericValue = numericValue * Math.pow(10, parseInt(scale));
+                }
+                
+                tags[name] = {
+                    value: numericValue,
+                    raw: value,
+                    scale: scale,
+                    context: context
+                };
+                
+                // Categorize tags
+                const lowerName = name.toLowerCase();
+                
+                if (lowerName.includes('balancesheettotal') || 
+                    (lowerName.includes('totalassets') && !lowerName.includes('less'))) {
+                    relevantTags.totalAssets[name] = numericValue;
+                }
+                else if (lowerName.includes('shareholdersfunds') || 
+                         lowerName.includes('netassets') ||
+                         lowerName.includes('capitalandreserves')) {
+                    relevantTags.netAssets[name] = numericValue;
+                }
+                else if (lowerName.includes('totalassetslesscurrentliabilities')) {
+                    // This is Net Assets, not Total Assets!
+                    relevantTags.netAssets[name] = numericValue;
+                }
+                else if (lowerName.includes('totalliabilities')) {
+                    relevantTags.totalLiabilities[name] = numericValue;
+                }
+                else if (lowerName.includes('creditors') && !lowerName.includes('due')) {
+                    relevantTags.totalLiabilities[name] = numericValue;
+                }
+                else if (lowerName.includes('currentassets')) {
+                    relevantTags.currentAssets[name] = numericValue;
+                }
+                else if (lowerName.includes('fixedassets')) {
+                    relevantTags.fixedAssets[name] = numericValue;
+                }
+                else if (lowerName.includes('currentliabilities') || 
+                         (lowerName.includes('creditors') && lowerName.includes('due'))) {
+                    relevantTags.currentLiabilities[name] = numericValue;
+                }
+            });
+            
+            // Extract best values
+            const extracted = {
+                totalAssets: Object.values(relevantTags.totalAssets)[0] || null,
+                netAssets: Object.values(relevantTags.netAssets)[0] || null,
+                totalLiabilities: Object.values(relevantTags.totalLiabilities)[0] || null,
+                currentAssets: Object.values(relevantTags.currentAssets)[0] || null,
+                fixedAssets: Object.values(relevantTags.fixedAssets)[0] || null,
+                currentLiabilities: Object.values(relevantTags.currentLiabilities)[0] || null
+            };
+            
+            // Calculate Total Assets if missing
+            if (!extracted.totalAssets && extracted.fixedAssets && extracted.currentAssets) {
+                extracted.totalAssets = extracted.fixedAssets + extracted.currentAssets;
+                extracted.totalAssetsCalculation = 'Fixed + Current';
+            }
+            else if (!extracted.totalAssets && extracted.netAssets && extracted.totalLiabilities) {
+                extracted.totalAssets = extracted.netAssets + Math.abs(extracted.totalLiabilities);
+                extracted.totalAssetsCalculation = 'Net Assets + Liabilities';
+            }
+            
+            // Calculate Total Liabilities if missing
+            if (!extracted.totalLiabilities && extracted.totalAssets && extracted.netAssets) {
+                extracted.totalLiabilities = extracted.totalAssets - extracted.netAssets;
+                extracted.totalLiabilitiesCalculation = 'Assets - Net Assets';
+            }
+            
+            return {
+                tags: tags,
+                relevantTags: relevantTags,
+                extracted: extracted,
+                endole: ENDOLE_VALUES[year] || {}
+            };
+        }
+
+        async function testYear(year) {
+            const results = document.getElementById('results');
+            
+            try {
+                results.innerHTML += `<div class="section"><h2>Testing ${year}...</h2></div>`;
+                
+                const xbrlText = await fetchXBRL(year);
+                const analysis = analyzeXBRL(xbrlText, year);
+                
+                let html = `<div class="section">`;
+                html += `<h2>${year} Results</h2>`;
+                
+                // Show found tags
+                html += '<h3>Relevant XBRL Tags Found:</h3>';
+                html += '<table>';
+                html += '<tr><th>Category</th><th>Tags Found</th></tr>';
+                
+                Object.entries(analysis.relevantTags).forEach(([category, tags]) => {
+                    if (Object.keys(tags).length > 0) {
+                        html += `<tr><td>${category}</td><td>`;
+                        Object.entries(tags).forEach(([tag, value]) => {
+                            html += `${tag} = ${value}<br>`;
+                        });
+                        html += '</td></tr>';
+                    }
+                });
+                html += '</table>';
+                
+                // Show comparison
+                html += '<h3>Comparison with Endole:</h3>';
+                html += '<table>';
+                html += '<tr><th>Metric</th><th>Our Value</th><th>Endole</th><th>Match?</th><th>Notes</th></tr>';
+                
+                const e = analysis.extracted;
+                const endole = analysis.endole;
+                
+                // Total Assets
+                const taMatch = e.totalAssets === endole.totalAssets;
+                html += `<tr class="${taMatch ? 'match' : 'mismatch'}">`;
+                html += `<td>Total Assets</td>`;
+                html += `<td>${e.totalAssets || 'MISSING'}</td>`;
+                html += `<td>${endole.totalAssets}</td>`;
+                html += `<td>${taMatch ? '✓' : '✗'}</td>`;
+                html += `<td>${e.totalAssetsCalculation || ''}</td>`;
+                html += '</tr>';
+                
+                // Total Liabilities
+                const tlMatch = Math.abs(e.totalLiabilities || 0) === endole.totalLiabilities;
+                html += `<tr class="${tlMatch ? 'match' : 'mismatch'}">`;
+                html += `<td>Total Liabilities</td>`;
+                html += `<td>${Math.abs(e.totalLiabilities || 0) || 'MISSING'}</td>`;
+                html += `<td>${endole.totalLiabilities}</td>`;
+                html += `<td>${tlMatch ? '✓' : '✗'}</td>`;
+                html += `<td>${e.totalLiabilitiesCalculation || ''}</td>`;
+                html += '</tr>';
+                
+                // Net Assets
+                const naMatch = e.netAssets === endole.netAssets;
+                html += `<tr class="${naMatch ? 'match' : 'mismatch'}">`;
+                html += `<td>Net Assets</td>`;
+                html += `<td>${e.netAssets || 'MISSING'}</td>`;
+                html += `<td>${endole.netAssets}</td>`;
+                html += `<td>${naMatch ? '✓' : '✗'}</td>`;
+                html += `<td></td>`;
+                html += '</tr>';
+                
+                // Calculation check
+                const calc = e.totalAssets - Math.abs(e.totalLiabilities || 0);
+                const calcMatch = calc === endole.netAssets;
+                html += `<tr class="${calcMatch ? 'match' : 'mismatch'}">`;
+                html += `<td>Assets - Liabilities</td>`;
+                html += `<td>${calc}</td>`;
+                html += `<td>${endole.netAssets}</td>`;
+                html += `<td>${calcMatch ? '✓' : '✗'}</td>`;
+                html += `<td>Calculation check</td>`;
+                html += '</tr>';
+                
+                html += '</table>';
+                
+                // Show all tags for debugging
+                html += '<details>';
+                html += '<summary>All XBRL Tags (click to expand)</summary>';
+                html += '<pre>' + JSON.stringify(analysis.tags, null, 2) + '</pre>';
+                html += '</details>';
+                
+                html += '</div>';
+                results.innerHTML += html;
+                
+            } catch (error) {
+                results.innerHTML += `<div class="error">Error testing ${year}: ${error.message}</div>`;
+                console.error(error);
+            }
+        }
+
+        async function test2020() {
+            document.getElementById('results').innerHTML = '';
+            await testYear('2020');
+        }
+
+        async function test2016() {
+            document.getElementById('results').innerHTML = '';
+            await testYear('2016');
+        }
+
+        async function testAll() {
+            document.getElementById('results').innerHTML = '';
+            const years = ['2024', '2023', '2022', '2021', '2020', '2019', '2018', '2017', '2016', '2015'];
+            for (const year of years) {
+                await testYear(year);
+            }
+        }
+    </script>
+</body>
+</html>

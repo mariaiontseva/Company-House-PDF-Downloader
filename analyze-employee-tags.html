@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Analyze Employee Tags in XBRL</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .results {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        .tag-group {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+        .tag-name {
+            font-family: monospace;
+            color: #0066cc;
+            font-weight: bold;
+        }
+        .tag-value {
+            color: #28a745;
+            font-weight: bold;
+        }
+        .context {
+            color: #6c757d;
+            font-size: 12px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Analyze Employee Tags in XBRL Documents</h1>
+    <button onclick="analyzeMultipleFilings()">Analyze Multiple Years</button>
+    <div id="results" class="results"></div>
+    
+    <script src="real-xbrl-parser.js"></script>
+    
+    <script>
+        async function analyzeMultipleFilings() {
+            const companyNumber = '05254058';
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<p>Loading filing history...</p>';
+            
+            try {
+                // Get filing history
+                const proxyUrl = `http://localhost:3002/api/proxy/companies-house/company/${companyNumber}/filing-history?category=accounts&items_per_page=10`;
+                const response = await fetch(proxyUrl);
+                const data = await response.json();
+                
+                let html = '<h2>Employee Data Analysis Results</h2>';
+                
+                // Process up to 5 recent filings
+                const filings = data.items?.filter(item => item.category === 'accounts').slice(0, 5) || [];
+                
+                for (const filing of filings) {
+                    if (!filing.transaction_id) continue;
+                    
+                    html += `<div class="tag-group">`;
+                    html += `<h3>${filing.description} (${filing.date})</h3>`;
+                    
+                    try {
+                        // Fetch XBRL
+                        const xbrlUrl = `http://localhost:3002/api/proxy/ixbrl/${companyNumber}/${filing.transaction_id}?format=xhtml`;
+                        const xbrlResponse = await fetch(xbrlUrl);
+                        const xbrlText = await xbrlResponse.text();
+                        
+                        // Parse to find employee-related tags
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(xbrlText, 'text/html');
+                        
+                        // Search for various employee-related patterns
+                        const employeePatterns = [
+                            'employee', 'staff', 'worker', 'personnel', 'headcount',
+                            'fte', 'workforce', 'AverageNumber', 'NumberEmployees'
+                        ];
+                        
+                        const foundTags = new Map();
+                        
+                        // Search all elements with name attribute
+                        const elements = doc.querySelectorAll('[name]');
+                        elements.forEach(element => {
+                            const name = element.getAttribute('name');
+                            const nameLower = name.toLowerCase();
+                            
+                            // Check if tag contains employee-related keywords
+                            if (employeePatterns.some(pattern => nameLower.includes(pattern.toLowerCase()))) {
+                                const value = element.textContent.trim();
+                                const contextRef = element.getAttribute('contextRef') || 'default';
+                                const unitRef = element.getAttribute('unitRef');
+                                
+                                if (!foundTags.has(name)) {
+                                    foundTags.set(name, []);
+                                }
+                                foundTags.set(name, [...foundTags.get(name), { value, contextRef, unitRef }]);
+                            }
+                        });
+                        
+                        if (foundTags.size > 0) {
+                            html += '<h4>Employee-related XBRL tags found:</h4>';
+                            foundTags.forEach((values, tag) => {
+                                html += `<div>`;
+                                html += `<span class="tag-name">${tag}</span><br>`;
+                                values.forEach(v => {
+                                    html += `&nbsp;&nbsp;Value: <span class="tag-value">${v.value}</span>`;
+                                    html += ` <span class="context">(Context: ${v.contextRef}, Unit: ${v.unitRef || 'none'})</span><br>`;
+                                });
+                                html += `</div>`;
+                            });
+                        } else {
+                            html += '<p>No employee-related XBRL tags found in this filing.</p>';
+                        }
+                        
+                        // Also try to parse with RealXBRLParser
+                        const parsed = RealXBRLParser.parse(xbrlText);
+                        if (parsed.employees) {
+                            html += '<h4>RealXBRLParser extraction:</h4>';
+                            html += `<p>Employees: <span class="tag-value">${parsed.employees.value}</span> (Source: ${parsed.employees.source})</p>`;
+                        }
+                        
+                    } catch (error) {
+                        html += `<p style="color: red;">Error processing filing: ${error.message}</p>`;
+                    }
+                    
+                    html += '</div>';
+                }
+                
+                resultsDiv.innerHTML = html;
+                
+            } catch (error) {
+                resultsDiv.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>

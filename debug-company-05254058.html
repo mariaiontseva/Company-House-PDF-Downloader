@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Company 05254058</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .section { background: white; padding: 15px; margin: 10px 0; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .success { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
+        .code { background: #f0f0f0; padding: 10px; font-family: monospace; font-size: 11px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>Debug FIND THE BALANCE LIMITED (05254058)</h1>
+    <button onclick="debugCompany()">Debug Company</button>
+    <div id="results"></div>
+    
+    <script src="enhanced-employee-parser.js"></script>
+    <script src="real-xbrl-parser.js"></script>
+    
+    <script>
+        async function debugCompany() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<p>Debugging company 05254058...</p>';
+            
+            try {
+                // Get latest filing
+                const filingResponse = await fetch(`http://localhost:3002/api/proxy/companies-house/company/05254058/filing-history?category=accounts&items_per_page=1`);
+                const filingData = await filingResponse.json();
+                
+                if (filingData.items && filingData.items.length > 0) {
+                    const filing = filingData.items[0];
+                    
+                    results.innerHTML = '<div class="section">';
+                    results.innerHTML += `<h3>Latest Filing: ${filing.description}</h3>`;
+                    results.innerHTML += `<p>Date: ${filing.date}</p>`;
+                    results.innerHTML += `<p>Transaction ID: ${filing.transaction_id}</p>`;
+                    
+                    // Fetch XBRL
+                    const xbrlUrl = `http://localhost:3002/api/proxy/ixbrl/05254058/${filing.transaction_id}?format=xhtml`;
+                    results.innerHTML += `<p>XBRL URL: ${xbrlUrl}</p>`;
+                    
+                    const xbrlResponse = await fetch(xbrlUrl);
+                    results.innerHTML += `<p>XBRL Response status: ${xbrlResponse.status}</p>`;
+                    
+                    if (xbrlResponse.ok) {
+                        const xbrlText = await xbrlResponse.text();
+                        results.innerHTML += `<p>XBRL size: ${xbrlText.length} characters</p>`;
+                        
+                        // Test parsers
+                        const enhancedResult = EnhancedEmployeeParser.extractEmployees(xbrlText);
+                        const xbrlResult = RealXBRLParser.parse(xbrlText);
+                        
+                        results.innerHTML += '<h4>Parser Results:</h4>';
+                        if (enhancedResult) {
+                            results.innerHTML += `<p class="success">Enhanced Parser: ${enhancedResult.value} employees (${enhancedResult.source})</p>`;
+                        } else {
+                            results.innerHTML += '<p class="error">Enhanced Parser: No employees found</p>';
+                        }
+                        
+                        if (xbrlResult.employees) {
+                            results.innerHTML += `<p class="success">XBRL Parser: ${xbrlResult.employees.value} employees</p>`;
+                        } else {
+                            results.innerHTML += '<p class="error">XBRL Parser: No employees found</p>';
+                        }
+                        
+                        // Search for employee content
+                        results.innerHTML += '<h4>Employee Content Search:</h4>';
+                        
+                        // Look for any employee mentions
+                        const employeeIndex = xbrlText.indexOf('Average number of persons employed');
+                        if (employeeIndex !== -1) {
+                            results.innerHTML += '<p class="success">Found "Average number of persons employed"</p>';
+                            const context = xbrlText.substring(employeeIndex - 100, employeeIndex + 500);
+                            results.innerHTML += '<div class="code">' + 
+                                context.replace(/</g, '&lt;').replace(/>/g, '&gt;') + 
+                                '</div>';
+                        } else {
+                            results.innerHTML += '<p class="error">No "Average number of persons employed" found</p>';
+                        }
+                        
+                        // Look for employee XBRL tags
+                        const employeeTags = xbrlText.match(/<ix:nonFraction[^>]*name="[^"]*[Ee]mploy[^"]*"[^>]*>[^<]*</g);
+                        if (employeeTags) {
+                            results.innerHTML += `<p class="success">Found ${employeeTags.length} employee XBRL tags:</p>`;
+                            employeeTags.forEach(tag => {
+                                results.innerHTML += '<div class="code">' + tag.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</div>';
+                            });
+                        } else {
+                            results.innerHTML += '<p class="error">No employee XBRL tags found</p>';
+                        }
+                        
+                        // Check for note 2 specifically
+                        const note2Index = xbrlText.indexOf('<span class="note-number">2</span>');
+                        if (note2Index !== -1) {
+                            results.innerHTML += '<p class="info">Found Note 2</p>';
+                            const noteContext = xbrlText.substring(note2Index, note2Index + 1000);
+                            results.innerHTML += '<div class="code">' + 
+                                noteContext.substring(0, 500).replace(/</g, '&lt;').replace(/>/g, '&gt;') + 
+                                '</div>';
+                        }
+                        
+                    } else {
+                        results.innerHTML += '<p class="error">Failed to fetch XBRL</p>';
+                    }
+                    
+                    results.innerHTML += '</div>';
+                }
+                
+            } catch (error) {
+                results.innerHTML += `<p class="error">Error: ${error.message}</p>`;
+                console.error(error);
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- Paper background (rounded square for favicon) -->
+  <rect width="64" height="64" rx="8" fill="#f3ede1"/>
+  <!-- Three bars — ink / signal red / gold (matching nav logo) -->
+  <rect x="10"   y="18" width="12" height="28" fill="#0d1117" rx="1"/>
+  <rect x="26"   y="10" width="12" height="36" fill="#ae2b17" rx="1"/>
+  <rect x="42"   y="22" width="12" height="24" fill="#8a6d2c" rx="1"/>
+</svg>

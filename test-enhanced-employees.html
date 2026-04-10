@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Enhanced Employee Extraction</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .success { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
+        .info { color: blue; }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .company-result {
+            background: #f8f9fa;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 4px;
+            border-left: 4px solid #007bff;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test Enhanced Employee Extraction</h1>
+    
+    <div class="test-section">
+        <h2>Test with Enhanced Parser</h2>
+        <button onclick="testEnhancedExtraction()">Run Enhanced Test</button>
+        <div id="results"></div>
+    </div>
+    
+    <!-- Load parsers in correct order -->
+    <script src="enhanced-employee-parser.js"></script>
+    <script src="real-xbrl-parser.js"></script>
+    <script src="finance-parser-minimal.js"></script>
+    
+    <script>
+        async function testEnhancedExtraction() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<p class="info">Testing enhanced employee extraction...</p>';
+            
+            // Test companies
+            const companies = [
+                { number: '09051662', name: 'MITOCHOLINE LTD' },
+                { number: '00445790', name: 'TESCO PLC' },
+                { number: '03142451', name: 'SAINSBURY\'S' }
+            ];
+            
+            for (const company of companies) {
+                const companyDiv = document.createElement('div');
+                companyDiv.className = 'company-result';
+                companyDiv.innerHTML = `<h3>${company.name} (${company.number})</h3>`;
+                
+                try {
+                    // Use local proxy
+                    const originalUrl = FinanceParser.PROXY_URL;
+                    FinanceParser.PROXY_URL = 'http://localhost:3002';
+                    
+                    const data = await FinanceParser.extractFinancialData(company.number);
+                    
+                    FinanceParser.PROXY_URL = originalUrl;
+                    
+                    if (data.historicalData && data.historicalData.length > 0) {
+                        let foundEmployees = false;
+                        
+                        data.historicalData.slice(0, 3).forEach(year => {
+                            const employees = year.metrics.employees;
+                            if (employees && employees.value) {
+                                foundEmployees = true;
+                                companyDiv.innerHTML += `
+                                    <div style="margin-left: 20px;">
+                                        <p class="success">✅ Year ${year.year}: ${employees.value} employees</p>
+                                        <p style="font-size: 12px; color: #666;">Source: ${employees.source}</p>
+                                    </div>
+                                `;
+                            } else {
+                                companyDiv.innerHTML += `
+                                    <div style="margin-left: 20px;">
+                                        <p class="error">❌ Year ${year.year}: No employees found</p>
+                                    </div>
+                                `;
+                            }
+                        });
+                        
+                        if (!foundEmployees) {
+                            companyDiv.innerHTML += '<p class="warning">No employee data found in any year</p>';
+                        }
+                    } else {
+                        companyDiv.innerHTML += '<p class="error">No financial data available</p>';
+                    }
+                } catch (error) {
+                    companyDiv.innerHTML += `<p class="error">Error: ${error.message}</p>`;
+                }
+                
+                results.appendChild(companyDiv);
+            }
+        }
+        
+        // Test on load
+        window.addEventListener('DOMContentLoaded', () => {
+            console.log('Enhanced Employee Parser loaded:', typeof EnhancedEmployeeParser !== 'undefined');
+            console.log('Real XBRL Parser loaded:', typeof RealXBRLParser !== 'undefined');
+            console.log('Finance Parser loaded:', typeof FinanceParser !== 'undefined');
+        });
+    </script>
+</body>
+</html>

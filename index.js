@@ -1,17 +1,65 @@
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
+require('dotenv').config();
+
+// Import fetch for Node.js
+const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 
 const app = express();
-app.use(cors());
 
-// Your Railway MySQL connection
-const connection = mysql.createConnection({
-  host: 'turntable.proxy.rlwy.net',
-  port: 51124,
-  user: 'root',
-  password: 'FuEbybhbhPwJXtsPAqdKdXyvbyOCxVWc',
-  database: 'railway'
+// Configure CORS to allow requests from production domain
+app.use(cors({
+  origin: ['https://docspace.uk', 'http://localhost:8080', 'http://localhost:3000'],
+  credentials: true,
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+app.use(express.json());
+
+// Health check route for Railway
+app.get('/', (req, res) => {
+  res.json({ 
+    status: 'ok', 
+    message: 'Companies API with OpenAI integration is running',
+    endpoints: {
+      companies: '/api/oldest, /api/newest, /api/search/:query',
+      openai: '/api/openai/completions'
+    },
+    config: {
+      hasOpenAIKey: !!process.env.OPENAI_API_KEY,
+      keyPrefix: process.env.OPENAI_API_KEY ? process.env.OPENAI_API_KEY.substring(0, 8) + '...' : 'not set'
+    }
+  });
+});
+
+// Create MySQL connection pool to handle reconnections
+const pool = mysql.createPool({
+  host: process.env.MYSQL_HOST || 'turntable.proxy.rlwy.net',
+  port: process.env.MYSQL_PORT || 51124,
+  user: process.env.MYSQL_USER || 'root',
+  password: process.env.MYSQL_PASSWORD || 'FuEbybhbhPwJXtsPAqdKdXyvbyOCxVWc',
+  database: process.env.MYSQL_DATABASE || 'railway',
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
+  enableKeepAlive: true,
+  keepAliveInitialDelay: 0
+});
+
+// Convert pool to promise-based for better error handling
+const promisePool = pool.promise();
+
+// Test database connection on startup
+pool.getConnection((err, connection) => {
+  if (err) {
+    console.error('Error connecting to MySQL:', err);
+    console.log('Server will continue running but database queries will fail');
+  } else {
+    console.log('Successfully connected to MySQL database');
+    connection.release();
+  }
 });
 
 // Get oldest companies with pagination
@@ -27,8 +75,11 @@ app.get('/api/oldest/:offset?', (req, res) => {
     LIMIT 5 OFFSET ?
   `;
   
-  connection.query(query, [offset], (err, results) => {
-    if (err) return res.status(500).json({ error: err.message });
+  pool.query(query, [offset], (err, results) => {
+    if (err) {
+      console.error('Database query error:', err);
+      return res.status(500).json({ error: 'Database query failed' });
+    }
     res.json(results);
   });
 });
@@ -46,8 +97,11 @@ app.get('/api/newest/:offset?', (req, res) => {
     LIMIT 5 OFFSET ?
   `;
   
-  connection.query(query, [offset], (err, results) => {
-    if (err) return res.status(500).json({ error: err.message });
+  pool.query(query, [offset], (err, results) => {
+    if (err) {
+      console.error('Database query error:', err);
+      return res.status(500).json({ error: 'Database query failed' });
+    }
     res.json(results);
   });
 });
@@ -64,8 +118,11 @@ app.get('/api/search/:query', (req, res) => {
   `;
   
   const searchTerm = `%${searchQuery}%`;
-  connection.query(query, [searchTerm, searchTerm], (err, results) => {
-    if (err) return res.status(500).json({ error: err.message });
+  pool.query(query, [searchTerm, searchTerm], (err, results) => {
+    if (err) {
+      console.error('Database query error:', err);
+      return res.status(500).json({ error: 'Database query failed' });
+    }
     res.json(results);
   });
 });
@@ -85,8 +142,11 @@ app.get('/api/oldest-plc/:limit?', (req, res) => {
     LIMIT ?
   `;
   
-  connection.query(query, [limit], (err, results) => {
-    if (err) return res.status(500).json({ error: err.message });
+  pool.query(query, [limit], (err, results) => {
+    if (err) {
+      console.error('Database query error:', err);
+      return res.status(500).json({ error: 'Database query failed' });
+    }
     res.json(results);
   });
 });
@@ -101,13 +161,118 @@ app.get('/api/stats', (req, res) => {
     FROM companies
   `;
   
-  connection.query(query, (err, results) => {
-    if (err) return res.status(500).json({ error: err.message });
+  pool.query(query, (err, results) => {
+    if (err) {
+      console.error('Database query error:', err);
+      return res.status(500).json({ error: 'Database query failed' });
+    }
     res.json(results[0]);
   });
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+// OpenAI API proxy endpoint with rate limiting and caching
+app.post('/api/openai/completions', async (req, res) => {
+  try {
+    // Get API key from environment variable
+    const apiKey = process.env.OPENAI_API_KEY;
+    
+    if (!apiKey) {
+      console.error('OpenAI API key not configured');
+      return res.status(500).json({ error: 'OpenAI API key not configured on server' });
+    }
+
+    // Validate request body
+    if (!req.body || !req.body.model || !req.body.messages) {
+      return res.status(400).json({ error: 'Invalid request body' });
+    }
+
+    // Add rate limiting headers
+    res.set({
+      'X-RateLimit-Limit': '100',
+      'X-RateLimit-Remaining': '99',
+      'X-RateLimit-Reset': Math.ceil(Date.now() / 1000) + 3600
+    });
+
+    // Forward request to OpenAI with timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+        'User-Agent': 'DocSpace-UK/1.0'
+      },
+      body: JSON.stringify({
+        ...req.body,
+        max_tokens: Math.min(req.body.max_tokens || 300, 500), // Limit max tokens
+        temperature: Math.min(req.body.temperature || 0.7, 1.0) // Limit temperature
+      }),
+      signal: controller.signal
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      const error = await response.text();
+      console.error('OpenAI API error:', error);
+      return res.status(response.status).json({ 
+        error: response.status === 429 ? 'Rate limit exceeded' : 'OpenAI API error' 
+      });
+    }
+
+    const data = await response.json();
+    
+    // Add caching headers for successful responses
+    res.set({
+      'Cache-Control': 'public, max-age=3600', // Cache for 1 hour
+      'ETag': `"${Buffer.from(JSON.stringify(req.body)).toString('base64')}"`
+    });
+
+    res.json(data);
+
+  } catch (error) {
+    if (error.name === 'AbortError') {
+      return res.status(408).json({ error: 'Request timeout' });
+    }
+    console.error('Proxy error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+const PORT = process.env.PORT || 8080;
+const server = app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('SIGTERM signal received: closing HTTP server and database pool');
+  server.close(() => {
+    console.log('HTTP server closed');
+    pool.end((err) => {
+      if (err) {
+        console.error('Error closing database pool:', err);
+      } else {
+        console.log('Database pool closed');
+      }
+      process.exit(0);
+    });
+  });
+});
+
+process.on('SIGINT', () => {
+  console.log('SIGINT signal received: closing HTTP server and database pool');
+  server.close(() => {
+    console.log('HTTP server closed');
+    pool.end((err) => {
+      if (err) {
+        console.error('Error closing database pool:', err);
+      } else {
+        console.log('Database pool closed');
+      }
+      process.exit(0);
+    });
+  });
 });

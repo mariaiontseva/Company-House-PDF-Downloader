@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lobster IT Limited - iXBRL Status</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
+        .info { background-color: #e3f2fd; padding: 15px; border-radius: 5px; margin: 10px 0; }
+        .warning { background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 10px 0; }
+        .success { background-color: #d4edda; padding: 15px; border-radius: 5px; margin: 10px 0; }
+        .error { background-color: #f8d7da; padding: 15px; border-radius: 5px; margin: 10px 0; }
+        code { background-color: #f5f5f5; padding: 2px 5px; border-radius: 3px; }
+        pre { background-color: #f5f5f5; padding: 10px; border-radius: 5px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>Lobster IT Limited - iXBRL Data Status</h1>
+    
+    <div class="info">
+        <h2>✅ What We Found:</h2>
+        <p>Lobster IT Limited has the following iXBRL documents available:</p>
+        <ul>
+            <li><strong>2017 Filing:</strong> 153,758 bytes of iXBRL data (application/xhtml+xml)</li>
+            <li><strong>2018 Filing:</strong> 123,437 bytes of iXBRL data</li>
+            <li><strong>2019 Filing:</strong> 130,423 bytes of iXBRL data</li>
+            <li><strong>2020 Filing:</strong> 135,069 bytes of iXBRL data</li>
+            <li><strong>2021 Filing:</strong> 134,500 bytes of iXBRL data</li>
+        </ul>
+        <p>These files contain structured financial data in iXBRL format.</p>
+    </div>
+    
+    <div class="error">
+        <h2>❌ The Problem:</h2>
+        <p>The Companies House API structure has changed:</p>
+        <ol>
+            <li>The <code>document-api</code> endpoints return metadata (JSON) instead of actual document content when we request XHTML format</li>
+            <li>The <code>/content</code> endpoint returns PDFs by default, even when iXBRL is available</li>
+            <li>The public website (<code>find-and-update.company-information.service.gov.uk</code>) serves iXBRL correctly, but we can't access it due to CORS restrictions</li>
+        </ol>
+    </div>
+    
+    <div class="warning">
+        <h2>⚠️ Current Behavior:</h2>
+        <p>When you click the Finance tab for Lobster IT Limited:</p>
+        <ul>
+            <li>The system tries multiple filings (2022, 2021, 2020, etc.)</li>
+            <li>Each filing has iXBRL data available (shown in metadata)</li>
+            <li>But the API returns PDFs or JSON metadata instead of the actual iXBRL content</li>
+            <li>Eventually falls back to showing minimal data for dormant accounts</li>
+        </ul>
+    </div>
+    
+    <div class="info">
+        <h2>💡 Solutions:</h2>
+        <ol>
+            <li><strong>Backend Proxy (Recommended):</strong>
+                <p>Set up a backend service that can:</p>
+                <ul>
+                    <li>Access the Companies House public website without CORS restrictions</li>
+                    <li>Download the actual iXBRL files</li>
+                    <li>Parse and return the financial data</li>
+                </ul>
+            </li>
+            <li><strong>Use Different API Endpoints:</strong>
+                <p>Companies House may have other API endpoints that serve iXBRL directly</p>
+            </li>
+            <li><strong>Manual Download:</strong>
+                <p>Users can manually download iXBRL files from the Companies House website and upload them</p>
+            </li>
+        </ol>
+    </div>
+    
+    <div class="success">
+        <h2>✅ What's Working:</h2>
+        <ul>
+            <li>Successfully identifying which filings have iXBRL data</li>
+            <li>Correctly parsing the metadata to find document IDs</li>
+            <li>The parsing logic works when given actual iXBRL content</li>
+            <li>The Finance tab UI is ready to display the data</li>
+        </ul>
+    </div>
+    
+    <div class="info">
+        <h2>📝 Example iXBRL Data Structure:</h2>
+        <p>When we can access the actual iXBRL files, they contain:</p>
+        <pre>&lt;ix:nonFraction name="uk-gaap:TurnoverRevenue" contextRef="CurrentYear" unitRef="GBP" decimals="0"&gt;1,234,567&lt;/ix:nonFraction&gt;
+&lt;ix:nonFraction name="uk-gaap:ProfitLossForPeriod" contextRef="CurrentYear" unitRef="GBP" decimals="0"&gt;234,567&lt;/ix:nonFraction&gt;
+&lt;ix:nonFraction name="uk-gaap:TotalAssetsLessCurrenLiabilities" contextRef="CurrentYear" unitRef="GBP" decimals="0"&gt;567,890&lt;/ix:nonFraction&gt;</pre>
+    </div>
+    
+    <p><a href="/">← Back to main application</a></p>
+</body>
+</html>

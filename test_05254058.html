@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Company 05254058 XBRL Extraction</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .debug-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; background: #f9f9f9; }
+        .error { color: red; }
+        .success { color: green; }
+        .comparison { background: #fff3cd; padding: 10px; margin: 10px 0; border-left: 4px solid #ffc107; }
+    </style>
+</head>
+<body>
+    <h1>Debug Company 05254058 XBRL Extraction</h1>
+    
+    <button onclick="testCompany()">Test Company 05254058</button>
+    <div id="results"></div>
+
+    <script src="finance-parser.js"></script>
+    <script src="enhanced-xbrl-parser.js"></script>
+    <script>
+        async function testCompany() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<p>Testing company 05254058...</p>';
+            
+            try {
+                console.log('🔍 Testing company 05254058 XBRL extraction...');
+                
+                // Extract financial data
+                const financialData = await FinanceParser.extractFinancialData('05254058');
+                
+                if (!financialData) {
+                    results.innerHTML += '<div class="error">❌ No financial data found</div>';
+                    return;
+                }
+                
+                console.log('📊 Complete financial data:', financialData);
+                
+                results.innerHTML += `<div class="debug-section">
+                    <h3>Financial Data Summary</h3>
+                    <p><strong>Total filings:</strong> ${financialData.totalFilings}</p>
+                    <p><strong>Filings with data:</strong> ${financialData.filingsWithData}</p>
+                    <p><strong>Historical data entries:</strong> ${financialData.historicalData?.length || 0}</p>
+                </div>`;
+                
+                // Find 2020 data
+                const data2020 = financialData.historicalData?.find(d => d.year === '2020');
+                
+                if (data2020) {
+                    console.log('📊 2020 data found:', data2020);
+                    
+                    const netAssets = data2020.metrics.netAssets?.value || data2020.metrics.shareholdersEquity?.value || 'N/A';
+                    const totalAssets = data2020.metrics.totalAssets?.value || 'N/A';
+                    const totalLiabilities = data2020.metrics.totalLiabilities?.value || 'N/A';
+                    
+                    results.innerHTML += `<div class="debug-section">
+                        <h3>2020 Data Comparison</h3>
+                        <table border="1" style="border-collapse: collapse; width: 100%;">
+                            <tr><th>Metric</th><th>Our Value</th><th>Endole Value</th><th>Difference</th></tr>
+                            <tr>
+                                <td>Net Assets</td>
+                                <td>${netAssets}</td>
+                                <td>£108,681</td>
+                                <td style="color: ${netAssets === 108681 ? 'green' : 'red'}">${netAssets === 108681 ? '✓ Match' : '✗ Different'}</td>
+                            </tr>
+                            <tr>
+                                <td>Total Assets</td>
+                                <td>${totalAssets}</td>
+                                <td>£151,488</td>
+                                <td style="color: ${totalAssets === 151488 ? 'green' : 'red'}">${totalAssets === 151488 ? '✓ Match' : '✗ Different'}</td>
+                            </tr>
+                            <tr>
+                                <td>Total Liabilities</td>
+                                <td>${totalLiabilities}</td>
+                                <td>£42,807</td>
+                                <td style="color: ${totalLiabilities === 42807 ? 'green' : 'red'}">${totalLiabilities === 42807 ? '✓ Match' : '✗ Different'}</td>
+                            </tr>
+                        </table>
+                    </div>`;
+                    
+                    // Show all metrics found
+                    const metrics = data2020.metrics;
+                    const metricsHtml = Object.entries(metrics).map(([key, value]) => {
+                        return `<li><strong>${key}:</strong> ${value?.value || 'N/A'} (${value?.formatted || 'N/A'})</li>`;
+                    }).join('');
+                    
+                    results.innerHTML += `<div class="debug-section">
+                        <h3>All Metrics Found for 2020</h3>
+                        <ul>${metricsHtml}</ul>
+                    </div>`;
+                    
+                } else {
+                    results.innerHTML += '<div class="error">❌ No 2020 data found</div>';
+                    
+                    // Show what years we do have
+                    const years = financialData.historicalData?.map(d => d.year).filter(y => y) || [];
+                    results.innerHTML += `<div class="debug-section">
+                        <h3>Available Years</h3>
+                        <p>${years.join(', ')}</p>
+                    </div>`;
+                }
+                
+                results.innerHTML += '<div class="success">✅ Test completed - check browser console for detailed logs</div>';
+                
+            } catch (error) {
+                console.error('❌ Error testing company 05254058:', error);
+                results.innerHTML += `<div class="error">❌ Error: ${error.message}</div>`;
+            }
+        }
+    </script>
+</body>
+</html>
